@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title><%= video.title %></title>
+	</head>
+	<body>
+		<video width="600" height="400" controls>
+			<source src="<%= video.video %>" type="video/mp4">
+			<source src="<%= video.video %>" type="video/ogg">
+		</video>
+		<h2><%= video.title %></h2>
+		<p><%= video.description %></p>
+	</body>
+</html>

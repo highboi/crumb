@@ -48,8 +48,17 @@ app.use(session({
 //allow the app to use flash messages
 app.use(flash());
 
-//have static file rendering (mainly for stylesheets)
-app.use(express.static(__dirname + '/views'));
+//declare a static directory for stylesheets
+app.use(express.static(__dirname + '/views/stylesheets'));
+
+//declare a static directory for the file contents
+app.use(express.static(__dirname + "/storage"));
+
+//allow the server to access the files but not the user
+app.use("/storage", (req, res, next) => {
+	res.status(403);
+	res.render("403.ejs");
+});
 
 
 /*
@@ -59,8 +68,18 @@ app.use(express.static(__dirname + '/views'));
 */
 
 //get the index of the site working
-app.get('/', checkSignedIn, (req, res) => {
-	res.render("index.ejs", { message: req.flash('message') });
+app.get('/', (req, res) => {
+	//select all of the videos from the database to be displayed
+	client.query(
+		`SELECT * FROM videos`,
+		(err, results) => {
+			if (req.session.user) {
+				res.render("index.ejs", { message: req.flash('message'), user: req.session.user, videos: results.rows, webroot: __dirname });
+			} else {
+				res.render("index.ejs", { message: req.flash('message'), videos: results.rows, webroot: __dirname});
+			}
+		}
+	);
 });
 
 //get the registration page
@@ -78,12 +97,26 @@ app.get("/logout", checkSignedIn, (req, res) => {
 	req.session.user = null;
 	console.log("Logged out.");
 	req.flash("message", "Logged out!");
-	res.redirect("/login");
+	res.redirect("/");
 });
 
 //get the form for submitting videos
 app.get("/v/submit", checkSignedIn, (req, res) => {
 	res.render("submitvideo.ejs", { message: req.flash("message") });
+});
+
+//views individual videos on the site
+app.get("/v/:videoid", (req, res) => {
+	client.query(
+		`SELECT * FROM videos WHERE id=$1`,
+		[req.params.videoid],
+		(err, results) => {
+			if (err) throw err;
+			console.log(`Viewing video with id: ${req.params.videoid}`);
+			//render the view with the video from the database
+			res.render("viewvideo.ejs", {video: results.rows[0]});
+		}
+	);
 });
 
 
@@ -197,7 +230,7 @@ app.post("/v/submit", checkSignedIn, (req, res) => {
 	form.parse(req, function (err, fields, files) {
 		//store the video
 		var oldpath = files.video.path; //this is the default path that formidable tries to store the file
-		var newpath = __dirname + "/storage/videos/files/" + Date.now() + files.video.name; //the path where we want to store the file
+		var newpath = __dirname + "/storage/videos/files/" + Date.now() + "-" + files.video.name; //the path where we want to store the file
 		fs.rename(oldpath, newpath, function(err) { //move the file to a desired directory
 			if (err) throw err;
 			console.log("Video Saved.");
@@ -205,15 +238,15 @@ app.post("/v/submit", checkSignedIn, (req, res) => {
 
 		//store the thumbnail
 		var oldpath = files.thumbnail.path;
-		var newpath = __dirname + "/storage/videos/thumbnails/" + Date.now() + files.thumbnail.name;
+		var newpath = __dirname + "/storage/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
 		fs.rename(oldpath, newpath, function(err) {
 			if (err) throw err;
 			console.log("Thumbnail Saved.");
 		});
 
 		//variables to store the path (relative to server root) of the video and thumbnail
-		var videopath = "/storage/videos/files/" + Date.now() + files.video.name;
-		var thumbnailpath = "/storage/videos/thumbnails/" + Date.now() + files.thumbnail.name;
+		var videopath = "/videos/files/" + Date.now() + "-" + files.video.name;
+		var thumbnailpath = "/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
 
 		//store the paths of the files so that the database can know where the files are
 		client.query(
@@ -263,6 +296,7 @@ function checkNotSignedIn(req, res, next) {
 		next();
 	}
 }
+
 
 /*
 ******************

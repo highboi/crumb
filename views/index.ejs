@@ -4,7 +4,7 @@
 
 	</head>
 	<body>
-		<h1>Index:</h1>
+		<h1>Crumb Home:</h1>
 
 		<div class="messages">
 			<% if (typeof message != 'undefined') { %>
@@ -20,7 +20,25 @@
 			</ul>
 		</div>
 
-		<button><a href="/v/submit">Submit a Video</a></button>
-		<button><a href="/logout">Log Out</a></button>
+		<% if (typeof user != 'undefined') { %>
+			<button><a href="/v/submit">Submit a Video</a></button><br>
+			<button><a href="/logout">Log Out</a></button>
+		<% } else { %>
+			<button><a href="/login">Login</a></button><br>
+			<button><a href="/register">Register</a></button>
+		<% } %>
+
+		<h1>Videos:</h1>
+		<div class="videos">
+			<% if (typeof videos != 'undefined') { %>
+				<% videos.forEach((item, index) => { %>
+					<h3 style="text-transform: capitalize"><strong><%= item.title %></strong></h3>
+					<% var videolink = `/v/${item.id}` %>
+					<a href="<%= videolink %>">
+						<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300"></img>
+					</a>
+				<% }); %>
+			<% } %>
+		</div>
 	</body>
 </html>
