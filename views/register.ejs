@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Register</title>
+	</head>
+	<body>
+		<h1>Register:</h1>
+
+		<div class="messages">
+			<% if (typeof message != 'undefined') { %>
+				<p><%= message %></p>
+			<% } %>
+
+			<ul>
+				<% if (typeof errors != 'undefined') { %>
+					<% errors.forEach((item, index) => { %>
+						<li><%= item.message %></li>
+					<% }); %>
+				<% } %>
+			</ul>
+		</div>
+
+		<form action="/register" method="POST">
+			<div>
+				<input id="username" name="username" type="text" placeholder="Username">
+			</div>
+			<div>
+				<input id="email" name="email" type="email" placeholder="Email">
+			</div>
+			<div>
+				<input id="password" name="password" type="password" placeholder="Password">
+			</div>
+			<div>
+				<input id="password2" name="password2" type="password" placeholder="Password Confirmation">
+			</div>
+			<div>
+				<input type="submit" value="Register">
+			</div>
+			<a href="/login">Existing User?</a>
+		</form>
+	</body>
+</html>

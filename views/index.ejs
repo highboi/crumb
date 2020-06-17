@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+	</head>
+	<body>
+		<h1>Index:</h1>
+
+		<div class="messages">
+			<% if (typeof message != 'undefined') { %>
+				<p><%= message %></p>
+			<% } %>
+
+			<ul>
+				<% if (typeof errors != 'undefined') { %>
+					<% errors.forEach((item, index) => { %>
+						<li><%= item.message %></li>
+					<% }); %>
+				<% } %>
+			</ul>
+		</div>
+	</body>
+</html>
