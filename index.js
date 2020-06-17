@@ -9,7 +9,8 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const bcrypt = require("bcrypt");
 const ejs = require("ejs");
-const path = require("path");
+const formidable = require("formidable");
+const fs = require("fs");
 
 /*
 ***********************
@@ -52,9 +53,9 @@ app.use(express.static(__dirname + '/views'));
 
 
 /*
-***********
-* ROUTING *
-***********
+************************
+* GET REQUEST HANDLING *
+************************
 */
 
 //get the index of the site working
@@ -71,6 +72,20 @@ app.get('/register', checkNotSignedIn, (req, res) => {
 app.get('/login', checkNotSignedIn, (req, res) => {
 	res.render("login.ejs", {message: req.flash("message")});
 });
+
+//log the user out of the session
+app.get("/logout", checkSignedIn, (req, res) => {
+	req.session.user = null;
+	console.log("Logged out.");
+	req.flash("message", "Logged out!");
+	res.redirect("/login");
+});
+
+//get the form for submitting videos
+app.get("/v/submit", checkSignedIn, (req, res) => {
+	res.render("submitvideo.ejs", { message: req.flash("message") });
+});
+
 
 /*
 *************************
@@ -173,10 +188,50 @@ app.post("/login", (req, res) => {
 	}
 });
 
+//store the submitted video to the database
+app.post("/v/submit", checkSignedIn, (req, res) => {
+	//get the form
+	var form = new formidable.IncomingForm();
+
+	//parse the form and store the files
+	form.parse(req, function (err, fields, files) {
+		//store the video
+		var oldpath = files.video.path; //this is the default path that formidable tries to store the file
+		var newpath = __dirname + "/storage/videos/files/" + Date.now() + files.video.name; //the path where we want to store the file
+		fs.rename(oldpath, newpath, function(err) { //move the file to a desired directory
+			if (err) throw err;
+			console.log("Video Saved.");
+		});
+
+		//store the thumbnail
+		var oldpath = files.thumbnail.path;
+		var newpath = __dirname + "/storage/videos/thumbnails/" + Date.now() + files.thumbnail.name;
+		fs.rename(oldpath, newpath, function(err) {
+			if (err) throw err;
+			console.log("Thumbnail Saved.");
+		});
+
+		//variables to store the path (relative to server root) of the video and thumbnail
+		var videopath = "/storage/videos/files/" + Date.now() + files.video.name;
+		var thumbnailpath = "/storage/videos/thumbnails/" + Date.now() + files.thumbnail.name;
+
+		//store the paths of the files so that the database can know where the files are
+		client.query(
+			`INSERT INTO videos (title, description, thumbnail, video) VALUES ($1, $2, $3, $4)`,
+			[fields.title, fields.description, thumbnailpath, videopath],
+			(err, results) => {
+				if (err) throw err;
+				console.log("Saved video details in database.");
+				res.redirect("/");
+			}
+		);
+	});
+});
+
 /*
-****************************
-* LISTENING TO CONNECTIONS *
-****************************
+*************************
+* LISTEN TO CONNECTIONS *
+*************************
 */
 
 //listen for connections to the server

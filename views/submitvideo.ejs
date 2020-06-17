@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Submit A Video</title>
+	</head>
+	<body>
+		<h1>Submit A Video:</h1>
+
+		<form action="/v/submit" method="POST" enctype='multipart/form-data'>
+			<div>
+				<input type="text" placeholder="Title" id="title" name="title" maxlength="300">
+			</div>
+			<div>
+				<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000"></textarea>
+			</div>
+			<div>
+				<label for="thumbnail">Choose a Thumbnail:</label>
+				<input type="file" id="thumbnail" name="thumbnail" accept="image/*">
+			</div>
+			<div>
+				<label for="video">Choose a Video:</label>
+				<input type="file" id="video" name="video" accept="video/*">
+			</div>
+			<div>
+				<input type="submit" value="Submit Video">
+			</div>
+		</form>
+	</body>
+</html>
