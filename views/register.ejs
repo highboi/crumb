@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" href="/main.css">
 		<title>Register</title>
 	</head>
 	<body>
+		<object data="/banner.html" class="bannerObj"></object>
+
 		<h1>Register:</h1>
 
 		<div class="messages">
@@ -20,12 +23,12 @@
 			</ul>
 		</div>
 
-		<form action="/register" method="POST">
+		<form action="/register" method="POST" class="authform">
 			<div>
 				<input id="username" name="username" type="text" placeholder="Username">
 			</div>
 			<div>
-				<input id="email" name="email" type="email" placeholder="Email">
+				<input id="email" name="email" type="email" placeholder="Email (Optional)">
 			</div>
 			<div>
 				<input id="password" name="password" type="password" placeholder="Password">

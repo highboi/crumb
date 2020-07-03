@@ -1,14 +1,99 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" href="/main.css">
 		<title><%= video.title %></title>
 	</head>
 	<body>
-		<video width="600" height="400" controls>
-			<source src="<%= video.video %>" type="video/mp4">
-			<source src="<%= video.video %>" type="video/ogg">
-		</video>
-		<h2><%= video.title %></h2>
-		<p><%= video.description %></p>
+		<object data="/banner.html" class="bannerObj"></object>
+
+		<div class="container">
+			<div class="video-container">
+				<video poster="<%= video.thumbnail %>" id="video" controls>
+					<source src="<%= video.video %>" type="video/mp4">
+					<source src="<%= video.video %>" type="video/ogg">
+				</video>
+
+				<div class="videotext">
+					<h1 style="text-transform: capitalize" id="title"><%= video.title %></h1>
+					<hr>
+					<div class="channel-details">
+						<% var channellink = `/u/${videocreator.id}` %>
+						<div id="icon">
+							<a href="<%= channellink %>">
+								<img src="/favicon.ico">
+							</a>
+						</div>
+						<div id="channel-text">	
+							<a href="<%= channellink %>">
+								<h2><%= videocreator.username %></h2>
+							</a>
+						</div>
+						<div id="video-buttons">
+							<button>Subscribe</button>
+						</div>
+					</div>
+					<hr>
+					<p><%= approx(video.views) %> Views</p>
+					<hr>
+					<div class="description">
+						<% if (video.description.length > 100) { %>
+							<p>
+								<%= video.description.substr(0, 100) %>
+								<span id="dots">...</span>
+							</p>
+							<% var moretext = video.description.substr(100); %>
+							<div id="more" style="display: none">
+								<p><%= moretext %></p>
+							</div>
+							<button onclick="readMore()" id="readMoreBtn">Read More</button>
+						<% } else { %>
+							<p><%= video.description %></p>
+						<% } %>
+					</div>
+					<hr>
+				</div>
+
+				<% if (typeof user != 'undefined') { %>
+					<% if (video.user_id == user.id) { %>
+						<% var deletelink = `/v/delete/${video.id}` %>
+						<button><a href="<%= deletelink %>">Delete Video</a></button>
+					<% } %>
+				<% } %>
+			</div>
+
+
+			<div class="reccomendations">
+				<% for (var i=0; i < videos.length; i++) { %>
+					<div class="links">
+						<a href="/v/<%= videos[i].id %>">
+							<img src="<%= videos[i].thumbnail %>" width="600px" height="500px">
+						</a>
+						<a href="/v/<%= videos[i].id %>">
+							<h2><strong>&nbsp;&nbsp<%= videos[i].title %></strong></h2>
+						</a>
+						<p>&nbsp;&nbsp<%= videos[i].description.substr(0, 14) %>...</p>
+					</div>
+				<% } %>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			function readMore() {
+				var dots = document.getElementById("dots");
+				var moreText = document.getElementById("more");
+				var btnText = document.getElementById("readMoreBtn");
+
+				if (dots.style.display === "none") {
+					dots.style.display = "inline";
+					btnText.innerHTML = "Read More";
+					moreText.style.display = "none";
+				} else {
+					dots.style.display = "none";
+					btnText.innerHTML = "Read Less";
+					moreText.style.display = "inline";
+				}
+			}
+		</script>
 	</body>
 </html>

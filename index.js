@@ -11,6 +11,7 @@ const bcrypt = require("bcrypt");
 const ejs = require("ejs");
 const formidable = require("formidable");
 const fs = require("fs");
+const approx = require("approximate-number");
 
 /*
 ***********************
@@ -48,17 +49,11 @@ app.use(session({
 //allow the app to use flash messages
 app.use(flash());
 
-//declare a static directory for stylesheets
-app.use(express.static(__dirname + '/views/stylesheets'));
+//declare a static directory for things like stylesheets and other content
+app.use(express.static(__dirname + '/views/content'));
 
-//declare a static directory for the file contents
+//declare a static directory for the file contents of the site
 app.use(express.static(__dirname + "/storage"));
-
-//allow the server to access the files but not the user
-app.use("/storage", (req, res, next) => {
-	res.status(403);
-	res.render("403.ejs");
-});
 
 
 /*
@@ -100,6 +95,20 @@ app.get("/logout", checkSignedIn, (req, res) => {
 	res.redirect("/");
 });
 
+//view the channel of the user
+app.get("/u/:userid", (req, res) => {
+	client.query(
+		`SELECT * FROM videos WHERE user_id=$1`,
+		[req.params.userid],
+		(err, results) => {
+			if (err) throw err;
+			console.log(results.rows);
+			var creator = JSON.parse(results.rows[0].creator);
+			res.render("viewchannel.ejs", {videos: results.rows, creator: creator});
+		}
+	);
+});
+
 //get the form for submitting videos
 app.get("/v/submit", checkSignedIn, (req, res) => {
 	res.render("submitvideo.ejs", { message: req.flash("message") });
@@ -113,8 +122,80 @@ app.get("/v/:videoid", (req, res) => {
 		(err, results) => {
 			if (err) throw err;
 			console.log(`Viewing video with id: ${req.params.videoid}`);
-			//render the view with the video from the database
-			res.render("viewvideo.ejs", {video: results.rows[0]});
+			if (results.rows.length <= 0) {
+				res.render("404.ejs");
+			} else {
+				//store the video
+				var video = results.rows[0];
+				//get the creator of the video
+				var videocreator = JSON.parse(video.creator);
+				//get the amount of views that the video currently has
+				var views = parseInt(video.views, 10);
+				//add 1 to the amount of views that the video has
+				var newcount = views + 1;
+				console.log(newcount);
+				//update the amount of views that the video has
+				client.query(
+					`UPDATE videos SET views = $1 WHERE id = $2`,
+					[newcount, req.params.videoid],
+					(err, results) => {
+						if (err) throw err;
+						console.log("Video has been viewed");
+					}
+				);
+				//get all videos excluding the one being viewed to put in the reccomendations for now
+				client.query(
+					`SELECT * FROM videos WHERE title != $1`,
+					[video.title],
+					(err, results) => {
+						if (err) throw err;
+						//render the view with the video from the database and all of the other videos
+						if (req.session.user) {
+							res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, user: req.session.user, approx: approx});
+						} else {
+							res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, approx: approx});
+						}
+					}
+				);
+			}
+		}
+	);
+});
+
+//delete a video
+app.get("/v/delete/:videoid", (req, res) => {
+	//select the video to be deleted
+	client.query(
+		`SELECT * FROM videos WHERE id=$1`,
+		[req.params.videoid],
+		(err, results) => {
+			console.log(req.params);
+			var video = results.rows[0];
+			//we have to add "storage" to the front of the path because this is relative to the server root
+			//the path is stored relative to the storage folder because the views have access to the storage folder already
+			//through express.static
+			var videopath = "storage" + video.video;
+			var thumbpath = "storage" + video.thumbnail;
+
+			fs.unlink(videopath, (err) => {
+				if (err) throw err;
+				console.log("Deleted Video File!");
+			});
+
+			fs.unlink(thumbpath, (err) => {
+				if (err) throw err;
+				console.log("Deleted Thumbnail!");
+			});
+
+			client.query(
+				`DELETE FROM videos WHERE id=$1`,
+				[video.id],
+				(err, results) => {
+					if (err) throw err;
+					console.log("Deleted Video Details");
+					res.redirect("/");
+				}
+			);
 		}
 	);
 });
@@ -134,7 +215,7 @@ app.post('/register', async (req, res) => {
 	var errors = [];
 
 	//check for empty values
-	if (!username || !email || !password || !password2) {
+	if (!username || !password || !password2) {
 		errors.push({message: "Please fill all fields."});
 	}
 
@@ -156,13 +237,17 @@ app.post('/register', async (req, res) => {
 
 		//check to see if the user doesn't exist already
 		client.query(
-			`SELECT * FROM users WHERE email=$1`,
-			[req.body.email],
+			`SELECT * FROM users WHERE email=$1 OR username=$2`,
+			[req.body.email, req.body.username],
 			(err, results) => {
 				if (err) throw err;
 
 				if (results.rows.length > 0) {
-					return res.render("register.ejs", {message: "Email Already Regtistered."});
+					if (results.rows[0].email == req.body.email) {
+						return res.render("register.ejs", {message: "Email is Registered."});
+					} else if (results.rows[0].username == req.body.username) {
+						return res.render("register.ejs", {message: "Username is Registered, Please Try Again."});
+					}
 				} else {
 					client.query(
 						`INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email, password`,
@@ -188,16 +273,20 @@ app.post('/register', async (req, res) => {
 app.post("/login", (req, res) => {
 	var errors = [];
 
-	if (!req.body.email || !req.body.password) {
-		errors.push({message: "Fill out all fields please."});
+	if (!req.body.username && !req.body.email) {
+		errors.push({message: "Enter a Username or Email please."});
+	}
+
+	if (!req.body.password) {
+		errors.push({message: "Fill out password please."});
 	}
 
 	if (errors.length > 0) {
 		res.render("login.ejs", {errors: errors});
 	} else {
 		client.query(
-			`SELECT * FROM users WHERE email = $1`,
-			[req.body.email],
+			`SELECT * FROM users WHERE email = $1 OR username = $2`,
+			[req.body.email, req.body.username ],
 			(err, results) => {
 				if (err) throw err;
 				if (typeof results.rows[0] != 'undefined') {
@@ -222,7 +311,7 @@ app.post("/login", (req, res) => {
 });
 
 //store the submitted video to the database
-app.post("/v/submit", checkSignedIn, (req, res) => {
+app.post("/v/submit", (req, res) => {
 	//get the form
 	var form = new formidable.IncomingForm();
 
@@ -246,12 +335,16 @@ app.post("/v/submit", checkSignedIn, (req, res) => {
 
 		//variables to store the path (relative to server root) of the video and thumbnail
 		var videopath = "/videos/files/" + Date.now() + "-" + files.video.name;
-		var thumbnailpath = "/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
+		if (files.thumbnail) {
+			var thumbnailpath = "/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
+		} else {
+			var thumbnailpath = "None";
+		}
 
-		//store the paths of the files so that the database can know where the files are
+		//store the title, description, thumbnail path, video file path, creator object, and user id to the database to be referenced later
 		client.query(
-			`INSERT INTO videos (title, description, thumbnail, video) VALUES ($1, $2, $3, $4)`,
-			[fields.title, fields.description, thumbnailpath, videopath],
+			`INSERT INTO videos (title, description, thumbnail, video, creator, user_id, views) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			[fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0],
 			(err, results) => {
 				if (err) throw err;
 				console.log("Saved video details in database.");
@@ -274,9 +367,9 @@ app.listen(PORT, '0.0.0.0', (req, res) => {
 
 
 /*
-****************************
-* AUTHENTICATION FUNCTIONS *
-****************************
+************************
+* MIDDLEWARE FUNCTIONS *
+************************
 */
 
 function checkSignedIn(req, res, next) {
@@ -295,6 +388,26 @@ function checkNotSignedIn(req, res, next) {
 	} else {
 		next();
 	}
+}
+
+function videoReccomendations(video) {
+	//get the title of the video to be analyzed
+	var title = video.title;
+
+	//get the keywords from the title
+	var keywords = title.split(" ");
+
+	//an array of words to ignore when reccomending videos for the user
+	var ignoreWords = ["for", "and", "nor", "but", "or", "yet", "so", "after", "as", "before", "if", "just", "now", "once", "since", "supposing", "that", "though", "until", "whenever", "whereas", "whenever", "which", "who", "although", "much", "because", "even"];
+
+	//remove irrelevant words from the stored list of keywords
+	ignoreWords.forEach((item, index) => {
+		keywords.forEach((keyword, index2) => {
+			if (item == keyword) {
+				keywords.splice(index2, 1);
+			}
+		});
+	});
 }
 
 

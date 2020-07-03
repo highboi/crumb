@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" href="/main.css">
 		<title>Login</title>
 	</head>
 	<body>
+		<object data="/banner.html" class="bannerObj"></object>
 		<h1>Login:</h1>
 
 		<div class="messages">
@@ -20,9 +22,15 @@
 			</ul>
 		</div>
 
-		<form action="/login" method="POST">
+		<form action="/login" method="POST" class="authform">
+			<ul>
+				<li>Enter Email or Username to Log in.</li>
+			</ul>
 			<div>
-				<input id="email" name="email" type="email" placeholder="name@example.com">
+				<input id="username" name="username" placeholder="Username" autofocus>
+			</div>
+			<div>
+				<input id="email" name="email" type="email" placeholder="Email">
 			</div>
 			<div>
 				<input id="password" name="password" type="password" placeholder="Password">

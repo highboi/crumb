@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="/main.css">
+		<title><%= creator.username %>'s Channel</title>
+	</head>
+	<body>
+		<object data="/banner.html" class="bannerObj"></object>
+		<div class="channel">
+			<div class="channel-banner">
+				<div id="channel-icon">
+					<img src="/favicon.ico" width="80px" height="80px">
+				</div>
+				<div id="channel-name">
+					<h1><%= creator.username %></h1>
+				</div>
+			</div>
+			<hr>
+			<div class="channel-content">
+				<% if (typeof videos != 'undefined') { %>
+					<% videos.forEach((item, index) => { %>
+						<div class="video">
+							<% var videolink = `/v/${item.id}` %>
+							<div class="thumbnail">
+								<a href="<%= videolink %>">
+									<img src="<%= item.thumbnail %>" alt="thumbnail" width="450" height="300">
+								</a>
+							</div>
+							<div class="links">
+								<a href="<%= videolink %>">
+									<h3 style="text-transform: capitalize;"><strong><%= item.title %></strong></h3>
+								</a>
+							</div>
+						</div>
+					<% }); %>
+				<% } %>
+			</div>
+		</div>
+	</body>
+</html>

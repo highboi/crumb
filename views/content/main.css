@@ -1,0 +1,223 @@
+/*
+GLOBAL ACCESS OF TAGS
+*/
+body {
+	/*
+	min-width: 600px;
+	min-height: 500px;
+	*/
+	background-color: #3f3f3f;
+	color: #adff12;
+	font-family: Charcoal, monospace, sans-serif;
+}
+
+a {
+	color: #adff12;
+	text-decoration: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+img:hover {
+	opacity: 0.5;
+}
+
+button {
+	background-color: #3f3f3f;
+}
+
+/*
+THE VIDEOS IN THE HOMEPAGE
+*/
+
+.home-videos {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.home-videos .video {
+	padding-right: 0.5vw;
+	padding-left: 0.5vw;
+}
+
+.home-videos .video .thumbnail {
+	vertical-align: top;
+	
+}
+
+.home-videos .video .links {
+	font-size: 1rem;
+}
+
+
+/*
+VIDEO AND RECCOMENDATIONS
+*/
+
+.container {
+	display: flex;
+	justify-content: space-between;
+}
+
+
+/*
+VIDEO BEING VIEWED
+*/
+
+.video-container {
+	padding: 20px;
+}
+
+.video-container button {
+	color: black;
+}
+
+.video-container .videotext .channel-details #icon {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.video-container #video {
+	object-fit: cover;
+	width: 60vw;
+	height: 45vw;
+}
+
+.video-container .videotext .channel-details #icon img {
+	width: 5rem;
+	height: 5rem;
+}
+
+.video-container .videotext .channel-details #channel-text {
+	display: inline-block;
+}
+
+.video-container .videotext .channel-details #video-buttons {
+	display: inline-block;
+}
+
+.video-container .videotext .channel-details #video-buttons button {
+	width: 8rem;
+	height: 2.5rem;
+	font-size:20px;
+	color: #adff12;
+	border: 2px solid #adff12;
+	background-color: #2f2f2f;
+}
+
+.video-container .videotext {
+	font-size: 1rem;
+}
+
+.video-container hr {
+	margin: 0;
+}
+
+/*
+RECCOMENDATIONS WHILE VIEWING VIDEOS
+*/
+.reccomendations {
+	flex-direction: column;
+}
+
+.reccomendations img {
+	width: 20vw;
+	height: 15vw;
+	padding: 10px;
+}
+
+.reccomendations .links {
+	display: inline-block;
+	font-size: 0.8vw;
+}
+
+.reccomendations .links :not(a) :not(img) {
+	display: inline;
+	margin: 0px;
+}
+
+.reccomendations .links a {
+	text-decoration: none;
+}
+
+.reccomendations .links img {
+	float: left;
+}
+
+/*
+THE SITE BANNER AT THE TOP OF EACH PAGE
+*/
+.bannerObj {
+	width: 100%;
+	height: 100px;
+}
+
+.banner {
+	background-color: #adff12;
+}
+
+.banner #banner-text {
+	display: inline-block;
+}
+
+.banner #banner-text a {
+	color: #2f2f2f;
+}
+
+.banner #banner-icon{
+	display: inline-block;
+	vertical-align: top;
+}
+
+
+/*
+STYLING FOR FORMS
+*/
+
+.authform input[type="text"] {
+	width: 250px;
+}
+
+.authform input[type="email"] {
+	width: 250px;
+}
+
+.authform input[type="password"] {
+	width: 250px;
+}
+
+
+/*
+STYLING CHANNELS
+*/
+
+.channel .channel-banner {
+	height: 80px;
+}
+
+.channel .channel-banner #channel-icon {
+	display: inline-block;
+	vertical-align: top;
+	float: left;
+}
+
+.channel .channel-banner #channel-name {
+	display: inline-block;
+}
+
+.channel .channel-content {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.channel .channel-content .video {
+	width: 25%;
+	height: auto;
+}
+
+.channel .channel-content .video .thumbnail {
+	vertical-align: top;
+}

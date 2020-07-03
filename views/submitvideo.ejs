@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" href="/main.css">
 		<title>Submit A Video</title>
 	</head>
 	<body>
@@ -8,10 +9,10 @@
 
 		<form action="/v/submit" method="POST" enctype='multipart/form-data'>
 			<div>
-				<input type="text" placeholder="Title" id="title" name="title" maxlength="300">
+				<input type="text" placeholder="Title" id="title" name="title" maxlength="300" required>
 			</div>
 			<div>
-				<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000"></textarea>
+				<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000" required></textarea>
 			</div>
 			<div>
 				<label for="thumbnail">Choose a Thumbnail:</label><br>
@@ -19,7 +20,7 @@
 			</div>
 			<div>
 				<label for="video">Choose a Video:</label><br>
-				<input type="file" id="video" name="video" accept="video/*">
+				<input type="file" id="video" name="video" accept="video/*" required>
 			</div>
 			<div>
 				<input type="submit" value="Submit Video">

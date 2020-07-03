@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-
+		<link rel="stylesheet" href="/main.css">
+		<title>Crumb</title>
 	</head>
 	<body>
-		<h1>Crumb Home:</h1>
+		<object data="/banner.html" class="bannerObj"></object>
 
 		<div class="messages">
 			<% if (typeof message != 'undefined') { %>
@@ -29,14 +30,29 @@
 		<% } %>
 
 		<h1>Videos:</h1>
-		<div class="videos">
+		<div class="home-videos">
 			<% if (typeof videos != 'undefined') { %>
 				<% videos.forEach((item, index) => { %>
-					<h3 style="text-transform: capitalize"><strong><%= item.title %></strong></h3>
-					<% var videolink = `/v/${item.id}` %>
-					<a href="<%= videolink %>">
-						<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300"></img>
-					</a>
+					<div class="video">
+						<% var creator = JSON.parse(item.creator) %>
+						<% var videolink = `/v/${item.id}` %>
+						<% var channellink = `/u/${creator.id}` %>
+						<div class="thumbnail">
+							<a href="<%= videolink %>">
+								<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
+							</a>
+						</div>
+						<div class="links">
+							<a href="<%= videolink %>">
+								<h3 style="text-transform: capitalize"><strong><%= item.title %></strong></h3>
+							</a>
+							<div id="channel-links">
+								<a href="<%= channellink %>">
+									<p><%= creator.username %></p>
+								</a>
+							</div>
+						</div>
+					</div>
 				<% }); %>
 			<% } %>
 		</div>
