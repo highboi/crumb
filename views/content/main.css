@@ -45,11 +45,20 @@ THE VIDEOS IN THE HOMEPAGE
 
 .home-videos .video .thumbnail {
 	vertical-align: top;
-	
 }
 
 .home-videos .video .links {
 	font-size: 1rem;
+}
+
+.home-videos .video .links #channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.home-videos .video .links #channel-links #channel-icon {
+	width: 3vw;
+	height: 3vw
 }
 
 
@@ -59,7 +68,6 @@ VIDEO AND RECCOMENDATIONS
 
 .container {
 	display: flex;
-	justify-content: space-between;
 }
 
 
@@ -67,84 +75,181 @@ VIDEO AND RECCOMENDATIONS
 VIDEO BEING VIEWED
 */
 
-.video-container {
-	padding: 20px;
+.container .video-contents .video-container {
+	position: relative;
 }
 
-.video-container button {
+.container .video-contents .videotext button {
 	color: black;
 }
 
-.video-container .videotext .channel-details #icon {
-	display: inline-block;
-	vertical-align: top;
+.container .video-contents .videotext hr {
+	margin: 0;
 }
 
-.video-container #video {
+.container .video-contents .video-container #video {
 	object-fit: cover;
 	width: 60vw;
 	height: 45vw;
 }
 
-.video-container .videotext .channel-details #icon img {
+.container .video-contents .video-container:fullscreen #video {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+
+/*
+STYLE VIDEO TEXT
+*/
+
+.container .video-contents .videotext {
+	display: block;
+}
+
+.container .video-contents .videotext .channel-details #icon {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.container .video-contents .videotext .channel-details #icon img {
 	width: 5rem;
 	height: 5rem;
 }
 
-.video-container .videotext .channel-details #channel-text {
+.container .video-contents .videotext .channel-details #channel-text {
 	display: inline-block;
 }
 
-.video-container .videotext .channel-details #video-buttons {
+.container .video-contents .videotext .channel-details #video-buttons {
 	display: inline-block;
 }
 
-.video-container .videotext .channel-details #video-buttons button {
+.container .video-contents .videotext .channel-details #video-buttons button {
 	width: 8rem;
 	height: 2.5rem;
-	font-size:20px;
+	font-size: 20px;
 	color: #adff12;
 	border: 2px solid #adff12;
 	background-color: #2f2f2f;
 }
 
-.video-container .videotext {
-	font-size: 1rem;
+.container .video-contents .videotext #title {
+	font-size: 2vw;
+	text-transform: capitalize;
 }
 
-.video-container hr {
-	margin: 0;
+.container .video-contents.videotext .channel-details {
+	font-size: 1vw;
+}
+
+.container .video-contents .videotext .channel-details #icon img {
+	width: 4.5vw;
+	height: 4.5vw;
+}
+
+.container .video-contents .videotext .channel-details #video-buttons button {
+	width: 7.5vw;
+	height: 2vw;
+	font-size: 1vw;
+}
+
+.container .video-contents .videotext .description {
+	font-size: 15px;
+}
+
+/*
+VIDEO CONTROLS
+*/
+
+.container .video-contents .video-container .video-controls {
+	display: flex;
+	align-items: center;
+	width: 90%;
+	position: absolute;
+	bottom: 20px;
+	left: 10px;
+	right: 10px;
+	padding: 5px;
+	opacity: 0;
+	transition: opacity .3s;
+	margin: 0 auto;
+}
+
+.container .video-contents .video-container:hover .video-controls {
+	opacity: 0.9;
+}
+
+.container .video-contents .video-container .video-controls button {
+	cursor: pointer;
+	width: 5vw;
+	height: 4.5vw;
+	padding: 10px;
+	background: #adff12;
+	border-radius: 50px;
+}
+
+.container .video-contents .video-container .video-controls #seeker {
+	width: 20vw;
+}
+
+.container .video-contents .video-container .video-controls #volumeslider {
+	width: 10vw;
+}
+
+.container .video-contents .video-container .video-controls #videotime {
+	font-size: 2vw;
+}
+
+.container .video-contents .video-container .video-controls #muteBtn, #fullscreenBtn, #playBtn {
+	border: none;
+}
+
+.container .video-contents .video-container:fullscreen .video-controls {
+	position: absolute;
+	width: 100%;
+}
+
+.container .video-contents .video-container:fullscreen button {
+	width: 100px;
+	height: 100px;
+}
+
+.container .video-contents .video-container:fullscreen #seeker{
+	width: 50vw;
+}
+
+.container .video-contents .video-container:fullscreen #volumeslider {
+	width: 19vw;
 }
 
 /*
 RECCOMENDATIONS WHILE VIEWING VIDEOS
 */
-.reccomendations {
+.container .reccomendations {
 	flex-direction: column;
 }
 
-.reccomendations img {
+.container .reccomendations .links img {
 	width: 20vw;
 	height: 15vw;
 	padding: 10px;
+	float: left;
 }
 
-.reccomendations .links {
+.container .reccomendations .links {
 	display: inline-block;
 	font-size: 0.8vw;
 }
 
-.reccomendations .links :not(a) :not(img) {
+.container .reccomendations .links :not(a) :not(img) {
 	display: inline;
 	margin: 0px;
 }
 
-.reccomendations .links a {
+.container .reccomendations .links a {
 	text-decoration: none;
-}
-
-.reccomendations .links img {
-	float: left;
 }
 
 /*
@@ -215,9 +320,13 @@ STYLING CHANNELS
 
 .channel .channel-content .video {
 	width: 25%;
-	height: auto;
 }
 
 .channel .channel-content .video .thumbnail {
 	vertical-align: top;
+	height: 16vw;
+}
+
+.channel .channel-content .video {
+	font-size: 1vw;
 }

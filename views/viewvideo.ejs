@@ -7,15 +7,39 @@
 	<body>
 		<object data="/banner.html" class="bannerObj"></object>
 
+		<div class="messages">
+			<% if (typeof message != 'undefined') { %>
+				<p><%= message %></p>
+			<% } %>
+
+			<ul>
+				<% if (typeof errors != 'undefined') { %>
+					<% errors.forEach((item, index) => { %>
+						<li><%= item.message %></li>
+					<% }); %>
+				<% } %>
+			</ul>
+		</div>
+
 		<div class="container">
-			<div class="video-container">
-				<video poster="<%= video.thumbnail %>" id="video" controls>
-					<source src="<%= video.video %>" type="video/mp4">
-					<source src="<%= video.video %>" type="video/ogg">
-				</video>
+			<div class="video-contents">
+				<div class="video-container">
+					<video poster="<%= video.thumbnail %>" id="video">
+						<source src="<%= video.video %>" type="video/mp4">
+						<source src="<%= video.video %>" type="video/ogg">
+					</video>
+					<div class="video-controls">
+						<button id="playBtn"><img src="/play.ico"></button>
+						<input id="seeker" type="range" min="0" max="100" value="0" step="1" oninput="vidSeek()">
+						<p id="videotime"></p>
+						<button id="muteBtn"><img src="/sound.ico"></button>
+						<input id="volumeslider" type="range" min="0" max="100" step="1" oninput="changeVolume()">
+						<button id="fullscreenBtn"><img src="/fullscreen.ico"></button>
+					</div>
+				</div>
 
 				<div class="videotext">
-					<h1 style="text-transform: capitalize" id="title"><%= video.title %></h1>
+					<h1 id="title"><%= video.title %></h1>
 					<hr>
 					<div class="channel-details">
 						<% var channellink = `/u/${videocreator.id}` %>
@@ -95,5 +119,6 @@
 				}
 			}
 		</script>
+		<script src="/videocontroller.js"></script>
 	</body>
 </html>

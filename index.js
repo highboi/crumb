@@ -12,6 +12,8 @@ const ejs = require("ejs");
 const formidable = require("formidable");
 const fs = require("fs");
 const approx = require("approximate-number");
+const crypto = require("crypto");
+const path = require("path");
 
 /*
 ***********************
@@ -145,8 +147,8 @@ app.get("/v/:videoid", (req, res) => {
 				);
 				//get all videos excluding the one being viewed to put in the reccomendations for now
 				client.query(
-					`SELECT * FROM videos WHERE title != $1`,
-					[video.title],
+					`SELECT * FROM videos WHERE id != $1`,
+					[video.id],
 					(err, results) => {
 						if (err) throw err;
 						//render the view with the video from the database and all of the other videos
@@ -169,31 +171,79 @@ app.get("/v/delete/:videoid", (req, res) => {
 		`SELECT * FROM videos WHERE id=$1`,
 		[req.params.videoid],
 		(err, results) => {
+			if (err) throw err;
 			console.log(req.params);
 			var video = results.rows[0];
-			//we have to add "storage" to the front of the path because this is relative to the server root
-			//the path is stored relative to the storage folder because the views have access to the storage folder already
-			//through express.static
-			var videopath = "storage" + video.video;
-			var thumbpath = "storage" + video.thumbnail;
-
-			fs.unlink(videopath, (err) => {
-				if (err) throw err;
-				console.log("Deleted Video File!");
-			});
-
-			fs.unlink(thumbpath, (err) => {
-				if (err) throw err;
-				console.log("Deleted Thumbnail!");
-			});
+			var videocreator = JSON.parse(video.creator);
 
 			client.query(
-				`DELETE FROM videos WHERE id=$1`,
-				[video.id],
+				`SELECT * FROM users WHERE id=$1`,
+				[videocreator.id],
 				(err, results) => {
 					if (err) throw err;
-					console.log("Deleted Video Details");
-					res.redirect("/");
+					var user = results.rows[0];
+					//check to see if the video belongs to the user deleting the video
+					if (typeof req.session.user != 'undefined') {
+						if (videocreator.id == req.session.user.id) {
+							//if the password for the creator of the video matches the password of the current session
+							//delete the video (we don't want random people getting the delete link and deleting the video)
+							if (req.session.user.password == user.password) {
+								//we have to add "storage" to the front of the path because this is relative to the server root
+								//the path is stored relative to the storage folder because the views have access to the storage folder already
+								//through express.static
+								var videopath = "storage" + video.video;
+								var thumbpath = "storage" + video.thumbnail;
+
+								fs.unlink(videopath, (err) => {
+									if (err) throw err;
+									console.log("Deleted Video File!");
+								});
+
+								fs.unlink(thumbpath, (err) => {
+									if (err) throw err;
+									console.log("Deleted Thumbnail!");
+								});
+
+								client.query(
+									`DELETE FROM videos WHERE id=$1`,
+									[video.id],
+									(err, results) => {
+										if (err) throw err;
+										console.log("Deleted Video Details");
+										res.redirect("/");
+									}
+								);
+							} else {
+								client.query(
+									`SELECT * FROM videos WHERE id != $1`,
+									[video.id],
+									(err, results) => {
+										if (err) throw err;
+										//render the view with the video from the database and all of the other videos
+										if (req.session.user) {
+											res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, user: req.session.user, approx: approx, errors: [{message: "Not Authorized to Delete Video."}]});
+										} else {
+											res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, approx: approx, errors: [{message: "Not Authorized to Delete Video."}]});
+										}
+									}
+								);
+							}
+						}
+					} else {
+						client.query(
+							`SELECT * FROM videos WHERE id != $1`,
+							[video.id],
+							(err, results) => {
+								if (err) throw err;
+								//render the view with the video from the database and all of the other videos
+								if (req.session.user) {
+									res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, user: req.session.user, approx: approx, errors: [{message: "Not Authorized to Delete Video."}]});
+								} else {
+									res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, approx: approx, errors: [{message: "Not Authorized to Delete Video."}]});
+								}
+							}
+						);
+					}
 				}
 			);
 		}
@@ -286,7 +336,7 @@ app.post("/login", (req, res) => {
 	} else {
 		client.query(
 			`SELECT * FROM users WHERE email = $1 OR username = $2`,
-			[req.body.email, req.body.username ],
+			[req.body.email, req.body.username],
 			(err, results) => {
 				if (err) throw err;
 				if (typeof results.rows[0] != 'undefined') {
@@ -295,7 +345,7 @@ app.post("/login", (req, res) => {
 
 						if (isMatch) {
 							var user = results.rows[0];
-							req.session.user = {id: user.id, username: user.username, email: user.email};
+							req.session.user = user;
 							req.flash("message", "Logged In!");
 							res.redirect("/");
 						} else {
@@ -316,8 +366,8 @@ app.post("/v/submit", (req, res) => {
 	var form = new formidable.IncomingForm();
 
 	//parse the form and store the files
-	form.parse(req, function (err, fields, files) {
-		//store the video
+	form.parse(req, async (err, fields, files) => {
+		//store the video file submitted
 		var oldpath = files.video.path; //this is the default path that formidable tries to store the file
 		var newpath = __dirname + "/storage/videos/files/" + Date.now() + "-" + files.video.name; //the path where we want to store the file
 		fs.rename(oldpath, newpath, function(err) { //move the file to a desired directory
@@ -325,7 +375,7 @@ app.post("/v/submit", (req, res) => {
 			console.log("Video Saved.");
 		});
 
-		//store the thumbnail
+		//store the thumbnail file submitted
 		var oldpath = files.thumbnail.path;
 		var newpath = __dirname + "/storage/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
 		fs.rename(oldpath, newpath, function(err) {
@@ -335,20 +385,24 @@ app.post("/v/submit", (req, res) => {
 
 		//variables to store the path (relative to server root) of the video and thumbnail
 		var videopath = "/videos/files/" + Date.now() + "-" + files.video.name;
-		if (files.thumbnail) {
-			var thumbnailpath = "/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
-		} else {
-			var thumbnailpath = "None";
-		}
+		var thumbnailpath = "/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
 
-		//store the title, description, thumbnail path, video file path, creator object, and user id to the database to be referenced later
+		//store the video details for later reference
+
+		//generate a unique video id for each video (await the result of this function)
+		var videoid = await generateVideoId();
+
+		//load the video into the database
 		client.query(
-			`INSERT INTO videos (title, description, thumbnail, video, creator, user_id, views) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-			[fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0],
+			`INSERT INTO videos (id, title, description, thumbnail, video, creator, user_id, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+			[videoid, fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0],
 			(err, results) => {
 				if (err) throw err;
 				console.log("Saved video details in database.");
-				res.redirect("/");
+
+				//once the video is saved to the database, then redirect the uploader to their video
+				var videourl = `/v/${results.rows[0].id}`;
+				res.redirect(videourl);
 			}
 		);
 	});
@@ -372,6 +426,8 @@ app.listen(PORT, '0.0.0.0', (req, res) => {
 ************************
 */
 
+//this is a function that redirects users to the login page if the user is not signed in
+//this is used for pages and requests that require a login
 function checkSignedIn(req, res, next) {
 	if (req.session.user) {
 		next();
@@ -381,6 +437,8 @@ function checkSignedIn(req, res, next) {
 	}
 }
 
+//this is a function to redirect users to the index page if they are signed in already
+//this is used for login pages and other forms that sign the user in
 function checkNotSignedIn(req, res, next) {
 	if (req.session.user) {
 		req.flash("message", "Already Logged In!");
@@ -390,26 +448,28 @@ function checkNotSignedIn(req, res, next) {
 	}
 }
 
-function videoReccomendations(video) {
-	//get the title of the video to be analyzed
-	var title = video.title;
+//this is the function that generates a unique id for each video
+//this function needs to be asynchronous as to allow for
+//the value of a DB query to be stored in a variable
+async function generateVideoId() {
+	//generate random bytes for the random id
+	var newid = crypto.randomBytes(11).toString("hex");
 
-	//get the keywords from the title
-	var keywords = title.split(" ");
+	console.log("Generated new ID: " + newid);
 
-	//an array of words to ignore when reccomending videos for the user
-	var ignoreWords = ["for", "and", "nor", "but", "or", "yet", "so", "after", "as", "before", "if", "just", "now", "once", "since", "supposing", "that", "though", "until", "whenever", "whereas", "whenever", "which", "who", "although", "much", "because", "even"];
+	//get the response from the database
+	var res = await client.query(`SELECT * FROM videos WHERE id=$1`, [newid]);
 
-	//remove irrelevant words from the stored list of keywords
-	ignoreWords.forEach((item, index) => {
-		keywords.forEach((keyword, index2) => {
-			if (item == keyword) {
-				keywords.splice(index2, 1);
-			}
-		});
-	});
+	//if the database returned more than 0 rows, this means that a video
+	//with the generated id exists, meaning that the function must be
+	//executed again in order to generate a truly unique id
+	if (res.rows.length > 0) {
+		generateVideoId();
+	} else { //if a unique id has been found, return this id
+		console.log("Valid ID Found: " + newid.toString());
+		return newid;
+	}
 }
-
 
 /*
 ******************
