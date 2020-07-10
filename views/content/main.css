@@ -30,6 +30,18 @@ button {
 }
 
 /*
+MISC STYLING
+*/
+
+.underlinelinks {
+	text-decoration: underline;
+}
+
+.authfileinput h4 {
+	margin: 3px;
+}
+
+/*
 THE VIDEOS IN THE HOMEPAGE
 */
 
@@ -307,6 +319,11 @@ STYLING CHANNELS
 	display: inline-block;
 	vertical-align: top;
 	float: left;
+}
+
+.channel .channel-banner #channel-icon img {
+        border-radius: 50px;
+        padding: 2px;
 }
 
 .channel .channel-banner #channel-name {

@@ -27,6 +27,8 @@
 					<video poster="<%= video.thumbnail %>" id="video">
 						<source src="<%= video.video %>" type="video/mp4">
 						<source src="<%= video.video %>" type="video/ogg">
+						<source src="<%= video.video %>" type="video/webm">
+						<h1>YOUR BROWSER DOES NOT SUPPORT HTML VIDEOS</h1>
 					</video>
 					<div class="video-controls">
 						<button id="playBtn"><img src="/play.ico"></button>
@@ -45,7 +47,7 @@
 						<% var channellink = `/u/${videocreator.id}` %>
 						<div id="icon">
 							<a href="<%= channellink %>">
-								<img src="/favicon.ico">
+								<img src="<%= videocreator.channelicon %>">
 							</a>
 						</div>
 						<div id="channel-text">	

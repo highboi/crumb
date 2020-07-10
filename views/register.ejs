@@ -23,9 +23,9 @@
 			</ul>
 		</div>
 
-		<form action="/register" method="POST" class="authform">
+		<form action="/register" method="POST" class="authform" enctype="multipart/form-data">
 			<div>
-				<input id="username" name="username" type="text" placeholder="Username">
+				<input id="username" name="username" type="text" placeholder="Username" autofocus>
 			</div>
 			<div>
 				<input id="email" name="email" type="email" placeholder="Email (Optional)">
@@ -35,11 +35,21 @@
 			</div>
 			<div>
 				<input id="password2" name="password2" type="password" placeholder="Password Confirmation">
-			</div>
+			</div><br>
+			<div class="authfileinput">
+				<h4>Channel Icon (optional): </h4>
+				<input id="channelicon" name="channelicon" type="file" accept="image/*">
+			</div><br>
+			<div class="authfileinput">
+				<h4>Channel Banner Image (optional): </h4>
+				<input id="channelbanner" name="channelbanner" type="file" accept="image/*">
+			</div><br>
 			<div>
 				<input type="submit" value="Register">
+			</div><br>
+			<div class="underlinelinks">
+				<a href="/login">Existing User?</a>
 			</div>
-			<a href="/login">Existing User?</a>
 		</form>
 	</body>
 </html>

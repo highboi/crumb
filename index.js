@@ -105,8 +105,20 @@ app.get("/u/:userid", (req, res) => {
 		(err, results) => {
 			if (err) throw err;
 			console.log(results.rows);
-			var creator = JSON.parse(results.rows[0].creator);
-			res.render("viewchannel.ejs", {videos: results.rows, creator: creator});
+			if (typeof results.rows[0] != 'undefined') {
+				var creator = JSON.parse(results.rows[0].creator);
+				res.render("viewchannel.ejs", {videos: results.rows, creator: creator});
+			} else {
+				client.query(
+					`SELECT * FROM users WHERE id=$1`,
+					[req.params.userid],
+					(err, results) => {
+						if (err) throw err;
+						var creator = results.rows[0];
+						res.render("viewchannel.ejs", {creator: creator});
+					}
+				);
+			}
 		}
 	);
 });
@@ -257,66 +269,87 @@ app.get("/v/delete/:videoid", (req, res) => {
 *************************
 */
 
-app.post('/register', async (req, res) => {
-	//store the values submitted in the form
-	var { username, email, password, password2 } = req.body;
+app.post('/register', (req, res) => {
+	var form = new formidable.IncomingForm();
 
-	//store errors to be shown in the registration page (if needed)
-	var errors = [];
+	form.parse(req, async (err, fields, files) => {
+		//store errors to be shown in the registration page (if needed)
+		var errors = [];
 
-	//check for empty values
-	if (!username || !password || !password2) {
-		errors.push({message: "Please fill all fields."});
-	}
+		//check for empty values
+		if (!fields.username || !fields.email || !fields.password || !fields.password2) {
+			errors.push({message: "Please fill all fields."});
+		}
 
-	//check for the length of the password (minimum 6 chars)
-	if (password.length < 6) {
-		errors.push({message: "Password must be at least 6 chars."});
-	}
+		//check for the length of the password (minimum 6 chars)
+		if (fields.password.length < 6) {
+			errors.push({message: "Password must be at least 6 chars."});
+		}
 
-	//check for mismatched passwords
-	if (password != password2) {
-		errors.push({message: "Passwords do not match"});
-	}
+		//check for mismatched passwords
+		if (fields.password != fields.password2) {
+			errors.push({message: "Passwords do not match"});
+		}
 
-	if (errors.length > 0) {
-		res.render('register.ejs', {errors});
-	} else {
-		//hash the password for secure storage in database
-		var hashedPassword = await bcrypt.hash(password, 10);
+		if (errors.length > 0) {
+			//render the register page with errors if there are errors to show the user
+			res.render('register.ejs', {errors});
+		} else {
+			//hash the password for secure storage in database
+			var hashedPassword = await bcrypt.hash(fields.password, 10);
 
-		//check to see if the user doesn't exist already
-		client.query(
-			`SELECT * FROM users WHERE email=$1 OR username=$2`,
-			[req.body.email, req.body.username],
-			(err, results) => {
-				if (err) throw err;
+			//generate an alphanumeric id inside the async function here
+			var newuserid = await generateAlphanumId();
 
-				if (results.rows.length > 0) {
-					if (results.rows[0].email == req.body.email) {
-						return res.render("register.ejs", {message: "Email is Registered."});
-					} else if (results.rows[0].username == req.body.username) {
-						return res.render("register.ejs", {message: "Username is Registered, Please Try Again."});
-					}
-				} else {
-					client.query(
-						`INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email, password`,
-						[req.body.username, req.body.email, hashedPassword],
-						(err, results) => {
-							if (err) throw err;
-							console.log("Registered User.");
-							//store the user in the session
-							req.session.user = results.rows[0];
-							//set a flash message to let the user know they are registered
-							req.flash("message", "Registered!");
-							//redirect the user to the index of the site
-							res.redirect('/');
-						}
-					);
-				}
+			console.log(files);
+
+			//save the channel icon submitted in the form
+			if (files.channelicon.name != '') { //if the name is not blank, then a file was submitted
+				var channeliconpath = saveFile(files.channelicon, "/storage/users/icons/");
+			} else { //if the channel icon file field was empty, use the default image
+				var channeliconpath = copyFile("/views/content/default.png", "/storage/users/icons/", "default.png");
 			}
-		);
-	}
+
+			//save the channel banner submitted in the form
+			if (files.channelbanner.name != '') { //if the name is not blank, then the file was submitted
+				var channelbannerpath = saveFile(files.channelbanner, "/storage/users/banners/");
+			} else { //if the name is blank, then the file was not submitted
+				var channelbannerpath = copyFile("/views/content/default.png", "/storage/users/banners/", "default.png");
+			}
+
+			//check to see if the user doesn't exist already
+			client.query(
+				`SELECT * FROM users WHERE email=$1 OR username=$2`,
+				[fields.email, fields.username],
+				(err, results) => {
+					if (err) throw err;
+					//check to see if the email is registered
+					if (results.rows.length > 0) {
+						if (results.rows[0].email == fields.email) { //check if the email is registered
+							return res.render("register.ejs", {message: "Email is Registered."});
+						} else if (results.rows[0].username == fields.username) { //check if the username is registered
+							return res.render("register.ejs", {message: "Username is Registered, Please Try Again."});
+						}
+					} else { //if the user is not registered, register them
+						client.query(
+							`INSERT INTO users (id, username, email, password, channelicon, channelbanner) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username, email, password`,
+							[newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath],
+							(err, results) => {
+								if (err) throw err;
+								console.log("Registered User.");
+								//store the user in the session
+								req.session.user = results.rows[0];
+								//set a flash message to let the user know they are registered
+								req.flash("message", "Registered!");
+								//redirect the user to the index of the site
+								res.redirect('/');
+							}
+						);
+					}
+				}
+			);
+		}
+	});
 });
 
 //have the user log in
@@ -367,44 +400,47 @@ app.post("/v/submit", (req, res) => {
 
 	//parse the form and store the files
 	form.parse(req, async (err, fields, files) => {
-		//store the video file submitted
-		var oldpath = files.video.path; //this is the default path that formidable tries to store the file
-		var newpath = __dirname + "/storage/videos/files/" + Date.now() + "-" + files.video.name; //the path where we want to store the file
-		fs.rename(oldpath, newpath, function(err) { //move the file to a desired directory
-			if (err) throw err;
-			console.log("Video Saved.");
-		});
+		//get the video and thumbnail extensions to be checked (file upload vuln)
+		var videoext = path.extname(files.video.path);
+		var thumbext = path.extname(files.thumbnail.path);
+		//make arrays of accepted file types
+		var acceptedvideo = [".mp4", ".ogg", ".webm"];
+		var acceptedthumbnail = [".png", ".jpeg", ".jpg"];
+		//if the video has an mp4, ogg, or webm extension and the thumbnail is a png, jpeg or jpg image, load the video
+		if ( (videoext in acceptedvideo) && (thumbext in acceptedthumbnail) ) {
+			//store the video file submitted
+			await saveFile(files.video, "/storage/videos/files/");
 
-		//store the thumbnail file submitted
-		var oldpath = files.thumbnail.path;
-		var newpath = __dirname + "/storage/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
-		fs.rename(oldpath, newpath, function(err) {
-			if (err) throw err;
-			console.log("Thumbnail Saved.");
-		});
+			//store the thumbnail file submitted
+			await saveFile(files.thumbnail, "/storage/videos/thumbnails/");
 
-		//variables to store the path (relative to server root) of the video and thumbnail
-		var videopath = "/videos/files/" + Date.now() + "-" + files.video.name;
-		var thumbnailpath = "/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
+			//variables to store the path (relative to server root) of the video and thumbnail
+			var videopath = "/videos/files/" + Date.now() + "-" + files.video.name;
+			var thumbnailpath = "/videos/thumbnails/" + Date.now() + "-" + files.thumbnail.name;
 
-		//store the video details for later reference
+			//store the video details for later reference
 
-		//generate a unique video id for each video (await the result of this function)
-		var videoid = await generateVideoId();
+			//generate a unique video id for each video (await the result of this function)
+			var videoid = await generateAlphanumId();
 
-		//load the video into the database
-		client.query(
-			`INSERT INTO videos (id, title, description, thumbnail, video, creator, user_id, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-			[videoid, fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0],
-			(err, results) => {
-				if (err) throw err;
-				console.log("Saved video details in database.");
+			//load the video into the database
+			client.query(
+				`INSERT INTO videos (id, title, description, thumbnail, video, creator, user_id, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+				[videoid, fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0],
+				(err, results) => {
+					if (err) throw err;
+					console.log("Saved video details in database.");
 
-				//once the video is saved to the database, then redirect the uploader to their video
-				var videourl = `/v/${results.rows[0].id}`;
-				res.redirect(videourl);
-			}
-		);
+					//once the video is saved to the database, then redirect the uploader to their video
+					var videourl = `/v/${results.rows[0].id}`;
+					res.redirect(videourl);
+				}
+			);
+		} else if (!(thumbext in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
+			res.render("submitvideo.ejs", {message: "Unsupported file type for thumbnail (png, jpeg, or jpg)."});
+		} else if (!(videoext in acceptedvideo)) { //if the video file types are not supported, then show errors
+			res.render("submitvideo.ejs", {message: "Unsupported file type for video (mp4, ogg, or webm)."});
+		}
 	});
 });
 
@@ -451,7 +487,7 @@ function checkNotSignedIn(req, res, next) {
 //this is the function that generates a unique id for each video
 //this function needs to be asynchronous as to allow for
 //the value of a DB query to be stored in a variable
-async function generateVideoId() {
+async function generateAlphanumId() {
 	//generate random bytes for the random id
 	var newid = crypto.randomBytes(11).toString("hex");
 
@@ -464,12 +500,47 @@ async function generateVideoId() {
 	//with the generated id exists, meaning that the function must be
 	//executed again in order to generate a truly unique id
 	if (res.rows.length > 0) {
-		generateVideoId();
+		generateAlphanumId();
 	} else { //if a unique id has been found, return this id
 		console.log("Valid ID Found: " + newid.toString());
 		return newid;
 	}
 }
+
+//this is a function for saving a file on to the server
+function saveFile(file, path) {
+	var oldpath = file.path; //default path for the file to be saved
+	var newpath = __dirname + path + Date.now() + "-" + file.name; //new path to save the file on the server
+	fs.rename(oldpath, newpath, function(err) { //save the file to the server on the desired path
+		if (err) throw err;
+		console.log("Saved file to server.");
+	});
+	//remove the dirname and the /storage folder from the string
+	//this is because the ejs views look inside the storage folder already
+	newpath = newpath.replace(__dirname, "");
+	newpath = newpath.replace("/storage", "");
+	//return the new file path to be stored in the database for reference
+	return newpath;
+}
+
+//this is a function to copy files on the server (used to save default images to peoples channels such as default icons etc.)
+function copyFile(oldpath, newpath, filename) {
+	//make a full path out of the given path
+	oldpath = __dirname + oldpath;
+	//make a new path with a timestamp to uniquely identify the file
+	var newfilepath = __dirname + newpath + Date.now() + "-" + filename;
+	fs.copyFile(oldpath, newfilepath, (err) => {
+		if (err) throw err;
+		console.log("Copied file on server.");
+	});
+	//remove the dirname and the /storage folder from the string
+	//this is because the ejs views look inside the storage folder already
+	newfilepath = newfilepath.replace(__dirname, "");
+	newfilepath = newfilepath.replace("/storage", "");
+	//return the new file path to be stored in the database
+	return newfilepath;
+}
+
 
 /*
 ******************
