@@ -104,7 +104,6 @@ app.get("/u/:userid", (req, res) => {
 		[req.params.userid],
 		(err, results) => {
 			if (err) throw err;
-			console.log(results.rows);
 			if (typeof results.rows[0] != 'undefined') {
 				var creator = JSON.parse(results.rows[0].creator);
 				res.render("viewchannel.ejs", {videos: results.rows, creator: creator});
@@ -147,14 +146,12 @@ app.get("/v/:videoid", (req, res) => {
 				var views = parseInt(video.views, 10);
 				//add 1 to the amount of views that the video has
 				var newcount = views + 1;
-				console.log(newcount);
 				//update the amount of views that the video has
 				client.query(
 					`UPDATE videos SET views = $1 WHERE id = $2`,
 					[newcount, req.params.videoid],
 					(err, results) => {
 						if (err) throw err;
-						console.log("Video has been viewed");
 					}
 				);
 				//get all videos excluding the one being viewed to put in the reccomendations for now
@@ -184,7 +181,7 @@ app.get("/v/delete/:videoid", (req, res) => {
 		[req.params.videoid],
 		(err, results) => {
 			if (err) throw err;
-			console.log(req.params);
+			console.log("Deleting video with id: " + req.params.videoid);
 			var video = results.rows[0];
 			var videocreator = JSON.parse(video.creator);
 
@@ -301,8 +298,6 @@ app.post('/register', (req, res) => {
 			//generate an alphanumeric id inside the async function here
 			var newuserid = await generateAlphanumId();
 
-			console.log(files);
-
 			//save the channel icon submitted in the form
 			if (files.channelicon.name != '') { //if the name is not blank, then a file was submitted
 				var channeliconpath = saveFile(files.channelicon, "/storage/users/icons/");
@@ -379,6 +374,7 @@ app.post("/login", (req, res) => {
 						if (isMatch) {
 							var user = results.rows[0];
 							req.session.user = user;
+							console.log("Logged In!");
 							req.flash("message", "Logged In!");
 							res.redirect("/");
 						} else {
@@ -401,13 +397,15 @@ app.post("/v/submit", (req, res) => {
 	//parse the form and store the files
 	form.parse(req, async (err, fields, files) => {
 		//get the video and thumbnail extensions to be checked (file upload vuln)
-		var videoext = path.extname(files.video.path);
-		var thumbext = path.extname(files.thumbnail.path);
+		var videoext = path.extname(getFilePath(files.video, "/storage/videos/files/"));
+		var thumbext = path.extname(getFilePath(files.thumbnail, "/storage/videos/thumbnails/"));
+
 		//make arrays of accepted file types
 		var acceptedvideo = [".mp4", ".ogg", ".webm"];
 		var acceptedthumbnail = [".png", ".jpeg", ".jpg"];
+
 		//if the video has an mp4, ogg, or webm extension and the thumbnail is a png, jpeg or jpg image, load the video
-		if ( (videoext in acceptedvideo) && (thumbext in acceptedthumbnail) ) {
+		if ( (acceptedvideo.includes(videoext)) && (acceptedthumbnail.includes(thumbext)) ) {
 			//store the video file submitted
 			await saveFile(files.video, "/storage/videos/files/");
 
@@ -429,7 +427,7 @@ app.post("/v/submit", (req, res) => {
 				[videoid, fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0],
 				(err, results) => {
 					if (err) throw err;
-					console.log("Saved video details in database.");
+					console.log("Saved video files and details.");
 
 					//once the video is saved to the database, then redirect the uploader to their video
 					var videourl = `/v/${results.rows[0].id}`;
@@ -505,6 +503,13 @@ async function generateAlphanumId() {
 		console.log("Valid ID Found: " + newid.toString());
 		return newid;
 	}
+}
+
+//this is a function that returns a path for a file you want to save
+function getFilePath(file, path) {
+	var filepath = path + Date.now() + "-" + file.name;
+	filepath = filepath.replace("/storage", "");
+	return filepath;
 }
 
 //this is a function for saving a file on to the server

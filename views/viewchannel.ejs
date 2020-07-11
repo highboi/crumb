@@ -7,11 +7,11 @@
 	<body>
 		<object data="/banner.html" class="bannerObj"></object>
 		<div class="channel">
-			<div class="channel-banner">
+			<div class="channel-banner" style="background-image: url(<%= creator.channelbanner %>)">
 				<div id="channel-icon">
 					<img src="<%= creator.channelicon %>" width="80px" height="80px">
 				</div>
-				<div id="channel-name">
+				<div id="channel-name" class="hardtoseetext">
 					<h1><%= creator.username %></h1>
 				</div>
 			</div>

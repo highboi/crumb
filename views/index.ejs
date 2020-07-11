@@ -22,6 +22,8 @@
 		</div>
 
 		<% if (typeof user != 'undefined') { %>
+			<% var channellink = `/u/${user.id}`; %>
+			<button><a href="<%= channellink %>">My Channel</a></button><br>
 			<button><a href="/v/submit">Submit a Video</a></button><br>
 			<button><a href="/logout">Log Out</a></button>
 		<% } else { %>
