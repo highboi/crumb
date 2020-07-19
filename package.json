@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "approximate-number": "^2.0.0",
+    "autocorrect": "^1.2.0",
     "bcrypt": "^5.0.0",
     "connect-flash": "^0.1.1",
     "crypto": "^1.0.1",

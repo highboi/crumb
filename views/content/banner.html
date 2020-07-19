@@ -1,5 +1,6 @@
 <link rel="stylesheet" href="/main.css">
-<div class="banner">
+
+<div class="banner" scroll="no">
 	<div id="banner-icon">
 		<a href="/" target="_parent">
 			<img src="/favicon.ico" width="80px" height="80px">
@@ -9,5 +10,11 @@
 		<a href="/" target="_parent">
 			<h1>Crumb</h1>
 		</a>
+	</div>
+	<div id="searchbar">
+		<form action="/search" method="get" target="_parent">
+			<button type="submit" value="Submit"><img src="/search.ico"></button>
+			<input type="text" id="searchquery" name="searchquery">
+		</form>
 	</div>
 </div>

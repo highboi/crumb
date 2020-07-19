@@ -46,10 +46,10 @@ function playPause() {
 	playBtnImg = playBtn.getElementsByTagName("img")[0];
 	if (video.paused) {
 		video.play();
-		playBtnImg.src = "http://localhost:3000/pause.ico";
+		playBtnImg.src = "http://localhost/pause.ico";
 	} else {
 		video.pause();
-		playBtnImg.src = "http://localhost:3000/play.ico";
+		playBtnImg.src = "http://localhost/play.ico";
 	}
 }
 
@@ -77,8 +77,19 @@ function seektimeupdate() {
 
 //function to change the volume of the video
 function changeVolume() {
+	//change the video volume
 	var newVol = volumeslider.value / 100;
 	video.volume = newVol;
+
+	//get the image of the mute button
+	var muteImg = muteBtn.getElementsByTagName("img")[0];
+
+	//check to see if the user used the seeker bar to mute the video and change the image
+	if (video.volume == 0) {
+		muteImg.src = "http://localhost/mute.ico";
+	} else if (video.volume > 0) {
+		muteImg.src = "http://localhost/sound.ico";
+	}
 }
 
 //this is a function to make the video go full screen
@@ -111,14 +122,14 @@ function getFullScreen() {
 //this is a function that toggles the mute button
 function toggleMute() {
 	var muteImg = muteBtn.getElementsByTagName("img")[0];
-	if (muteImg.src == "http://localhost:3000/sound.ico") {
+	if (muteImg.src == "http://localhost/sound.ico") {
 		volumeslider.value = 0;
 		video.volume = 0;
-		muteImg.src = "http://localhost:3000/mute.ico";
-	} else if (muteImg.src == "http://localhost:3000/mute.ico") {
+		muteImg.src = "http://localhost/mute.ico";
+	} else if (muteImg.src == "http://localhost/mute.ico") {
 		volumeslider.value = 100;
 		video.volume = 1;
-		muteImg.src = "http://localhost:3000/sound.ico";
+		muteImg.src = "http://localhost/sound.ico";
 	}
 }
 

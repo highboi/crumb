@@ -55,8 +55,14 @@
 								<h2><%= videocreator.username %></h2>
 							</a>
 						</div>
-						<div id="video-buttons">
-							<button>Subscribe</button>
+						<div class="video-buttons">
+							<button id="subscribebutton" onclick="subscribe();">Subscribe</button>
+							<div class="likesection">
+								<button class="likebuttons" onclick="likeVideo()"><img src="/like.ico"></button>
+								<p id="likes"><%= video.likes %></p>
+								<button class="likebuttons" onclick="dislikeVideo()"><img src="/dislike.ico"></button>
+								<p id="dislikes"><%= video.dislikes %></p>
+							</div>
 						</div>
 					</div>
 					<hr>
@@ -121,6 +127,13 @@
 				}
 			}
 		</script>
+
+		<script type="text/javascript">
+			var videovar = <%- JSON.stringify(video) %>;
+		</script>
+
 		<script src="/videocontroller.js"></script>
+		<script src="/javascript/likedislike.js"></script>
+		<script src="/javascript/subscribe.js"></script>
 	</body>
 </html>

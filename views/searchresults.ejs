@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<link rel="stylesheet" href="/main.css">
+		<title>Results For "<%= search.query %>"</title>
+	</head>
+	<body>
+		<object data="/banner.html" class="bannerObj"></object>
+
+		<div class="messages">
+			<% if (typeof message != 'undefined') { %>
+				<p><%= message %></p>
+			<% } %>
+
+			<ul>
+				<% if (typeof errors != 'undefined') { %>
+					<% errors.forEach((item, index) => { %>
+						<li><%= item.message %></li>
+					<% }); %>
+				<% } %>
+			</ul>
+
+			<%if (search.autocorrected == true) { %>
+				<p><q><%= search.humanquery %></q></p>
+				<p>Did you mean: <q><%= search.query %></q></p>
+			<% } %>
+		</div>
+
+		<div class="home-videos">
+			<% if (search.videos.length > 0) { %>
+				<% search.videos.forEach((item, index) => { %>
+					<div class="video">
+						<% var creator = JSON.parse(item.creator); %>
+						<% var videolink = `/v/${item.id}`; %>
+						<% var channellink = `/u/${creator.id}`; %>
+						<div class="thumbnail">
+							<a href="<%= videolink %>">
+								<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
+							</a>
+						</div>
+						<div class="links">
+							<a href="<%= videolink %>">
+								<h3 style="text-transform: capitalize;"><strong><%= item.title %></strong></h3>
+							</a>
+							<div id="channel-links">
+								<a href="<%= channellink %>">
+									<img id="channel-icon" src="<%= creator.channelicon %>">
+								</a>
+								<a href="<%= channellink %>">
+									<p><%= creator.username %></p>
+								</a>
+							</div>
+						</div>
+					</div>
+				<% }); %>
+			<% } else { %>
+				<p>No Results Returned</p>
+			<% } %>
+		</div>
+	</body>
+</html>
