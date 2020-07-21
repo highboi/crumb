@@ -334,8 +334,7 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 
 .banner #searchbar {
 	display: inline-block;
-	float: right;
-	margin: 20px;
+	margin: auto;
 }
 
 .banner #searchbar button {
@@ -346,6 +345,25 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 	border-width: 4px;
 }
 
+.banner #settings {
+	display: inline-block;
+}
+
+.banner #settings #dropbtn {
+	width: 45px;
+	height: 45px;
+	display: inline-block;
+}
+
+.banner #settings #dropdown-content {
+	display: none;
+}
+
+.banner #settings:hover #dropdown-content {
+	background-color: #ddd;
+	color: black;
+	display: block;
+}
 
 /*
 STYLING FOR FORMS

@@ -2,10 +2,10 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="/main.css">
-		<title><%= video.title %></title>
+		<title><%= video.title %> - Crumb</title>
 	</head>
 	<body>
-		<object data="/banner.html" class="bannerObj"></object>
+		<%- include('content/banner.html') %>
 
 		<div class="messages">
 			<% if (typeof message != 'undefined') { %>
@@ -67,6 +67,8 @@
 					</div>
 					<hr>
 					<p><%= approx(video.views) %> Views</p>
+					<% var datestring = video.posttime.split("-"); %>
+					<p>Posted: <%= datestring[1] + "-" + datestring[2] + "-" + datestring[0] %></p>
 					<hr>
 					<div class="description">
 						<% if (video.description.length > 100) { %>
@@ -107,6 +109,24 @@
 						<p>&nbsp;&nbsp<%= videos[i].description.substr(0, 14) %>...</p>
 					</div>
 				<% } %>
+			</div>
+
+			<div class="comments">
+				<div id="commentform">
+					<% var commentlink = `/comment/${video.id}`; %>
+					<form action="<%= commentlink %>" method="post">
+						<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000"></textarea>
+						<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
+					</form>
+				</div>
+				<div id="theComments">
+					<% if (typeof comments != 'undefined') { %>
+						<% comments.forEach((item, index) => { %>
+							<h3><%= item.username %></h3>
+							<p><%= item.comment %></p>
+						<% }); %>
+					<% } %>
+				</div>
 			</div>
 		</div>
 

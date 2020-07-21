@@ -69,135 +69,86 @@ app.get("/v/submit", middleware.checkSignedIn, (req, res) => {
 });
 
 //views individual videos on the site
-app.get("/v/:videoid", (req, res) => {
-	client.query(
-		`SELECT * FROM videos WHERE id=$1`,
-		[req.params.videoid],
-		(err, results) => {
-			if (err) throw err;
-			console.log(`Viewing video with id: ${req.params.videoid}`);
-			if (results.rows.length <= 0) {
-				res.render("404.ejs");
-			} else {
-				//store the video
-				var video = results.rows[0];
-				//get the creator of the video
-				var videocreator = JSON.parse(video.creator);
-				//get the amount of views that the video currently has
-				var views = parseInt(video.views, 10);
-				//add 1 to the amount of views that the video has
-				var newcount = views + 1;
-				//update the amount of views that the video has
-				client.query(
-					`UPDATE videos SET views = $1 WHERE id = $2`,
-					[newcount, req.params.videoid],
-					(err, results) => {
-						if (err) throw err;
-					}
-				);
-				//get all videos excluding the one being viewed to put in the reccomendations for now
-				client.query(
-					`SELECT * FROM videos WHERE id != $1`,
-					[video.id],
-					(err, results) => {
-						if (err) throw err;
-						//render the view with the video from the database and all of the other videos
-						if (req.session.user) {
-							res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, user: req.session.user, approx: approx});
-						} else {
-							res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, approx: approx});
-						}
-					}
-				);
-			}
-		}
-	);
+app.get("/v/:videoid", async (req, res) => {
+	//select the video from the database
+	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
+	video = video.rows[0];
+
+	//get the video creator
+	var videocreator = JSON.parse(video.creator);
+
+	//update the views on the video
+	var views = parseInt(video.views, 10); //get the current amount of views on the video
+	var newcount = views + 1; //increase the amount of views on the video
+	await client.query(`UPDATE videos SET views=$1 WHERE id=$2`, [newcount, req.params.videoid]); //update the views on the video
+
+	//get videos for the reccomendations
+	var videos = middleware.getReccomendations(video);
+
+	//select the comments that belong to the video
+	var comments = await client.query(`SELECT * FROM comments WHERE videoid=$1 ORDER BY posttime DESC`, [req.params.videoid]);
+	comments = comments.rows;
+
+	//render the video view based on whether or not the user is logged in and has a session variable
+	if (req.session.user) {
+		res.render("viewvideo.ejs", {video: video, videos: videos, videocreator: videocreator, approx: approx, user: req.session.user, comments: comments});
+	} else {
+		res.render("viewvideo.ejs", {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments});
+	}
 });
 
 //delete a video
-app.get("/v/delete/:videoid", (req, res) => {
+app.get("/v/delete/:videoid", async (req, res) => {
 	//select the video to be deleted
-	client.query(
-		`SELECT * FROM videos WHERE id=$1`,
-		[req.params.videoid],
-		(err, results) => {
-			if (err) throw err;
-			console.log("Deleting video with id: " + req.params.videoid);
-			var video = results.rows[0];
-			var videocreator = JSON.parse(video.creator);
+	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
+	video = video.rows[0];
+	console.log("Deleting video with id: " + req.params.videoid);
 
-			client.query(
-				`SELECT * FROM users WHERE id=$1`,
-				[videocreator.id],
-				(err, results) => {
+	//get the video creator
+	var videocreator = JSON.parse(video.creator);
+
+	//verify the user is authorized to delete this video
+	if (typeof req.session.user != 'undefined') {
+		if (videocreator.id == req.session.user.id) { //if the user and the video creator have the same id
+			if (videocreator.password == req.session.user.password) {
+				//get the file paths for the video files to be deleted
+				var videopath = "storage" + video.video;
+				var thumbpath = "storage" + video.thumbnail;
+
+				//delete the video file
+				fs.unlink(videopath, (err) => {
 					if (err) throw err;
-					var user = results.rows[0];
-					//check to see if the video belongs to the user deleting the video
-					if (typeof req.session.user != 'undefined') {
-						if (videocreator.id == req.session.user.id) {
-							//if the password for the creator of the video matches the password of the current session
-							//delete the video (we don't want random people getting the delete link and deleting the video)
-							if (req.session.user.password == user.password) {
-								//we have to add "storage" to the front of the path because this is relative to the server root
-								//the path is stored relative to the storage folder because the views have access to the storage folder already
-								//through express.static
-								var videopath = "storage" + video.video;
-								var thumbpath = "storage" + video.thumbnail;
+					console.log("Deleted Video File!");
+				});
 
-								fs.unlink(videopath, (err) => {
-									if (err) throw err;
-									console.log("Deleted Video File!");
-								});
+				//delete the thumbnail file
+				fs.unlink(thumbpath, (err) => {
+					if (err) throw err;
+					console.log("Deleted Thumbnail!");
+				});
 
-								fs.unlink(thumbpath, (err) => {
-									if (err) throw err;
-									console.log("Deleted Thumbnail!");
-								});
 
-								client.query(
-									`DELETE FROM videos WHERE id=$1`,
-									[video.id],
-									(err, results) => {
-										if (err) throw err;
-										console.log("Deleted Video Details");
-										res.redirect("/");
-									}
-								);
-							} else {
-								client.query(
-									`SELECT * FROM videos WHERE id != $1`,
-									[video.id],
-									(err, results) => {
-										if (err) throw err;
-										//render the view with the video from the database and all of the other videos
-										if (req.session.user) {
-											res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, user: req.session.user, approx: approx, errors: [{message: "Not Authorized to Delete Video."}]});
-										} else {
-											res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, approx: approx, errors: [{message: "Not Authorized to Delete Video."}]});
-										}
-									}
-								);
-							}
-						}
-					} else {
-						client.query(
-							`SELECT * FROM videos WHERE id != $1`,
-							[video.id],
-							(err, results) => {
-								if (err) throw err;
-								//render the view with the video from the database and all of the other videos
-								if (req.session.user) {
-									res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, user: req.session.user, approx: approx, errors: [{message: "Not Authorized to Delete Video."}]});
-								} else {
-									res.render("viewvideo.ejs", {video: video, videos: results.rows, videocreator: videocreator, approx: approx, errors: [{message: "Not Authorized to Delete Video."}]});
-								}
-							}
-						);
-					}
-				}
-			);
+				//delete the video from the database
+				await client.query(`DELETE FROM videos WHERE id=$1`, [video.id]);
+				console.log("Deleted video details.");
+
+				//redirect to the home page
+				res.redirect("/");
+			} else {
+				//get the reccomendations
+				var videos = middleware.getReccomendations(video);
+
+				//render the view and let the user know that they are not authorized to do this action
+				res.render("viewvideo.ejs", {video: video, videos: videos, videocreator: videocreator, user: req.session.user, approx: approx, errors: [{message: "Not Authorized To Delete Video."}]});
+			}
+		} else {
+			//get the reccomendations
+			var videos = middleware.getReccomendations(video);
+
+			//render the view and let the user know that they are not authorized to do this action
+			res.render("viewvideo.ejs", {video: video, videos: videos, videocreator: videocreator, user: req.session.user, approx: approx, errors: [{message: "Not Authorized To Delete Video."}]});
 		}
-	);
+	}
 });
 
 //get request for the like button
@@ -288,47 +239,53 @@ app.get("/search", async (req, res) => {
 	var query = req.query.searchquery;
 
 	//get the autocorrected string
-	var autocorrectedquery = middleware.autoCorrect(query);
+	var autocorrectedquery = middleware.autoCorrect(query, false, false);
+
+	//get the autocorrected string but check for capitalization
+	var autocorrectedCapsQuery = middleware.autoCorrect(query, true, false);
+
+	//get the autocorrected string but check for title case
+	var autocorrectedTitle = middleware.autoCorrect(query, false, true);
 
 	//check if the original query is different from the autocorrected version
-	if (query == autocorrectedquery) { //if both queries are the same, then this means that nothing was autocorrected in the query
+	if (query == autocorrectedquery && query == autocorrectedCapsQuery && query == autocorrectedTitle) { //if both queries are the same, then this means that nothing was autocorrected in the query
 		search.autocorrected = false;
-	} else { //if the original query and the autocorrected query are different, this means that the search was autocorrected
-		search.autocorrected = true
+		search.autocorrectedNormal = false;
+		search.autocorrectedCaps = false;
+		search.autocorrectedTitleCase = false;
+	} else {
+		search.autocorrected = true;
+	}
+	//check for autocorrected normal
+	if (query != autocorrectedquery ) {
+		search.autocorrectedNormal = true;
+	}
+	//check for autocorrecting caps
+	if (query != autocorrectedCapsQuery) {
+		search.autocorrectedCaps = true;
+	}
+	//check for autocorrecting title case
+	if (query != autocorrectedTitle) {
+		search.autocorrectedTitleCase = true;
 	}
 
 	//store the autocorrected search query inside the search object
-	search.humanquery = query;
-	search.query = autocorrectedquery;
+	search.humanquery = query; //the original query
+	search.query = autocorrectedquery; //the regular autocorrected query
+	search.queryCaps = autocorrectedCapsQuery; //autocorrected while checking for all caps
+	search.queryTitle = autocorrectedTitle; //autocorrected checking for title case
 
-
-	//a variable to store the results of the video
-	var results = [];
 
 	//get the phrases/keywords from the query through the algorithm
 	var phrases = middleware.getSearchTerms(search.query);
+	var capPhrases = middleware.getSearchTerms(search.queryCaps);
+	var titlePhrases = middleware.getSearchTerms(search.queryTitle);
 
-	//loop through the extracted phrases to find videos with titles or descriptions containing the key phrases
-	for (var i=0; i<phrases.length; i++) {
-		//get all of the videos containing the phrase in the title
-		var result = await client.query(`SELECT * FROM videos WHERE title LIKE $1`, ["%" + phrases[i] + "%"]);
-		//check to see that the same video is not put into the results twice
-		result.rows.forEach((item, index) => {
-			//a variable to use to check if a video has been added
-			var added = false;
-			//loop through the videos already in the results array and compare them to the videos found in the current query
-			for (var j=0; j<results.length; j++) {
-				//if the video has been added already, then set the added variable to true so that we do not add it in the results again
-				if (JSON.stringify(item) == JSON.stringify(results[j])) {
-					added = true;
-				}
-			}
-			//if the video has not been added, then add it to the results array
-			if (!added) {
-				results.push(item);
-			}
-		});
-	}
+	//add the results for the regular phrases into the results array
+	var results = await middleware.searchVideos(phrases, results);
+
+	//add the results for the phrases (checking for capitalization)
+	results = results.concat(await middleware.searchVideos(capPhrases, results));
 
 	//store the array of video objects inside the search object
 	search.videos = results;

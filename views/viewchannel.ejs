@@ -2,10 +2,10 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="/main.css">
-		<title><%= creator.username %>'s Channel</title>
+		<title><%= creator.username %>'s Channel - Crumb</title>
 	</head>
 	<body>
-		<object data="/banner.html" class="bannerObj"></object>
+		<%- include('content/banner.html') %>
 		<div class="channel">
 			<div class="channel-banner" style="background-image: url(<%= creator.channelbanner %>)">
 				<div id="channel-icon">

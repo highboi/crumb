@@ -4,6 +4,7 @@
 const bcrypt = require("bcrypt");
 const formidable = require("formidable");
 const path = require("path");
+const approx = require("approximate-number");
 
 const { app, client, middleware, PORT } = require("./configBasic");
 
@@ -14,8 +15,8 @@ app.post('/register', (req, res) => {
 		//store errors to be shown in the registration page (if needed)
 		var errors = [];
 
-		//check for empty values
-		if (!fields.username || !fields.email || !fields.password || !fields.password2) {
+		//check for empty values (the email entry is optional, but we need a username)
+		if (!fields.username || !fields.password || !fields.password2) {
 			errors.push({message: "Please fill all fields."});
 		}
 
@@ -53,43 +54,34 @@ app.post('/register', (req, res) => {
 				var channelbannerpath = middleware.copyFile("/views/content/default.png", "/storage/users/banners/", "default.png");
 			}
 
-			//check to see if the user doesn't exist already
-			client.query(
-				`SELECT * FROM users WHERE email=$1 OR username=$2`,
-				[fields.email, fields.username],
-				(err, results) => {
-					if (err) throw err;
-					//check to see if the email is registered
-					if (results.rows.length > 0) {
-						if (results.rows[0].email == fields.email) { //check if the email is registered
-							return res.render("register.ejs", {message: "Email is Registered."});
-						} else if (results.rows[0].username == fields.username) { //check if the username is registered
-							return res.render("register.ejs", {message: "Username is Registered, Please Try Again."});
-						}
-					} else { //if the user is not registered, register them
-						client.query(
-							`INSERT INTO users (id, username, email, password, channelicon, channelbanner) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username, email, password`,
-							[newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath],
-							(err, results) => {
-								if (err) throw err;
-								console.log("Registered User.");
-								//store the user in the session
-								req.session.user = results.rows[0];
-								//set a flash message to let the user know they are registered
-								req.flash("message", "Registered!");
-								//redirect the user to the index of the site
-								res.redirect('/');
-							}
-						);
-					}
+			//check to see if the user does not already exist
+			var existinguser = await client.query(`SELECT * FROM users WHERE email=$1 OR username=$2`, [fields.email, fields.username]);
+
+			//do something according to if the user is already registered or not
+			if (existinguser.rows.length > 0) { //if the user is registered
+				if (existinguser.rows[0].email == fields.email) {
+					req.flash("message", "Email is Already Registered. Please Log In.");
+					return res.redirect("/login");
+				} else if (existinguser.rows[0].username == field.username) {
+					return res.render("register.ejs", {message: "Username Already Taken, Please Try Again."});
 				}
-			);
+			} else { //if the user is a new user, then register them
+				var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username, email, password, channelicon, channelbanner`, [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath]);
+				newuser = newuser.rows[0];
+				console.log("Registered User.");
+				//store the user in the session
+				req.session.user = newuser;
+				//flash message to let the user know they are registered
+				req.flash("message", "Registered!");
+				//redirect to the home page
+				res.redirect("/");
+			}
 		}
 	});
 });
 
 //have the user log in
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
 	var errors = [];
 
 	if (!req.body.username && !req.body.email) {
@@ -103,30 +95,26 @@ app.post("/login", (req, res) => {
 	if (errors.length > 0) {
 		res.render("login.ejs", {errors: errors});
 	} else {
-		client.query(
-			`SELECT * FROM users WHERE email = $1 OR username = $2`,
-			[req.body.email, req.body.username],
-			(err, results) => {
-				if (err) throw err;
-				if (typeof results.rows[0] != 'undefined') {
-					bcrypt.compare(req.body.password, results.rows[0].password, (err, isMatch) => {
-						if (err) throw err;
-
-						if (isMatch) {
-							var user = results.rows[0];
-							req.session.user = user;
-							console.log("Logged In!");
-							req.flash("message", "Logged In!");
-							res.redirect("/");
-						} else {
-							res.render("login.ejs", {message: "Password Incorrect."});
-						}
-					});
-				} else {
-					res.render("login.ejs", {message: "User does not exist."});
-				}
+		//select the users from the database with the specified fields
+		var user = await client.query(`SELECT * FROM users WHERE email=$1 OR username=$2`, [req.body.email, req.body.username]);
+		user = user.rows[0];
+		//check to see if the user exists
+		if (typeof user != 'undefined') { //if the user exists, then log them in
+			var match = await bcrypt.compare(req.body.password, user.password); //compare the password entered with the password in the db
+			if (match) { //if the password is a match, log the user in
+				//store the user in the current session
+				req.session.user = user;
+				//messages to let the server and the client know that a user logged in
+				console.log("Logged In!");
+				req.flash("message", "Logged In!");
+				//redirect to the home page
+				res.redirect("/");
+			} else { //if the password is incorrect, then let the user know
+				res.render("login.ejs", {message: "Password Incorrect."});
 			}
-		);
+		} else { // if the user does not exist, then tell the user
+			res.render("login.ejs", {message: "User does not exist."});
+		}
 	}
 });
 
@@ -163,22 +151,36 @@ app.post("/v/submit", (req, res) => {
 			var videoid = await middleware.generateAlphanumId();
 
 			//load the video into the database
-			client.query(
-				`INSERT INTO videos (id, title, description, thumbnail, video, creator, user_id, views) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-				[videoid, fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0],
-				(err, results) => {
-					if (err) throw err;
-					console.log("Saved video files and details.");
-
-					//once the video is saved to the database, then redirect the uploader to their video
-					var videourl = `/v/${results.rows[0].id}`;
-					res.redirect(videourl);
-				}
-			);
+			var id = await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, creator, user_id, views, posttime) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`, [videoid, fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0, middleware.getDate()]);
+			var videourl = `/v/${id.rows[0].id}`; //get the url to redirect to now that the video has been created
+			res.redirect(videourl); //redirect to the url
 		} else if (!(thumbext in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
 			res.render("submitvideo.ejs", {message: "Unsupported file type for thumbnail (png, jpeg, or jpg)."});
 		} else if (!(videoext in acceptedvideo)) { //if the video file types are not supported, then show errors
 			res.render("submitvideo.ejs", {message: "Unsupported file type for video (mp4, ogg, or webm)."});
 		}
 	});
+});
+
+//post request for commenting on videos
+app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
+	//get the video so that it can be rendered
+	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
+	video = video.rows[0];
+
+	//get the creator of the video
+	var videocreator = JSON.parse(video.creator);
+
+	//put the comment into the database
+	await client.query(`INSERT INTO comments (username, userid, comment, videoid, posttime) VALUES ($1, $2, $3, $4, $5)`, [req.session.user.username, req.session.user.id, req.body.commenttext, req.params.videoid, middleware.getDate()]);
+
+	//select all of the comments belonging to the video (in order by newest to oldest)
+	var comments = await client.query(`SELECT * FROM comments WHERE videoid=$1 ORDER BY posttime DESC`, [req.params.videoid]);
+	comments = comments.rows;
+
+	//get videos for the reccomended
+	var videos = middleware.getReccomendations(video);
+
+	//render the video view with the updated list of comments
+	res.render('viewvideo.ejs', {video: video, comments: comments, user: req.session.user, approx: approx, videocreator: videocreator, videos: videos});
 });

@@ -161,7 +161,7 @@ middleware = {
 	},
 
 	//this is a function for managing auto-correcting strings for searches on the site
-	autoCorrect: function (query) {
+	autoCorrect: function (query, checkCaps=false, checkTitle=false) {
 		//this is the regex to filter for special characters
 		var regexp = /[^a-zA-Z ]/g;
 
@@ -185,11 +185,28 @@ middleware = {
 
 		//search through the array and autocorrect each word if need be
 		searcharray.forEach((item, index) => {
-			correctedarray.push(autocorrect(item));
+			if (checkCaps) {
+				correctedarray.push(autocorrect(item.toLowerCase()));
+			} else if (checkTitle) {
+				var titlecase = item.charAt(0).toUpperCase() + item.substr(1).toLowerCase();
+				if (titlecase == item) {
+					//autocorrect the actual word in lower case to prevent errors
+					autocorrectedTitle = autocorrect(item.toLowerCase());
+					//convert the word back into title case and put it back into the corrected array
+					autocorrectedTitle = autocorrectedTitle.charAt(0).toUpperCase() + autocorrectedTitle.substr(1).toLowerCase();
+					correctedarray.push(autocorrectedTitle);
+				} else {
+					correctedarray.push(item);
+				}
+			} else {
+				correctedarray.push(autocorrect(item));
+			}
 		});
 
 		//join the corrected array into a corrected string
 		var correctedstring = correctedarray.join(" ");
+
+		console.log("CORRECTED: " + correctedstring);
 
 		//place the special characters back into the array based on the index
 		matches.forEach((item, index) => {
@@ -200,6 +217,78 @@ middleware = {
 
 		//return the corrected query string with special characters included
 		return correctedstring;
+	},
+
+	//this is a function that selects videos from the database based on a given array of search terms
+	searchVideos: async (phrases, existingResults=[]) => {
+		//an array to store all of the video objects selected from the database
+		var results = [];
+		//get all of the videos from the database based on the list of phrases
+		for (var i=0; i<phrases.length; i++) {
+			//get all of the videos from the database with a title matching the current term
+			var result = await client.query(`SELECT * FROM videos WHERE title LIKE $1`, ["%" + phrases[i] + "%"]);
+			//check to see that the same video is not included in the results twice
+			result.rows.forEach((item, index) => {
+				//a boolean to check to see if the video has been added
+				var added = false;
+				//loop through the videos already in the results array and compare the two objects as strings
+				for (var j=0; j<results.length; j++) {
+					//if the video in the results and the video in the results array are the same, then the video has been added
+					if (JSON.stringify(results[j]) == JSON.stringify(item)) {
+						added = true;
+					}
+				}
+				//loop through the existing results and check if the videos have already been added in a previous function call
+				for (var j=0; j<existingResults.length; j++) {
+					//if the video in the existing results array contains the video being added currently, then it has already been added
+					//to the results
+					if (JSON.stringify(existingResults[j]) == JSON.stringify(item)) {
+						added = true;
+					}
+				}
+				//if the video has not been added, then add the video to the results
+				if (!added) {
+					results.push(item);
+				}
+			});
+		}
+		//return the results
+		return results;
+	},
+
+	//a function for getting a date string for showing the post date of videos, etc
+	getDate: function () {
+		//get the current time at the time of executing the function
+		var currenttime = new Date();
+
+		//get the minutes
+		var minutes = currenttime.getMinutes();
+
+		//get the hours
+		var hours = currenttime.getHours();
+
+		//get the day
+		var day = currenttime.getDate();
+
+		//get the month
+		var month = currenttime.getMonth()+1;
+
+		//get the year
+		var year = currenttime.getFullYear();
+
+		//bring all of the details into one date string, having each number seperated by dashes for splitting the string later on
+		var datestring = year.toString() + "-" + month.toString() + "-" + day.toString() + "-" + hours.toString() + "-" + minutes.toString();
+
+		//return the date string
+		return datestring;
+	},
+
+	//this is a function for getting the reccomendations for the videos according to the title and description of the video being viewed
+	getReccomendations: async function (video) {
+		var videos = await client.query(`SELECT * FROM videos WHERE id != $1`, [video.id]);
+		videos = videos.rows;
+
+		return videos;
 	}
 }
 

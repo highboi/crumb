@@ -3,10 +3,10 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="/main.css">
-		<title>Results For "<%= search.query %>"</title>
+		<title>Results For "<%= search.humanquery %>" - Crumb</title>
 	</head>
 	<body>
-		<object data="/banner.html" class="bannerObj"></object>
+		<%- include('content/banner.html') %>
 
 		<div class="messages">
 			<% if (typeof message != 'undefined') { %>
@@ -23,7 +23,13 @@
 
 			<%if (search.autocorrected == true) { %>
 				<p><q><%= search.humanquery %></q></p>
-				<p>Did you mean: <q><%= search.query %></q></p>
+				<% if (search.autocorrectedTitleCase) { %>
+					<p>Did you mean: <q><%= search.queryTitle %></q></p>
+				<% } else if (search.autocorrectedCaps) { %>
+					<p>Did you mean: <q><%= search.queryCaps %></q></p>
+				<% } else if (search.autocorrectedNormal) { %>
+					<p>Did you mean: <q><%= search.query %></q></p>
+				<% } %>
 			<% } %>
 		</div>
 
