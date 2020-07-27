@@ -45,11 +45,14 @@ middleware = {
 		//get the response from the database
 		var res = await client.query(`SELECT * FROM videos WHERE id=$1`, [newid]);
 
+		//get comment ids
+		var commentres = await client.query(`SELECT * FROM comments WHERE id=$1`, [newid]);
+
 		//if the database returned more than 0 rows, this means that a video
 		//with the generated id exists, meaning that the function must be
 		//executed again in order to generate a truly unique id
-		if (res.rows.length > 0) {
-			obj.generateAlphanumId();
+		if (res.rows.length > 0 || commentres.rows.length > 0) {
+			middleware.generateAlphanumId();
 		} else { //if a unique id has been found, return this id
 			console.log("Valid ID Found: " + newid.toString());
 			return newid;
@@ -277,7 +280,8 @@ middleware = {
 		var year = currenttime.getFullYear();
 
 		//bring all of the details into one date string, having each number seperated by dashes for splitting the string later on
-		var datestring = year.toString() + "-" + month.toString() + "-" + day.toString() + "-" + hours.toString() + "-" + minutes.toString();
+		var datestring = [year.toString(), month.toString(), day.toString(), hours.toString(), minutes.toString()];
+		datestring = datestring.join("-");
 
 		//return the date string
 		return datestring;
@@ -285,10 +289,21 @@ middleware = {
 
 	//this is a function for getting the reccomendations for the videos according to the title and description of the video being viewed
 	getReccomendations: async function (video) {
-		var videos = await client.query(`SELECT * FROM videos WHERE id != $1`, [video.id]);
-		videos = videos.rows;
+		//get a list of phrases to use in searching for results in the database
+		var phrases = middleware.getSearchTerms(video.title);
 
-		return videos;
+		//get the results of searching for the videos based on the list of phrases in the db
+		var vids = await middleware.searchVideos(phrases);
+
+		//eliminate the video from the list if the video being viewed is in the list
+		vids.forEach((item, index) => {
+			if (item.id == video.id) {
+				vids.splice(index, 1);
+			}
+		});
+
+		//return the videos
+		return vids;
 	}
 }
 

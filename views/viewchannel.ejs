@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<link rel="stylesheet" href="/main.css">
+		<%- include('content/html/head.html') %>
 		<title><%= creator.username %>'s Channel - Crumb</title>
 	</head>
 	<body>
-		<%- include('content/banner.html') %>
+		<%- include('content/html/banner.html') %>
 		<div class="channel">
 			<div class="channel-banner" style="background-image: url(<%= creator.channelbanner %>)">
 				<div id="channel-icon">

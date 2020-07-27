@@ -2,11 +2,11 @@
 
 <html>
 	<head>
-		<link rel="stylesheet" href="/main.css">
+		<%- include('content/html/head.html') %>
 		<title>Results For "<%= search.humanquery %>" - Crumb</title>
 	</head>
 	<body>
-		<%- include('content/banner.html') %>
+		<%- include('content/html/banner.html') %>
 
 		<div class="messages">
 			<% if (typeof message != 'undefined') { %>

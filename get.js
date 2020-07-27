@@ -83,18 +83,27 @@ app.get("/v/:videoid", async (req, res) => {
 	await client.query(`UPDATE videos SET views=$1 WHERE id=$2`, [newcount, req.params.videoid]); //update the views on the video
 
 	//get videos for the reccomendations
-	var videos = middleware.getReccomendations(video);
+	var videos = await middleware.getReccomendations(video);
 
 	//select the comments that belong to the video
 	var comments = await client.query(`SELECT * FROM comments WHERE videoid=$1 ORDER BY posttime DESC`, [req.params.videoid]);
 	comments = comments.rows;
 
+	//set the object to be passed to the rendering function
+	var viewobj = {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments};
+
 	//render the video view based on whether or not the user is logged in and has a session variable
 	if (req.session.user) {
-		res.render("viewvideo.ejs", {video: video, videos: videos, videocreator: videocreator, approx: approx, user: req.session.user, comments: comments});
-	} else {
-		res.render("viewvideo.ejs", {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments});
+		viewobj.user = req.session.user;
 	}
+
+	//check to see if the video needs to scroll down to a comment that was just posted
+	if (req.query.scrollToComment == "true" && typeof req.query.commentid != 'undefined') {
+		viewobj.scrollToComment = true;
+		viewobj.commentid = req.query.commentid;
+	}
+
+	res.render("viewvideo.ejs", viewobj);
 });
 
 //delete a video
@@ -136,14 +145,14 @@ app.get("/v/delete/:videoid", async (req, res) => {
 				res.redirect("/");
 			} else {
 				//get the reccomendations
-				var videos = middleware.getReccomendations(video);
+				var videos = await middleware.getReccomendations(video);
 
 				//render the view and let the user know that they are not authorized to do this action
 				res.render("viewvideo.ejs", {video: video, videos: videos, videocreator: videocreator, user: req.session.user, approx: approx, errors: [{message: "Not Authorized To Delete Video."}]});
 			}
 		} else {
 			//get the reccomendations
-			var videos = middleware.getReccomendations(video);
+			var videos = await middleware.getReccomendations(video);
 
 			//render the view and let the user know that they are not authorized to do this action
 			res.render("viewvideo.ejs", {video: video, videos: videos, videocreator: videocreator, user: req.session.user, approx: approx, errors: [{message: "Not Authorized To Delete Video."}]});
@@ -152,7 +161,7 @@ app.get("/v/delete/:videoid", async (req, res) => {
 });
 
 //get request for the like button
-app.get("/like/:videoid", middleware.checkSignedIn, async (req, res) => {
+app.get("/v/like/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//get the liked video from the database
 	var liked = await client.query(`SELECT * FROM liked WHERE userid=$1 AND videoid=$2`, [req.session.user.id, req.params.videoid]);
 
@@ -182,7 +191,7 @@ app.get("/like/:videoid", middleware.checkSignedIn, async (req, res) => {
 });
 
 //get request for the dislike button
-app.get("/dislike/:videoid", middleware.checkSignedIn, async (req, res) => {
+app.get("/v/dislike/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//get the disliked video from the database
 	var disliked = await client.query(`SELECT * FROM disliked WHERE userid=$1 AND videoid=$2`, [req.session.user.id, req.params.videoid]);
 
@@ -294,4 +303,46 @@ app.get("/search", async (req, res) => {
 	console.log("Search: " + search.humanquery);
 
 	res.render("searchresults.ejs", {search: search});
+});
+
+//a get request for liking a comment on the site
+app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) => {
+	//the comment to edit
+	var comment = await client.query(`SELECT * FROM comments WHERE id=$1`, [req.params.commentid]);
+	comment = comment.rows[0];
+
+	//change the number of likes
+	var likes = comment.likes;
+	var newcount = likes += 1;
+
+	//get the dislikes
+	var dislikes = comment.dislikes;
+
+	//insert the updated amount of likes into the database
+	await client.query(`UPDATE comments SET likes=$1 WHERE id=$2`, [newcount, req.params.commentid]);
+
+	//send the likes and dislikes
+	var data = [likes, dislikes];
+	res.send(data);
+});
+
+//a get request for disliking a comment on the site
+app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res) => {
+	//the comment to edit
+	var comment = await client.query(`SELECT * FROM comments WHERE id=$1`, [req.params.commentid]);
+	comment = comment.rows[0];
+
+	//change the number of dislikes
+	var dislikes = comment.dislikes;
+	var newcount = dislikes += 1;
+
+	//get the likes
+	var likes = comment.likes;
+
+	//insert the updated amount of dislikes
+	await client.query(`UPDATE comments SET dislikes=$1 WHERE id=$2`, [req.params.commentid]);
+
+	//send the likes and dislikes
+	var data = [likes, dislikes];
+	res.send(data);
 });

@@ -164,23 +164,14 @@ app.post("/v/submit", (req, res) => {
 
 //post request for commenting on videos
 app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
-	//get the video so that it can be rendered
-	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
-	video = video.rows[0];
-
-	//get the creator of the video
-	var videocreator = JSON.parse(video.creator);
+	//get a unique comment id
+	var commentid = await middleware.generateAlphanumId();
 
 	//put the comment into the database
-	await client.query(`INSERT INTO comments (username, userid, comment, videoid, posttime) VALUES ($1, $2, $3, $4, $5)`, [req.session.user.username, req.session.user.id, req.body.commenttext, req.params.videoid, middleware.getDate()]);
+	await client.query(`INSERT INTO comments (id, username, userid, comment, videoid, posttime, likes, dislikes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [commentid, req.session.user.username, req.session.user.id, req.body.commenttext, req.params.videoid, middleware.getDate(), 0, 0]);
 
-	//select all of the comments belonging to the video (in order by newest to oldest)
-	var comments = await client.query(`SELECT * FROM comments WHERE videoid=$1 ORDER BY posttime DESC`, [req.params.videoid]);
-	comments = comments.rows;
-
-	//get videos for the reccomended
-	var videos = middleware.getReccomendations(video);
-
-	//render the video view with the updated list of comments
-	res.render('viewvideo.ejs', {video: video, comments: comments, user: req.session.user, approx: approx, videocreator: videocreator, videos: videos});
+	//redirect to the same view url (the back end will show an updated list of comments)
+	//pass a query parameter to let the middleware for this path to know to scroll down to the new comment
+	res.redirect(`/v/${req.params.videoid}/?scrollToComment=true&commentid=${commentid}`);
 });
+

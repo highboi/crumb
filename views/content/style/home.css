@@ -1,0 +1,41 @@
+/*
+STYLESHEET FOR THE LANDING PAGE OF THE SITE
+*/
+
+
+/*
+THE VIDEOS IN THE HOMEPAGE
+*/
+
+.home-videos {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.home-videos .video {
+	padding-right: 0.5vw;
+	padding-left: 0.5vw;
+}
+
+.home-videos .video .thumbnail {
+	vertical-align: top;
+}
+
+.home-videos .video .links {
+	font-size: 1rem;
+}
+
+.home-videos .video .links #channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.home-videos .video .links #channel-links #channel-icon {
+	width: 3vw;
+	height: 3vw
+}
+
+.home-videos .video .links #channel-links #channel-icon {
+	border-radius: 50px;
+}
+

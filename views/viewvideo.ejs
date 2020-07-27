@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<link rel="stylesheet" href="/main.css">
+		<%- include('content/html/head.html') %>
 		<title><%= video.title %> - Crumb</title>
 	</head>
 	<body>
-		<%- include('content/banner.html') %>
+		<%- include('content/html/banner.html') %>
 
 		<div class="messages">
 			<% if (typeof message != 'undefined') { %>
@@ -24,6 +24,7 @@
 		<div class="container">
 			<div class="video-contents">
 				<div class="video-container">
+					<div id="loading"></div>
 					<video poster="<%= video.thumbnail %>" id="video">
 						<source src="<%= video.video %>" type="video/mp4">
 						<source src="<%= video.video %>" type="video/ogg">
@@ -31,12 +32,12 @@
 						<h1>YOUR BROWSER DOES NOT SUPPORT HTML VIDEOS</h1>
 					</video>
 					<div class="video-controls">
-						<button id="playBtn"><img src="/play.ico"></button>
+						<button id="playBtn"><img src="/icons/play.ico"></button>
 						<input id="seeker" type="range" min="0" max="100" value="0" step="1" oninput="vidSeek()">
 						<p id="videotime"></p>
-						<button id="muteBtn"><img src="/sound.ico"></button>
+						<button id="muteBtn"><img src="/icons/sound.ico"></button>
 						<input id="volumeslider" type="range" min="0" max="100" step="1" oninput="changeVolume()">
-						<button id="fullscreenBtn"><img src="/fullscreen.ico"></button>
+						<button id="fullscreenBtn"><img src="/icons/fullscreen.ico"></button>
 					</div>
 				</div>
 
@@ -58,17 +59,16 @@
 						<div class="video-buttons">
 							<button id="subscribebutton" onclick="subscribe();">Subscribe</button>
 							<div class="likesection">
-								<button class="likebuttons" onclick="likeVideo()"><img src="/like.ico"></button>
+								<button class="likebuttons" onclick="likeVideo()"><img src="/icons/like.ico"></button>
 								<p id="likes"><%= video.likes %></p>
-								<button class="likebuttons" onclick="dislikeVideo()"><img src="/dislike.ico"></button>
+								<button class="likebuttons" onclick="dislikeVideo()"><img src="/icons/dislike.ico"></button>
 								<p id="dislikes"><%= video.dislikes %></p>
 							</div>
 						</div>
 					</div>
 					<hr>
-					<p><%= approx(video.views) %> Views</p>
 					<% var datestring = video.posttime.split("-"); %>
-					<p>Posted: <%= datestring[1] + "-" + datestring[2] + "-" + datestring[0] %></p>
+					<p><%= approx(video.views) %> Views | Posted: <%= datestring[1] + "-" + datestring[2] + "-" + datestring[0] %></p>
 					<hr>
 					<div class="description">
 						<% if (video.description.length > 100) { %>
@@ -92,41 +92,56 @@
 					<% if (video.user_id == user.id) { %>
 						<% var deletelink = `/v/delete/${video.id}` %>
 						<button><a href="<%= deletelink %>">Delete Video</a></button>
+						<hr>
 					<% } %>
 				<% } %>
+
+				<div class="comments">
+					<h2>Comments:</h2>
+					<div id="commentform">
+						<% var commentlink = `/comment/${video.id}`; %>
+						<form action="<%= commentlink %>" method="post">
+							<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br>
+							<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
+						</form>
+					</div>
+					<div id="theComments">
+						<% if (typeof comments != 'undefined') { %>
+							<% comments.forEach((item, index) => { %>
+								<hr>
+								<div id="<%= item.id %>">
+									<h3>&nbsp<%= item.username %></h3>
+									<p>&nbsp;&nbsp<%= item.comment %></p>
+									<div class="commentlikes" id="<%= item.id %>">
+										&nbsp
+										<button onclick="likeComment(\'' + <%= item.id %> + '\')"><img src="/icons/like.ico"></button>
+										<p id="<%= item.id %>likes"><%= item.likes %></p>
+										<button onclick="dislikeComment(\'' + <%= item.id %> + '\')"><img src="/icons/dislike.ico"></button>
+										<p id="<%= item.id %>dislikes"><%= item.dislikes %></p>
+									</div>
+								</div>
+								<hr>
+							<% }); %>
+						<% } %>
+					</div>
+				</div>
 			</div>
 
 
 			<div class="reccomendations">
-				<% for (var i=0; i < videos.length; i++) { %>
-					<div class="links">
-						<a href="/v/<%= videos[i].id %>">
-							<img src="<%= videos[i].thumbnail %>" width="600px" height="500px">
-						</a>
-						<a href="/v/<%= videos[i].id %>">
-							<h2><strong>&nbsp;&nbsp<%= videos[i].title %></strong></h2>
-						</a>
-						<p>&nbsp;&nbsp<%= videos[i].description.substr(0, 14) %>...</p>
-					</div>
-				<% } %>
-			</div>
-
-			<div class="comments">
-				<div id="commentform">
-					<% var commentlink = `/comment/${video.id}`; %>
-					<form action="<%= commentlink %>" method="post">
-						<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000"></textarea>
-						<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
-					</form>
-				</div>
-				<div id="theComments">
-					<% if (typeof comments != 'undefined') { %>
-						<% comments.forEach((item, index) => { %>
-							<h3><%= item.username %></h3>
-							<p><%= item.comment %></p>
-						<% }); %>
+				<% if (typeof videos != 'undefined') { %>
+					<% for (var i=0; i < videos.length; i++) { %>
+						<div class="links">
+							<a href="/v/<%= videos[i].id %>">
+								<img src="<%= videos[i].thumbnail %>" width="600px" height="500px">
+							</a>
+							<a href="/v/<%= videos[i].id %>">
+								<h2><strong>&nbsp;&nbsp<%= videos[i].title %></strong></h2>
+							</a>
+							<p>&nbsp;&nbsp<%= videos[i].description.substr(0, 14) %>...</p>
+						</div>
 					<% } %>
-				</div>
+				<% } %>
 			</div>
 		</div>
 
@@ -150,9 +165,18 @@
 
 		<script type="text/javascript">
 			var videovar = <%- JSON.stringify(video) %>;
+			<% if (typeof commentid != 'undefined') { %>
+				var commentid = <%- JSON.stringify(commentid) %>;
+				var commentElement = document.getElementById(commentid);
+				commentElement.scrollIntoView();
+				commentElement.style.backgroundColor = "#1a1a1a";
+				commentElement.style.borderStyle = "solid";
+				commentElement.style.borderWidth = "5px";
+				commentElement.style.borderColor = "#adff12";
+			<% } %>
 		</script>
 
-		<script src="/videocontroller.js"></script>
+		<script src="/javascript/videocontroller.js"></script>
 		<script src="/javascript/likedislike.js"></script>
 		<script src="/javascript/subscribe.js"></script>
 	</body>

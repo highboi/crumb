@@ -2,7 +2,7 @@
 
 
 //make global variables to be accessed in all functions
-var video, playBtn, seeker, videotime, volumeslider, fullscreenBtn, muteBtn, videoContainer;
+var video, playBtn, seeker, videotime, volumeslider, fullscreenBtn, muteBtn, videoContainer, loading;
 var totalduration, isFullScreen = false;
 
 function initializePlayer() {
@@ -15,11 +15,14 @@ function initializePlayer() {
 	volumeslider = document.getElementById("volumeslider");
 	fullscreenBtn = document.getElementById("fullscreenBtn");
 	muteBtn = document.getElementById("muteBtn");
+	loading = document.getElementById("loading");
 
 	//add event listeners to the elements such that the elements have functionality related to the video
 	playBtn.addEventListener("click", playPause, false);
 	video.addEventListener("timeupdate", seektimeupdate, false);
 	video.addEventListener("click", playPauseSpace, false);
+	video.addEventListener("waiting", loadingWheel, false);
+	video.addEventListener("canplay", stopLoading, false);
 	fullscreenBtn.addEventListener("click", getFullScreen, false);
 	muteBtn.addEventListener("click", toggleMute, false);
 
@@ -46,10 +49,10 @@ function playPause() {
 	playBtnImg = playBtn.getElementsByTagName("img")[0];
 	if (video.paused) {
 		video.play();
-		playBtnImg.src = "http://localhost/pause.ico";
+		playBtnImg.src = "http://localhost/icons/pause.ico";
 	} else {
 		video.pause();
-		playBtnImg.src = "http://localhost/play.ico";
+		playBtnImg.src = "http://localhost/icons/play.ico";
 	}
 }
 
@@ -86,9 +89,9 @@ function changeVolume() {
 
 	//check to see if the user used the seeker bar to mute the video and change the image
 	if (video.volume == 0) {
-		muteImg.src = "http://localhost/mute.ico";
+		muteImg.src = "http://localhost/icons/mute.ico";
 	} else if (video.volume > 0) {
-		muteImg.src = "http://localhost/sound.ico";
+		muteImg.src = "http://localhost/icons/sound.ico";
 	}
 }
 
@@ -122,14 +125,14 @@ function getFullScreen() {
 //this is a function that toggles the mute button
 function toggleMute() {
 	var muteImg = muteBtn.getElementsByTagName("img")[0];
-	if (muteImg.src == "http://localhost/sound.ico") {
+	if (muteImg.src == "http://localhost/icons/sound.ico") {
 		volumeslider.value = 0;
 		video.volume = 0;
-		muteImg.src = "http://localhost/mute.ico";
-	} else if (muteImg.src == "http://localhost/mute.ico") {
+		muteImg.src = "http://localhost/icons/mute.ico";
+	} else if (muteImg.src == "http://localhost/icons/mute.ico") {
 		volumeslider.value = 100;
 		video.volume = 1;
-		muteImg.src = "http://localhost/sound.ico";
+		muteImg.src = "http://localhost/icons/sound.ico";
 	}
 }
 
@@ -172,4 +175,29 @@ function findTime(time) {
 
 	//return the time string
 	return finaltime;
+}
+
+//this is a function to show a loading wheel in the video whenever it is buffering
+function loadingWheel() {
+	//the gif source
+	var loadinggif = "https://media.giphy.com/media/131tNuGktpXGhy/giphy.gif"
+	//show the gif
+	loading.innerHTML = `<img src=${loadinggif}>`;
+	//store the image element
+	var imgElement = loading.getElementsByTagName("img")[0];
+	//set the width and height appropriately
+	imgElement.style.width = (video.offsetWidth/2).toString() + "px";
+	imgElement.style.height = (video.offsetHeight/2).toString() + "px";
+	//position the div on top of the video (overlay)
+	loading.style.display = "flex";
+	loading.style.position = "absolute";
+	loading.style.alignItems = "center";
+	//center the loading gif
+	loading.style.paddingTop = ((video.offsetHeight/2)-(imgElement.offsetHeight/2)).toString() + "px";
+	loading.style.paddingLeft = ((video.offsetWidth/2)-(imgElement.offsetWidth/2)).toString() + "px";
+}
+
+//stops the loading wheel whenever the video can finally play
+function stopLoading() {
+	loading.innerHTML = "";
 }

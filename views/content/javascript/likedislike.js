@@ -5,9 +5,13 @@ var xhttp = new XMLHttpRequest();
 var likeCount = document.getElementById("likes");
 var dislikeCount = document.getElementById("dislikes");
 
+//variables to store the comment likes and dislikes for specific ids
+var commentLikes;
+var commentDislikes;
+
 //this is a function that makes a get request to the server so that the server can increase the amount of likes on the video in the database
 //this function also changes the inner html of the element containing the number of likes and dislikes on the video
-function getPath(path) {
+function getPath(path, likeElement, dislikeElement) {
 	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) { //if the response is an updated amount of likes
 			//get the data from the response
@@ -21,8 +25,8 @@ function getPath(path) {
 
 			//check for what to do with the data
 			if (Array.isArray(data) && data.length == 2) { //if the response is an array, then the amount of likes will be updated
-				likeCount.innerHTML = data[0];
-				dislikeCount.innerHTML = data[1];
+				likeElement.innerHTML = data[0];
+				dislikeElement.innerHTML = data[1];
 			} else { // if the data is not an array, then it is the ejs file trying to render, so redirect to the login page
 				window.location.href = "http://localhost/login";
 				console.log(this.responseText);
@@ -33,27 +37,48 @@ function getPath(path) {
 	xhttp.send();
 }
 
-/*
-functions to like and dislike the video
-*/
+//functions to like and dislike the video
 
 function likeVideo() {
 	//get the like url
-	doLike();
+	doLike(true, false, videovar.id);
 }
 
 function dislikeVideo() {
 	//get the dislike url
-	doDislike();
+	doDislike(true, false, videovar.id);
+}
+
+//functions for liking and disliking comments
+function likeComment(commentid) {
+	doLike(false, true, commentid);
+	commentLikes = document.getElementById(commentid+"likes");
+	commentdislikes = document.getElementById(commentid+"dislikes");
+}
+
+function dislikeComment(commentid) {
+	doDislike(false, true, commentid);
+	commentlikes = document.getElementById(commentid+"likes");
+	commentdislikes = document.getElementById(commentid+"dislikes");
 }
 
 //functions to handle likes/dislikes on videos
-function doLike() {
-	var likepath = `/like/${videovar.id}`;
-	getPath(likepath);
+function doLike(video, comment, id) {
+	if (video) {
+		var likepath = `/v/like/${id}`;
+		getPath(likepath, likeCount, dislikeCount);
+	} else if (comment) {
+		var likepath = `/comment/like/${id}`;
+		getPath(likepath, commentlikes, commentdislikes);
+	}
 }
 
-function doDislike() {
-	var dislikepath = `/dislike/${videovar.id}`;
-	getPath(dislikepath);
+function doDislike(video, comment) {
+	if (video) {
+		var dislikepath = `/v/dislike/${id}`;
+		getPath(dislikepath, likeCount, dislikeCount);
+	} else if (comment) {
+		var dislikepath = `/comment/like/${id}`;
+		getPath(dislikepath, commentlikes, commentdislikes);
+	}
 }

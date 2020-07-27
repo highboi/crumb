@@ -1,0 +1,126 @@
+/*
+STYLESHEET FOR MISC OR GENERAL STYLING
+*/
+
+
+/*
+GLOBAL ACCESS OF TAGS
+*/
+body {
+	/*
+	min-width: 600px;
+	min-height: 500px;
+	*/
+	background-color: #3f3f3f;
+	color: #adff12;
+	font-family: Charcoal, monospace, sans-serif;
+	font-smooth: never;
+}
+
+a {
+	color: #adff12;
+	text-decoration: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a img:hover {
+	opacity: 0.5;
+}
+
+button {
+	background-color: #3f3f3f;
+}
+
+
+/*
+MISC STYLING
+*/
+
+.underlinelinks {
+	text-decoration: underline;
+}
+
+.authfileinput h4 {
+	margin: 3px;
+}
+
+.hardtoseetext {
+	color: black;
+	text-shadow: 1px 1px 0 #adff12, -1px -1px 0 #adff12, 1px -1px 0 #adff12, -1px 1px 0 #adff12;
+}
+
+
+/*
+STYLING FOR FORMS
+*/
+
+.authform input[type="text"] {
+	width: 250px;
+}
+
+.authform input[type="email"] {
+	width: 250px;
+}
+
+.authform input[type="password"] {
+	width: 250px;
+}
+
+
+/*
+THE SITE BANNER AT THE TOP OF EACH PAGE
+*/
+
+.banner {
+	background-color: #adff12;
+}
+
+.banner #banner-text {
+	display: inline-block;
+}
+
+.banner #banner-text a {
+	color: #2f2f2f;
+}
+
+.banner #banner-icon{
+	display: inline-block;
+	vertical-align: top;
+}
+
+.banner #searchbar {
+	display: inline-block;
+	margin: auto;
+}
+
+.banner #searchbar button {
+	width: 45px;
+	height: 45px;
+	background-color: #7dff12;
+	border-color: black;
+	border-width: 4px;
+}
+
+.banner #settings {
+	display: inline-block;
+}
+
+.banner #settings #dropbtn {
+	width: 45px;
+	height: 45px;
+	display: inline-block;
+}
+
+.banner #settings #dropdown-content {
+	display: none;
+}
+
+.banner #settings:hover #dropdown-content {
+	background-color: #ddd;
+	color: black;
+	display: block;
+}
