@@ -7,19 +7,7 @@
 	<body>
 		<%- include('content/html/banner.html') %>
 
-		<div class="messages">
-			<% if (typeof message != 'undefined') { %>
-				<p><%= message %></p>
-			<% } %>
-
-			<ul>
-				<% if (typeof errors != 'undefined') { %>
-					<% errors.forEach((item, index) => { %>
-						<li><%= item.message %></li>
-					<% }); %>
-				<% } %>
-			</ul>
-		</div>
+		<%- include('content/html/body.html') %>
 
 		<div class="container">
 			<div class="video-contents">
@@ -31,6 +19,9 @@
 						<source src="<%= video.video %>" type="video/webm">
 						<h1>YOUR BROWSER DOES NOT SUPPORT HTML VIDEOS</h1>
 					</video>
+					<div class="fullscreen-text">
+						<h1 id="TitleFullscreen"><%= video.title %></h1>
+					</div>
 					<div class="video-controls">
 						<button id="playBtn"><img src="/icons/play.ico"></button>
 						<input id="seeker" type="range" min="0" max="100" value="0" step="1" oninput="vidSeek()">
@@ -43,6 +34,15 @@
 
 				<div class="videotext">
 					<h1 id="title"><%= video.title %></h1>
+					<% if (typeof video.topics != 'object') { %>
+						<hr>
+						<p>
+						<% var topicsarray = video.topics.split(","); %>
+						<% topicsarray.forEach((item, index) => { %>
+							<%= item %> 
+						<% }); %>
+						</p>
+					<% } %>
 					<hr>
 					<div class="channel-details">
 						<% var channellink = `/u/${videocreator.id}` %>
@@ -57,7 +57,18 @@
 							</a>
 						</div>
 						<div class="video-buttons">
-							<button id="subscribebutton" onclick="subscribe();">Subscribe</button>
+							<div class="subscribe-section">
+								<% if (typeof subscribed != 'undefined') { %>
+									<% if (subscribed != 0) { %>
+										<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribed</button>
+									<% } else { %>
+										<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribe</button>
+									<% } %>
+								<% } else { %>
+									<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribe</button>
+								<% } %>
+								<p><%= videocreator.subscribers %></p>
+							</div>
 							<div class="likesection">
 								<button class="likebuttons" onclick="likeVideo()"><img src="/icons/like.ico"></button>
 								<p id="likes"><%= video.likes %></p>
@@ -108,27 +119,52 @@
 					<div id="theComments">
 						<% if (typeof comments != 'undefined') { %>
 							<% comments.forEach((item, index) => { %>
-								<hr>
-								<div id="<%= item.id %>">
-									<h3>&nbsp<%= item.username %></h3>
-									<p>&nbsp;&nbsp<%= item.comment %></p>
-									<div class="commentlikes" id="<%= item.id %>">
-										&nbsp
-										<button onclick="likeComment(\'' + <%= item.id %> + '\')"><img src="/icons/like.ico"></button>
-										<p id="<%= item.id %>likes"><%= item.likes %></p>
-										<button onclick="dislikeComment(\'' + <%= item.id %> + '\')"><img src="/icons/dislike.ico"></button>
-										<p id="<%= item.id %>dislikes"><%= item.dislikes %></p>
+								<% if (!item.parent_id) { %>
+									<hr>
+									<div id="<%= item.id %>">
+										<h3>&nbsp<%= item.username %></h3>
+										<p>&nbsp;&nbsp<%= item.comment %></p>
+										<div class="commentlikes" id="<%= item.id %>">
+											&nbsp
+											<button id="commentLike" onclick="likeComment('<%= item.id %>')"><img src="/icons/like.ico"></button>
+											<p id="<%= item.id %>likes"><%= item.likes %></p>
+											<button id="commentDislike" onclick="dislikeComment('<%= item.id %>')"><img src="/icons/dislike.ico"></button>
+											<p id="<%= item.id %>dislikes"><%= item.dislikes %></p>
+											<button id="replybtn" onclick='showbox(&quot;<%= item.id %>replybox&quot;)'>Reply</button>
+											<button id="showreplies" onclick='showbox(&quot;replies&quot;)'>Replies</button>
+										</div>
+										<div class="replybox" id="<%= item.id %>replybox">
+											<% var replylink = commentlink + `?parent_id=${item.id}`; %>
+											<form action="<%= replylink %>" method="post">
+												<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br>
+												<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
+												<input type="button" onclick='showbox(&quot;<%= item.id %>replybox&quot;)' value="Cancel">
+											</form>
+										</div>
+										<div class="replies" id="replies">
+											<% var replies = comments.filter((obj) => obj.parent_id == item.id); %>
+											<% replies.forEach((item, index) => { %>
+												<h3>&nbsp;&nbsp<%= item.username %></h3>
+												<p>&nbsp;&nbsp;&nbsp<%= item.comment %></p>
+												<div class="commentlikes" id="<%= item.id %>">
+													&nbsp;&nbsp
+													<button id="commentLike" onclick="likeComment('<%= item.id %>')"><img src="/icons/like.ico"></button>
+													<p id="<%= item.id %>likes"><%= item.likes %></p>
+													<button id="commentDislike" onclick="dislikeComment('<%= item.id %>')"><img src="/icons/dislike.ico"></button>
+													<p id="<%= item.id %>dislikes"><%= item.dislikes %></p>
+												</div>
+											<% }); %>
+										</div>
 									</div>
-								</div>
-								<hr>
+									<hr>
+								<% } %>
 							<% }); %>
 						<% } %>
 					</div>
 				</div>
 			</div>
-
-
 			<div class="reccomendations">
+				<h2>&nbspUp Next</h2>
 				<% if (typeof videos != 'undefined') { %>
 					<% for (var i=0; i < videos.length; i++) { %>
 						<div class="links">
@@ -165,6 +201,9 @@
 
 		<script type="text/javascript">
 			var videovar = <%- JSON.stringify(video) %>;
+			<% if (typeof videos[0] != 'undefined') { %>
+				var nextvideo = <%- JSON.stringify(videos[0]) %>;
+			<% } %>
 			<% if (typeof commentid != 'undefined') { %>
 				var commentid = <%- JSON.stringify(commentid) %>;
 				var commentElement = document.getElementById(commentid);
@@ -179,5 +218,6 @@
 		<script src="/javascript/videocontroller.js"></script>
 		<script src="/javascript/likedislike.js"></script>
 		<script src="/javascript/subscribe.js"></script>
+		<script src="/javascript/replycomment.js"></script>
 	</body>
 </html>

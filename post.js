@@ -8,6 +8,7 @@ const approx = require("approximate-number");
 
 const { app, client, middleware, PORT } = require("./configBasic");
 
+//handle the user registrations
 app.post('/register', (req, res) => {
 	var form = new formidable.IncomingForm();
 
@@ -66,7 +67,8 @@ app.post('/register', (req, res) => {
 					return res.render("register.ejs", {message: "Username Already Taken, Please Try Again."});
 				}
 			} else { //if the user is a new user, then register them
-				var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, username, email, password, channelicon, channelbanner`, [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath]);
+				var valuesarr = [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath, fields.channeldesc, fields.topics];
+				var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, username, email, password, channelicon, channelbanner`, valuesarr);
 				newuser = newuser.rows[0];
 				console.log("Registered User.");
 				//store the user in the session
@@ -102,6 +104,10 @@ app.post("/login", async (req, res) => {
 		if (typeof user != 'undefined') { //if the user exists, then log them in
 			var match = await bcrypt.compare(req.body.password, user.password); //compare the password entered with the password in the db
 			if (match) { //if the password is a match, log the user in
+				//get the list of the channels that the user is subscribed to
+				var subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [user.id]);
+				//store the values of the objects inside the rows array into one array of values into the user session variable
+				user.subscribedChannels = subscribedChannels.rows.map(({channel_id}) => channel_id);
 				//store the user in the current session
 				req.session.user = user;
 				//messages to let the server and the client know that a user logged in
@@ -150,8 +156,15 @@ app.post("/v/submit", (req, res) => {
 			//generate a unique video id for each video (await the result of this function)
 			var videoid = await middleware.generateAlphanumId();
 
+			//turn the list of topics into an array to be parsed
+			var topics = fields.topics.split(" ");
+			topics = topics.toString();
+
+			//the array to contain the values to insert into the db
+			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, req.session.user.id, 0, middleware.getDate(), topics, req.session.user.username, req.session.user.channelicon];
+
 			//load the video into the database
-			var id = await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, creator, user_id, views, posttime) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`, [videoid, fields.title, fields.description, thumbnailpath, videopath, req.session.user, req.session.user.id, 0, middleware.getDate()]);
+			var id = await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`, valuesArr);
 			var videourl = `/v/${id.rows[0].id}`; //get the url to redirect to now that the video has been created
 			res.redirect(videourl); //redirect to the url
 		} else if (!(thumbext in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
@@ -167,11 +180,20 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//get a unique comment id
 	var commentid = await middleware.generateAlphanumId();
 
-	//put the comment into the database
-	await client.query(`INSERT INTO comments (id, username, userid, comment, videoid, posttime, likes, dislikes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [commentid, req.session.user.username, req.session.user.id, req.body.commenttext, req.params.videoid, middleware.getDate(), 0, 0]);
+	//an array of values to insert into the database
+	var valuesarr = [commentid, req.session.user.username, req.session.user.id, req.body.commenttext, req.params.videoid, middleware.getDate(), 0, 0];
+
+	//check to see if the comment belongs to a thread of some sort
+	if (typeof req.query.parent_id != 'undefined') {
+		//add the comment to the database with the parent id
+		valuesarr.push(req.query.parent_id.toString());
+		await client.query(`INSERT INTO comments (id, username, userid, comment, videoid, posttime, likes, dislikes, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, valuesarr);
+	} else {
+		//add the comment to the database
+		await client.query(`INSERT INTO comments (id, username, userid, comment, videoid, posttime, likes, dislikes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, valuesarr);
+	}
 
 	//redirect to the same view url (the back end will show an updated list of comments)
 	//pass a query parameter to let the middleware for this path to know to scroll down to the new comment
 	res.redirect(`/v/${req.params.videoid}/?scrollToComment=true&commentid=${commentid}`);
 });
-

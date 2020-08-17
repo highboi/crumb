@@ -1,6 +1,5 @@
 //this is a js file to store functions to interact with the video player
 
-
 //make global variables to be accessed in all functions
 var video, playBtn, seeker, videotime, volumeslider, fullscreenBtn, muteBtn, videoContainer, loading;
 var totalduration, isFullScreen = false;
@@ -23,6 +22,7 @@ function initializePlayer() {
 	video.addEventListener("click", playPauseSpace, false);
 	video.addEventListener("waiting", loadingWheel, false);
 	video.addEventListener("canplay", stopLoading, false);
+	video.addEventListener("ended", nextVideo, false);
 	fullscreenBtn.addEventListener("click", getFullScreen, false);
 	muteBtn.addEventListener("click", toggleMute, false);
 
@@ -200,4 +200,16 @@ function loadingWheel() {
 //stops the loading wheel whenever the video can finally play
 function stopLoading() {
 	loading.innerHTML = "";
+}
+
+//this is a function to sleep for a number of milliseconds
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+//this is a function to go to the next video
+async function nextVideo() {
+	await sleep(5000);
+	loadingWheel();
+	window.location.href = `/v/${nextvideo.id}`;
 }

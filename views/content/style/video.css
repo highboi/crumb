@@ -56,38 +56,36 @@ STYLE VIDEO TEXT
 }
 
 .container .video-contents .videotext .channel-details {
-	padding-bottom: 5%;
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+	padding: 1%;
 }
 
 .container .video-contents .videotext .channel-details #icon {
 	display: inline-block;
-	vertical-align: top;
-	padding-top: 5%;
 }
 
 .container .video-contents .videotext .channel-details #icon img {
-	width: 5rem;
-	height: 5rem;
+	width: 100%;
+	height: 100%;
 	border-radius: 50px;
+	text-align: center;
+	margin: auto;
 }
 
 .container .video-contents .videotext .channel-details #channel-text {
 	display: inline-block;
-	padding-top: 5%;
+	font-size: 1vw;
 }
 
 .container .video-contents .videotext .channel-details .video-buttons {
-	display: inline-block;
-	padding-top: 5%;
-	float: right;
-}
-
-.container .video-contents .videotext .channel-details .video-buttons .likesection {
+	margin-left: auto;
 }
 
 .container .video-contents .videotext .channel-details .video-buttons #subscribebutton {
-	width: 8rem;
-	height: 2.5rem;
+	width: 100%;
+	height: 100%;
 	font-size: 20px;
 	color: #adff12;
 	border: 2px solid #adff12;
@@ -100,13 +98,16 @@ STYLE VIDEO TEXT
 }
 
 .container .video-contents .videotext .channel-details .video-buttons .likesection .likebuttons {
-	width: 2.5rem;
-	height: 2.5rem;
-	font-size: 20px;
+	width: 3vw;
+	height: 3vw;
 	color: #adff12;
 	border: 2px solid #adff12;
 	background-color: #adff12;
 	vertical-align: text-top;
+}
+
+.container .video-contents .videotext .channel-details .video-buttons .likesection {
+	font-size: 1vw;
 }
 
 .container .video-contents .videotext #title {
@@ -149,14 +150,28 @@ VIDEO CONTROLS
 .container .video-contents .video-container .video-controls {
 	display: flex;
 	align-items: center;
-	width: 90%;
+	width: 60vw;
 	position: absolute;
 	bottom: 10px;
-	left: 10px;
-	right: 10px;
-	padding: 5px;
 	opacity: 0;
 	transition: opacity .3s;
+	margin: 0px 2vw 0px 2vw;
+}
+
+.container .video-contents .video-container:not(:fullscreen) .fullscreen-text {
+	display: none;
+}
+
+.container .video-contents .video-container:fullscreen .fullscreen-text {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	bottom: 90%;
+	padding: 5%;
+	opacity: 0;
 	margin: 0px auto;
 }
 
@@ -164,17 +179,29 @@ VIDEO CONTROLS
 	opacity: 0.9;
 }
 
+.container .video-contents .video-container:hover .fullscreen-text {
+	opacity: 0.9;
+}
+
 .container .video-contents .video-container .video-controls button {
 	cursor: pointer;
-	width: 50px;
-	height: 50px;
 	padding: 10px 10px 10px 10px;
 	background: #adff12;
 	border-radius: 50%;
 }
 
+.container .video-contents .video-container .video-controls button {
+	width: auto;
+	height: 50px;
+}
+
+.container .video-contents .video-container .video-controls img {
+	width: auto;
+	height: 50px;
+}
+
 .container .video-contents .video-container .video-controls #seeker {
-	width: 50%;
+	width: 40%;
 }
 
 .container .video-contents .video-container .video-controls #volumeslider {
@@ -182,7 +209,7 @@ VIDEO CONTROLS
 }
 
 .container .video-contents .video-container .video-controls #videotime {
-	font-size: 3.5ch;
+	font-size: 2vw;
 	color: black;
 	text-shadow: 1px 1px 0 #adff12, -1px -1px 0 #adff12, 1px -1px 0 #adff12, -1px 1px 0 #adff12;
 }
@@ -194,6 +221,8 @@ VIDEO CONTROLS
 .container .video-contents .video-container:fullscreen .video-controls {
 	position: absolute;
 	width: 100%;
+	margin: 0px auto;
+	padding: 20px;
 }
 
 .container .video-contents .video-container:fullscreen button {
@@ -242,6 +271,41 @@ COMMENTS SECTION
 	vertical-align: text-top;
 }
 
+.container .comments #theComments .commentlikes #replybtn {
+	width: 5rem;
+	height: 2.5rem;
+	border-width: 4px;
+	border-color: black;
+}
+
+
+.container .comments #theComments .commentlikes #showreplies {
+	width: 5rem;
+	height: 2.5rem;
+	border-width: 4px;
+	border-color: black;
+}
+
+.container .comments #theComments .replybox {
+	display: none;
+}
+
+.container .comments #theComments .replybox button {
+	width: 5rem;
+	height: 2.5rem;
+	background-color: #adff12;
+}
+
+.container .comments #theComments .replybox input[type="button"] {
+	width: 5rem;
+	height: 2.5rem;
+	background-color: #adff12;
+}
+
+.container .comments #theComments .replies {
+	display: none;
+}
+
 /*
 RECCOMENDATIONS WHILE VIEWING VIDEOS
 */
@@ -268,4 +332,15 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 
 .container .reccomendations .links a {
 	text-decoration: none;
+}
+
+/**/
+@media all and (max-width: 1500px) {
+	.container .video-contents .video-container {
+		width: 100vw;
+	}
+
+	.container .video-contents .video-container #video {
+		width: 100vw;
+	}
 }

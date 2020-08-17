@@ -1,0 +1,28 @@
+.playlist-videos {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.playlist-videos .video {
+	padding-right: 0.5vw;
+	padding-left: 0.5vw;
+}
+
+.playlist-videos .video .thumbnail {
+	vertical-align: top;
+}
+
+.playlist-videos .video .links {
+	font-size: 15px;
+}
+
+.playlist-videos .video .links #channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.playlist-videos .video .links #channel-links #channel-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+}

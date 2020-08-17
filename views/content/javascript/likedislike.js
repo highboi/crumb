@@ -29,7 +29,6 @@ function getPath(path, likeElement, dislikeElement) {
 				dislikeElement.innerHTML = data[1];
 			} else { // if the data is not an array, then it is the ejs file trying to render, so redirect to the login page
 				window.location.href = "http://localhost/login";
-				console.log(this.responseText);
 			}
 		}
 	};
@@ -51,15 +50,15 @@ function dislikeVideo() {
 
 //functions for liking and disliking comments
 function likeComment(commentid) {
-	doLike(false, true, commentid);
 	commentLikes = document.getElementById(commentid+"likes");
-	commentdislikes = document.getElementById(commentid+"dislikes");
+	commentDislikes = document.getElementById(commentid+"dislikes");
+	doLike(false, true, commentid);
 }
 
 function dislikeComment(commentid) {
+	commentLikes = document.getElementById(commentid+"likes");
+	commentDislikes = document.getElementById(commentid+"dislikes");
 	doDislike(false, true, commentid);
-	commentlikes = document.getElementById(commentid+"likes");
-	commentdislikes = document.getElementById(commentid+"dislikes");
 }
 
 //functions to handle likes/dislikes on videos
@@ -69,16 +68,16 @@ function doLike(video, comment, id) {
 		getPath(likepath, likeCount, dislikeCount);
 	} else if (comment) {
 		var likepath = `/comment/like/${id}`;
-		getPath(likepath, commentlikes, commentdislikes);
+		getPath(likepath, commentLikes, commentDislikes);
 	}
 }
 
-function doDislike(video, comment) {
+function doDislike(video, comment, id) {
 	if (video) {
 		var dislikepath = `/v/dislike/${id}`;
 		getPath(dislikepath, likeCount, dislikeCount);
 	} else if (comment) {
-		var dislikepath = `/comment/like/${id}`;
-		getPath(dislikepath, commentlikes, commentdislikes);
+		var dislikepath = `/comment/dislike/${id}`;
+		getPath(dislikepath, commentLikes, commentDislikes);
 	}
 }

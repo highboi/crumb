@@ -8,38 +8,44 @@
 	<body>
 		<%- include('content/html/banner.html') %>
 
-		<div class="messages">
-			<% if (typeof message != 'undefined') { %>
-				<p><%= message %></p>
+		<%- include('content/html/body.html') %>
+
+		<div class="search-videos">
+			<% if (search.channels.length > 0) { %>
+				<h1>Channels:</h1>
+				<hr>
+				<% search.channels.forEach((item, index) => { %>
+					<% var channellink = `/u/${item.id}`; %>
+					<% var subscribelink = `/subscribe/${item.id}`; %>
+					<div class="channel">
+						<a href="<%= channellink %>">
+							<img id="channel-icon" src="<%= item.channelicon %>" alt="Channelicon">
+						</a>
+						<a href="<%= channellink %>">
+							<h1 id="channel-link"><%= item.username %></h1>
+						</a>
+						<% if (typeof user != 'undefined') { %>
+							<% if (user.id != item.id) { %>
+								<% if (user.subscribedChannels.includes(item.id)) { %>
+									<button id="subscribebutton" onclick='subscribe(&quot;<%= item.id %>&quot;)'>Subscribed</button>
+								<% } else { %>
+									<button id="subscribebutton" onclick='subscribe(&quot;<%= item.id %>&quot;)'>Subscribe</button>
+								<% } %>
+							<% } %>
+						<% } else { %>
+							<button id="subscribebutton" onclick='subscribe(&quot;<%= item.id %>&quot;)'>Subscribe</button>
+						<% } %>
+						<p><%= item.subscribers %></p>
+					</div>
+				<% }); %>
 			<% } %>
-
-			<ul>
-				<% if (typeof errors != 'undefined') { %>
-					<% errors.forEach((item, index) => { %>
-						<li><%= item.message %></li>
-					<% }); %>
-				<% } %>
-			</ul>
-
-			<%if (search.autocorrected == true) { %>
-				<p><q><%= search.humanquery %></q></p>
-				<% if (search.autocorrectedTitleCase) { %>
-					<p>Did you mean: <q><%= search.queryTitle %></q></p>
-				<% } else if (search.autocorrectedCaps) { %>
-					<p>Did you mean: <q><%= search.queryCaps %></q></p>
-				<% } else if (search.autocorrectedNormal) { %>
-					<p>Did you mean: <q><%= search.query %></q></p>
-				<% } %>
-			<% } %>
-		</div>
-
-		<div class="home-videos">
 			<% if (search.videos.length > 0) { %>
+				<h1>Videos:</h1>
+				<hr>
 				<% search.videos.forEach((item, index) => { %>
 					<div class="video">
-						<% var creator = JSON.parse(item.creator); %>
 						<% var videolink = `/v/${item.id}`; %>
-						<% var channellink = `/u/${creator.id}`; %>
+						<% var channellink = `/u/${item.user_id}`; %>
 						<div class="thumbnail">
 							<a href="<%= videolink %>">
 								<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
@@ -51,10 +57,10 @@
 							</a>
 							<div id="channel-links">
 								<a href="<%= channellink %>">
-									<img id="channel-icon" src="<%= creator.channelicon %>">
+									<img id="channel-icon" src="<%= item.channelicon %>">
 								</a>
 								<a href="<%= channellink %>">
-									<p><%= creator.username %></p>
+									<p><%= item.username %></p>
 								</a>
 							</div>
 						</div>
@@ -64,5 +70,6 @@
 				<p>No Results Returned</p>
 			<% } %>
 		</div>
+		<script src="/javascript/subscribe.js"></script>
 	</body>
 </html>

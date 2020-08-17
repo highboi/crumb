@@ -2,24 +2,18 @@
 <html>
 	<head>
 		<%- include('content/html/head.html') %>
-		<title>Home - Crumb</title>
+		<title><%= sectionname %> - Crumb</title>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
 
 		<%- include('content/html/body.html') %>
 
-		<% if (typeof user != 'undefined') { %>
-			<% var channellink = `/u/${user.id}`; %>
-			<button><a href="<%= channellink %>">My Channel</a></button><br>
-			<button><a href="/v/submit">Submit a Video</a></button><br>
-			<button><a href="/logout">Log Out</a></button>
-		<% } else { %>
-			<button><a href="/login">Login</a></button><br>
-			<button><a href="/register">Register</a></button>
-		<% } %>
+		<div class="section-header">
+			<h1>/s/<%= sectionname %> Videos:</h1>
+			<button id="joinbutton" onclick='join(&quot;<%= sectionname %>&quot;)'>Join</button>
+		</div>
 
-		<h1>Videos:</h1>
 		<div class="home-videos">
 			<% if (typeof videos != 'undefined') { %>
 				<% videos.forEach((item, index) => { %>
@@ -42,19 +36,13 @@
 								<a href="<%= channellink %>">
 									<p><%= item.username %></p>
 								</a>
-								<svg width="10" height="40" id="extras">
-									<circle cx="5" cy="5" r="5" fill="#adff12"/>
-									<circle cx="5" cy="20" r="5" fill="#adff12"/>
-									<circle cx="5" cy="35" r="5" fill="#adff12"/>
-								</svg>
-								<a></a>
-								<a></a>
-								<a></a>
 							</div>
 						</div>
 					</div>
 				<% }); %>
 			<% } %>
 		</div>
+
+		<script src="/javascript/subscribe.js"></script>
 	</body>
 </html>

@@ -1,11 +1,13 @@
-<div class="banner">
-	<div id="banner-icon">
-		<a href="/">
-			<img src="/favicon.ico" style="float: left">
-		</a>
-	</div>
-	<div id="banner-text">
-		<h1>Crumb</h1>
-	</div>
-</div>
+<div class="messages">
+	<% if (typeof message != 'undefined') { %>
+		<p><%= message %></p>
+	<% } %>
 
+	<ul>
+		<% if (typeof errors != 'undefined') { %>
+			<% errors.forEach((item, index) => { %>
+				<li><%= item.message %></li>
+			<% }); %>
+		<% } %>
+	</ul>
+</div>

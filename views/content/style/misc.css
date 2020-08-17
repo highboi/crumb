@@ -7,10 +7,8 @@ STYLESHEET FOR MISC OR GENERAL STYLING
 GLOBAL ACCESS OF TAGS
 */
 body {
-	/*
 	min-width: 600px;
 	min-height: 500px;
-	*/
 	background-color: #3f3f3f;
 	color: #adff12;
 	font-family: Charcoal, monospace, sans-serif;
@@ -44,10 +42,6 @@ MISC STYLING
 	text-decoration: underline;
 }
 
-.authfileinput h4 {
-	margin: 3px;
-}
-
 .hardtoseetext {
 	color: black;
 	text-shadow: 1px 1px 0 #adff12, -1px -1px 0 #adff12, 1px -1px 0 #adff12, -1px 1px 0 #adff12;
@@ -70,6 +64,9 @@ STYLING FOR FORMS
 	width: 250px;
 }
 
+.authform h4 {
+	margin: 3px;
+}
 
 /*
 THE SITE BANNER AT THE TOP OF EACH PAGE

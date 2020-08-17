@@ -9,19 +9,7 @@
 
 		<h1>Register:</h1>
 
-		<div class="messages">
-			<% if (typeof message != 'undefined') { %>
-				<p><%= message %></p>
-			<% } %>
-
-			<ul>
-				<% if (typeof errors != 'undefined') { %>
-					<% errors.forEach((item, index) => { %>
-						<li><%= item.message %></li>
-					<% }); %>
-				<% } %>
-			</ul>
-		</div>
+		<%- include('content/html/body.html') %>
 
 		<form action="/register" method="POST" class="authform" enctype="multipart/form-data">
 			<div>
@@ -43,6 +31,14 @@
 			<div class="authfileinput">
 				<h4>Channel Banner Image (optional): </h4>
 				<input id="channelbanner" name="channelbanner" type="file" accept="image/*">
+			</div><br>
+			<div>
+				<label for="channeldesc"><h4>Channel Description (1000 characters):</h4></label><br>
+				<textarea id="channeldesc" name="channeldesc" rows="6" cols="40" maxlength="1000" placeholder="Channel Description Here"></textarea>
+			</div><br>
+			<div>
+				<label for="topics"><h4>Topics of Channel</h4></label>
+				<input type="text" id="topics" name="topics" placeholder="topic1 topic2 etc" maxlength="300">
 			</div><br>
 			<div>
 				<input type="submit" value="Register">

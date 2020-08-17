@@ -6,6 +6,9 @@
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
+
+		<%- include('content/html/body.html') %>
+
 		<div class="channel">
 			<div class="channel-banner" style="background-image: url(<%= creator.channelbanner %>)">
 				<div id="channel-icon">
@@ -17,23 +20,53 @@
 				<button id="subscribebutton" onclick="subscribe();">Subscribe</button>
 			</div>
 			<hr>
+			<div id="tabs">
+				<% var channellink = `/u/${creator.id}` %>
+				<button onclick="window.location.href = '<%= channellink %>/?section=home';">Home</button>
+				<button onclick="window.location.href = '<%= channellink %>/?section=videos';">Videos</button>
+				<button>Playlists</button>
+				<button onclick="window.location.href = '<%= channellink %>/?section=about';">About</button>
+			</div>
+			<hr>
 			<div class="channel-content">
-				<% if (typeof videos != 'undefined') { %>
-					<% videos.forEach((item, index) => { %>
-						<div class="video">
-							<% var videolink = `/v/${item.id}` %>
-							<div class="thumbnail">
-								<a href="<%= videolink %>">
-									<img src="<%= item.thumbnail %>" alt="thumbnail" width="450" height="300">
-								</a>
+				<% if (section == "home" || section == "videos") { %>
+					<% if (typeof videos != 'undefined') { %>
+						<% videos.forEach((item, index) => { %>
+							<div class="video">
+								<% var videolink = `/v/${item.id}` %>
+								<div class="thumbnail">
+									<a href="<%= videolink %>">
+										<img src="<%= item.thumbnail %>" alt="thumbnail" width="450" height="300">
+									</a>
+								</div>
+								<div class="links">
+									<a href="<%= videolink %>">
+										<h3 style="text-transform: capitalize;"><strong><%= item.title %></strong></h3>
+									</a>
+								</div>
 							</div>
-							<div class="links">
-								<a href="<%= videolink %>">
-									<h3 style="text-transform: capitalize;"><strong><%= item.title %></strong></h3>
-								</a>
-							</div>
-						</div>
-					<% }); %>
+						<% }); %>
+					<% } else { %>
+						<p>No Videos Yet!</p>
+					<% } %>
+				<% } else if (section == "about") { %>
+					<div>
+						<h1>Description:</h1>
+						<% if (creator.description) { %>
+							<p><%= creator.description %></p>
+						<% } else { %>
+							<pre>
+┏━┓┃┏┓┃┃┃┃┃┃━━━┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┏┓┃┃┃┃┃┃┃┃┃┃┃┓┃┏┓┃┃┃┃┃┃┃┃
+┃┃┗┓┃┃┃┃┃┃┃┃┓┏┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┛┗┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
+┃┏┓┗┛┃━━┓┃┃┃┃┃┃┃━━┓━━┓━━┓━┓┓━━┓┓┏┛┓━━┓━┓┃┃┃┃┗━┛┃━━┓━┓━━┓
+┃┃┗┓┃┃┏┓┃┃┃┃┃┃┃┃┏┓┃━━┫┏━┛┏┛┫┏┓┃┃┃┃┫┏┓┃┏┓┓┃┃┃┏━┓┃┏┓┃┏┛┏┓┃
+┃┃┃┃┃┃┗┛┃┃┃┃┛┗┛┃┃━┫━━┃┗━┓┃┃┃┗┛┃┃┗┓┃┗┛┃┃┃┃┃┃┃┃┃┃┃┃━┫┃┃┃━┫
+┗┛┃┗━┛━━┛┃┃┃━━━┛━━┛━━┛━━┛┛┃┛┏━┛┗━┛┛━━┛┛┗┛┃┃┃┛┃┗┛━━┛┛┃━━┛
+┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
+┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┛┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
+							</pre>
+						<% } %>
+					</div>
 				<% } %>
 			</div>
 		</div>

@@ -1,6 +1,9 @@
 //get the variables to work with in the config file
 const { app, client, middleware, PORT } = require("./configBasic");
 
+//handle the shutting down of the server
+middleware.onShutdown();
+
 //handle the get requests
 require("./get");
 

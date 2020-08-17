@@ -43,6 +43,7 @@ app.use(express.static(__dirname + '/views/content'));
 //declare a static directory for the file contents of the site
 app.use(express.static(__dirname + "/storage"));
 
+//export the variables
 module.exports = {
 	app,
 	client,

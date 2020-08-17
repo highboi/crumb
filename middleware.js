@@ -10,6 +10,9 @@ const crypto = require("crypto");
 var dictpath = "/home/merlin/webdev/crumb/storage/server/words.txt";
 const autocorrect = require("autocorrect")({dictionary: dictpath});
 
+//get the write stream to write to the log file
+const { stream } = require("./logger");
+
 middleware = {
 	//this is a function that redirects users to the login page if the user is not signed in
 	//this is used for pages and requests that require a login
@@ -164,7 +167,7 @@ middleware = {
 	},
 
 	//this is a function for managing auto-correcting strings for searches on the site
-	autoCorrect: function (query, checkCaps=false, checkTitle=false) {
+	autoCorrect: function (query, checkCaps=false, checkTitle=false, checkLowerCase=false) {
 		//this is the regex to filter for special characters
 		var regexp = /[^a-zA-Z ]/g;
 
@@ -201,6 +204,8 @@ middleware = {
 				} else {
 					correctedarray.push(item);
 				}
+			} else if (checkLowerCase) {
+				correctedarray.push(autocorrect(item.toUpperCase()));
 			} else {
 				correctedarray.push(autocorrect(item));
 			}
@@ -223,13 +228,13 @@ middleware = {
 	},
 
 	//this is a function that selects videos from the database based on a given array of search terms
-	searchVideos: async (phrases, existingResults=[]) => {
+	searchVideos: async (phrases, limit=undefined) => {
 		//an array to store all of the video objects selected from the database
 		var results = [];
-		//get all of the videos from the database based on the list of phrases
+		//get all of the videos from the database with titles like the search term
 		for (var i=0; i<phrases.length; i++) {
 			//get all of the videos from the database with a title matching the current term
-			var result = await client.query(`SELECT * FROM videos WHERE title LIKE $1`, ["%" + phrases[i] + "%"]);
+			var result = await client.query(`SELECT * FROM videos WHERE title LIKE $1 OR description LIKE $1 OR topics LIKE $1 OR username LIKE $1`, ["%" + phrases[i] + "%"]);
 			//check to see that the same video is not included in the results twice
 			result.rows.forEach((item, index) => {
 				//a boolean to check to see if the video has been added
@@ -241,14 +246,6 @@ middleware = {
 						added = true;
 					}
 				}
-				//loop through the existing results and check if the videos have already been added in a previous function call
-				for (var j=0; j<existingResults.length; j++) {
-					//if the video in the existing results array contains the video being added currently, then it has already been added
-					//to the results
-					if (JSON.stringify(existingResults[j]) == JSON.stringify(item)) {
-						added = true;
-					}
-				}
 				//if the video has not been added, then add the video to the results
 				if (!added) {
 					results.push(item);
@@ -256,6 +253,26 @@ middleware = {
 			});
 		}
 		//return the results
+		return results;
+	},
+
+	//this is a function that returns the channels that come up in search results
+	searchChannels: async (phrases, limit=undefined) => {
+		var results = [];
+		for (var i=0; i < phrases.length; i++) {
+			var result = await client.query(`SELECT * FROM users WHERE username LIKE $1 OR description LIKE $1 OR topics LIKE $1`, ["%" + phrases[i] +"%"]);
+			result.rows.forEach((item, index) => {
+				var added = false;
+				for (var j=0; j < results.length; j++) {
+					if (JSON.stringify(results[j]) == JSON.stringify(item)) {
+						added = true;
+					}
+				}
+				if (!added) {
+					results.push(item);
+				}
+			});
+		}
 		return results;
 	},
 
@@ -287,6 +304,25 @@ middleware = {
 		return datestring;
 	},
 
+	//get human readable date parts
+	getHumanDate: function() {
+		//get the current time
+		var currenttime = middleware.getDate();
+
+		//get the time parts
+		times = currenttime.split("-");
+		times.reverse();
+
+		//get the time
+		var time = [times[1], times[0]].join(":").toString();
+
+		//get the date
+		var date = [times[3], times[2], times[4]].join("-").toString();
+
+		//return the human readable time and date
+		return [time, date];
+	},
+
 	//this is a function for getting the reccomendations for the videos according to the title and description of the video being viewed
 	getReccomendations: async function (video) {
 		//get a list of phrases to use in searching for results in the database
@@ -304,6 +340,142 @@ middleware = {
 
 		//return the videos
 		return vids;
+	},
+
+	//this is a function that counts the amount of hits on the site
+	hitCounter: function(req, res, next) {
+		//get the time of the hit on the site
+		var currenttime = middleware.getHumanDate();
+
+		//get the time and date in a readable manner
+		var time = currenttime[0];
+		var date = currenttime[1];
+
+		//if this is a get request, then this is a hit
+		if (req.method == "GET") {
+			console.log("HIT FROM: " + req.ip.toString());
+			var logstring = "Hit From: " + req.ip.toString() + " on " + req.url.toString() + " at " + time + " on " + date;
+			middleware.log(logstring);
+		}
+
+		//check to see if this is a post request in order to log actions on the site
+		if (req.method == "POST") {
+			console.log("ACTION FROM: " + req.ip.toString());
+			var logstring = "Action From: " + req.ip.toString() + " on " + req.url.toString() + " at " + time + " on " + date;
+			middleware.log(logstring);
+		}
+
+		//go to the next action on the server
+		next();
+	},
+
+	//this is a function that writes to a log file to see the traffic
+	log: function(string) {
+		//write the given string to the write stream in logger.js
+		stream.write(string + "\n");
+	},
+
+	//this is a function that executes whenever the node process is killed (server shuts down)
+	shutDown: function() {
+		//end the write stream to the traffic log file
+		stream.end();
+
+		//message that the server is shutting down
+		console.log("Shutting Down...");
+
+		//exit the node process
+		process.exit(0);
+	},
+
+	//check to see if the server should execute the shutdown process
+	onShutdown: function() {
+		//if the node server is interrupted or terminated, execute the shutdown process
+		process.on("SIGINT", middleware.shutDown);
+		process.on("SIGTERM", middleware.shutDown);
+	},
+
+	//this is a function to handle the likes on certain elements of the site
+	handleLikes: async function(req, element, liked, disliked, likedTable, dislikedTable) {
+		//get the user id and the element id
+		var userid = req.session.user.id.toString();
+		var elementid = element.id.toString();
+
+		//get the id column name based on if the element has a video or not
+		if (typeof element.video != 'undefined') {
+			var idcolumn = "videoid";
+		} else {
+			var idcolumn = "commentid";
+		}
+
+		//handle the liking and unliking of the element
+		if (liked.rows.length == 0) {
+			var likes = parseInt(element.likes, 10)
+			likes = likes + 1;
+			likes = likes.toString();
+			var querystring = `INSERT INTO ${likedTable} (userid, ${idcolumn}) VALUES (\'${userid}\', \'${elementid}\')`;
+			await client.query(querystring);
+		} else if (liked.rows.length > 0) {
+			var likes = parseInt(element.likes, 10);
+			likes = likes - 1;
+			likes = likes.toString();
+			var querystring = `DELETE FROM ${likedTable} WHERE userid=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
+			await client.query(querystring);
+		}
+
+		//handle any dislikes that come up
+		if (disliked.rows.length == 0) {
+			var dislikes = element.dislikes.toString();
+		} else if (disliked.rows.length > 0) {
+			var dislikes = parseInt(element.dislikes, 10);
+			dislikes = dislikes - 1;
+			dislikes = dislikes.toString();
+			var querystring = `DELETE FROM ${dislikedTable} WHERE userid=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
+			await client.query(querystring);
+		}
+
+		return [likes, dislikes];
+	},
+
+	//this is a function to handle the dislikes on certain elements of the site
+	handleDislikes: async function (req, element, liked, disliked, likedTable, dislikedTable) {
+		//get the userid and element id
+		var userid = req.session.user.id.toString();
+		var elementid = element.id.toString();
+
+		//get the id column name
+		if (typeof element.video != 'undefined') {
+			var idcolumn = "videoid";
+		} else {
+			var idcolumn = "commentid";
+		}
+
+		//handle the disliking and the un-disliking of the element
+		if (disliked.rows.length == 0) {
+			var dislikes = parseInt(element.dislikes, 10);
+			dislikes = dislikes + 1;
+			dislikes = dislikes.toString();
+			var querystring = `INSERT INTO ${dislikedTable} (userid, ${idcolumn}) VALUES (\'${userid}\', \'${elementid}\')`;
+			await client.query(querystring);
+		} else if (disliked.rows.length > 0) {
+			var dislikes = parseInt(element.dislikes, 10);
+			dislikes = dislikes - 1;
+			dislikes = dislikes.toString();
+			var querystring = `DELETE FROM ${dislikedTable} WHERE userid=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
+			await client.query(querystring);
+		}
+
+		//handle any likes that come up
+		if (liked.rows.length == 0) {
+			var likes = element.likes.toString();
+		} else if (liked.rows.length > 0) {
+			var likes = parseInt(element.likes, 10);
+			likes = likes - 1;
+			likes = likes.toString();
+			var querystring = `DELETE FROM ${likedTable} WHERE userid=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
+			await client.query(querystring);
+		}
+
+		return [likes, dislikes];
 	}
 }
 
