@@ -7,8 +7,6 @@ STYLESHEET FOR MISC OR GENERAL STYLING
 GLOBAL ACCESS OF TAGS
 */
 body {
-	min-width: 600px;
-	min-height: 500px;
 	background-color: #3f3f3f;
 	color: #adff12;
 	font-family: Charcoal, monospace, sans-serif;
@@ -74,6 +72,9 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 
 .banner {
 	background-color: #adff12;
+	position: sticky;
+	top: 0px;
+	z-index: 1;
 }
 
 .banner #banner-text {

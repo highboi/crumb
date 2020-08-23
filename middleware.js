@@ -51,10 +51,13 @@ middleware = {
 		//get comment ids
 		var commentres = await client.query(`SELECT * FROM comments WHERE id=$1`, [newid]);
 
+		//get the playlist ids
+		var playlistres = await client.query(`SELECT * FROM playlists WHERE id=$1`, [newid]);
+
 		//if the database returned more than 0 rows, this means that a video
 		//with the generated id exists, meaning that the function must be
 		//executed again in order to generate a truly unique id
-		if (res.rows.length > 0 || commentres.rows.length > 0) {
+		if (res.rows.length > 0 || commentres.rows.length > 0 || playlistres.rows.length > 0) {
 			middleware.generateAlphanumId();
 		} else { //if a unique id has been found, return this id
 			console.log("Valid ID Found: " + newid.toString());
@@ -194,16 +197,9 @@ middleware = {
 			if (checkCaps) {
 				correctedarray.push(autocorrect(item.toLowerCase()));
 			} else if (checkTitle) {
-				var titlecase = item.charAt(0).toUpperCase() + item.substr(1).toLowerCase();
-				if (titlecase == item) {
-					//autocorrect the actual word in lower case to prevent errors
-					autocorrectedTitle = autocorrect(item.toLowerCase());
-					//convert the word back into title case and put it back into the corrected array
-					autocorrectedTitle = autocorrectedTitle.charAt(0).toUpperCase() + autocorrectedTitle.substr(1).toLowerCase();
-					correctedarray.push(autocorrectedTitle);
-				} else {
-					correctedarray.push(item);
-				}
+				var autocorrecteditem = autocorrect(item.toLowerCase());
+				var titlecase = autocorrecteditem.charAt(0).toUpperCase() + autocorrecteditem.substr(1).toLowerCase();
+				correctedarray.push(titlecase);
 			} else if (checkLowerCase) {
 				correctedarray.push(autocorrect(item.toUpperCase()));
 			} else {
@@ -228,7 +224,7 @@ middleware = {
 	},
 
 	//this is a function that selects videos from the database based on a given array of search terms
-	searchVideos: async (phrases, limit=undefined) => {
+	searchVideos: async (phrases) => {
 		//an array to store all of the video objects selected from the database
 		var results = [];
 		//get all of the videos from the database with titles like the search term
@@ -257,10 +253,30 @@ middleware = {
 	},
 
 	//this is a function that returns the channels that come up in search results
-	searchChannels: async (phrases, limit=undefined) => {
+	searchChannels: async (phrases) => {
 		var results = [];
 		for (var i=0; i < phrases.length; i++) {
 			var result = await client.query(`SELECT * FROM users WHERE username LIKE $1 OR description LIKE $1 OR topics LIKE $1`, ["%" + phrases[i] +"%"]);
+			result.rows.forEach((item, index) => {
+				var added = false;
+				for (var j=0; j < results.length; j++) {
+					if (JSON.stringify(results[j]) == JSON.stringify(item)) {
+						added = true;
+					}
+				}
+				if (!added) {
+					results.push(item);
+				}
+			});
+		}
+		return results;
+	},
+
+	//this is a function that returns the playlists that come up in the search results
+	searchPlaylists: async (phrases) => {
+		var results = [];
+		for (var i=0; i < phrases.length; i++) {
+			var result = await client.query(`SELECT * FROM playlists WHERE name LIKE $1`, ["%" + phrases[i] + "%"]);
 			result.rows.forEach((item, index) => {
 				var added = false;
 				for (var j=0; j < results.length; j++) {

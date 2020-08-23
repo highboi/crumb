@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const formidable = require("formidable");
 const path = require("path");
 const approx = require("approximate-number");
+var viewObject = require("./variables");
 
 const { app, client, middleware, PORT } = require("./configBasic");
 
@@ -32,8 +33,9 @@ app.post('/register', (req, res) => {
 		}
 
 		if (errors.length > 0) {
+			var viewObj = Object.assign({}, viewObject, {errors: errors});
 			//render the register page with errors if there are errors to show the user
-			res.render('register.ejs', {errors});
+			res.render('register.ejs', viewObj);
 		} else {
 			//hash the password for secure storage in database
 			var hashedPassword = await bcrypt.hash(fields.password, 10);
@@ -73,6 +75,8 @@ app.post('/register', (req, res) => {
 				console.log("Registered User.");
 				//store the user in the session
 				req.session.user = newuser;
+				//store the user into the global view object
+				viewObject.user = req.session.user;
 				//flash message to let the user know they are registered
 				req.flash("message", "Registered!");
 				//redirect to the home page
@@ -95,7 +99,8 @@ app.post("/login", async (req, res) => {
 	}
 
 	if (errors.length > 0) {
-		res.render("login.ejs", {errors: errors});
+		var viewObj = Object.assign({}, viewObject, {errors: errors});
+		res.render("login.ejs", viewObj);
 	} else {
 		//select the users from the database with the specified fields
 		var user = await client.query(`SELECT * FROM users WHERE email=$1 OR username=$2`, [req.body.email, req.body.username]);
@@ -110,16 +115,20 @@ app.post("/login", async (req, res) => {
 				user.subscribedChannels = subscribedChannels.rows.map(({channel_id}) => channel_id);
 				//store the user in the current session
 				req.session.user = user;
+				//store the user in the global view object
+				viewObject.user = req.session.user;
 				//messages to let the server and the client know that a user logged in
 				console.log("Logged In!");
 				req.flash("message", "Logged In!");
 				//redirect to the home page
 				res.redirect("/");
 			} else { //if the password is incorrect, then let the user know
-				res.render("login.ejs", {message: "Password Incorrect."});
+				var viewObj = Object.assign({}, viewObject, {message: "Password Incorrect."});
+				res.render("login.ejs", viewObj);
 			}
 		} else { // if the user does not exist, then tell the user
-			res.render("login.ejs", {message: "User does not exist."});
+			var viewObj = Object.assign({}, viewObject, {message: "User does not exist yet, please register."});
+			res.render("login.ejs", viewObj);
 		}
 	}
 });
@@ -168,9 +177,11 @@ app.post("/v/submit", (req, res) => {
 			var videourl = `/v/${id.rows[0].id}`; //get the url to redirect to now that the video has been created
 			res.redirect(videourl); //redirect to the url
 		} else if (!(thumbext in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
-			res.render("submitvideo.ejs", {message: "Unsupported file type for thumbnail (png, jpeg, or jpg)."});
+			var viewObj = Object.assign({}, viewObject, {message: "Unsupported file type for thumbnail, please use png, jpeg, or jpg."});
+			res.render("submitvideo.ejs", viewObj);
 		} else if (!(videoext in acceptedvideo)) { //if the video file types are not supported, then show errors
-			res.render("submitvideo.ejs", {message: "Unsupported file type for video (mp4, ogg, or webm)."});
+			var viewObj = Object.assign({}, viewObject, {message: "Unsupported file type for video, please use mp4, ogg, or webm."});
+			res.render("submitvideo.ejs", viewObj);
 		}
 	});
 });
@@ -196,4 +207,35 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//redirect to the same view url (the back end will show an updated list of comments)
 	//pass a query parameter to let the middleware for this path to know to scroll down to the new comment
 	res.redirect(`/v/${req.params.videoid}/?scrollToComment=true&commentid=${commentid}`);
+});
+
+//this is a post link to create a new playlist
+app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
+	//generate a new id for the playlist
+	var newid = await middleware.generateAlphanumId();
+
+	//get any playlists with matching properties to the one trying to be created
+	var results = await client.query(`SELECT * FROM playlists WHERE user_id=$1 AND name=$2`, [req.session.user.id, req.body.name]);
+
+	//check to see if this playlist already exists
+	if (results.rows.length > 0) { //if the playlist already exists
+		//create an array of errors
+		var errors = [{message: "Playlist with the same name already exists."}];
+		//view object to be passed to the view
+		var viewObj = Object.assign({}, viewObject, {errors: errors});
+		//render the create playlist view with errors
+		res.render("createplaylist.ejs", viewObj);
+	} else { //add the playlist into the db
+		//add the details of the playlist into the database
+		await client.query(`INSERT INTO playlists (id, name, user_id) VALUES ($1, $2, $3)`, [newid, req.body.name, req.session.user.id]);
+		//check to see if there is a video that needs to be added to the new playlist
+		if (typeof req.body.videoid != 'undefined') {
+			//insert the video id and playlist id into the playlistvideos table
+			await client.query(`INSERT INTO playlistvideos (playlist_id, video_id) VALUES ($1, $2)`, [newid, req.body.videoid]);
+			//update the amount of videos in the playlist (which is now 1)
+			await client.query(`UPDATE playlists SET videocount=$1 WHERE id=$2`, [1, newid]);
+		}
+		//redirect to the playlist
+		res.redirect(`/p/${newid}`);
+	}
 });

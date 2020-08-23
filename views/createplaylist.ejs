@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/html/head.html') %>
+		<title>Create a Playlist - Crumb</title>
+	</head>
+	<body>
+		<%- include('content/html/banner.html') %>
+
+		<h1>Create a Playlist</h1>
+
+		<%- include('content/html/body.html') %>
+
+		<form action="/playlist/create" method="post" class="authform">
+			<div>
+				<input id="name" name="name" type="text" placeholder="Name your playlist" autofocus>
+			</div><br>
+			<div>
+				<% if (typeof videoid != 'undefined') { %>
+					<input type="hidden" id="videoid" name="videoid" value="<%= videoid %>">
+				<% } %>
+			</div><br>
+			<div>
+				<input type="submit" value="Create">
+			</div>
+		</form>
+	</body>
+</html>

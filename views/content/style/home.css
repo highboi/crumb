@@ -39,3 +39,11 @@ THE VIDEOS IN THE HOMEPAGE
 .home-videos .video .links #channel-links #extras:hover {
 	cursor: pointer;
 }
+
+.home-videos .video .links #channel-links .extralinks {
+	display: none;
+}
+
+.home-videos .video .links #channel-links .extralinkforms object {
+	display: none;
+}

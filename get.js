@@ -1,6 +1,7 @@
 //this is a file to handle all of the get requests for the server
 
 const { app, client, middleware, PORT} = require("./configBasic");
+var viewObject = require("./variables");
 
 const fs = require("fs");
 const approx = require("approximate-number");
@@ -15,33 +16,37 @@ app.get('/', async (req, res) => {
 	var videos = await client.query("SELECT * FROM videos LIMIT 50");
 	videos = videos.rows;
 
-	//select the 
-
-	//create an object for the view
-	var viewobj = {message: req.flash("message"), videos: videos, webroot: __dirname};
-
-	//check to see if the user exists in the session or not
+	//select all of the playlists in the database that belong to the user if they are signed in
 	if (req.session.user) {
-		viewobj.user = req.session.user;
+		var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [req.session.user.id]);
+		playlists = playlists.rows;
+		//object for the view with the playlists included
+		var viewObj = Object.assign({}, viewObject, {message: req.flash("message"), videos: videos, playlists: playlists});
+	} else {
+		//create an object for the view
+		var viewObj = Object.assign({}, viewObject, {message: req.flash("message"), videos: videos});
 	}
 
 	//render the view
-	res.render("index.ejs", viewobj);
+	res.render("index.ejs", viewObj);
 });
 
 //get the registration page
 app.get('/register', middleware.checkNotSignedIn, (req, res) => {
-	res.render("register.ejs", { message: req.flash('message') });
+	var viewObj = Object.assign({}, viewObject, {message: req.flash("message")});
+	res.render("register.ejs", viewObj);
 });
 
 //get the login page
 app.get('/login', middleware.checkNotSignedIn, (req, res) => {
-	res.render("login.ejs", {message: req.flash("message")});
+	var viewObj = Object.assign({}, viewObject, {message: req.flash("message")});
+	res.render("login.ejs", viewObj);
 });
 
 //log the user out of the session
 app.get("/logout", middleware.checkSignedIn, (req, res) => {
 	req.session.user = null;
+	delete viewObject.user;
 	console.log("[+] Logged out.");
 	req.flash("message", "Logged out!");
 	res.redirect("/");
@@ -58,7 +63,7 @@ app.get("/u/:userid", async (req, res) => {
 	creator = creator.rows[0];
 
 	//create an object for passing into the view
-	var viewObj = {creator: creator};
+	var viewObj = {creator: creator, message: req.flash("message")};
 
 	//get any variables from the query string in order to render the right things
 	if (Object.keys(req.query).length && typeof req.query.section != 'undefined') {
@@ -68,7 +73,6 @@ app.get("/u/:userid", async (req, res) => {
 		//the default section is the home page
 		viewObj.section = "home";
 	}
-
 
 	//add the videos to the view object if the videos exist on the channel and if the section actually needs the videos to be sent with the view
 	if (typeof videostest[0] != 'undefined') {
@@ -81,11 +85,20 @@ app.get("/u/:userid", async (req, res) => {
 				var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1`, [req.params.userid]);
 				videos = videos.rows;
 				break;
+			case "playlists":
+				var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [req.params.userid]);
+				playlists = playlists.rows;
 		}
 		if (typeof videos != 'undefined') {
 			viewObj.videos = videos;
 		}
+		if (typeof playlists != 'undefined') {
+			viewObj.playlists = playlists;
+		}
 	}
+
+	//get the full view object
+	viewObj = Object.assign({}, viewObject, viewObj);
 
 	//render the view
 	res.render("viewchannel.ejs", viewObj);
@@ -93,7 +106,8 @@ app.get("/u/:userid", async (req, res) => {
 
 //get the form for submitting videos
 app.get("/v/submit", middleware.checkSignedIn, (req, res) => {
-	res.render("submitvideo.ejs", { message: req.flash("message") });
+	var viewObj = Object.assign({}, viewObject, {message: req.flash("message")});
+	res.render("submitvideo.ejs", viewObj);
 });
 
 //views individual videos on the site
@@ -119,43 +133,149 @@ app.get("/v/:videoid", async (req, res) => {
 	comments = comments.rows;
 
 	//set the object to be passed to the rendering function
-	var viewobj = {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments};
+	var viewObj = {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments};
 
 	//render the video view based on whether or not the user is logged in and has a session variable
 	if (req.session.user) {
-		viewobj.user = req.session.user;
+		viewObj.user = req.session.user;
 		var subscribed = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [videocreator.id, req.session.user.id]);
-		viewobj.subscribed = subscribed.rows.length;
+		viewObj.subscribed = subscribed.rows.length;
 	}
 
 	//check to see if the video needs to scroll down to a comment that was just posted
 	if (req.query.scrollToComment == "true" && typeof req.query.commentid != 'undefined') {
-		viewobj.scrollToComment = true;
-		viewobj.commentid = req.query.commentid;
+		viewObj.scrollToComment = true;
+		viewObj.commentid = req.query.commentid;
 	}
 
-	res.render("viewvideo.ejs", viewobj);
+	viewObj.message = req.flash("message");
+
+	viewObj = Object.assign({}, viewObject, viewObj);
+
+	res.render("viewvideo.ejs", viewObj);
 });
 
 //this is a get request for the playlists on the site
-app.get("/playlist/:playlistid", async(req, res) => {
-	//select all of the videos from the database with the matching playlist id
-	var videos = await client.query(`SELECT * FROM videos WHERE playlist_id=$1`, [req.params.playlistid]);
+app.get("/p/:playlistid", async(req, res) => {
+	//get all of the videos in the db
+	var videos = await client.query(`SELECT * FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1)`, [req.params.playlistid]);
 	videos = videos.rows;
-
-	//get the creator of the playlist
-	var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [videos[0].user_id]);
-	creator = creator.rows[0];
 
 	//get the playlist object which contains the name of the playlist and the id of the user that created it
 	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1`, [req.params.playlistid]);
 	playlist = playlist.rows[0];
 
+	//get the creator of the playlist
+	var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [playlist.user_id]);
+	creator = creator.rows[0];
+
 	//create view object to pass into the view
-	var viewObj = {creator: creator, videos: videos, playlist: playlist};
+	var viewObj = {creator: creator, videos: videos, playlist: playlist, message: req.flash("message")};
+
+	//make the full view object
+	viewObj = Object.assign({}, viewObject, viewObj);
 
 	//render the view for the playlist
 	res.render("viewplaylist.ejs", viewObj);
+});
+
+//this is a get path for adding videos to playlists on the site
+app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, async (req, res) => {
+	//get the playlist from the database
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.session.user.id]);
+	playlist = playlist.rows[0];
+
+	//get the playlist-video relation from the database
+	var playlistvideo = await client.query(`SELECT * FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
+	playlistvideo = playlistvideo.rows[0];
+
+	//check to see if the video is in the playlist already
+	if (typeof playlistvideo != 'undefined') { //if the video has already been added, then render an error
+		var viewObj = Object.assign({}, viewObject, {error: "Video has already been added to the playlist."});
+		res.render("error.ejs", viewObj);
+	} else {
+		//do something based on if the playlist belongs to the user or not
+		if (typeof playlist != 'undefined') {
+			//get the amount of videos in the playlist
+			var videocount = parseInt(playlist.videocount, 10);
+			videocount = videocount + 1;
+			//add the video into the playlist
+			await client.query(`INSERT INTO playlistvideos (playlist_id, video_id) VALUES ($1, $2)`, [req.params.playlistid, req.params.videoid]);
+			//update the video count in the playlist
+			await client.query(`UPDATE playlists SET videocount=$1 WHERE id=$2`, [videocount, req.params.playlistid]);
+			//redirect to the playlist again
+			res.redirect(`/p/${req.params.playlistid}`);
+		} else { //if the playlist does not belong to the user, render an error
+			var viewObj = Object.assign({}, viewObject, {error: "This playlist does not belong to you."});
+			res.render("error.ejs", viewObj);
+		}
+	}
+});
+
+//this is a get path for deleting videos from playlists on the site
+app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, async (req, res) => {
+	//get the playlist from the database
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.session.user.id]);
+	playlist = playlist.rows[0];
+
+	//get the playlist-video relation from the database
+	var playlistvideo = await client.query(`SELECT * FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
+	playlistvideo = playlistvideo.rows[0];
+
+	//check to see whether or not the video is in the playlist or not
+	if (typeof playlistvideo != 'undefined') { //if the video is in the playlist, delete it
+		//do something based on if the playlist belongs to the user or not
+		if (typeof playlist != 'undefined') { //if the playlist belongs to the user
+			//get the amount of videos in the playlist
+			var videocount = parseInt(playlist.videocount, 10);
+			videocount = videocount - 1;
+			//delete the video from the playlist
+			await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
+			//update the video count on the playlist
+			await client.query(`UPDATE playlists SET videocount=$1 WHERE id=$2`, [videocount, req.params.playlistid]);
+			req.flash("message", "Video Deleted!");
+			//redirect to the playlist again
+			res.redirect(`/p/${req.params.playlistid}`);
+		} else { //if the playlist does not belong to the user, then render an error
+			var viewObj = Object.assign({}, viewObject, {error: "Playlist does not belong to you."});
+			res.render("error.ejs", viewObj);
+		}
+	} else { //if the video is not in the playlist, then render an error
+		var viewObj = Object.assign({}, viewObject, {error: `Video with ID: ${playlistvideo.video_id} not in playlist.`});
+		res.render("error.ejs", viewObj);
+	}
+});
+
+//this is a get request for creating a new playlist
+app.get("/playlist/new", middleware.checkSignedIn, async (req, res) => {
+	if (typeof req.query.videoid != 'undefined') {
+		var viewObj = Object.assign({}, viewObject, {videoid: req.query.videoid});
+	} else {
+		var viewObj = Object.assign({}, viewObject);
+	}
+	//render the form for creating a new playlist
+	res.render("createplaylist.ejs", viewObj);
+});
+
+//this is a get request for deleting a playlist
+app.get("/playlist/delete/:playlistid", middleware.checkSignedIn, async (req, res) => {
+	//check to see if the playlist belongs to the user
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.session.user.id]);
+	playlist = playlist.rows[0];
+
+	//check to see if the playlist exists in the first place
+	if (typeof playlist != 'undefined') { //if the playlist exists, then delete it
+		//delete the playlist from the database
+		await client.query(`DELETE FROM playlists WHERE id=$1`, [req.params.playlistid]);
+		//delete any associated video ids from the playlistvideos table
+		await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1`, [req.params.playlistid]);
+		//redirect to the index along with a message that the playlist was deleted
+		req.flash("message", "Playlist Deleted!");
+		res.redirect("/");
+	} else { //if the playlist does not exist or does not belong to the user, then render an error
+		var viewObj = Object.assign({}, viewObject, {error: `Playlist with ID: ${playlist.id} is nonexistent or does not belong to you.`});
+		res.render("error.ejs", viewObj);
+	}
 });
 
 //delete a video
@@ -281,26 +401,25 @@ app.get("/search", async (req, res) => {
 	totalphrases = totalphrases.concat(capsPhrases);
 
 	//add the results for the regular phrases into the results array
-	var results = await middleware.searchVideos(totalphrases);
+	var videos = await middleware.searchVideos(totalphrases);
 
 	//get the channels that match the search terms
 	var channels = await middleware.searchChannels(totalphrases);
 
+	//get the playlists that match the search terms
+	var playlists = await middleware.searchPlaylists(totalphrases);
+
 	//store the array of video objects inside the search object
-	search.videos = results;
+	search.videos = videos;
 	search.channels = channels;
+	search.playlists = playlists;
 
 	console.log("Search: " + search.humanquery);
 
-	//create a search object to be passed to the view
-	var searchObj = {search: search};
+	//create the view object
+	viewObj = Object.assign({}, viewObject, {search: search});
 
-	//add the user to the variable if they are signed in
-	if (req.session.user) {
-		searchObj.user = req.session.user;
-	}
-
-	res.render("searchresults.ejs", searchObj);
+	res.render("searchresults.ejs", viewObj);
 });
 
 //a get request for liking a comment on the site
@@ -355,7 +474,7 @@ app.get("/s/:topic", async (req, res) => {
 	videos = videos.rows;
 
 	//have a view object
-	var viewObj = {videos: videos, sectionname: req.params.topic};
+	var viewObj = Object.assign({}, viewObject, {videos: videos, sectionname: req.params.topic});
 
 	//render the view for the section
 	res.render("viewsection.ejs", viewObj);

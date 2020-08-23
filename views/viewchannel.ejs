@@ -24,7 +24,7 @@
 				<% var channellink = `/u/${creator.id}` %>
 				<button onclick="window.location.href = '<%= channellink %>/?section=home';">Home</button>
 				<button onclick="window.location.href = '<%= channellink %>/?section=videos';">Videos</button>
-				<button>Playlists</button>
+				<button onclick="window.location.href = '<%= channellink %>/?section=playlists';">Playlists</button>
 				<button onclick="window.location.href = '<%= channellink %>/?section=about';">About</button>
 			</div>
 			<hr>
@@ -67,6 +67,18 @@
 							</pre>
 						<% } %>
 					</div>
+				<% } else if (section == "playlists") { %>
+					<% if (typeof playlists != 'undefined') { %>
+						<% playlists.forEach((item, index) => { %>
+							<div>
+								<% var playlistlink = `/p/${item.id}` %>
+								<h1><a href="<%= playlistlink %>"><%= item.name %></a></h1>
+								<p><%= item.videocount %> Videos</p>
+							</div><br>
+						<% }); %>
+					<% } else { %>
+						<h3><a href="/playlist/new">Create New Playlist</a></h3>
+					<% } %>
 				<% } %>
 			</div>
 		</div>

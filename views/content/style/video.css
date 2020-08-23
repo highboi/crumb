@@ -313,25 +313,37 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 	flex-direction: column;
 }
 
-.container .reccomendations .links img {
+.container .reccomendations .links .text img {
 	width: 20vw;
 	height: 15vw;
 	padding: 10px;
 	float: left;
 }
 
-.container .reccomendations .links {
+.container .reccomendations .links .text {
 	display: inline-block;
 	font-size: 0.8vw;
 }
 
-.container .reccomendations .links :not(a) :not(img) {
+.container .reccomendations .links .text :not(a) :not(img) {
 	display: inline;
 	margin: 0px;
 }
 
-.container .reccomendations .links a {
+.container .reccomendations .links .text a {
 	text-decoration: none;
+}
+
+.container .reccomendations .links .extras {
+}
+
+.container .reccomendations .links .extras:hover {
+	cursor: pointer;
+}
+
+.container .reccomendations .links .extralinks {
+	display: none;
+	position: absolute;
 }
 
 /**/

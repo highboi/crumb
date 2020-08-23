@@ -168,13 +168,25 @@
 				<% if (typeof videos != 'undefined') { %>
 					<% for (var i=0; i < videos.length; i++) { %>
 						<div class="links">
-							<a href="/v/<%= videos[i].id %>">
-								<img src="<%= videos[i].thumbnail %>" width="600px" height="500px">
-							</a>
-							<a href="/v/<%= videos[i].id %>">
-								<h2><strong>&nbsp;&nbsp<%= videos[i].title %></strong></h2>
-							</a>
-							<p>&nbsp;&nbsp<%= videos[i].description.substr(0, 14) %>...</p>
+							<div class="text">
+								<a href="/v/<%= videos[i].id %>">
+									<img src="<%= videos[i].thumbnail %>" width="600px" height="500px">
+								</a>
+								<a href="/v/<%= videos[i].id %>">
+									<h2><strong>&nbsp;&nbsp<%= videos[i].title %></strong></h2>
+								</a>
+								<p>&nbsp;&nbsp<%= videos[i].description.substr(0, 14) %>...</p>
+							</div>
+							<svg width="10" height="40" class="extras" onclick='showboxVertical(&quot;<%= videos[i].id %>extraslinks&quot;)'>
+								<circle cx="5" cy="5" r="5" fill="#adff12"/>
+								<circle cx="5" cy="20" r="5" fill="#adff12"/>
+								<circle cx="5" cy="35" r="5" fill="#adff12"/>
+							</svg>
+							<div id="<%= videos[i].id %>extraslinks" class="extralinks">
+								<a>Add To Playlist</a>
+								<a>Not Interested</a>
+								<a>Report</a>
+							</div>
 						</div>
 					<% } %>
 				<% } %>
@@ -218,6 +230,6 @@
 		<script src="/javascript/videocontroller.js"></script>
 		<script src="/javascript/likedislike.js"></script>
 		<script src="/javascript/subscribe.js"></script>
-		<script src="/javascript/replycomment.js"></script>
+		<script src="/javascript/elementclicks.js"></script>
 	</body>
 </html>
