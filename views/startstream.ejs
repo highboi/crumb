@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/html/head.html') %>
+		<title>Start a Live Stream - Crumb</title>
+	</head>
+	<body>
+		<%- include('content/html/banner.html') %>
+
+		<%- include('content/html/body.html') %>
+
+		<form action="/l/stream" method="get">
+			<div>
+				<label for="name">Name your Livestream:</label>
+				<input id="name" name="name" type="text">
+			</div>
+			<div>
+				<label for="enableChat">Enable/Disable Chat:</label>
+				<select id="enableChat" name="enableChat">
+					<option value="true">Yes</option>
+					<option value="false">No</option>
+				</select>
+			</div>
+			<div>
+				<input type="submit" value="Start Streaming">
+			</div>
+		</form>
+	</body>
+</html>

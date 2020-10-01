@@ -49,10 +49,10 @@ function playPause() {
 	playBtnImg = playBtn.getElementsByTagName("img")[0];
 	if (video.paused) {
 		video.play();
-		playBtnImg.src = "http://localhost/icons/pause.ico";
+		playBtnImg.src = "http://localhost/content/icons/pause.ico";
 	} else {
 		video.pause();
-		playBtnImg.src = "http://localhost/icons/play.ico";
+		playBtnImg.src = "http://localhost/content/icons/play.ico";
 	}
 }
 
@@ -89,9 +89,9 @@ function changeVolume() {
 
 	//check to see if the user used the seeker bar to mute the video and change the image
 	if (video.volume == 0) {
-		muteImg.src = "http://localhost/icons/mute.ico";
+		muteImg.src = "http://localhost/content/icons/mute.ico";
 	} else if (video.volume > 0) {
-		muteImg.src = "http://localhost/icons/sound.ico";
+		muteImg.src = "http://localhost/content/icons/sound.ico";
 	}
 }
 
@@ -125,14 +125,14 @@ function getFullScreen() {
 //this is a function that toggles the mute button
 function toggleMute() {
 	var muteImg = muteBtn.getElementsByTagName("img")[0];
-	if (muteImg.src == "http://localhost/icons/sound.ico") {
+	if (muteImg.src == "http://localhost/content/icons/sound.ico") {
 		volumeslider.value = 0;
 		video.volume = 0;
-		muteImg.src = "http://localhost/icons/mute.ico";
-	} else if (muteImg.src == "http://localhost/icons/mute.ico") {
+		muteImg.src = "http://localhost/content/icons/mute.ico";
+	} else if (muteImg.src == "http://localhost/content/icons/mute.ico") {
 		volumeslider.value = 100;
 		video.volume = 1;
-		muteImg.src = "http://localhost/icons/sound.ico";
+		muteImg.src = "http://localhost/content/icons/sound.ico";
 	}
 }
 

@@ -1,11 +1,12 @@
 //this is a file to handle all of the get requests for the server
 
-const { app, client, middleware, PORT} = require("./configBasic");
-var viewObject = require("./variables");
+const { app, client, middleware, PORT, viewObject, server, wss} = require("./configBasic");
 
 const fs = require("fs");
 const approx = require("approximate-number");
 const path = require("path");
+const {v4: uuidv4} = require("uuid");
+const WebSocket = require("ws");
 
 //calculate the amount of hits on the site
 app.use(middleware.hitCounter);
@@ -153,6 +154,113 @@ app.get("/v/:videoid", async (req, res) => {
 	viewObj = Object.assign({}, viewObject, viewObj);
 
 	res.render("viewvideo.ejs", viewObj);
+});
+
+app.get("/l/view/:streamid", (req, res) => {
+	//create a view object with a specific
+	var viewObj = Object.assign({}, viewObject);
+
+	//isolate the websocket with the livestream id in the url
+	var streams = Array.from(wss.clients).filter((socket) => {
+		return typeof socket.streamid != 'undefined';
+	}).filter((socket) => {
+		return socket.streamid == req.params.streamid;
+	});
+
+	//if there are no streams with the id in the url, then redirect to an error
+	if (streams.length == 0) {
+		res.render("error.ejs", {error: `Stream with ID: '${req.params.streamid}' does not exist.`});
+	}
+
+	//check for connections to the server
+	wss.on("connection", (ws) => {
+		//assign the client to a "room" with the stream id
+		ws.room = req.params.streamid;
+
+		//send the existing data of the stream
+		console.log("Connection from Client.");
+		var dataBuf = Buffer.concat(streams[0].dataBuffer);
+		console.log("Data Buf: ", dataBuf);
+		ws.send(dataBuf);
+
+		ws.on("message", (message) => {
+			if (message == "ended") {
+				console.log(`Stream with id: ${req.params.streamid} ended.`);
+			}
+		});
+	});
+
+	//render the view with the stream
+	res.render("viewstream.ejs", viewObj);
+});
+
+//this is a get request to get basic info about a live stream
+app.get("/l/start", middleware.checkSignedIn, (req, res) => {
+	var viewObj = Object.assign({}, viewObject);
+
+	res.render("startstream.ejs", viewObj);
+});
+
+//this is a get request to start streaming on the site
+app.get("/l/stream", middleware.checkSignedIn, (req, res) => {
+	//this is a view object
+	var viewObj = Object.assign({}, viewObject, {streamname: req.query.name, enableChat: req.query.enableChat});
+
+	var streamid = uuidv4();
+
+	console.log("Stream Id: " + streamid);
+
+	wss.on("connection", (ws) => {
+		//set the stream id for this socket
+		ws.streamid = streamid;
+
+		//a data buffer to store the video data for later, store this inside
+		//the websocket in order to be able to access it from other websockets
+		ws.dataBuffer = [];
+
+		//create a file stream for saving the contents of the live stream
+		var fileName = "./storage/videos/files/" + Date.now() + "-" + req.query.name + ".webm";
+		var writeStream = fs.createWriteStream(fileName);
+
+		//message that we got a connection from the streamer
+		console.log("Connection from Streamer.");
+
+		//if the socket recieves a message from the streamer socket, then send the data to the client for
+		//streaming (the data is the live stream)
+		ws.on("message", (message) => {
+			if (typeof message == 'object') {
+				//write the new data to the file
+				writeStream.write(message, () => {
+					console.log("Writing to file complete.");
+				});
+
+				//append the data to the data buffer
+				ws.dataBuffer.push(message);
+			}
+
+			//sort the clients for the websocket server to only the stream
+			//viewers
+			var clients = Array.from(wss.clients).filter((socket) => {
+				return socket.room == streamid;
+			}).filter((socket) => {
+				return socket.readyState == WebSocket.OPEN;
+			});
+
+			//send the new data to each of the corresponding clients
+			clients.forEach((item, index) => {
+				item.send(message);
+			});
+		});
+
+		//whenever the websocket closes, close the write stream to the file as well
+		ws.on("close", () => {
+			console.log("Stream Viewer Disconnected.");
+			writeStream.end();
+		});
+	});
+
+	//render the view for starting a stream
+	res.render("stream.ejs", viewObj);
 });
 
 //this is a get request for the playlists on the site

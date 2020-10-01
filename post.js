@@ -5,9 +5,8 @@ const bcrypt = require("bcrypt");
 const formidable = require("formidable");
 const path = require("path");
 const approx = require("approximate-number");
-var viewObject = require("./variables");
 
-const { app, client, middleware, PORT } = require("./configBasic");
+const { app, client, middleware, PORT, viewObject } = require("./configBasic");
 
 //handle the user registrations
 app.post('/register', (req, res) => {

@@ -1,7 +1,7 @@
 <div class="banner">
 	<div id="banner-icon">
 		<a href="/" target="_parent">
-			<img src="/icons/favicon.ico" width="80px" height="80px">
+			<img src="/content/icons/favicon.ico" width="80px" height="80px">
 		</a>
 	</div>
 	<div id="banner-text">
@@ -11,31 +11,13 @@
 	</div>
 	<div id="searchbar">
 		<form action="/search" method="get" target="_parent">
-			<button type="submit" value="Submit"><img src="/icons/search.ico"></button>
+			<button type="submit" value="Submit"><img src="/content/icons/search.ico"></button>
 			<input type="text" id="searchquery" name="searchquery" required>
 		</form>
 	</div>
 	<div id="settings">
-		<button id="dropbtn"><img src="/icons/gear.ico"></button>
+		<button id="dropbtn"><img src="/content/icons/gear.ico"></button>
 		<div id="dropdown-content">
-				<button id="themeswitch" onclick="changeTheme()">Theme</button>
 		</div>
 	</div>
 </div>
-
-<script type="text/javascript">
-	function changeTheme() {
-		var fgColor = "rgb(173, 255, 18)";
-		var bgColor = "rgb(63, 63, 63)";
-		var style = getComputedStyle(document.body);
-		console.log(style.color);
-		console.log(style.backgroundColor);
-		if (style.color == fgColor) {
-			document.body.style.color = bgColor;
-			document.body.style.backgroundColor = fgColor;
-		} else if (style.color == bgColor) {
-			document.body.style.color = fgColor;
-			document.body.style.backgroundColor = bgColor;
-		}
-	}
-</script>

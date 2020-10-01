@@ -5,6 +5,7 @@
 const fs = require("fs");
 const client = require("./dbConfig");
 const crypto = require("crypto");
+const {v4: uuidv4} = require("uuid");
 
 //import the autocorrect library with a custom path to a custom dictionary file
 var dictpath = "/home/merlin/webdev/crumb/storage/server/words.txt";
@@ -41,7 +42,7 @@ middleware = {
 	//the value of a DB query to be stored in a variable
 	generateAlphanumId: async function () {
 		//generate random bytes for the random id
-		var newid = crypto.randomBytes(11).toString("hex");
+		var newid = uuidv4();
 
 		console.log("Generated new ID: " + newid);
 

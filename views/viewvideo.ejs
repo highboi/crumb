@@ -23,12 +23,12 @@
 						<h1 id="TitleFullscreen"><%= video.title %></h1>
 					</div>
 					<div class="video-controls">
-						<button id="playBtn"><img src="/icons/play.ico"></button>
+						<button id="playBtn"><img src="/content/icons/play.ico"></button>
 						<input id="seeker" type="range" min="0" max="100" value="0" step="1" oninput="vidSeek()">
 						<p id="videotime"></p>
-						<button id="muteBtn"><img src="/icons/sound.ico"></button>
+						<button id="muteBtn"><img src="/content/icons/sound.ico"></button>
 						<input id="volumeslider" type="range" min="0" max="100" step="1" oninput="changeVolume()">
-						<button id="fullscreenBtn"><img src="/icons/fullscreen.ico"></button>
+						<button id="fullscreenBtn"><img src="/content/icons/fullscreen.ico"></button>
 					</div>
 				</div>
 
@@ -43,6 +43,26 @@
 						<% }); %>
 						</p>
 					<% } %>
+					<hr>
+					<div class="extralinks" id="<%= video.id %>extralinks">
+						<button onclick='showform(&quot;<%= video.id %>&quot;, &quot;playlistform&quot;)'>Add To Playlist</button>
+						<button onclick='showform(&quot;<%= video.id %>&quot;, &quot;reportform&quot;)'>Report</button>
+					</div>
+					<div class="extralinkforms" id="<%= video.id %>extralinkforms">
+						<object id="<%= video.id %>playlistform">
+							<h3><a href="/playlist/new/?videoid=<%= video.id %>">Create Playlist</a></h3><br>
+							<% if (typeof playlists != 'undefined') { %>
+								<% playlists.forEach((plist, index) => { %>
+									<h3><a href="/playlistvideo/add/<%= plist.id %>/<%= item.id %>"><%= plist.name %></a></h3><br>
+								<% }); %>
+							<% } %>
+						</object>
+						<object id="<%= video.id %>reportform">
+							<form action="/report/<%= video.id %>" method="post">
+								<%- include('content/ejs/reportform.ejs') %>
+							</form>
+						</object>
+					</div>
 					<hr>
 					<div class="channel-details">
 						<% var channellink = `/u/${videocreator.id}` %>
@@ -70,9 +90,9 @@
 								<p><%= videocreator.subscribers %></p>
 							</div>
 							<div class="likesection">
-								<button class="likebuttons" onclick="likeVideo()"><img src="/icons/like.ico"></button>
+								<button class="likebuttons" onclick="likeVideo()"><img src="/content/icons/like.ico"></button>
 								<p id="likes"><%= video.likes %></p>
-								<button class="likebuttons" onclick="dislikeVideo()"><img src="/icons/dislike.ico"></button>
+								<button class="likebuttons" onclick="dislikeVideo()"><img src="/content/icons/dislike.ico"></button>
 								<p id="dislikes"><%= video.dislikes %></p>
 							</div>
 						</div>
@@ -166,29 +186,44 @@
 			<div class="reccomendations">
 				<h2>&nbspUp Next</h2>
 				<% if (typeof videos != 'undefined') { %>
-					<% for (var i=0; i < videos.length; i++) { %>
+					<% videos.forEach((item, index) => { %>
 						<div class="links">
 							<div class="text">
-								<a href="/v/<%= videos[i].id %>">
-									<img src="<%= videos[i].thumbnail %>" width="600px" height="500px">
+								<a href="/v/<%= item.id %>">
+									<img src="<%= item.thumbnail %>" width="600px" height="500px">
 								</a>
-								<a href="/v/<%= videos[i].id %>">
-									<h2><strong>&nbsp;&nbsp<%= videos[i].title %></strong></h2>
+								<a href="/v/<%= item.id %>">
+									<h2><strong>&nbsp;&nbsp<%= item.title %></strong></h2>
 								</a>
-								<p>&nbsp;&nbsp<%= videos[i].description.substr(0, 14) %>...</p>
+								<p>&nbsp;&nbsp<%= item.description.substr(0, 14) %>...</p>
 							</div>
-							<svg width="10" height="40" class="extras" onclick='showboxVertical(&quot;<%= videos[i].id %>extraslinks&quot;)'>
+							<svg width="10" height="40" class="extras" onclick='showlinks(&quot;<%= item.id %>extralinks&quot;, &quot;<%= item.id %>&quot;)'>
 								<circle cx="5" cy="5" r="5" fill="#adff12"/>
 								<circle cx="5" cy="20" r="5" fill="#adff12"/>
 								<circle cx="5" cy="35" r="5" fill="#adff12"/>
 							</svg>
-							<div id="<%= videos[i].id %>extraslinks" class="extralinks">
-								<a>Add To Playlist</a>
-								<a>Not Interested</a>
-								<a>Report</a>
+							<div id="<%= item.id %>extralinks" class="extralinks">
+								<button onclick='showform(&quot;<%= item.id %>&quot;, &quot;playlistform&quot;)'>Add To Playlist</button>
+								<button>Not Interested</button>
+								<button onclick='showform(&quot;<%= item.id %>&quot;, &quot;reportform&quot;)'>Report</button>
+							</div>
+							<div class="extralinkforms" id="<%= item.id %>extralinkforms">
+								<object id="<%= item.id %>playlistform">
+									<h3><a href="/playlist/new/?videoid=<%= item.id %>">Create Playlist</a></h3><br>
+									<% if (typeof playlists != 'undefined') { %>
+										<% playlists.forEach((plist, index) => { %>
+											<h3><a href="/playlistvideo/add/<%= plist.id %>/<%= item.id %>"><%= plist.name %></a></h3><br>
+										<% }); %>
+									<% } %>
+								</object>
+								<object id="<%= item.id %>reportform">
+									<form action="/report/<%= item.id %>" method="post">
+										<%- include('content/ejs/reportform.ejs') %>
+									</form>
+								</object>
 							</div>
 						</div>
-					<% } %>
+					<% }); %>
 				<% } %>
 			</div>
 		</div>
@@ -227,9 +262,9 @@
 			<% } %>
 		</script>
 
-		<script src="/javascript/videocontroller.js"></script>
-		<script src="/javascript/likedislike.js"></script>
-		<script src="/javascript/subscribe.js"></script>
-		<script src="/javascript/elementclicks.js"></script>
+		<script src="/content/javascript/videocontroller.js"></script>
+		<script src="/content/javascript/likedislike.js"></script>
+		<script src="/content/javascript/subscribe.js"></script>
+		<script src="/content/javascript/elementclicks.js"></script>
 	</body>
 </html>

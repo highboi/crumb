@@ -14,6 +14,7 @@
 			<button><a href="<%= channellink %>">My Channel</a></button><br>
 			<button><a href="/v/submit">Submit a Video</a></button><br>
 			<button><a href="/playlist/new">Make a Playlist</a></button><br>
+			<button><a href="/l/start">Start a Live Stream</a></button><br>
 			<button><a href="/logout">Log Out</a></button>
 		<% } else { %>
 			<button><a href="/login">Login</a></button><br>
@@ -43,7 +44,7 @@
 								<a href="<%= channellink %>">
 									<p><%= item.username %></p>
 								</a>
-								<svg width="10" height="40" id="extras" onclick='showboxVertical(&quot;<%= item.id %>extralinks&quot;)'>
+								<svg width="10" height="40" id="extras" onclick='showlinks(&quot;<%= item.id %>extralinks&quot;, &quot;<%= item.id %>&quot;)'>
 									<circle cx="5" cy="5" r="5" fill="#adff12"/>
 									<circle cx="5" cy="20" r="5" fill="#adff12"/>
 									<circle cx="5" cy="35" r="5" fill="#adff12"/>
@@ -75,7 +76,6 @@
 			<% } %>
 		</div>
 
-		<script src="javascript/elementclicks.js"></script>
-		<script src="javascript/extralinks.js"></script>
+		<script src="/content/javascript/elementclicks.js"></script>
 	</body>
 </html>

@@ -3,9 +3,16 @@
 const express = require("express");
 const session = require("express-session");
 const flash = require("connect-flash");
+const WebSocket = require("ws");
 
 //generate the express app
 const app = express();
+
+//make a server variable
+const server = require("http").createServer(app);
+
+//make a websocket server
+const wss = new WebSocket.Server({server});
 
 //get the database client to make queries
 const client = require("./dbConfig");
@@ -38,15 +45,21 @@ app.use(session({
 app.use(flash());
 
 //declare a static directory for things like stylesheets and other content
-app.use(express.static(__dirname + '/views/content'));
+app.use(express.static('views'));
 
 //declare a static directory for the file contents of the site
-app.use(express.static(__dirname + "/storage"));
+app.use(express.static("storage"));
+
+//this is a global view object to use in each view rendered
+var viewObject = {};
 
 //export the variables
 module.exports = {
 	app,
 	client,
 	middleware,
-	PORT
+	PORT,
+	viewObject,
+	server,
+	wss
 }

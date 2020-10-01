@@ -143,6 +143,10 @@ STYLE VIDEO TEXT
 	background-color: #3f3f3f;
 }
 
+.container .video-contents .videotext .extralinkforms object {
+	display: none;
+}
+
 /*
 VIDEO CONTROLS
 */
@@ -343,7 +347,10 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 
 .container .reccomendations .links .extralinks {
 	display: none;
-	position: absolute;
+}
+
+.container .reccomendations .links .extralinkforms object {
+	display: none;
 }
 
 /**/

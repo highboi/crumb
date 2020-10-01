@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/html/head.html') %>
+		<title>Livestream - Crumb</title>
+	</head>
+	<body>
+		<%- include('content/html/banner.html') %>
+
+		<%- include('content/html/body.html') %>
+
+		<video id="livestream"></video>
+		<h1><%= streamname %></h1>
+		<h3>Enable Chat: <%= enableChat %></h3>
+		<script src="/content/javascript/stream.js"></script>
+	</body>
+</html>
