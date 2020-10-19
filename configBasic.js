@@ -1,9 +1,12 @@
 //this file contains the basic configuration for the server
 
+//modules to use
 const express = require("express");
 const session = require("express-session");
+const cookieParser = require("cookie-parser");
 const flash = require("connect-flash");
 const WebSocket = require("ws");
+const NodeMediaServer = require("node-media-server");
 
 //generate the express app
 const app = express();
@@ -11,8 +14,37 @@ const app = express();
 //make a server variable
 const server = require("http").createServer(app);
 
-//make a websocket server
-const wss = new WebSocket.Server({server});
+//make websocket servers pertaining to specific functions
+const liveWss = new WebSocket.Server({noServer: true});
+const chatWss = new WebSocket.Server({noServer: true});
+
+//configure and run node-media-server for OBS streaming on top of in-browser streams
+const nmsConfig = {
+	rtmp: {
+		port: 1935,
+		chunk_size: 60000,
+		gop_cache: true,
+		ping: 30,
+		ping_timeout: 60
+	},
+	http: {
+		port: 8000,
+		mediaroot: "./storage/videos/nmsMedia",
+		allow_origin: "*"
+	},
+	trans: {
+		ffmpeg: '/usr/bin/ffmpeg',
+		tasks: [
+			{
+				app: 'live',
+				mp4: true,
+				mp4Flags: '[movflags=frag_keyframe+empty_moov]',
+			}
+		]
+	}
+};
+const nms = new NodeMediaServer(nmsConfig);
+
 
 //get the database client to make queries
 const client = require("./dbConfig");
@@ -34,12 +66,14 @@ app.use(express.urlencoded({ extended: false }));
 
 //set up the session for the server
 app.use(session({
-		cookie: {maxAge: 60000},
 		secret: SALT, ///the salt to encrypt the information in the session
 		resave: false, //do not resave session variables if nothing is changed
 		saveUninitialized: false //do not save uninitialized variables
 	})
 );
+
+//use the cookie parser for sessions
+app.use(cookieParser());
 
 //allow the app to use flash messages
 app.use(flash());
@@ -50,16 +84,14 @@ app.use(express.static('views'));
 //declare a static directory for the file contents of the site
 app.use(express.static("storage"));
 
-//this is a global view object to use in each view rendered
-var viewObject = {};
-
 //export the variables
 module.exports = {
 	app,
 	client,
 	middleware,
 	PORT,
-	viewObject,
 	server,
-	wss
+	liveWss,
+	chatWss,
+	nms
 }

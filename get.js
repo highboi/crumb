@@ -1,15 +1,35 @@
 //this is a file to handle all of the get requests for the server
 
-const { app, client, middleware, PORT, viewObject, server, wss} = require("./configBasic");
+const { app, client, middleware, PORT, server, liveWss, chatWss} = require("./configBasic");
 
 const fs = require("fs");
 const approx = require("approximate-number");
 const path = require("path");
 const {v4: uuidv4} = require("uuid");
 const WebSocket = require("ws");
+const url = require("url");
+const cookie = require("cookie");
 
 //calculate the amount of hits on the site
 app.use(middleware.hitCounter);
+
+//handle the http upgrade for websockets (switching from http(s) to ws protocol)
+server.on("upgrade", (req, socket, head) => {
+	var pathname = url.parse(req.url).pathname;
+
+	if (pathname == "/live") {
+		console.log("Live Streaming Server Connection...");
+		liveWss.handleUpgrade(req, socket, head, (ws) => {
+			liveWss.emit("connection", ws, req);
+		});
+	} else if (pathname == "/chat") {
+		console.log("Chat Server Connection...");
+		chatWss.handleUpgrade(req, socket, head, (ws) => {
+			chatWss.emit("connection", ws, req);
+		});
+	}
+});
+
 
 //get the index of the site working
 app.get('/', async (req, res) => {
@@ -17,15 +37,14 @@ app.get('/', async (req, res) => {
 	var videos = await client.query("SELECT * FROM videos LIMIT 50");
 	videos = videos.rows;
 
+	var viewObj = {message: req.flash("message"), videos: videos}
+
 	//select all of the playlists in the database that belong to the user if they are signed in
-	if (req.session.user) {
-		var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [req.session.user.id]);
+	if (req.cookies.userinfo) {
+		var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [req.cookies.userinfo.id]);
 		playlists = playlists.rows;
 		//object for the view with the playlists included
-		var viewObj = Object.assign({}, viewObject, {message: req.flash("message"), videos: videos, playlists: playlists});
-	} else {
-		//create an object for the view
-		var viewObj = Object.assign({}, viewObject, {message: req.flash("message"), videos: videos});
+		var viewObj = Object.assign({}, {user: req.cookies.userinfo}, viewObj, {playlists: playlists});
 	}
 
 	//render the view
@@ -34,24 +53,27 @@ app.get('/', async (req, res) => {
 
 //get the registration page
 app.get('/register', middleware.checkNotSignedIn, (req, res) => {
-	var viewObj = Object.assign({}, viewObject, {message: req.flash("message")});
+	var viewObj = {message: req.flash("message")};
 	res.render("register.ejs", viewObj);
 });
 
 //get the login page
 app.get('/login', middleware.checkNotSignedIn, (req, res) => {
-	var viewObj = Object.assign({}, viewObject, {message: req.flash("message")});
+	var viewObj = {message: req.flash("message")};
 	res.render("login.ejs", viewObj);
 });
 
 //log the user out of the session
 app.get("/logout", middleware.checkSignedIn, (req, res) => {
-	req.session.user = null;
-	delete viewObject.user;
+	res.cookie('userinfo', '', {expires: new Date(0)});
 	console.log("[+] Logged out.");
 	req.flash("message", "Logged out!");
 	res.redirect("/");
 });
+
+
+
+
 
 //view the channel of the user
 app.get("/u/:userid", async (req, res) => {
@@ -99,15 +121,21 @@ app.get("/u/:userid", async (req, res) => {
 	}
 
 	//get the full view object
-	viewObj = Object.assign({}, viewObject, viewObj);
+	if (req.cookies.userinfo) {
+		viewObj = Object.assign({}, {user: req.cookies.userinfo}, viewObj);
+	}
 
 	//render the view
 	res.render("viewchannel.ejs", viewObj);
 });
 
+
+
+
+
 //get the form for submitting videos
 app.get("/v/submit", middleware.checkSignedIn, (req, res) => {
-	var viewObj = Object.assign({}, viewObject, {message: req.flash("message")});
+	var viewObj = Object.assign({}, {user: req.cookies.userinfo}, {message: req.flash("message")});
 	res.render("submitvideo.ejs", viewObj);
 });
 
@@ -133,13 +161,22 @@ app.get("/v/:videoid", async (req, res) => {
 	var comments = await client.query(`SELECT * FROM comments WHERE videoid=$1 ORDER BY posttime DESC`, [req.params.videoid]);
 	comments = comments.rows;
 
+	//select all of the chat messages that were typed if this was a live stream
+	var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE streamid=$1`, [req.params.videoid]);
+	chatReplayMessages = chatReplayMessages.rows;
+
 	//set the object to be passed to the rendering function
 	var viewObj = {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments};
 
+	//check to see if there are any chat messages to replay
+	if (chatReplayMessages.length > 0) {
+		viewObj.chatReplayMessages = chatReplayMessages;
+	}
+
 	//render the video view based on whether or not the user is logged in and has a session variable
-	if (req.session.user) {
-		viewObj.user = req.session.user;
-		var subscribed = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [videocreator.id, req.session.user.id]);
+	if (req.cookies.userinfo) {
+		viewObj.user = req.cookies.userinfo;
+		var subscribed = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [videocreator.id, req.cookies.userinfo.id]);
 		viewObj.subscribed = subscribed.rows.length;
 	}
 
@@ -151,39 +188,54 @@ app.get("/v/:videoid", async (req, res) => {
 
 	viewObj.message = req.flash("message");
 
-	viewObj = Object.assign({}, viewObject, viewObj);
-
 	res.render("viewvideo.ejs", viewObj);
 });
 
-app.get("/l/view/:streamid", (req, res) => {
-	//create a view object with a specific
-	var viewObj = Object.assign({}, viewObject);
 
+
+
+
+app.get("/l/view/:streamid", async (req, res) => {
 	//isolate the websocket with the livestream id in the url
-	var streams = Array.from(wss.clients).filter((socket) => {
+	var streams = Array.from(liveWss.clients).filter((socket) => {
 		return typeof socket.streamid != 'undefined';
 	}).filter((socket) => {
 		return socket.streamid == req.params.streamid;
 	});
 
-	//if there are no streams with the id in the url, then redirect to an error
+	//create a view object
+	var viewObj = {streamid: req.params.streamid, enableChat: streams[0].enableChat};
+	if (req.cookies.userinfo) {
+		viewObj.user = req.cookies.userinfo;
+	}
+
+	//if there are no streams with the id in the url, then redirect to an error or the recorded stream
 	if (streams.length == 0) {
-		res.render("error.ejs", {error: `Stream with ID: '${req.params.streamid}' does not exist.`});
+		var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.streamid]);
+		if (video.rows.length == 0) {
+			res.render("error.ejs", {error: `Stream with ID: '${req.params.streamid}' does not exist.`});
+		} else {
+			req.flash('message', "Live stream does not exist or streamer has stopped streaming.");
+			res.redirect(`/v/${req.params.streamid}`);
+		}
 	}
 
 	//check for connections to the server
-	wss.on("connection", (ws) => {
+	liveWss.on("connection", (ws, req) => {
 		//assign the client to a "room" with the stream id
 		ws.room = req.params.streamid;
+
+		console.log("COOKIES: ", req.cookies);
 
 		//send the existing data of the stream
 		console.log("Connection from Client.");
 		var dataBuf = Buffer.concat(streams[0].dataBuffer);
 		console.log("Data Buf: ", dataBuf);
 		ws.send(dataBuf);
+		console.log("NO ERROR YET.");
 
 		ws.on("message", (message) => {
+			console.log("NO ERROR YET.");
 			if (message == "ended") {
 				console.log(`Stream with id: ${req.params.streamid} ended.`);
 			}
@@ -196,72 +248,61 @@ app.get("/l/view/:streamid", (req, res) => {
 
 //this is a get request to get basic info about a live stream
 app.get("/l/start", middleware.checkSignedIn, (req, res) => {
-	var viewObj = Object.assign({}, viewObject);
+	var viewObj = {};
+	if (req.cookies.userinfo) {
+		viewObj.user = req.cookies.userinfo;
+	}
 
 	res.render("startstream.ejs", viewObj);
 });
 
-//this is a get request to start streaming on the site
-app.get("/l/stream", middleware.checkSignedIn, (req, res) => {
-	//this is a view object
-	var viewObj = Object.assign({}, viewObject, {streamname: req.query.name, enableChat: req.query.enableChat});
+//this is a websocket connection handler for the chat server which handles the transmitting of chat data between clients of a live stream
+chatWss.on("connection", (ws, req) => {
+	//get the user info from the cookies in the headers
+	var userinfo = JSON.parse((cookie.parse(req.headers.cookie).userinfo).slice(2));
 
-	var streamid = uuidv4();
+	//whenever we get a message
+	ws.on("message", async (message) => {
+		console.log(typeof message);
+		console.log("Message: ", message);
 
-	console.log("Stream Id: " + streamid);
+		//get the streamid and the actual message
+		var data = message.split(",");
 
-	wss.on("connection", (ws) => {
-		//set the stream id for this socket
-		ws.streamid = streamid;
+		//if this is an initialization segment with information about the client, process this
+		if (data[0] == "init") {
+			//set the stream room id
+			ws.room = data[1];
 
-		//a data buffer to store the video data for later, store this inside
-		//the websocket in order to be able to access it from other websockets
-		ws.dataBuffer = [];
-
-		//create a file stream for saving the contents of the live stream
-		var fileName = "./storage/videos/files/" + Date.now() + "-" + req.query.name + ".webm";
-		var writeStream = fs.createWriteStream(fileName);
-
-		//message that we got a connection from the streamer
-		console.log("Connection from Streamer.");
-
-		//if the socket recieves a message from the streamer socket, then send the data to the client for
-		//streaming (the data is the live stream)
-		ws.on("message", (message) => {
-			if (typeof message == 'object') {
-				//write the new data to the file
-				writeStream.write(message, () => {
-					console.log("Writing to file complete.");
-				});
-
-				//append the data to the data buffer
-				ws.dataBuffer.push(message);
+			//check the type of the socket (streamer or client) and set a boolean accordingly in order to distinguish between the host and clients/viewers
+			if (data[2] == "streamer") {
+				ws.isStreamer = true;
+			} else if (data[2] == "client") {
+				ws.isStreamer = false;
 			}
-
-			//sort the clients for the websocket server to only the stream
-			//viewers
-			var clients = Array.from(wss.clients).filter((socket) => {
-				return socket.room == streamid;
+		} else if (data[0] == "msg") { //if the data is a message to send, then send it
+			//get the recipients from the chat wss for this live stream
+			var recipients = Array.from(chatWss.clients).filter((socket) => {
+				return typeof socket.room != 'undefined';
 			}).filter((socket) => {
-				return socket.readyState == WebSocket.OPEN;
+				return socket.room == data[1];
 			});
 
-			//send the new data to each of the corresponding clients
-			clients.forEach((item, index) => {
-				item.send(message);
+			//send the message to each of the recipients
+			recipients.forEach((item, index) => {
+				if (item != ws) {
+					item.send(data[2]);
+				}
 			});
-		});
 
-		//whenever the websocket closes, close the write stream to the file as well
-		ws.on("close", () => {
-			console.log("Stream Viewer Disconnected.");
-			writeStream.end();
-		});
+			//insert the message into the database along with the stream id, user id, and the time which the message was posted
+			await client.query(`INSERT INTO livechat (message, streamid, userid, time) VALUES ($1, $2, $3, $4)`, [data[2], data[1], userinfo.id, parseInt(data[3], 10)]);
+		}
 	});
-
-	//render the view for starting a stream
-	res.render("stream.ejs", viewObj);
 });
+
+
+
 
 //this is a get request for the playlists on the site
 app.get("/p/:playlistid", async(req, res) => {
@@ -281,7 +322,9 @@ app.get("/p/:playlistid", async(req, res) => {
 	var viewObj = {creator: creator, videos: videos, playlist: playlist, message: req.flash("message")};
 
 	//make the full view object
-	viewObj = Object.assign({}, viewObject, viewObj);
+	if (req.cookies.userinfo) {
+		viewObj.user = req.cookies.userinfo;
+	}
 
 	//render the view for the playlist
 	res.render("viewplaylist.ejs", viewObj);
@@ -290,7 +333,7 @@ app.get("/p/:playlistid", async(req, res) => {
 //this is a get path for adding videos to playlists on the site
 app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//get the playlist from the database
-	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.session.user.id]);
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.cookies.userinfo.id]);
 	playlist = playlist.rows[0];
 
 	//get the playlist-video relation from the database
@@ -299,7 +342,7 @@ app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, asy
 
 	//check to see if the video is in the playlist already
 	if (typeof playlistvideo != 'undefined') { //if the video has already been added, then render an error
-		var viewObj = Object.assign({}, viewObject, {error: "Video has already been added to the playlist."});
+		var viewObj = {user: req.cookies.userinfo, error: "Video has already been added to the playlist."};
 		res.render("error.ejs", viewObj);
 	} else {
 		//do something based on if the playlist belongs to the user or not
@@ -314,7 +357,7 @@ app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, asy
 			//redirect to the playlist again
 			res.redirect(`/p/${req.params.playlistid}`);
 		} else { //if the playlist does not belong to the user, render an error
-			var viewObj = Object.assign({}, viewObject, {error: "This playlist does not belong to you."});
+			var viewObj = {user: req.cookies.userinfo, error: "This playlist does not belong to you."};
 			res.render("error.ejs", viewObj);
 		}
 	}
@@ -323,7 +366,7 @@ app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, asy
 //this is a get path for deleting videos from playlists on the site
 app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//get the playlist from the database
-	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.session.user.id]);
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.cookies.userinfo.id]);
 	playlist = playlist.rows[0];
 
 	//get the playlist-video relation from the database
@@ -345,11 +388,11 @@ app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, 
 			//redirect to the playlist again
 			res.redirect(`/p/${req.params.playlistid}`);
 		} else { //if the playlist does not belong to the user, then render an error
-			var viewObj = Object.assign({}, viewObject, {error: "Playlist does not belong to you."});
+			var viewObj = {user: req.cookies.userinfo, error: "Playlist does not belong to you."};
 			res.render("error.ejs", viewObj);
 		}
 	} else { //if the video is not in the playlist, then render an error
-		var viewObj = Object.assign({}, viewObject, {error: `Video with ID: ${playlistvideo.video_id} not in playlist.`});
+		var viewObj = {user: req.cookies.userinfo, error: `Video with ID: ${playlistvideo.video_id} not in playlist.`};
 		res.render("error.ejs", viewObj);
 	}
 });
@@ -357,9 +400,9 @@ app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, 
 //this is a get request for creating a new playlist
 app.get("/playlist/new", middleware.checkSignedIn, async (req, res) => {
 	if (typeof req.query.videoid != 'undefined') {
-		var viewObj = Object.assign({}, viewObject, {videoid: req.query.videoid});
+		var viewObj = {user: req.cookies.userinfo, videoid: req.query.videoid};
 	} else {
-		var viewObj = Object.assign({}, viewObject);
+		var viewObj = {user: req.cookies.userinfo};
 	}
 	//render the form for creating a new playlist
 	res.render("createplaylist.ejs", viewObj);
@@ -368,7 +411,7 @@ app.get("/playlist/new", middleware.checkSignedIn, async (req, res) => {
 //this is a get request for deleting a playlist
 app.get("/playlist/delete/:playlistid", middleware.checkSignedIn, async (req, res) => {
 	//check to see if the playlist belongs to the user
-	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.session.user.id]);
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, req.cookies.userinfo.id]);
 	playlist = playlist.rows[0];
 
 	//check to see if the playlist exists in the first place
@@ -381,13 +424,17 @@ app.get("/playlist/delete/:playlistid", middleware.checkSignedIn, async (req, re
 		req.flash("message", "Playlist Deleted!");
 		res.redirect("/");
 	} else { //if the playlist does not exist or does not belong to the user, then render an error
-		var viewObj = Object.assign({}, viewObject, {error: `Playlist with ID: ${playlist.id} is nonexistent or does not belong to you.`});
+		var viewObj = {user: req.cookies.userinfo, error: `Playlist with ID: ${playlist.id} is nonexistent or does not belong to you.`};
 		res.render("error.ejs", viewObj);
 	}
 });
 
+
+
+
+
 //delete a video
-app.get("/v/delete/:videoid", async (req, res) => {
+app.get("/v/delete/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//store the video to be deleted
 	var video = await client.query(`SELECT thumbnail, video, user_id FROM videos WHERE id=$1`, [req.params.videoid]);
 	video = video.rows[0];
@@ -397,7 +444,7 @@ app.get("/v/delete/:videoid", async (req, res) => {
 	var videopath = __dirname + "/storage" + video.video;
 
 	//delete the video details before deleting the files in case of any error
-	if (req.session.user.id == video.user_id) { //did the user make this video?
+	if (req.cookies.userinfo.id == video.user_id) { //did the user make this video?
 		//delete the video details from the database
 		await client.query(`DELETE FROM videos WHERE id=$1`, [req.params.videoid]);
 		//delete the files associated with the videos
@@ -425,10 +472,10 @@ app.get("/v/like/:videoid", middleware.checkSignedIn, async (req, res) => {
 	video = video.rows[0];
 
 	//get the liked video from the database
-	var liked = await client.query(`SELECT * FROM likedVideos WHERE userid=$1 AND videoid=$2`, [req.session.user.id, req.params.videoid]);
+	var liked = await client.query(`SELECT * FROM likedVideos WHERE userid=$1 AND videoid=$2`, [req.cookies.userinfo.id, req.params.videoid]);
 
 	//get the disliked video from the database
-	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE userid=$1 AND videoid=$2`, [req.session.user.id, req.params.videoid]);
+	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE userid=$1 AND videoid=$2`, [req.cookies.userinfo.id, req.params.videoid]);
 
 	//get the updated amount of likes and dislikes
 	var data = await middleware.handleLikes(req, video, liked, disliked, "likedVideos", "dislikedVideos");
@@ -445,10 +492,10 @@ app.get("/v/dislike/:videoid", middleware.checkSignedIn, async (req, res) => {
 	video = video.rows[0];
 
 	//get the disliked video from the database
-	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE userid=$1 AND videoid=$2`, [req.session.user.id, req.params.videoid]);
+	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE userid=$1 AND videoid=$2`, [req.cookies.userinfo.id, req.params.videoid]);
 
 	//get the liked video from the database
-	var liked = await client.query(`SELECT * FROM likedVideos WHERE userid=$1 AND videoid=$2`, [req.session.user.id, req.params.videoid]);
+	var liked = await client.query(`SELECT * FROM likedVideos WHERE userid=$1 AND videoid=$2`, [req.cookies.userinfo.id, req.params.videoid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleDislikes(req, video, liked, disliked, "likedVideos", "dislikedVideos");
@@ -458,10 +505,14 @@ app.get("/v/dislike/:videoid", middleware.checkSignedIn, async (req, res) => {
 	res.send(data);
 });
 
+
+
+
+
 //get request for subscribing to a channel
 app.get("/subscribe/:channelid", middleware.checkSignedIn, async (req, res) => {
 	//get the subscribed channel from the database
-	var channel = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [req.params.channelid, req.session.user.id]);
+	var channel = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [req.params.channelid, req.cookies.userinfo.id]);
 
 	//get the amount of subscribers from the channel
 	var subscriberscount = await client.query(`SELECT subscribers FROM users WHERE id=$1`, [req.params.channelid]);
@@ -469,20 +520,24 @@ app.get("/subscribe/:channelid", middleware.checkSignedIn, async (req, res) => {
 
 	//check to see what to do to update the subscribed list
 	if (channel.rows.length == 0) { //if the user has not subscribed to this channel yet, then add the user id and channel id into the database
-		await client.query(`INSERT INTO subscribed (channel_id, user_id) VALUES ($1, $2)`, [req.params.channelid, req.session.user.id]);
+		await client.query(`INSERT INTO subscribed (channel_id, user_id) VALUES ($1, $2)`, [req.params.channelid, req.cookies.userinfo.id]);
 		//increase the amount of subscribers for the user
 		await client.query(`UPDATE users SET subscribers=$1 WHERE id=$2`, [(subscriberscount + 1).toString(), req.params.channelid]);
 		//update the user object inside the videos
 		//send a response that is true, meaning that the user has subscribed
 		res.send("true");
 	} else if (channel.rows.length > 0) { //if the user has already subscribed to the channel, then the user wants to undo the subscription (a confirm in javascript will be done in the front end to check if the user clicked accidentally)
-		await client.query(`DELETE FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [req.params.channelid, req.session.user.id]);
+		await client.query(`DELETE FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [req.params.channelid, req.cookies.userinfo.id]);
 		//decrease the amount of subscribers that the user has
 		await client.query(`UPDATE users SET subscribers=$1 WHERE id=$2`, [(subscriberscount - 1).toString(), req.params.channelid]);
 		//send a response that is false, meaning the user unsubscribed
 		res.send("false");
 	}
 });
+
+
+
+
 
 //get request for searching for videos
 app.get("/search", async (req, res) => {
@@ -524,11 +579,19 @@ app.get("/search", async (req, res) => {
 
 	console.log("Search: " + search.humanquery);
 
+	viewObj = {search: search};
+
 	//create the view object
-	viewObj = Object.assign({}, viewObject, {search: search});
+	if (req.cookies.userinfo) {
+		viewObj.user = req.cookies.userinfo;
+	}
 
 	res.render("searchresults.ejs", viewObj);
 });
+
+
+
+
 
 //a get request for liking a comment on the site
 app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) => {
@@ -537,10 +600,10 @@ app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) =
 	comment = comment.rows[0];
 
 	//select the liked comment from the database
-	var likedComment = await client.query(`SELECT * FROM likedComments WHERE userid=$1 AND commentid=$2`, [req.session.user.id, req.params.commentid]);
+	var likedComment = await client.query(`SELECT * FROM likedComments WHERE userid=$1 AND commentid=$2`, [req.cookies.userinfo.id, req.params.commentid]);
 
 	//select the disliked comment from the database
-	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE userid=$1 AND commentid=$2`, [req.session.user.id, req.params.commentid]);
+	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE userid=$1 AND commentid=$2`, [req.cookies.userinfo.id, req.params.commentid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleLikes(req, comment, likedComment, dislikedComment, "likedComments", "dislikedComments");
@@ -550,7 +613,6 @@ app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) =
 
 	//send the updated values
 	res.send(data);
-
 });
 
 //a get request for disliking a comment on the site
@@ -560,10 +622,10 @@ app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res
 	comment = comment.rows[0];
 
 	//select the liked comment from the database
-	var likedComment = await client.query(`SELECT * FROM likedComments WHERE userid=$1 AND commentid=$2`, [req.session.user.id, req.params.commentid]);
+	var likedComment = await client.query(`SELECT * FROM likedComments WHERE userid=$1 AND commentid=$2`, [req.cookies.userinfo.id, req.params.commentid]);
 
 	//select the disliked comment from the database
-	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE userid=$1 AND commentid=$2`, [req.session.user.id, req.params.commentid]);
+	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE userid=$1 AND commentid=$2`, [req.cookies.userinfo.id, req.params.commentid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleDislikes(req, comment, likedComment, dislikedComment, "likedComments", "dislikedComments");
@@ -575,14 +637,22 @@ app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res
 	res.send(data);
 });
 
+
+
+
+
 //this is a get request for sections of videos on the site
 app.get("/s/:topic", async (req, res) => {
 	//select all of the videos in the database with topics that include the topic in the link
 	var videos = await client.query(`SELECT * FROM videos WHERE topics LIKE $1`, ["%" + req.params.topic + "%"]);
 	videos = videos.rows;
 
+	var viewObj = {videos: videos, sectionname: req.params.topic};
+
 	//have a view object
-	var viewObj = Object.assign({}, viewObject, {videos: videos, sectionname: req.params.topic});
+	if (req.cookies.userinfo) {
+		viewObj.user = req.cookies.userinfo;
+	}
 
 	//render the view for the section
 	res.render("viewsection.ejs", viewObj);
@@ -591,18 +661,18 @@ app.get("/s/:topic", async (req, res) => {
 //this is a get request to join a section of videos
 app.get("/s/subscribe/:topic", middleware.checkSignedIn, async (req, res) => {
 	//get the subscribed topic and the user id from the database to check for joining or unjoining
-	var subscribed = await client.query(`SELECT * FROM subscribedtopics WHERE topicname=$1 AND user_id=$2`, [req.params.topic, req.session.user.id]);
+	var subscribed = await client.query(`SELECT * FROM subscribedtopics WHERE topicname=$1 AND user_id=$2`, [req.params.topic, req.cookies.userinfo.id]);
 	subscribed = subscribed.rows;
 
 	//check to see if the user is joined or not
 	if (subscribed.length == 0) {
 		//add the user and the topic to the subscribedtopics table
-		await client.query(`INSERT INTO subscribedtopics (topicname, user_id) VALUES ($1, $2)`, [req.params.topic, req.session.user.id]);
+		await client.query(`INSERT INTO subscribedtopics (topicname, user_id) VALUES ($1, $2)`, [req.params.topic, req.cookies.userinfo.id]);
 		//send a value that shows that the joining happened
 		res.send("true");
 	} else if (subscribed.length > 0) {
 		//delete the user and the topic from the subscribedtopics table
-		await client.query(`DELETE FROM subscribedtopics WHERE topicname=$1 AND user_id=$2`, [req.params.topic, req.session.user.id]);
+		await client.query(`DELETE FROM subscribedtopics WHERE topicname=$1 AND user_id=$2`, [req.params.topic, req.cookies.userinfo.id]);
 		//send a value that shows that the unjoining happened
 		res.send("false");
 	}

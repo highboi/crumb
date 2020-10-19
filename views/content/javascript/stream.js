@@ -1,8 +1,8 @@
-var socket = new WebSocket(`ws://localhost/`);
+var streamSocket = new WebSocket(`ws://localhost/live`);
 var livestream = document.getElementById("livestream");
 
-socket.onopen = (e) => {
-	console.log("Connected");
+streamSocket.onopen = (e) => {
+	console.log("Stream Socket Connected.");
 };
 
 //get the user's webcam video and audio
@@ -35,12 +35,12 @@ async function sendVideoChunks(event) {
 
 	console.log(event.data.type);
 
-	socket.send(chunk);
+	streamSocket.send(chunk);
 }
 
 //function to tell the server to end the stream on the client side
 function stopStream() {
-	socket.send("ended");
+	streamSocket.send("ended");
 }
 
 //add a video stream to the html document

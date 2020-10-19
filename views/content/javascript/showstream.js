@@ -1,5 +1,5 @@
 //make a websocket connection and get the livestream video tag
-var socket = new WebSocket(`ws://localhost/`);
+var socket = new WebSocket(`ws://localhost/live`);
 var livestream = document.getElementById("livestream");
 
 //make a mediasource, sourcebuffer, and set the stream source

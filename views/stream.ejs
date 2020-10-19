@@ -12,6 +12,24 @@
 		<video id="livestream"></video>
 		<h1><%= streamname %></h1>
 		<h3>Enable Chat: <%= enableChat %></h3>
+
+		<% if (enableChat) { %>
+			<h3>Live Chat:</h3>
+		<% } else { %>
+			<h3>Chat disabled for this live stream.</h3>
+		<% } %>
+
+		<div id="chatBox"></div>
+		<div id="chatForm">
+			<input type="text" id="message" name="message" placeholder="Description" maxlength="150">
+			<button id="submitBtnChat" onclick="sendMessage()">Send Message</button>
+		</div>
+		<script>
+			var enableChat = <%- JSON.stringify(enableChat) %>;
+			var streamid = <%- JSON.stringify(streamid) %>;
+			var isStreamer = <%- JSON.stringify(isStreamer) %>;
+		</script>
 		<script src="/content/javascript/stream.js"></script>
+		<script src="/content/javascript/livechat.js"></script>
 	</body>
 </html>

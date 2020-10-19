@@ -30,6 +30,7 @@ function initializePlayer() {
 	volumeslider.value = 100;
 	video.volume = 1;
 
+	console.log(video.duration);
 	//get the total duration of the video
 	totalduration = findTime(video.duration);
 
@@ -41,8 +42,15 @@ function initializePlayer() {
 	} else if (hours <= 0) {
 		videotime.innerHTML = "00:00/" + `${totalduration}`;
 	}
+
+	//update the duration if the duration changes for some odd reason
+	video.ondurationchange = () => {
+		totalduration = findTime(video.duration);
+	};
 }
-window.onload = initializePlayer;
+
+//whenever the window loads initialize the player
+window.onload = initializePlayer();
 
 //toggle the play and pause function of the video
 function playPause() {
@@ -54,6 +62,8 @@ function playPause() {
 		video.pause();
 		playBtnImg.src = "http://localhost/content/icons/play.ico";
 	}
+
+	console.log(video.duration);
 }
 
 //toggle the play and pause but shift focus to the play button to allow for the space bar to pause/play

@@ -26,7 +26,11 @@
 			<% if (typeof videos != 'undefined') { %>
 				<% videos.forEach((item, index) => { %>
 					<div class="video">
-						<% var videolink = `/v/${item.id}` %>
+						<% if (item.streaming == 'true') { %>
+							<% var videolink = `/l/view/${item.id}` %>
+						<% } else { %>
+							<% var videolink = `/v/${item.id}` %>
+						<% } %>
 						<% var channellink = `/u/${item.user_id}` %>
 						<div class="thumbnail">
 							<a href="<%= videolink %>">

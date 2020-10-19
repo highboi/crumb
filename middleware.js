@@ -6,6 +6,7 @@ const fs = require("fs");
 const client = require("./dbConfig");
 const crypto = require("crypto");
 const {v4: uuidv4} = require("uuid");
+const {viewObject} = require("./globalVars");
 
 //import the autocorrect library with a custom path to a custom dictionary file
 var dictpath = "/home/merlin/webdev/crumb/storage/server/words.txt";
@@ -18,7 +19,7 @@ middleware = {
 	//this is a function that redirects users to the login page if the user is not signed in
 	//this is used for pages and requests that require a login
 	checkSignedIn: function (req, res, next) {
-		if (req.session.user) {
+		if (req.cookies.hasOwnProperty('userinfo')) {
 			next();
 		} else {
 			req.flash("message", "Please sign in.");
@@ -29,7 +30,7 @@ middleware = {
 	//this is a function to redirect users to the index page if they are signed in already
 	//this is used for login pages and other forms that sign the user in
 	checkNotSignedIn: function (req, res, next) {
-		if (req.session.user) {
+		if (req.cookies.hasOwnProperty('userinfo')) {
 			req.flash("message", "Already Logged In!");
 			res.redirect("/");
 		} else {
@@ -41,7 +42,7 @@ middleware = {
 	//this function needs to be asynchronous as to allow for
 	//the value of a DB query to be stored in a variable
 	generateAlphanumId: async function () {
-		//generate random bytes for the random id
+		//get the supposed new id
 		var newid = uuidv4();
 
 		console.log("Generated new ID: " + newid);
@@ -62,6 +63,22 @@ middleware = {
 			middleware.generateAlphanumId();
 		} else { //if a unique id has been found, return this id
 			console.log("Valid ID Found: " + newid.toString());
+			return newid;
+		}
+	},
+
+	//this is a function that generates stream keys for OBS streaming
+	generateStreamKey: async function () {
+		//generate random bytes for the user's stream key instead of using uuid
+		var newid = crypto.randomBytes(32).toString("base64");
+
+		//check to see if there are any existing users with the same stream key
+		var res = await client.query(`SELECT * FROM users WHERE streamkey=$1`, newid);
+
+		if (res.rows.length > 0) {
+			middleware.generateStreamKey();
+		} else {
+			console.log("Valid Stream Key Found: " + newid.toString());
 			return newid;
 		}
 	},
@@ -294,9 +311,16 @@ middleware = {
 	},
 
 	//a function for getting a date string for showing the post date of videos, etc
-	getDate: function () {
+	getDate: function (timestamp=0) {
 		//get the current time at the time of executing the function
-		var currenttime = new Date();
+		if (timestamp == 0) {
+			var currenttime = new Date();
+		} else {
+			var currenttime = timestamp;
+		}
+
+		//get the seconds
+		var seconds = currenttime.getSeconds();
 
 		//get the minutes
 		var minutes = currenttime.getMinutes();
@@ -314,7 +338,7 @@ middleware = {
 		var year = currenttime.getFullYear();
 
 		//bring all of the details into one date string, having each number seperated by dashes for splitting the string later on
-		var datestring = [year.toString(), month.toString(), day.toString(), hours.toString(), minutes.toString()];
+		var datestring = [year.toString(), month.toString(), day.toString(), hours.toString(), minutes.toString(), seconds.toString()];
 		datestring = datestring.join("-");
 
 		//return the date string
@@ -414,7 +438,7 @@ middleware = {
 	//this is a function to handle the likes on certain elements of the site
 	handleLikes: async function(req, element, liked, disliked, likedTable, dislikedTable) {
 		//get the user id and the element id
-		var userid = req.session.user.id.toString();
+		var userid = req.cookies.userinfo.id.toString();
 		var elementid = element.id.toString();
 
 		//get the id column name based on if the element has a video or not
@@ -456,7 +480,7 @@ middleware = {
 	//this is a function to handle the dislikes on certain elements of the site
 	handleDislikes: async function (req, element, liked, disliked, likedTable, dislikedTable) {
 		//get the userid and element id
-		var userid = req.session.user.id.toString();
+		var userid = req.cookies.userinfo.id.toString();
 		var elementid = element.id.toString();
 
 		//get the id column name

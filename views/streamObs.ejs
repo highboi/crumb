@@ -10,6 +10,7 @@
 		<%- include('content/html/body.html') %>
 
 		<video id="livestream" controls=""></video>
+		<h1><%= streamname %></h1>
 
 		<% if (enableChat) { %>
 			<h3>Live Chat:</h3>
@@ -18,7 +19,6 @@
 		<% } %>
 
 		<div id="chatBox"></div>
-
 		<div id="chatForm">
 			<textarea id="message" name="message" rows="4" cols="50" placeholder="Say Something!" maxlength="200"></textarea>
 			<button id="submitBtnChat" onclick="sendMessage()">Post</button>
@@ -26,10 +26,23 @@
 
 		<script>
 			var enableChat = <%- JSON.stringify(enableChat) %>;
+			var streamURL = <%- JSON.stringify(streamURL) %>;
 			var streamid = <%- JSON.stringify(streamid) %>;
-			var isStreamer = false;
+			var isStreamer = <%- JSON.stringify(isStreamer) %>;
 		</script>
-		<script src="/content/javascript/showstream.js"></script>
 		<script src="/content/javascript/livechat.js"></script>
+		<script src="/content/javascript/flv.min.js"></script>
+		<script>
+		    if (flvjs.isSupported()) {
+		        var videoElement = document.getElementById('livestream');
+		        var flvPlayer = flvjs.createPlayer({
+		            type: 'flv',
+		            url: streamURL
+		        });
+		        flvPlayer.attachMediaElement(videoElement);
+		        flvPlayer.load();
+		        flvPlayer.play();
+		    }
+		</script>
 	</body>
 </html>

@@ -182,6 +182,12 @@
 						<% } %>
 					</div>
 				</div>
+
+				<div id="chatReplay">
+					<% if (typeof chatReplayMessages != 'undefined') { %>
+						<h3>Chat Replay:</h3>
+					<% } %>
+				</div>
 			</div>
 			<div class="reccomendations">
 				<h2>&nbspUp Next</h2>
@@ -247,7 +253,9 @@
 		</script>
 
 		<script type="text/javascript">
+			var videoelement = document.getElementById("video");
 			var videovar = <%- JSON.stringify(video) %>;
+			var chatreplayelement = document.getElementById("chatReplay");
 			<% if (typeof videos[0] != 'undefined') { %>
 				var nextvideo = <%- JSON.stringify(videos[0]) %>;
 			<% } %>
@@ -260,11 +268,15 @@
 				commentElement.style.borderWidth = "5px";
 				commentElement.style.borderColor = "#adff12";
 			<% } %>
+			<% if (typeof chatReplayMessages != 'undefined') { %>
+				var chatReplayMessages = <%- JSON.stringify(chatReplayMessages) %>;
+			<% } %>
 		</script>
 
 		<script src="/content/javascript/videocontroller.js"></script>
 		<script src="/content/javascript/likedislike.js"></script>
 		<script src="/content/javascript/subscribe.js"></script>
 		<script src="/content/javascript/elementclicks.js"></script>
+		<script src="/content/javascript/chatreplay.js"></script>
 	</body>
 </html>
