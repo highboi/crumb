@@ -12,6 +12,13 @@
 		<video id="livestream" controls=""></video>
 		<h1><%= streamname %></h1>
 
+		<div>
+			<p>RTMP Server: <%= rtmpServer %></p>
+			<p>Stream Key: <%= streamKey %></p>
+			<p>Stream ID: <%= streamid %></p>
+			<a href="http://localhost/l/view/<%= streamid %>">Link to viewer end of stream.</a>
+		</div>
+
 		<% if (enableChat) { %>
 			<h3>Live Chat:</h3>
 		<% } else { %>
@@ -28,21 +35,10 @@
 			var enableChat = <%- JSON.stringify(enableChat) %>;
 			var streamURL = <%- JSON.stringify(streamURL) %>;
 			var streamid = <%- JSON.stringify(streamid) %>;
-			var isStreamer = <%- JSON.stringify(isStreamer) %>;
+			var video = document.getElementById("livestream");
 		</script>
 		<script src="/content/javascript/livechat.js"></script>
-		<script src="/content/javascript/flv.min.js"></script>
-		<script>
-		    if (flvjs.isSupported()) {
-		        var videoElement = document.getElementById('livestream');
-		        var flvPlayer = flvjs.createPlayer({
-		            type: 'flv',
-		            url: streamURL
-		        });
-		        flvPlayer.attachMediaElement(videoElement);
-		        flvPlayer.load();
-		        flvPlayer.play();
-		    }
-		</script>
+		<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+		<script src="/content/javascript/obsStreamAdmin.js"></script>
 	</body>
 </html>

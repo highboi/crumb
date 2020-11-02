@@ -1,6 +1,6 @@
 //this is a file to handle all of the get requests for the server
 
-const { app, client, middleware, PORT, server, liveWss, chatWss} = require("./configBasic");
+const { app, client, middleware, PORT, server, liveWss, chatWss, obsWss, nms} = require("./configBasic");
 
 const fs = require("fs");
 const approx = require("approximate-number");
@@ -17,16 +17,28 @@ app.use(middleware.hitCounter);
 server.on("upgrade", (req, socket, head) => {
 	var pathname = url.parse(req.url).pathname;
 
-	if (pathname == "/live") {
-		console.log("Live Streaming Server Connection...");
-		liveWss.handleUpgrade(req, socket, head, (ws) => {
-			liveWss.emit("connection", ws, req);
-		});
-	} else if (pathname == "/chat") {
-		console.log("Chat Server Connection...");
-		chatWss.handleUpgrade(req, socket, head, (ws) => {
-			chatWss.emit("connection", ws, req);
-		});
+	switch (pathname) {
+		case "/live":
+			console.log("Live Streaming Server Connection...");
+			liveWss.handleUpgrade(req, socket, head, (ws) => {
+				liveWss.emit("connection", ws, req);
+			});
+			break;
+		case "/chat":
+			console.log("Chat Server Connection...");
+			chatWss.handleUpgrade(req, socket, head, (ws) => {
+				chatWss.emit("connection", ws, req);
+			});
+			break;
+		case "/obslive":
+			console.log("OBS Live Streaming Server Connection...");
+			obsWss.handleUpgrade(req, socket, head, (ws) => {
+				obsWss.emit("connection", ws, req);
+			});
+			break;
+		default:
+			console.log("Attempted upgrade at " + pathname);
+			break;
 	}
 });
 
@@ -135,7 +147,10 @@ app.get("/u/:userid", async (req, res) => {
 
 //get the form for submitting videos
 app.get("/v/submit", middleware.checkSignedIn, (req, res) => {
-	var viewObj = Object.assign({}, {user: req.cookies.userinfo}, {message: req.flash("message")});
+	var viewObj = {message: req.flash("message")};
+	if (req.cookies.userinfo) {
+		viewObj.user = req.cookies.userinfo;
+	}
 	res.render("submitvideo.ejs", viewObj);
 });
 
@@ -166,7 +181,7 @@ app.get("/v/:videoid", async (req, res) => {
 	chatReplayMessages = chatReplayMessages.rows;
 
 	//set the object to be passed to the rendering function
-	var viewObj = {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments};
+	var viewObj = {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments, message: req.flash("message")};
 
 	//check to see if there are any chat messages to replay
 	if (chatReplayMessages.length > 0) {
@@ -186,11 +201,70 @@ app.get("/v/:videoid", async (req, res) => {
 		viewObj.commentid = req.query.commentid;
 	}
 
-	viewObj.message = req.flash("message");
-
+	//render the view
 	res.render("viewvideo.ejs", viewObj);
 });
 
+//get the video data from the file in chunks for efficiency of the network
+app.get("/video/:id", async (req, res) => {
+	//get the video path
+	var path = await client.query(`SELECT video FROM videos WHERE id=$1`, [req.params.id]);
+	path = "./storage" + path.rows[0].video;
+
+	console.log(path);
+
+	//get the extension of the video for the content type of the response
+	var contentType = path.substring(path.lastIndexOf(".")+1);
+	contentType = `video/${contentType}`
+
+	//get information about the file
+	const stat = fs.statSync(path);
+	//get the file size
+	const fileSize = stat.size;
+	//get the "range" in the http header if there is one, this defines the amount of bytes the 
+	//front-end wants from a file
+	const range = req.headers.range;
+
+	//the first few requests will be made without a range header, but after a while the range header
+	//will show up in order to get the next chunk of data for the video. this is better than loading
+	//the entire file because this throttles the network speed by splitting the video requests
+	//into chunks as needed, this is especially useful for hours-long videos which may take time to load
+	if (range) {
+		//get the parts of the file to get from the range header
+		const parts = range.replace(/bytes=/, "").split("-");
+		//get the starting byte for our chunk
+		const start = parseInt(parts[0], 10);
+		//this uses a ternary operator. if parts[1], or the ending chunk exists in the range header,
+		//then we set the ending chunk to be this number, if there is no ending chunk, then get the ending byte of the file by
+		//fileSize-1
+		const end = parts[1] ? parseInt(parts[1], 10) : fileSize-1;
+		//get the chunk size based off of the start and end bytes
+		const chunksize = (end-start)+1
+		//create a read stream for the file with the start and end defining the chunk to look at
+		const file = fs.createReadStream(path, {start, end})
+		//define an http head for the response
+		const head = {
+			'Content-Range': `bytes ${start}-${end}/${fileSize}`, //define a content range
+			'Accept-Ranges': 'bytes', //define the type of range we want, we will calculate this range in bytes
+			'Content-Length': chunksize, //define the content size
+			'Content-Type': contentType, //define the type of content
+		}
+		//write the head to the response, we have a 206 for partial content, which tells the front-end to make another request for the other chunks
+		res.writeHead(206, head);
+		//pipe the chunk of file contents to the response
+		file.pipe(res);
+	} else { //if the front-end is requesting the entire file
+		//create an http head
+		const head = {
+			'Content-Length': fileSize, //make the content size the entire file if the file is small enough
+			'Content-Type': contentType //make the content type mp4
+		}
+		//write the head to the response as 200 since this is a complete response for the video contents
+		res.writeHead(200, head)
+		//pipe the complete contents of the file to the response with a read stream of the file
+		fs.createReadStream(path).pipe(res)
+	}
+});
 
 
 
@@ -203,47 +277,66 @@ app.get("/l/view/:streamid", async (req, res) => {
 		return socket.streamid == req.params.streamid;
 	});
 
-	//create a view object
-	var viewObj = {streamid: req.params.streamid, enableChat: streams[0].enableChat};
-	if (req.cookies.userinfo) {
-		viewObj.user = req.cookies.userinfo;
-	}
-
 	//if there are no streams with the id in the url, then redirect to an error or the recorded stream
 	if (streams.length == 0) {
 		var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.streamid]);
-		if (video.rows.length == 0) {
+		video = video.rows[0];
+		if (typeof video != 'undefined' && video.streaming == false) {
 			res.render("error.ejs", {error: `Stream with ID: '${req.params.streamid}' does not exist.`});
 		} else {
-			req.flash('message', "Live stream does not exist or streamer has stopped streaming.");
-			res.redirect(`/v/${req.params.streamid}`);
-		}
-	}
+			if (!video.streaming) { //redirect to the recorded stream
+				res.redirect(`/v/${req.params.streamid}`);
+			} else { //render the OBS stream
+				//this is a websocket connection handler for the obs stream sockets in order to handle the obs stream clients and end streams
+				obsWss.on("connection", (ws, request) => {
+					ws.room = req.params.streamid;
 
-	//check for connections to the server
-	liveWss.on("connection", (ws, req) => {
-		//assign the client to a "room" with the stream id
-		ws.room = req.params.streamid;
+					ws.on("message", (message) => {
+						console.log("OBS WSS Message: " + message);
+						if (message == "ended") {
+							console.log("OBS STREAM ENDED");
+						}
+					});
+				});
+				//get the stream key of the streamer
+				var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1`, [video.user_id]);
+				streamkey = streamkey.rows[0].streamkey;
 
-		console.log("COOKIES: ", req.cookies);
+				//make the view object
+				var viewObj = Object.assign({}, req.cookies.userinfo, {streamid: req.params.streamid, enableChat: video.enablechat, streamname: video.title, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, message: req.flash("message")});
 
-		//send the existing data of the stream
-		console.log("Connection from Client.");
-		var dataBuf = Buffer.concat(streams[0].dataBuffer);
-		console.log("Data Buf: ", dataBuf);
-		ws.send(dataBuf);
-		console.log("NO ERROR YET.");
-
-		ws.on("message", (message) => {
-			console.log("NO ERROR YET.");
-			if (message == "ended") {
-				console.log(`Stream with id: ${req.params.streamid} ended.`);
+				//render the view for the stream
+				res.render("viewStreamObs.ejs", viewObj);
 			}
-		});
-	});
+		}
+	} else {
+		//create a view object
+		var viewObj = {streamid: req.params.streamid, enableChat: streams[0].enableChat, message: req.flash("message")};
+		if (req.cookies.userinfo) {
+			viewObj.user = req.cookies.userinfo;
+		}
 
-	//render the view with the stream
-	res.render("viewstream.ejs", viewObj);
+		//check for connections to the server
+		liveWss.on("connection", (ws, request) => {
+			//assign the client to a "room" with the stream id
+			ws.room = req.params.streamid;
+
+			//send the existing data of the stream
+			console.log("Connection from Client.");
+			var dataBuf = Buffer.concat(streams[0].dataBuffer);
+			console.log("Data Buf: ", dataBuf);
+			ws.send(dataBuf);
+
+			ws.on("message", (message) => {
+				if (message == "ended") {
+					console.log(`Stream with id: ${req.params.streamid} ended.`);
+				}
+			});
+		});
+
+		//render the view with the stream
+		res.render("viewstream.ejs", viewObj);
+	}
 });
 
 //this is a get request to get basic info about a live stream
@@ -254,6 +347,114 @@ app.get("/l/start", middleware.checkSignedIn, (req, res) => {
 	}
 
 	res.render("startstream.ejs", viewObj);
+});
+
+//this is a get request for the admin panel of a live stream
+app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
+	//get the stream info
+	var stream = await client.query(`SELECT * FROM videos WHERE id=$1 AND user_id=$2`, [req.params.streamid, req.cookies.userinfo.id]);
+	stream = stream.rows[0];
+
+	//view object for the views, other values can be added later
+	var viewObj = Object.assign({}, req.cookies.userinfo, {streamname: stream.name, enableChat: stream.enableChat, streamid: stream.id, isStreamer: true});
+
+	//if there is a stream that exists, then render the admin panel
+	if (typeof stream != 'undefined') {
+		if (req.query.streamtype == "obs") {
+			//get the stream key
+			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1`, [stream.user_id]);
+			streamkey = streamkey.rows[0].streamkey;
+
+			//this is a websocket connection handler for the obs stream sockets in order to handle the obs stream clients and end streams
+			obsWss.on("connection", (ws, request) => {
+				ws.room = stream.id;
+
+				ws.on("message", (message) => {
+					console.log("OBS WSS Message: " + message);
+					if (message == "ended") {
+						console.log("OBS STREAM ENDED");
+					}
+				});
+			});
+
+			//make the view object
+			var viewObj = Object.assign({}, req.cookies.userinfo, {streamname: stream.name, enableChat: stream.enablechat, streamid: stream.id, });
+
+			//set the additional values for the view object
+			viewObj = Object.assign({}, viewObj, {streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://localhost/live", streamKey: streamkey, message: req.flash("message")});
+
+			//render the admin panel
+			res.render("obsAdminPanel.ejs", viewObj);
+		} else if (req.query.streamtype == "browser") {
+			//handle the websocket connections and the handling of video data
+			liveWss.on("connection", async (ws) => {
+				//set the stream id for this socket
+				ws.streamid = req.params.streamid;
+
+				//set a value for the enabling of the chat
+				ws.enableChat = stream.enableChat;
+
+				//a data buffer to store the video data for later, store this inside
+				//the websocket in order to be able to access it from other websockets
+				ws.dataBuffer = [];
+
+				//create a file stream for saving the contents of the live stream
+				var fileName = "./storage/videos/files/" + Date.now() + "-" + stream.name + ".webm";
+				var writeStream = fs.createWriteStream(fileName);
+
+				//set the video path equal to the path to the webm
+				var videopath = fileName.replace("./storage", "");
+
+				//set the video path in the database entry
+				await client.query(`UPDATE videos SET video=$1 WHERE id=$2`, [videopath, req.params.streamid]);
+
+				//message that we got a connection from the streamer
+				console.log("Connection from Streamer.");
+
+				//if the socket recieves a message from the streamer socket, then send the data to the client for
+				//streaming (the data is the live stream)
+				ws.on("message", (message) => {
+					if (typeof message == 'object') {
+						//write the new data to the file
+						writeStream.write(message, () => {
+							console.log("Writing to file complete.");
+						});
+
+						//append the data to the data buffer
+						ws.dataBuffer.push(message);
+					}
+
+					//sort the clients for the websocket server to only the stream
+					//viewers
+					var clients = Array.from(liveWss.clients).filter((socket) => {
+						return socket.room == stream.id;
+					}).filter((socket) => {
+						return socket.readyState == WebSocket.OPEN;
+					});
+
+					//send the new data to each of the corresponding clients
+					clients.forEach((item, index) => {
+						item.send(message);
+					});
+				});
+
+				//whenever the websocket closes
+				ws.on("close", async () => {
+					console.log("Stream Viewer Disconnected.");
+					//end the filestream to the recorded live stream
+					writeStream.end();
+					//let the database know that this video is not streaming anymore so that the view references the file instead of a mediasource
+					await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', stream.id]);
+				});
+			});
+
+			//render the "admin" panel for the browser streamer
+			res.render("webAdminPanel.ejs", viewObj);
+		}
+	} else {
+		req.flash("message", "There is no stream in your roster yet, please start one.");
+		res.redirect("/l/start");
+	}
 });
 
 //this is a websocket connection handler for the chat server which handles the transmitting of chat data between clients of a live stream
@@ -404,6 +605,9 @@ app.get("/playlist/new", middleware.checkSignedIn, async (req, res) => {
 	} else {
 		var viewObj = {user: req.cookies.userinfo};
 	}
+
+	viewObj.message = req.flash("message");
+
 	//render the form for creating a new playlist
 	res.render("createplaylist.ejs", viewObj);
 });
@@ -449,6 +653,7 @@ app.get("/v/delete/:videoid", middleware.checkSignedIn, async (req, res) => {
 		await client.query(`DELETE FROM videos WHERE id=$1`, [req.params.videoid]);
 		//delete the files associated with the videos
 		fs.unlink(videopath, (err) => {
+			if (err) throw err;
 			console.log("Video File Deleted.");
 		});
 		fs.unlink(thumbnailpath, (err) => {
@@ -460,7 +665,7 @@ app.get("/v/delete/:videoid", middleware.checkSignedIn, async (req, res) => {
 		res.redirect("/");
 	} else {
 		//rerender the video page with a message that the video deletion didn't work
-		req.flash("message", "Could not delete video for some reason.");
+		req.flash("message", "Error: Could not delete video.");
 		res.redirect(`/v/${req.params.videoid}`);
 	}
 });
@@ -579,7 +784,7 @@ app.get("/search", async (req, res) => {
 
 	console.log("Search: " + search.humanquery);
 
-	viewObj = {search: search};
+	viewObj = {search: search, message: req.flash("message")};
 
 	//create the view object
 	if (req.cookies.userinfo) {
@@ -647,7 +852,7 @@ app.get("/s/:topic", async (req, res) => {
 	var videos = await client.query(`SELECT * FROM videos WHERE topics LIKE $1`, ["%" + req.params.topic + "%"]);
 	videos = videos.rows;
 
-	var viewObj = {videos: videos, sectionname: req.params.topic};
+	var viewObj = {videos: videos, sectionname: req.params.topic, message: req.flash("message")};
 
 	//have a view object
 	if (req.cookies.userinfo) {

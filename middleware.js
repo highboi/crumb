@@ -310,29 +310,41 @@ middleware = {
 		return results;
 	},
 
+	//this is a function that adds a 0 at the beginning of a number if the number is less than 10
+	addZero: function(number) {
+		var integer = number.toString();
+
+		return ('0' + integer).slice(-2);
+	},
+
 	//a function for getting a date string for showing the post date of videos, etc
 	getDate: function (timestamp=0) {
 		//get the current time at the time of executing the function
 		if (timestamp == 0) {
 			var currenttime = new Date();
 		} else {
-			var currenttime = timestamp;
+			var currenttime = new Date(timestamp);
 		}
 
 		//get the seconds
 		var seconds = currenttime.getSeconds();
+		seconds = middleware.addZero(seconds);
 
 		//get the minutes
 		var minutes = currenttime.getMinutes();
+		minutes = middleware.addZero(minutes);
 
 		//get the hours
 		var hours = currenttime.getHours();
+		hours = middleware.addZero(hours);
 
 		//get the day
 		var day = currenttime.getDate();
+		day = middleware.addZero(day);
 
 		//get the month
 		var month = currenttime.getMonth()+1;
+		month = middleware.addZero(month);
 
 		//get the year
 		var year = currenttime.getFullYear();
@@ -355,10 +367,10 @@ middleware = {
 		times.reverse();
 
 		//get the time
-		var time = [times[1], times[0]].join(":").toString();
+		var time = [times[2], times[1], times[0]].join(":").toString();
 
 		//get the date
-		var date = [times[3], times[2], times[4]].join("-").toString();
+		var date = [times[3], times[4], times[5]].join("-").toString();
 
 		//return the human readable time and date
 		return [time, date];

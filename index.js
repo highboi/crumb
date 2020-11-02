@@ -1,5 +1,7 @@
+const path = require("path");
+
 //get the variables to work with in the config file
-const { app, client, middleware, PORT, viewObject, server, liveWss, chatWss, nms } = require("./configBasic");
+const { app, client, middleware, PORT, viewObject, server, liveWss, chatWss, obsWss, nms } = require("./configBasic");
 
 //handle the shutting down of the server
 middleware.onShutdown();
@@ -18,8 +20,8 @@ server.listen(PORT, '0.0.0.0', () => {
 //run node media server in order to enable obs streaming
 nms.run();
 
-//check for invalid stream keys
-nms.on("prePublish", async (id, streamPath, args) => {
+//check for invalid stream keys and store details of live streams if keys are valid
+nms.on("postPublish", async (id, streamPath, args) => {
 	//get the session for later rejection if necessary
 	var session = nms.getSession(id);
 
@@ -33,16 +35,57 @@ nms.on("prePublish", async (id, streamPath, args) => {
 	//if the stream key does not exist, then reject this session
 	if (res.length == 0) {
 		session.reject();
+	} else { //get information about the live stream from the user and store the file path in the database
+		//get the user info
+		var user = res[0];
+
+		//get the pending streams where the video path is undefined and where the userid is the same as the user variable
+		var streamid = await client.query(`SELECT id FROM videos WHERE user_id=$1 AND video IS NULL`, [user.id]);
+		streamid = streamid.rows[0].id;
+
+		//send a message to all of the OBS WSS sockets that the stream has started
+		var viewers = Array.from(obsWss.clients).filter((socket) => {
+			return socket.room == streamid;
+		});
+
+		viewers.forEach((item, index) => {
+			item.send("started");
+			console.log("STREAM STARTED");
+		});
 	}
 });
 
-nms.on("donePublish", (id, streamPath, args) => {
+//rename/move the recorded streams elsewhere for convenience and save the path to the DB
+nms.on("donePublish", async (id, streamPath, args) => {
 	var timestamp = nms.getSession(id).startTimestamp;
 	var streamkey = streamPath.replace("/live/", "");
 
-	
+	var user = await client.query(`SELECT id FROM users WHERE streamkey=$1`, [streamkey]);
+	userid = user.rows[0].id;
 
-	console.log("done streaming");
+	var time = middleware.getDate(timestamp);
+
+	console.log("SUPPOSED FILE NAME: ", time);
+
+	var path = `/videos/nmsMedia/live/${streamkey}/${time}.mp4`;
+
+	console.log(path);
+
+	//add the path into the DB
+	await client.query(`UPDATE videos SET video=$1 WHERE video IS NULL AND user_id=$2`, [path, userid]);
+
+	//get the stream id
+	var streamid = await client.query(`SELECT id FROM videos WHERE video=$1 AND user_id=$2`, [path, userid]);
+	streamid = streamid.rows[0].id;
+
+	//notify the users that the stream has ended
+	var viewers = Array.from(obsWss.clients).filter((socket) => {
+		return socket.room == streamid;
+	});
+
+	viewers.forEach((item, index) => {
+		item.send("ended");
+	});
 });
 
 //handle errors

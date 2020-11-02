@@ -248,92 +248,35 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 
 	//parse the form and files such as the thumbnail
 	form.parse(req, async (err, fields, files) => {
-		//a view object for the view
-		var viewObj = Object.assign({}, req.cookies.userinfo, {streamname: fields.name, enableChat: fields.enableChat, streamid: streamid, isStreamer: true});
-
 		if (req.params.type == "browser") {
+			//a view object for the view
+			var viewObj = Object.assign({}, req.cookies.userinfo, {streamname: fields.name, enableChat: fields.enableChat, streamid: streamid, isStreamer: true});
+
 			//save the thumbnail of the live stream
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
 
-			//a variable for saving the generated webm file from the live stream
-			var videopath;
+			//get the topics for the live stream
+			var topics = fields.topics.split(' ').toString();
 
-			//handle the websocket connections and the handling of video data
-			liveWss.on("connection", async (ws) => {
-				//set the stream id for this socket
-				ws.streamid = streamid;
+			//set all of the database details
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, req.cookies.userinfo.id, 0, middleware.getDate(), topics, req.cookies.userinfo.username, req.cookies.userinfo.channelicon, 'true'];
+			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, valuesarr);
 
-				//set a value for the enabling of the chat
-				ws.enableChat = fields.enableChat;
-
-				//a data buffer to store the video data for later, store this inside
-				//the websocket in order to be able to access it from other websockets
-				ws.dataBuffer = [];
-
-				//create a file stream for saving the contents of the live stream
-				var fileName = "./storage/videos/files/" + Date.now() + "-" + fields.name + ".webm";
-				var writeStream = fs.createWriteStream(fileName);
-
-				//set the video path equal to the path to the webm
-				videopath = fileName.replace("./storage", "");
-
-				//get the topics for the live stream
-				var topics = fields.topics.split(' ').toString();
-
-				//set all of the database details
-				var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, videopath, req.cookies.userinfo.id, 0, middleware.getDate(), topics, req.cookies.userinfo.username, req.cookies.userinfo.channelicon, 'true'];
-				await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, valuesarr);
-
-				//message that we got a connection from the streamer
-				console.log("Connection from Streamer.");
-
-				//if the socket recieves a message from the streamer socket, then send the data to the client for
-				//streaming (the data is the live stream)
-				ws.on("message", (message) => {
-					if (typeof message == 'object') {
-						//write the new data to the file
-						writeStream.write(message, () => {
-							console.log("Writing to file complete.");
-						});
-
-						//append the data to the data buffer
-						ws.dataBuffer.push(message);
-					}
-
-					//sort the clients for the websocket server to only the stream
-					//viewers
-					var clients = Array.from(liveWss.clients).filter((socket) => {
-						return socket.room == streamid;
-					}).filter((socket) => {
-						return socket.readyState == WebSocket.OPEN;
-					});
-
-					//send the new data to each of the corresponding clients
-					clients.forEach((item, index) => {
-						item.send(message);
-					});
-				});
-
-				//whenever the websocket closes
-				ws.on("close", async () => {
-					console.log("Stream Viewer Disconnected.");
-					//end the filestream to the recorded live stream
-					writeStream.end();
-					//let the database know that this video is not streaming anymore so that the view references the file instead of a mediasource
-					await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', streamid]);
-				});
-			});
-
-			//render the view for starting a stream
-			res.render("stream.ejs", viewObj);
+			//redirect to the admin panel link as to not have trouble reloading the page
+			res.redirect(`/l/admin/${streamid}?streamtype=browser`);
 		} else if (req.params.type == "obs") {
+			//save the thumbnail and return the path to the thumbnail
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
 
-			var videopath = "/videos/nmsMedia/live/" + req.cookies.userinfo.streamkey + `${fields.name}.mp4`;
+			//save topics
+			var topics = fields.topics.split(' ').toString();
 
-			viewObj.streamURL = `http://localhost:8000/live/${req.cookies.userinfo.streamkey}.flv`;
+			//save the details into the db excluding the video path
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, req.cookies.userinfo.id, 0, middleware.getDate(), topics, req.cookies.userinfo.username, req.cookies.userinfo.channelicon, 'true', fields.enableChat.toString()];
+			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, enableChat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesarr);
 
-			res.render("streamObs.ejs", viewObj);
+			//render the view for the streamer
+			res.redirect(`/l/admin/${streamid}?streamtype=obs`);
 		}
 	});
 });

@@ -1,5 +1,6 @@
 //this is a js file to store functions to interact with the video player
 
+
 //make global variables to be accessed in all functions
 var video, playBtn, seeker, videotime, volumeslider, fullscreenBtn, muteBtn, videoContainer, loading;
 var totalduration, isFullScreen = false;

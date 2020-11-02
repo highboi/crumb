@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const flash = require("connect-flash");
 const WebSocket = require("ws");
 const NodeMediaServer = require("node-media-server");
+const cors = require("cors");
 
 //generate the express app
 const app = express();
@@ -15,8 +16,9 @@ const app = express();
 const server = require("http").createServer(app);
 
 //make websocket servers pertaining to specific functions
-const liveWss = new WebSocket.Server({noServer: true});
-const chatWss = new WebSocket.Server({noServer: true});
+const liveWss = new WebSocket.Server({noServer: true}); //transfer of live video
+const chatWss = new WebSocket.Server({noServer: true}); //live chat
+const obsWss = new WebSocket.Server({noServer: true}); //obs wss for ending obs streams
 
 //configure and run node-media-server for OBS streaming on top of in-browser streams
 const nmsConfig = {
@@ -39,6 +41,8 @@ const nmsConfig = {
 				app: 'live',
 				mp4: true,
 				mp4Flags: '[movflags=frag_keyframe+empty_moov]',
+				hls: true,
+				hlsFlags: '[hls_time=2:hls_list_size=3:hls_flags=delete_segments]'
 			}
 		]
 	}
@@ -60,6 +64,9 @@ const SALT = "superawesomesecretsaltime";
 
 //set up the rendering engine for the views
 app.set("view engine", "ejs");
+
+//use CORS
+app.use(cors());
 
 //allow the server to parse requests with url encoded payloads
 app.use(express.urlencoded({ extended: false }));
@@ -93,5 +100,6 @@ module.exports = {
 	server,
 	liveWss,
 	chatWss,
+	obsWss,
 	nms
 }
