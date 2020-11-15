@@ -4,9 +4,9 @@
 //get the necessary dependencies for use in this file
 const fs = require("fs");
 const client = require("./dbConfig");
+const redisClient = require("./redisConfig");
 const crypto = require("crypto");
 const {v4: uuidv4} = require("uuid");
-const {viewObject} = require("./globalVars");
 
 //import the autocorrect library with a custom path to a custom dictionary file
 var dictpath = "/home/merlin/webdev/crumb/storage/server/words.txt";
@@ -19,7 +19,7 @@ middleware = {
 	//this is a function that redirects users to the login page if the user is not signed in
 	//this is used for pages and requests that require a login
 	checkSignedIn: function (req, res, next) {
-		if (req.cookies.hasOwnProperty('userinfo')) {
+		if (req.cookies.hasOwnProperty('sessionid')) {
 			next();
 		} else {
 			req.flash("message", "Please sign in.");
@@ -30,7 +30,7 @@ middleware = {
 	//this is a function to redirect users to the index page if they are signed in already
 	//this is used for login pages and other forms that sign the user in
 	checkNotSignedIn: function (req, res, next) {
-		if (req.cookies.hasOwnProperty('userinfo')) {
+		if (req.cookies.hasOwnProperty('sessionid')) {
 			req.flash("message", "Already Logged In!");
 			res.redirect("/");
 		} else {
@@ -73,7 +73,7 @@ middleware = {
 		var newid = crypto.randomBytes(32).toString("base64");
 
 		//check to see if there are any existing users with the same stream key
-		var res = await client.query(`SELECT * FROM users WHERE streamkey=$1`, newid);
+		var res = await client.query(`SELECT * FROM users WHERE streamkey=$1`, [newid]);
 
 		if (res.rows.length > 0) {
 			middleware.generateStreamKey();
@@ -81,6 +81,19 @@ middleware = {
 			console.log("Valid Stream Key Found: " + newid.toString());
 			return newid;
 		}
+	},
+
+	//this is a function for generating a unique session id
+	generateSessionId: function () {
+	    var sha = crypto.createHash('sha256');
+	    sha.update(Math.random().toString());
+	    return sha.digest('hex');
+	},
+
+	//this gets a user from the redis session store and returns the object for this user
+	getUserSession: async function (sessionid) {
+		var userinfo = await redisClient.getAsync(sessionid);
+		return JSON.parse(userinfo);
 	},
 
 	//this is a function that returns a path for a file you want to save
@@ -449,8 +462,12 @@ middleware = {
 
 	//this is a function to handle the likes on certain elements of the site
 	handleLikes: async function(req, element, liked, disliked, likedTable, dislikedTable) {
+		//get the user info from redis session store
+		var userinfo = await redisClient.getAsync(req.cookies.sessionid);
+		userinfo = JSON.parse(userinfo);
+
 		//get the user id and the element id
-		var userid = req.cookies.userinfo.id.toString();
+		var userid = userinfo.id.toString();
 		var elementid = element.id.toString();
 
 		//get the id column name based on if the element has a video or not
@@ -491,8 +508,12 @@ middleware = {
 
 	//this is a function to handle the dislikes on certain elements of the site
 	handleDislikes: async function (req, element, liked, disliked, likedTable, dislikedTable) {
+		//get the user info from redis session store
+		var userinfo = await redisClient.getAsync(req.cookies.sessionid);
+		userinfo = JSON.parse(userinfo);
+
 		//get the userid and element id
-		var userid = req.cookies.userinfo.id.toString();
+		var userid = userinfo.id.toString();
 		var elementid = element.id.toString();
 
 		//get the id column name

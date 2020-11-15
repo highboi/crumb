@@ -129,6 +129,13 @@
 
 				<div class="comments">
 					<h2>Comments:</h2>
+					<p>Sort Comments:</p>
+					<select id="commentSort" onchange="sortComments(this);">
+						<option value="top" selected>Top</option>
+						<option value="bottom">Bottom</option>
+						<option value="oldest">Oldest</option>
+						<option value="newest">Newest</option>
+					</select>
 					<div id="commentform">
 						<% var commentlink = `/comment/${video.id}`; %>
 						<form action="<%= commentlink %>" method="post">
@@ -146,12 +153,12 @@
 										<p>&nbsp;&nbsp<%= item.comment %></p>
 										<div class="commentlikes" id="<%= item.id %>">
 											&nbsp
-											<button id="commentLike" onclick="likeComment('<%= item.id %>')"><img src="/icons/like.ico"></button>
+											<button id="commentLike" onclick="likeComment('<%= item.id %>')"><img src="/content/icons/like.ico"></button>
 											<p id="<%= item.id %>likes"><%= item.likes %></p>
-											<button id="commentDislike" onclick="dislikeComment('<%= item.id %>')"><img src="/icons/dislike.ico"></button>
+											<button id="commentDislike" onclick="dislikeComment('<%= item.id %>')"><img src="/content/icons/dislike.ico"></button>
 											<p id="<%= item.id %>dislikes"><%= item.dislikes %></p>
 											<button id="replybtn" onclick='showbox(&quot;<%= item.id %>replybox&quot;)'>Reply</button>
-											<button id="showreplies" onclick='showbox(&quot;replies&quot;)'>Replies</button>
+											<button id="showreplies" onclick='showbox(&quot;<%= item.id %>replies&quot;)'>Replies</button>
 										</div>
 										<div class="replybox" id="<%= item.id %>replybox">
 											<% var replylink = commentlink + `?parent_id=${item.id}`; %>
@@ -161,16 +168,16 @@
 												<input type="button" onclick='showbox(&quot;<%= item.id %>replybox&quot;)' value="Cancel">
 											</form>
 										</div>
-										<div class="replies" id="replies">
+										<div class="replies" id="<%= item.id %>replies">
 											<% var replies = comments.filter((obj) => obj.parent_id == item.id); %>
 											<% replies.forEach((item, index) => { %>
 												<h3>&nbsp;&nbsp<%= item.username %></h3>
 												<p>&nbsp;&nbsp;&nbsp<%= item.comment %></p>
 												<div class="commentlikes" id="<%= item.id %>">
 													&nbsp;&nbsp
-													<button id="commentLike" onclick="likeComment('<%= item.id %>')"><img src="/icons/like.ico"></button>
+													<button id="commentLike" onclick="likeComment('<%= item.id %>')"><img src="/content/icons/like.ico"></button>
 													<p id="<%= item.id %>likes"><%= item.likes %></p>
-													<button id="commentDislike" onclick="dislikeComment('<%= item.id %>')"><img src="/icons/dislike.ico"></button>
+													<button id="commentDislike" onclick="dislikeComment('<%= item.id %>')"><img src="/content/icons/dislike.ico"></button>
 													<p id="<%= item.id %>dislikes"><%= item.dislikes %></p>
 												</div>
 											<% }); %>
@@ -256,6 +263,7 @@
 			var videoelement = document.getElementById("video");
 			var videovar = <%- JSON.stringify(video) %>;
 			var chatreplayelement = document.getElementById("chatReplay");
+			var comments = <%- JSON.stringify(comments) %>;
 			<% if (typeof videos[0] != 'undefined') { %>
 				var nextvideo = <%- JSON.stringify(videos[0]) %>;
 			<% } %>
@@ -278,5 +286,6 @@
 		<script src="/content/javascript/subscribe.js"></script>
 		<script src="/content/javascript/elementclicks.js"></script>
 		<script src="/content/javascript/chatreplay.js"></script>
+		<script src="/content/javascript/sortcomments.js"></script>
 	</body>
 </html>

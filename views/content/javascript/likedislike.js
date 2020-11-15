@@ -27,8 +27,14 @@ function getPath(path, likeElement, dislikeElement) {
 			if (Array.isArray(data) && data.length == 2) { //if the response is an array, then the amount of likes will be updated
 				likeElement.innerHTML = data[0];
 				dislikeElement.innerHTML = data[1];
+				if (typeof callback != 'undefined') {
+					callback(data);
+				}
 			} else { // if the data is not an array, then it is the ejs file trying to render, so redirect to the login page
 				window.location.href = "http://localhost/login";
+				if (typeof callback != 'undefined') {
+					callback(undefined);
+				}
 			}
 		}
 	};
@@ -52,32 +58,44 @@ function dislikeVideo() {
 function likeComment(commentid) {
 	commentLikes = document.getElementById(commentid+"likes");
 	commentDislikes = document.getElementById(commentid+"dislikes");
-	doLike(false, true, commentid);
+	doLike(false, true, commentid, (data) => {
+		if (typeof data != 'undefined') {
+			var commentObj = comments.find(comm => comm.id == commentid);
+			commentObj.likes = data[0];
+			commentObj.dislikes = data[1];
+		}
+	});
 }
 
 function dislikeComment(commentid) {
 	commentLikes = document.getElementById(commentid+"likes");
 	commentDislikes = document.getElementById(commentid+"dislikes");
-	doDislike(false, true, commentid);
+	doDislike(false, true, commentid, (data) => {
+		if (typeof data != 'undefined') {
+			var commentObj = comments.find(comm => comm.id == commentid);
+			commentObj.likes = data[0];
+			commentObj.dislikes = data[1];
+		}
+	});
 }
 
 //functions to handle likes/dislikes on videos
-function doLike(video, comment, id) {
+function doLike(video, comment, id, callback=undefined) {
 	if (video) {
 		var likepath = `/v/like/${id}`;
-		getPath(likepath, likeCount, dislikeCount);
+		getPath(likepath, likeCount, dislikeCount, callback);
 	} else if (comment) {
 		var likepath = `/comment/like/${id}`;
-		getPath(likepath, commentLikes, commentDislikes);
+		getPath(likepath, commentLikes, commentDislikes, callback);
 	}
 }
 
-function doDislike(video, comment, id) {
+function doDislike(video, comment, id, callback=undefined) {
 	if (video) {
 		var dislikepath = `/v/dislike/${id}`;
-		getPath(dislikepath, likeCount, dislikeCount);
+		getPath(dislikepath, likeCount, dislikeCount, callback);
 	} else if (comment) {
 		var dislikepath = `/comment/dislike/${id}`;
-		getPath(dislikepath, commentLikes, commentDislikes);
+		getPath(dislikepath, commentLikes, commentDislikes, callback);
 	}
 }

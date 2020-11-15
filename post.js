@@ -8,7 +8,7 @@ const approx = require("approximate-number");
 const fs = require("fs");
 const WebSocket = require("ws");
 
-const { app, client, middleware, PORT, server, liveWss, chatWss } = require("./configBasic");
+const { app, client, redisClient, middleware, PORT, server, liveWss, chatWss } = require("./configBasic");
 
 //handle the user registrations
 app.post('/register', (req, res) => {
@@ -77,8 +77,16 @@ app.post('/register', (req, res) => {
 				var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, username, email, password, channelicon, channelbanner, streamkey`, valuesarr);
 				newuser = newuser.rows[0];
 				console.log("Registered User.");
-				//store the user in the session with a cookie
-				res.cookie("userinfo", newuser, {httpOnly: true, expires: 0});
+				//add a "Watch Later"playlist into the database which the user cannot delete
+				var newplaylistid = await middleware.generateAlphanumId();
+				valuesarr = [newuserid, "Watch Later", newplaylistid, 0, false];
+				await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES ($1, $2, $3, $4, $5)`, valuesarr);
+				//generate a new session id
+				var newsessid = middleware.generateSessionId();
+				//store the user info inside redis db
+				redisClient.set(newsessid, JSON.stringify(newuser));
+				//store the session id in the browser of the user
+				res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
 				//flash message to let the user know they are registered
 				req.flash("message", "Registered!");
 				//redirect to the home page
@@ -115,15 +123,19 @@ app.post("/login", async (req, res) => {
 				var subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [user.id]);
 				//store the values of the objects inside the rows array into one array of values into the user session variable
 				user.subscribedChannels = subscribedChannels.rows.map(({channel_id}) => channel_id);
-				//store the user in the current session with a cookie
-				res.cookie("userinfo", user, {httpOnly: true, expires: 0});
+				//generate a new session id
+				var newsessid = middleware.generateSessionId();
+				//store the user in redis
+				redisClient.set(newsessid, JSON.stringify(user));
+				//store the session id on the client side
+				res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
 				//messages to let the server and the client know that a user logged in
 				console.log("Logged In!");
 				req.flash("message", "Logged In!");
 				//redirect to the home page
 				res.redirect("/");
 			} else { //if the password is incorrect, then let the user know
-				var viewObj = Object.assign({}, req.cookies.userinfo, {message: "Password Incorrect."});
+				var viewObj = {message: "Password Incorrect."};
 				res.render("login.ejs", viewObj);
 			}
 		} else { // if the user does not exist, then tell the user
@@ -140,6 +152,9 @@ app.post("/v/submit", (req, res) => {
 
 	//parse the form and store the files
 	form.parse(req, async (err, fields, files) => {
+		//get user from redis
+		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
 		//get the video and thumbnail extensions to be checked (file upload vuln)
 		var videoext = path.extname(middleware.getFilePath(files.video, "/storage/videos/files/"));
 		var thumbext = path.extname(middleware.getFilePath(files.thumbnail, "/storage/videos/thumbnails/"));
@@ -166,17 +181,17 @@ app.post("/v/submit", (req, res) => {
 			topics = topics.toString();
 
 			//the array to contain the values to insert into the db
-			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, req.cookies.userinfo.id, 0, middleware.getDate(), topics, req.cookies.userinfo.username, req.cookies.userinfo.channelicon, true];
+			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, middleware.getDate(), topics, userinfo.username, userinfo.channelicon, true];
 
 			//load the video into the database
 			var id = await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`, valuesArr);
 			var videourl = `/v/${id.rows[0].id}`; //get the url to redirect to now that the video has been created
 			res.redirect(videourl); //redirect to the url
 		} else if (!(thumbext in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
-			var viewObj = Object.assign({}, req.cookies.userinfo, {message: "Unsupported file type for thumbnail, please use png, jpeg, or jpg."});
+			var viewObj = Object.assign({}, userinfo, {message: "Unsupported file type for thumbnail, please use png, jpeg, or jpg."});
 			res.render("submitvideo.ejs", viewObj);
 		} else if (!(videoext in acceptedvideo)) { //if the video file types are not supported, then show errors
-			var viewObj = Object.assign({}, req.cookies.userinfo, {message: "Unsupported file type for video, please use mp4, ogg, or webm."});
+			var viewObj = Object.assign({}, userinfo, {message: "Unsupported file type for video, please use mp4, ogg, or webm."});
 			res.render("submitvideo.ejs", viewObj);
 		}
 	});
@@ -184,11 +199,14 @@ app.post("/v/submit", (req, res) => {
 
 //post request for commenting on videos
 app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
+	//get the user from redis
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
 	//get a unique comment id
 	var commentid = await middleware.generateAlphanumId();
 
 	//an array of values to insert into the database
-	var valuesarr = [commentid, req.cookies.userinfo.username, req.cookies.userinfo.id, req.body.commenttext, req.params.videoid, middleware.getDate(), 0, 0];
+	var valuesarr = [commentid, userinfo.username, userinfo.id, req.body.commenttext, req.params.videoid, middleware.getDate(), 0, 0];
 
 	//check to see if the comment belongs to a thread of some sort
 	if (typeof req.query.parent_id != 'undefined') {
@@ -207,23 +225,26 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 
 //this is a post link to create a new playlist
 app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
+	//get the user from redis
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
 	//generate a new id for the playlist
 	var newid = await middleware.generateAlphanumId();
 
 	//get any playlists with matching properties to the one trying to be created
-	var results = await client.query(`SELECT * FROM playlists WHERE user_id=$1 AND name=$2`, [req.cookies.userinfo.id, req.body.name]);
+	var results = await client.query(`SELECT * FROM playlists WHERE user_id=$1 AND name=$2`, [userinfo.id, req.body.name]);
 
 	//check to see if this playlist already exists
 	if (results.rows.length > 0) { //if the playlist already exists
 		//create an array of errors
 		var errors = [{message: "Playlist with the same name already exists."}];
 		//view object to be passed to the view
-		var viewObj = Object.assign({}, req.cookies.userinfo, {errors: errors});
+		var viewObj = Object.assign({}, userinfo, {errors: errors});
 		//render the create playlist view with errors
 		res.render("createplaylist.ejs", viewObj);
 	} else { //add the playlist into the db
 		//add the details of the playlist into the database
-		await client.query(`INSERT INTO playlists (id, name, user_id) VALUES ($1, $2, $3)`, [newid, req.body.name, req.cookies.userinfo.id]);
+		await client.query(`INSERT INTO playlists (id, name, user_id) VALUES ($1, $2, $3)`, [newid, req.body.name, userinfo.id]);
 		//check to see if there is a video that needs to be added to the new playlist
 		if (typeof req.body.videoid != 'undefined') {
 			//insert the video id and playlist id into the playlistvideos table
@@ -238,6 +259,9 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 
 //this is the post link for starting a new stream on the site
 app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
+	//get the user
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
 	//make a form handler in order to save the files and details into the db
 	var form = formidable.IncomingForm();
 
@@ -250,7 +274,7 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 	form.parse(req, async (err, fields, files) => {
 		if (req.params.type == "browser") {
 			//a view object for the view
-			var viewObj = Object.assign({}, req.cookies.userinfo, {streamname: fields.name, enableChat: fields.enableChat, streamid: streamid, isStreamer: true});
+			var viewObj = {user: userinfo, streamname: fields.name, enableChat: fields.enableChat, streamid: streamid, isStreamer: true};
 
 			//save the thumbnail of the live stream
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
@@ -259,7 +283,7 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 			var topics = fields.topics.split(' ').toString();
 
 			//set all of the database details
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, req.cookies.userinfo.id, 0, middleware.getDate(), topics, req.cookies.userinfo.username, req.cookies.userinfo.channelicon, 'true'];
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, middleware.getDate(), topics, userinfo.username, userinfo.channelicon, 'true'];
 			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, valuesarr);
 
 			//redirect to the admin panel link as to not have trouble reloading the page
@@ -272,7 +296,7 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 			var topics = fields.topics.split(' ').toString();
 
 			//save the details into the db excluding the video path
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, req.cookies.userinfo.id, 0, middleware.getDate(), topics, req.cookies.userinfo.username, req.cookies.userinfo.channelicon, 'true', fields.enableChat.toString()];
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, middleware.getDate(), topics, userinfo.username, userinfo.channelicon, 'true', fields.enableChat.toString()];
 			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, enableChat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesarr);
 
 			//render the view for the streamer

@@ -12,7 +12,7 @@
 
 		<h1><%= playlist.name %></h1>
 		<% if (typeof user != 'undefined') { %>
-			<% if (creator.id == user.id) { %>
+			<% if (creator.id == user.id && playlist.candelete) { %>
 				<% var deletelink = `/playlist/delete/${playlist.id}` %>
 				<button><a href="<%= deletelink %>">Delete Playlist</a></button>
 			<% } %>
@@ -50,7 +50,11 @@
 								</div>
 							</div>
 						</div>
-						<button><a href="/playlistvideo/delete/<%= playlist.id %>/<%= item.id %>">Delete Video</a></button>
+						<% if (typeof user != undefined) { %>
+							<% if (creator.id == user.id) { %>
+								<button><a href="/playlistvideo/delete/<%= playlist.id %>/<%= item.id %>">Delete Video</a></button>
+							<% } %>
+						<% } %>
 					<% }); %>
 				<% } else { %>
 					<h2>No videos yet!</h2>

@@ -1,7 +1,7 @@
 const path = require("path");
 
 //get the variables to work with in the config file
-const { app, client, middleware, PORT, viewObject, server, liveWss, chatWss, obsWss, nms } = require("./configBasic");
+const { app, client, redisClient, middleware, PORT, viewObject, server, liveWss, chatWss, obsWss, nms } = require("./configBasic");
 
 //handle the shutting down of the server
 middleware.onShutdown();
@@ -14,7 +14,7 @@ require("./post");
 
 //listen for connections to the server
 server.listen(PORT, '0.0.0.0', () => {
-	console.log("Server is Running");
+	console.log(`[+] Server is Running on port ${PORT}`);
 });
 
 //run node media server in order to enable obs streaming

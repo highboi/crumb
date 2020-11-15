@@ -28,7 +28,7 @@
 				<button onclick="window.location.href = '<%= channellink %>/?section=about';">About</button>
 			</div>
 			<hr>
-			<div class="channel-content">
+			<div class="channel-content" id="<%= section %>">
 				<% if (section == "home" || section == "videos") { %>
 					<% if (typeof videos != 'undefined') { %>
 						<% videos.forEach((item, index) => { %>
@@ -69,12 +69,15 @@
 					</div>
 				<% } else if (section == "playlists") { %>
 					<% if (typeof playlists != 'undefined') { %>
+						<div>
+							<h3><a href="/playlist/new">Create New Playlist</a></h3>
+						</div>
 						<% playlists.forEach((item, index) => { %>
 							<div>
 								<% var playlistlink = `/p/${item.id}` %>
 								<h1><a href="<%= playlistlink %>"><%= item.name %></a></h1>
 								<p><%= item.videocount %> Videos</p>
-							</div><br>
+							</div>
 						<% }); %>
 					<% } else { %>
 						<h3><a href="/playlist/new">Create New Playlist</a></h3>

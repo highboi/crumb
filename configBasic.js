@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const flash = require("connect-flash");
 const WebSocket = require("ws");
 const NodeMediaServer = require("node-media-server");
-const cors = require("cors");
+const fs = require("fs");
 
 //generate the express app
 const app = express();
@@ -53,20 +53,20 @@ const nms = new NodeMediaServer(nmsConfig);
 //get the database client to make queries
 const client = require("./dbConfig");
 
+//get the redis session store client
+const redisClient = require("./redisConfig");
+
 //get access to custom middleware functions and functions to make the code better
 const middleware = require("./middleware");
 
 //get the port for the server to listen on
-const PORT = 80;
+const PORT = 3000;
 
 //the salt value for encrypting session data
 const SALT = "superawesomesecretsaltime";
 
 //set up the rendering engine for the views
 app.set("view engine", "ejs");
-
-//use CORS
-app.use(cors());
 
 //allow the server to parse requests with url encoded payloads
 app.use(express.urlencoded({ extended: false }));
@@ -91,10 +91,12 @@ app.use(express.static('views'));
 //declare a static directory for the file contents of the site
 app.use(express.static("storage"));
 
+
 //export the variables
 module.exports = {
 	app,
 	client,
+	redisClient,
 	middleware,
 	PORT,
 	server,
