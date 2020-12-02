@@ -148,7 +148,7 @@
 							<% comments.forEach((item, index) => { %>
 								<% if (!item.parent_id) { %>
 									<hr>
-									<div id="<%= item.id %>">
+									<div class="comment" id="<%= item.id %>" likes="<%= item.likes %>" dislikes="<%= item.dislikes %>" posttime="<%= item.posttime %>">
 										<h3>&nbsp<%= item.username %></h3>
 										<p>&nbsp;&nbsp<%= item.comment %></p>
 										<div class="commentlikes" id="<%= item.id %>">
@@ -263,7 +263,6 @@
 			var videoelement = document.getElementById("video");
 			var videovar = <%- JSON.stringify(video) %>;
 			var chatreplayelement = document.getElementById("chatReplay");
-			var comments = <%- JSON.stringify(comments) %>;
 			<% if (typeof videos[0] != 'undefined') { %>
 				var nextvideo = <%- JSON.stringify(videos[0]) %>;
 			<% } %>

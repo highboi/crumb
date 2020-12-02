@@ -1,16 +1,9 @@
+//require the postgres module and configure the dotenv module to allow node.js to access environment variables
 const pg = require("pg");
-
 require('dotenv').config();
 
-//get credentials from the environment variables in the .env file
-var name = process.env.NAME;
-var pass = process.env.PASS;
-var host = process.env.HOST;
-var port  = process.env.PORT;
-var dbName = process.env.DBNAME;
-
 //set up the connection string to connect to the database
-var connString = `postgres://${name}:${pass}@${host}:${port}/${dbName}`;
+var connString = `postgres://${process.env.NAME}:${process.env.PASS}@${process.env.HOST}:${process.env.PORT}/${process.env.DBNAME}`;
 
 //create the client for the database
 var client = new pg.Client(connString);

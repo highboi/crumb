@@ -1,10 +1,25 @@
-const path = require("path");
-
 //get the variables to work with in the config file
-const { app, client, redisClient, middleware, PORT, viewObject, server, liveWss, chatWss, obsWss, nms } = require("./configBasic");
+const { client, middleware, server, nms, obsWss } = require("./configBasic");
 
 //handle the shutting down of the server
 middleware.onShutdown();
+
+/*
+CRON FORMAT:
+*    *    *    *    *    *
+┬    ┬    ┬    ┬    ┬    ┬
+│    │    │    │    │    │
+│    │    │    │    │    └ day of week (0 - 7) (0 or 7 is Sun)
+│    │    │    │    └───── month (1 - 12)
+│    │    │    └────────── day of month (1 - 31)
+│    │    └─────────────── hour (0 - 23)
+│    └──────────────────── minute (0 - 59)
+└───────────────────────── second (0 - 59, OPTIONAL)
+*/
+//set the degradation rate for each of the search terms in the redis store
+//this degrades the search score every week on sunday, where there is likely
+//to be less traffic (according to youtube stats)
+//middleware.scheduleFunction("0 0 0 * * 0", (async () => {await middleware.changeAllWordScore(false, 0.000001)})());
 
 //handle the get requests
 require("./get");
@@ -13,8 +28,8 @@ require("./get");
 require("./post");
 
 //listen for connections to the server
-server.listen(PORT, '0.0.0.0', () => {
-	console.log(`[+] Server is Running on port ${PORT}`);
+server.listen(process.env.SERVERPORT, '0.0.0.0', () => {
+	console.log(`[+] Server is Running on port ${process.env.SERVERPORT}`);
 });
 
 //run node media server in order to enable obs streaming

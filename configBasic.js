@@ -49,21 +49,14 @@ const nmsConfig = {
 };
 const nms = new NodeMediaServer(nmsConfig);
 
+//get the redis clients
+const redisClient = require("./redisConfig");
 
 //get the database client to make queries
 const client = require("./dbConfig");
 
-//get the redis session store client
-const redisClient = require("./redisConfig");
-
 //get access to custom middleware functions and functions to make the code better
 const middleware = require("./middleware");
-
-//get the port for the server to listen on
-const PORT = 3000;
-
-//the salt value for encrypting session data
-const SALT = "superawesomesecretsaltime";
 
 //set up the rendering engine for the views
 app.set("view engine", "ejs");
@@ -73,7 +66,7 @@ app.use(express.urlencoded({ extended: false }));
 
 //set up the session for the server
 app.use(session({
-		secret: SALT, ///the salt to encrypt the information in the session
+		secret: process.env.SALT, ///the salt to encrypt the information in the session
 		resave: false, //do not resave session variables if nothing is changed
 		saveUninitialized: false //do not save uninitialized variables
 	})
@@ -95,11 +88,10 @@ app.use(express.static("storage"));
 //export the variables
 module.exports = {
 	app,
-	client,
-	redisClient,
-	middleware,
-	PORT,
 	server,
+	client,
+	middleware,
+	redisClient,
 	liveWss,
 	chatWss,
 	obsWss,

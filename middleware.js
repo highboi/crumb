@@ -7,10 +7,8 @@ const client = require("./dbConfig");
 const redisClient = require("./redisConfig");
 const crypto = require("crypto");
 const {v4: uuidv4} = require("uuid");
-
-//import the autocorrect library with a custom path to a custom dictionary file
-var dictpath = "/home/merlin/webdev/crumb/storage/server/words.txt";
-const autocorrect = require("autocorrect")({dictionary: dictpath});
+const readline = require("readline");
+const schedule = require("node-schedule");
 
 //get the write stream to write to the log file
 const { stream } = require("./logger");
@@ -96,6 +94,68 @@ middleware = {
 		return JSON.parse(userinfo);
 	},
 
+	//this is a function to return all of the cases of a string (titlecase, all caps, lowercase)
+	getAllStringCases: function (words) {
+		//get the string version in lowercase, uppercase, and titlecase
+		var lowercase = words.toLowerCase();
+		var uppercase = words.toUpperCase();
+		var titlecase = words.replace(
+			/\w\S*/g,
+			function(txt) {
+				return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+			}
+		);
+
+		//return an array with all of these types of cases
+		return [lowercase, titlecase, uppercase];
+	},
+
+	//this is a function to delete video details
+	deleteVideoDetails: async function (userinfo, videoid) {
+		//get the video to be deleted
+		var video = await client.query(`SELECT thumbnail, video, user_id FROM videos WHERE id=$1`, [videoid]);
+		video = video.rows[0];
+		//get the paths of the files for the thumbnail and the video
+		var thumbnailpath = __dirname + "/storage" + video.thumbnail;
+		var videopath = __dirname + "/storage" + video.video;
+		//check to see if the user trying to delete the video actually owns the video
+		if (userinfo.id == video.user_id) {
+			//delete all of the playlist entries for this video
+			await client.query(`DELETE FROM playlistvideos WHERE video_id=$1`, [videoid]);
+			//delete all of the comments for this video
+			await client.query(`DELETE FROM comments WHERE video_id=$1`, [videoid]);
+			//delete the video details in the database
+			await client.query(`DELETE FROM videos WHERE id=$1`, [videoid]);
+			//delete the actual files for the video and thumbnail
+			fs.unlink(videopath, (err) => {
+				if (err) throw err;
+			});
+			fs.unlink(thumbnailpath, (err) => {
+				if (err) throw err;
+			});
+			//return true as the files and database entry were successfully deleted
+			return true;
+		} else { //if the video does not belong to the user, return false
+			return false;
+		}
+	},
+
+	//this is a function to delete playlist details
+	deletePlaylistDetails: async function (userinfo, playlistid) {
+		var playlist = await client.query(`SELECT user_id FROM playlists WHERE id=$1`, [playlistid]);
+		playlist = playlist.rows[0];
+
+		//if the playlist's user id matches the given user info, then delete the playlist video entries
+		//as well as the playlist itself and return true on success
+		if (playlist.user_id == userinfo.id) {
+			await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1`, [playlistid]);
+			await client.query(`DELETE FROM playlists WHERE id=$1`, [playlistid]);
+			return true;
+		} else { //if the playlist apparently does not belong to the user, then return false
+			return false;
+		}
+	},
+
 	//this is a function that returns a path for a file you want to save
 	getFilePath: function (file, path) {
 		var filepath = path + Date.now() + "-" + file.name;
@@ -168,6 +228,57 @@ middleware = {
 		}
 	},
 
+	//this is a function to schedule a job for a function. this uses the cron format for
+	//scheduling jobs
+	scheduleFunction: function(cronstring, job) {
+		schedule.scheduleJob(cronstring, job);
+	},
+
+	//this is a function that changes the word score in the wordlist file
+	changeWordScore: async function (word, add, amount) {
+		//get the current wordscore
+		var wordscore = await client.query(`SELECT score FROM commonwords WHERE word=$1`, [word]);
+		wordscore = wordscore.rows[0];
+
+		//check to see if this words exists inside the redis store
+		if (typeof wordscore != 'undefined') {
+			//get the actual score attribute now that we know that this is a defined entry in the database
+			wordscore = wordscore.score;
+
+			//check to see if we add or subtract from the wordscore
+			if (add) {
+				wordscore = wordscore + amount;
+			} else {
+				wordscore = wordscore - amount;
+			}
+
+			//set the wordscore of this word
+			await client.query(`UPDATE commonwords SET score=$1 WHERE word=$2`, [wordscore, word]);
+		} else { //if the word does not exist yet
+			//set the default word score
+			await client.query(`INSERT INTO commonwords (word, score) VALUES ($1, $2)`, [word, 0]);
+		}
+	},
+
+	//this is a function that loops through all of the wordlist terms in an array and changes the wordscore
+	changeWordScoreArr: function (words, add, amount) {
+		//loop through the word array provided in the parameters
+		words.forEach(async (item, index) => {
+			await middleware.changeWordScore(item, add, amount);
+		});
+	},
+
+	//this is a function to update the wordscore of a video
+	changeVideoWordScore: async function (videoid) {
+		//get the video information
+		var video = await client.query(`SELECT topics, title, username, user_id FROM videos WHERE id=$1`, videoid);
+		video = video.rows[0];
+		//change the wordscore of each of these attributes
+		var wordsArr = video.title.split(" ").concat([video.username], video.topics.split(" "));
+		//change the actual wordscore for each word/phrase
+		await changeWordScoreArr(wordsArr, true, 1);
+	},
+
 	//this is a function that puts together a list of phrases to use in our search algorithm
 	getSearchTerms: function (searchterm) {
 		//break the search term into individual words
@@ -198,60 +309,6 @@ middleware = {
 		}
 
 		return terms;
-	},
-
-	//this is a function for managing auto-correcting strings for searches on the site
-	autoCorrect: function (query, checkCaps=false, checkTitle=false, checkLowerCase=false) {
-		//this is the regex to filter for special characters
-		var regexp = /[^a-zA-Z ]/g;
-
-		//an array to store the matches for special characters
-		var matches = [];
-
-		//loop and find all of the matches for special characters so that we can put them back later
-		while ((match = regexp.exec(query)) != null) {
-			var arr = [];
-			arr.push(match.index);
-			arr.push(match);
-			matches.push(arr);
-		}
-
-		//strip the query of special characters so that they dont get autocorrected to "aa"
-		//this is the array to search through for words to be corrected
-		var searcharray = query.replace(regexp, "").split(" ");
-
-		//a variable to store the autocorrected words
-		var correctedarray = [];
-
-		//search through the array and autocorrect each word if need be
-		searcharray.forEach((item, index) => {
-			if (checkCaps) {
-				correctedarray.push(autocorrect(item.toLowerCase()));
-			} else if (checkTitle) {
-				var autocorrecteditem = autocorrect(item.toLowerCase());
-				var titlecase = autocorrecteditem.charAt(0).toUpperCase() + autocorrecteditem.substr(1).toLowerCase();
-				correctedarray.push(titlecase);
-			} else if (checkLowerCase) {
-				correctedarray.push(autocorrect(item.toUpperCase()));
-			} else {
-				correctedarray.push(autocorrect(item));
-			}
-		});
-
-		//join the corrected array into a corrected string
-		var correctedstring = correctedarray.join(" ");
-
-		console.log("CORRECTED: " + correctedstring);
-
-		//place the special characters back into the array based on the index
-		matches.forEach((item, index) => {
-			var charindex = item[0];
-			var char = item[1];
-			correctedstring = correctedstring.slice(0, charindex) + char + correctedstring.slice(charindex);
-		});
-
-		//return the corrected query string with special characters included
-		return correctedstring;
 	},
 
 	//this is a function that selects videos from the database based on a given array of search terms
@@ -472,9 +529,9 @@ middleware = {
 
 		//get the id column name based on if the element has a video or not
 		if (typeof element.video != 'undefined') {
-			var idcolumn = "videoid";
+			var idcolumn = "video_id";
 		} else {
-			var idcolumn = "commentid";
+			var idcolumn = "comment_id";
 		}
 
 		//handle the liking and unliking of the element
@@ -518,9 +575,9 @@ middleware = {
 
 		//get the id column name
 		if (typeof element.video != 'undefined') {
-			var idcolumn = "videoid";
+			var idcolumn = "video_id";
 		} else {
-			var idcolumn = "commentid";
+			var idcolumn = "comment_id";
 		}
 
 		//handle the disliking and the un-disliking of the element

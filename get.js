@@ -1,7 +1,7 @@
 //this is a file to handle all of the get requests for the server
 
-const { app, client, redisClient, middleware, PORT, server, liveWss, chatWss, obsWss, nms } = require("./configBasic");
-
+//get all of the necessary libraries and objects
+const { app, client, redisClient, middleware, server, liveWss, chatWss, obsWss, nms } = require("./configBasic");
 const fs = require("fs");
 const approx = require("approximate-number");
 const path = require("path");
@@ -68,6 +68,53 @@ app.get('/', async (req, res) => {
 app.get('/register', middleware.checkNotSignedIn, (req, res) => {
 	var viewObj = {message: req.flash("message")};
 	res.render("register.ejs", viewObj);
+});
+
+//delete the user and all traces of the user like videos
+app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
+	//get the user info for verification later on
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	//get all of the videos belonging to this user
+	var videos = await client.query(`SELECT id FROM videos WHERE user_id=$1`, [req.params.userid]);
+	videos = videos.rows;
+
+	//delete all of the video details for this video
+	videos.forEach(async (item, index) => {
+		await middleware.deleteVideoDetails(userinfo, item.id);
+	});
+
+	//delete all of the playlists of the user
+	var playlistids = await client.query(`SELECT id FROM playlists WHERE user_id=$1`, [req.params.userid]);
+	playlistids = playlistids.rows;
+	//loop through the playlist ids and delete the playlist details
+	playlistids.forEach(async (item, index) => {
+		await middleware.deletePlaylistDetails(userinfo, item.id);
+	});
+
+	//check to see if the user id in the url matches the one in the session
+	if (userinfo.id == req.params.userid) {
+		//delete the comments of this user
+		await client.query(`DELETE FROM comments WHERE userid=$1`, [req.params.userid]);
+
+		//delete the actual user
+		await client.query(`DELETE FROM users WHERE id=$1`, [req.params.userid]);
+
+		//delete the session on the browser
+		redisClient.del(req.cookies.sessionid, (err, reply) => {
+			if (err) throw err;
+			console.log("Redis Session Deleted");
+		});
+		res.cookie('sessionid', '', {expires: new Date(0)});
+
+		//redirect to the index page after setting a flash message
+		req.flash("message", "Deleted Your Account!");
+		res.redirect("/");
+	} else {
+		//let the user know that this is not their account
+		req.flash("message", "Not Your Account!");
+		res.redirect("/");
+	}
 });
 
 //get the login page
@@ -172,11 +219,11 @@ app.get("/v/:videoid", async (req, res) => {
 	var videos = await middleware.getReccomendations(video);
 
 	//select the comments that belong to the video and order the comments by the amount of likes (most likes to least likes)
-	var comments = await client.query(`SELECT * FROM comments WHERE videoid=$1 ORDER BY likes DESC`, [req.params.videoid]);
+	var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1 ORDER BY likes DESC`, [req.params.videoid]);
 	comments = comments.rows;
 
 	//select all of the chat messages that were typed if this was a live stream
-	var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE streamid=$1`, [req.params.videoid]);
+	var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE stream_id=$1`, [req.params.videoid]);
 	chatReplayMessages = chatReplayMessages.rows;
 
 	//set the object to be passed to the rendering function
@@ -510,7 +557,7 @@ chatWss.on("connection", async (ws, req) => {
 			});
 
 			//insert the message into the database along with the stream id, user id, and the time which the message was posted
-			await client.query(`INSERT INTO livechat (message, streamid, userid, time) VALUES ($1, $2, $3, $4)`, [data[2], data[1], userinfo.id, parseInt(data[3], 10)]);
+			await client.query(`INSERT INTO livechat (message, stream_id, user_id, time) VALUES ($1, $2, $3, $4)`, [data[2], data[1], userinfo.id, parseInt(data[3], 10)]);
 		}
 	});
 });
@@ -672,29 +719,11 @@ app.get("/v/delete/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//get user from session store
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//store the video to be deleted
-	var video = await client.query(`SELECT thumbnail, video, user_id FROM videos WHERE id=$1`, [req.params.videoid]);
-	video = video.rows[0];
+	//get the result of deleting the video details
+	var result = await middleware.deleteVideoDetails(userinfo, req.params.videoid);
 
-	console.log("VIDEO:", video);
-
-	//create a path to the videos files
-	var thumbnailpath = __dirname + "/storage" + video.thumbnail;
-	var videopath = __dirname + "/storage" + video.video;
-
-	//delete the video details before deleting the files in case of any error
-	if (userinfo.id == video.user_id) { //did the user make this video?
-		//delete the video details from the database
-		await client.query(`DELETE FROM videos WHERE id=$1`, [req.params.videoid]);
-		//delete the files associated with the videos
-		fs.unlink(videopath, (err) => {
-			if (err) throw err;
-			console.log("Video File Deleted.");
-		});
-		fs.unlink(thumbnailpath, (err) => {
-			if (err) throw err;
-			console.log("Thumbnail Deleted.");
-		});
+	//check to see if the deletion of the video was a success
+	if (result) {
 		//redirect to the index page
 		req.flash("message", "Deleted Video Details.");
 		res.redirect("/");
@@ -715,10 +744,10 @@ app.get("/v/like/:videoid", middleware.checkSignedIn, async (req, res) => {
 	video = video.rows[0];
 
 	//get the liked video from the database
-	var liked = await client.query(`SELECT * FROM likedVideos WHERE userid=$1 AND videoid=$2`, [userinfo.id, req.params.videoid]);
+	var liked = await client.query(`SELECT * FROM likedVideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, req.params.videoid]);
 
 	//get the disliked video from the database
-	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE userid=$1 AND videoid=$2`, [userinfo.id, req.params.videoid]);
+	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, req.params.videoid]);
 
 	//get the updated amount of likes and dislikes
 	var data = await middleware.handleLikes(req, video, liked, disliked, "likedVideos", "dislikedVideos");
@@ -738,10 +767,10 @@ app.get("/v/dislike/:videoid", middleware.checkSignedIn, async (req, res) => {
 	video = video.rows[0];
 
 	//get the disliked video from the database
-	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE userid=$1 AND videoid=$2`, [userinfo.id, req.params.videoid]);
+	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, req.params.videoid]);
 
 	//get the liked video from the database
-	var liked = await client.query(`SELECT * FROM likedVideos WHERE userid=$1 AND videoid=$2`, [userinfo.id, req.params.videoid]);
+	var liked = await client.query(`SELECT * FROM likedVideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, req.params.videoid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleDislikes(req, video, liked, disliked, "likedVideos", "dislikedVideos");
@@ -797,10 +826,11 @@ app.get("/search", async (req, res) => {
 	var query = req.query.searchquery;
 
 	//store the autocorrected search query inside the search object
+	var queryCases = middleware.getAllStringCases(query);
 	search.humanquery = query; //the original query
-	search.lowerQuery = middleware.autoCorrect(query, true, false, false);
-	search.titleQuery = middleware.autoCorrect(query, false, true, false);
-	search.capsQuery = middleware.autoCorrect(query, false, false, true);
+	search.lowerQuery = queryCases[0];
+	search.titleQuery = queryCases[1];
+	search.capsQuery = queryCases[2];
 
 	//get the phrases/keywords from the query through the algorithm
 	var phrases = middleware.getSearchTerms(search.humanquery);
@@ -808,9 +838,7 @@ app.get("/search", async (req, res) => {
 	var titlePhrases = middleware.getSearchTerms(search.titleQuery);
 	var capsPhrases = middleware.getSearchTerms(search.capsQuery);
 
-	var totalphrases = phrases.concat(lowerPhrases);
-	totalphrases = totalphrases.concat(titlePhrases);
-	totalphrases = totalphrases.concat(capsPhrases);
+	var totalphrases = phrases.concat(lowerPhrases, titlePhrases, capsPhrases);
 
 	//add the results for the regular phrases into the results array
 	var videos = await middleware.searchVideos(totalphrases);
@@ -839,6 +867,34 @@ app.get("/search", async (req, res) => {
 	res.render("searchresults.ejs", viewObj);
 });
 
+//this is a get path for search reccomendations as the user types them into the search bar
+app.get("/getsearch", async (req, res) => {
+	//get the search term in the query parameters (replace all whitespace with a single space then split by space character)
+	var searchterms = req.query.searchquery.replace("/\s/g", " ").split(" ");
+
+	//get the current word that the user is typing
+	var currentword = searchterms[searchterms.length - 1];
+
+	//check to see if the current word is a space character, meaning that the user is typing a new word
+	if (currentword == " ") {
+		//get all of the possible cases for the search query string
+		var searchCases = middleware.getAllStringCases(req.query.searchquery.trim());
+
+		//get all of the titles of videos and streams that are most similar to the search query
+		var videos = await client.query(`SELECT title FROM videos WHERE title LIKE $1 OR title LIKE $2 OR title LIKE $3 LIMIT 15`, ['%' + searchCases[0] + '%', '%' + searchCases[1] + '%', '%' + searchCases[2] + '%']);
+		videos = videos.rows;
+		console.log("VIDEOS:", videos);
+	} else {
+		//get all of the possible cases for the search query string
+		var searchCases = middleware.getAllStringCases(req.query.searchquery);
+
+		//get all of the titles of videos and streams that are similar to the search query
+		var videos = await client.query(`SELECT title FROM videos WHERE title LIKE $1 OR title LIKE $2 OR title LIKE $3 LIMIT 15`, [searchCases[0], searchCases[1], searchCases[2]]);
+		videos = videos.rows;
+		console.log("VIDEOS:", videos);
+	}
+});
+
 
 
 
@@ -853,10 +909,10 @@ app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) =
 	comment = comment.rows[0];
 
 	//select the liked comment from the database
-	var likedComment = await client.query(`SELECT * FROM likedComments WHERE userid=$1 AND commentid=$2`, [userinfo.id, req.params.commentid]);
+	var likedComment = await client.query(`SELECT * FROM likedComments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, req.params.commentid]);
 
 	//select the disliked comment from the database
-	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE userid=$1 AND commentid=$2`, [userinfo.id, req.params.commentid]);
+	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, req.params.commentid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleLikes(req, comment, likedComment, dislikedComment, "likedComments", "dislikedComments");
@@ -878,10 +934,10 @@ app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res
 	comment = comment.rows[0];
 
 	//select the liked comment from the database
-	var likedComment = await client.query(`SELECT * FROM likedComments WHERE userid=$1 AND commentid=$2`, [userinfo.id, req.params.commentid]);
+	var likedComment = await client.query(`SELECT * FROM likedComments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, req.params.commentid]);
 
 	//select the disliked comment from the database
-	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE userid=$1 AND commentid=$2`, [userinfo.id, req.params.commentid]);
+	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, req.params.commentid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleDislikes(req, comment, likedComment, dislikedComment, "likedComments", "dislikedComments");

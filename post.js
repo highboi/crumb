@@ -8,7 +8,7 @@ const approx = require("approximate-number");
 const fs = require("fs");
 const WebSocket = require("ws");
 
-const { app, client, redisClient, middleware, PORT, server, liveWss, chatWss } = require("./configBasic");
+const { app, client, redisClient, middleware} = require("./configBasic");
 
 //handle the user registrations
 app.post('/register', (req, res) => {
@@ -81,6 +81,10 @@ app.post('/register', (req, res) => {
 				var newplaylistid = await middleware.generateAlphanumId();
 				valuesarr = [newuserid, "Watch Later", newplaylistid, 0, false];
 				await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES ($1, $2, $3, $4, $5)`, valuesarr);
+				//add this user's username to the redis store with the default score. if the username already exists, add to the score already inside redis
+				await middleware.changeWordScore(fields.username, true, 1);
+				//loop through the channel topics and add to their scores or set default scores if these words are not in there yet
+				await middleware.changeWordScoreArr(fields.topics.split(" "), true, 1);
 				//generate a new session id
 				var newsessid = middleware.generateSessionId();
 				//store the user info inside redis db
@@ -176,12 +180,24 @@ app.post("/v/submit", (req, res) => {
 			//generate a unique video id for each video (await the result of this function)
 			var videoid = await middleware.generateAlphanumId();
 
-			//turn the list of topics into an array to be parsed
-			var topics = fields.topics.split(" ");
-			topics = topics.toString();
-
 			//the array to contain the values to insert into the db
-			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, middleware.getDate(), topics, userinfo.username, userinfo.channelicon, true];
+			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, middleware.getDate(), fields.topics, userinfo.username, userinfo.channelicon, true];
+
+			//change/set the word scores for the title of the video, the topics on the video, and the channel's name and topics
+			if (fields.includeChannelTopics) {
+				//get the topics and remove any duplicate keywords
+				var topics = fields.topics.split(" ");
+				topics = [...new Set(topics)];
+				//get the full array of words
+				var wordsArr = fields.title.split(" ").concat(topics, [userinfo.username]);
+			} else {
+				//get the topics and remove any duplicates
+				var topics = fields.topics.split(" ").concat(fields.topics.split(" "));
+				topics = [...new Set(topics)];
+				//get the full array of words
+				var wordsArr = fields.title.split(" ").concat(topics, [userinfo.username]);
+			}
+			await middleware.changeWordScoreArr(wordsArr, true, 1);
 
 			//load the video into the database
 			var id = await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`, valuesArr);
@@ -212,10 +228,10 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 	if (typeof req.query.parent_id != 'undefined') {
 		//add the comment to the database with the parent id
 		valuesarr.push(req.query.parent_id.toString());
-		await client.query(`INSERT INTO comments (id, username, userid, comment, videoid, posttime, likes, dislikes, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, valuesarr);
+		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, valuesarr);
 	} else {
 		//add the comment to the database
-		await client.query(`INSERT INTO comments (id, username, userid, comment, videoid, posttime, likes, dislikes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, valuesarr);
+		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, valuesarr);
 	}
 
 	//redirect to the same view url (the back end will show an updated list of comments)
@@ -245,12 +261,17 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 	} else { //add the playlist into the db
 		//add the details of the playlist into the database
 		await client.query(`INSERT INTO playlists (id, name, user_id) VALUES ($1, $2, $3)`, [newid, req.body.name, userinfo.id]);
+		//change the word scores of the words in the title of the video and the channel name
+		var wordsArr = req.body.name.split(" ").concat([userinfo.username]);
+		await middleware.changeWordScoreArr(wordsArr, true, 0.000001);
 		//check to see if there is a video that needs to be added to the new playlist
 		if (typeof req.body.videoid != 'undefined') {
 			//insert the video id and playlist id into the playlistvideos table
 			await client.query(`INSERT INTO playlistvideos (playlist_id, video_id) VALUES ($1, $2)`, [newid, req.body.videoid]);
 			//update the amount of videos in the playlist (which is now 1)
 			await client.query(`UPDATE playlists SET videocount=$1 WHERE id=$2`, [1, newid]);
+			//change the wordscore of this video
+			await changeVideoWordScore(req.body.videoid);
 		}
 		//redirect to the playlist
 		res.redirect(`/p/${newid}`);
@@ -272,35 +293,42 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 
 	//parse the form and files such as the thumbnail
 	form.parse(req, async (err, fields, files) => {
+		//variable for storing the stream type
+		var streamtype = req.params.type;
+		//check for the stream type
 		if (req.params.type == "browser") {
-			//a view object for the view
-			var viewObj = {user: userinfo, streamname: fields.name, enableChat: fields.enableChat, streamid: streamid, isStreamer: true};
-
 			//save the thumbnail of the live stream
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
 
-			//get the topics for the live stream
-			var topics = fields.topics.split(' ').toString();
-
 			//set all of the database details
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, middleware.getDate(), topics, userinfo.username, userinfo.channelicon, 'true'];
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, middleware.getDate(), fields.topics, userinfo.username, userinfo.channelicon, 'true'];
 			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, valuesarr);
-
-			//redirect to the admin panel link as to not have trouble reloading the page
-			res.redirect(`/l/admin/${streamid}?streamtype=browser`);
 		} else if (req.params.type == "obs") {
 			//save the thumbnail and return the path to the thumbnail
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
 
-			//save topics
-			var topics = fields.topics.split(' ').toString();
-
 			//save the details into the db excluding the video path
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, middleware.getDate(), topics, userinfo.username, userinfo.channelicon, 'true', fields.enableChat.toString()];
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, middleware.getDate(), fields.topics, userinfo.username, userinfo.channelicon, 'true', fields.enableChat.toString()];
 			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, enableChat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesarr);
-
-			//render the view for the streamer
-			res.redirect(`/l/admin/${streamid}?streamtype=obs`);
 		}
+		//change the word scores for the words in the stream title and the channel name
+		if (fields.includeChannelTopics) {
+			//get the topics and remove duplicates
+			var topics = fields.topics.split(" ").concat(userinfo.topics.split(" "));
+			topics = [...new Set(topics)];
+			//get the full array of words
+			var wordsArr = fields.name.split(" ").concat([userinfo.username], topics);
+		} else {
+			//get the topics and remove duplicates
+			var topics = fields.topics.split(" ");
+			topics = [...new Set(topics)];
+			//get the full array of words
+			var wordsArr = fields.name.split(" ").concat([userinfo.username], fields.topics.split(" "), userinfo.topics.split(" "));
+		}
+		//change the words inside the wordsArr variable
+		await middleware.changeWordScoreArr(wordsArr, true, 1);
+
+		//render the view for the streamer based on the stream type
+		res.redirect(`/l/admin/${streamid}?streamtype=${streamtype}`);
 	});
 });
