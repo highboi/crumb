@@ -825,29 +825,20 @@ app.get("/search", async (req, res) => {
 	//store the query in a variable so that it will be easier to recall the variable
 	var query = req.query.searchquery;
 
-	//store the autocorrected search query inside the search object
-	var queryCases = middleware.getAllStringCases(query);
-	search.humanquery = query; //the original query
-	search.lowerQuery = queryCases[0];
-	search.titleQuery = queryCases[1];
-	search.capsQuery = queryCases[2];
+	//store the original query
+	search.humanquery = query;
 
 	//get the phrases/keywords from the query through the algorithm
 	var phrases = middleware.getSearchTerms(search.humanquery);
-	var lowerPhrases = middleware.getSearchTerms(search.lowerQuery);
-	var titlePhrases = middleware.getSearchTerms(search.titleQuery);
-	var capsPhrases = middleware.getSearchTerms(search.capsQuery);
-
-	var totalphrases = phrases.concat(lowerPhrases, titlePhrases, capsPhrases);
 
 	//add the results for the regular phrases into the results array
-	var videos = await middleware.searchVideos(totalphrases);
+	var videos = await middleware.searchVideos("*", phrases);
 
 	//get the channels that match the search terms
-	var channels = await middleware.searchChannels(totalphrases);
+	var channels = await middleware.searchChannels("*", phrases);
 
 	//get the playlists that match the search terms
-	var playlists = await middleware.searchPlaylists(totalphrases);
+	var playlists = await middleware.searchPlaylists("*", phrases);
 
 	//store the array of video objects inside the search object
 	search.videos = videos;
@@ -868,31 +859,43 @@ app.get("/search", async (req, res) => {
 });
 
 //this is a get path for search reccomendations as the user types them into the search bar
-app.get("/getsearch", async (req, res) => {
-	//get the search term in the query parameters (replace all whitespace with a single space then split by space character)
-	var searchterms = req.query.searchquery.replace("/\s/g", " ").split(" ");
+app.get("/getsearchrecs", async (req, res) => {
+	//get the search query
+	var searchquery = req.query.searchquery;
 
-	//get the current word that the user is typing
-	var currentword = searchterms[searchterms.length - 1];
+	//get all of the titles of videos and streams that are most similar to the search query
+	var videos = await client.query(`SELECT title FROM videos WHERE UPPER(title) LIKE UPPER($1) ORDER BY likes`, ["%" + searchquery + "%"]);
+	videos = videos.rows;
 
-	//check to see if the current word is a space character, meaning that the user is typing a new word
-	if (currentword == " ") {
-		//get all of the possible cases for the search query string
-		var searchCases = middleware.getAllStringCases(req.query.searchquery.trim());
+	//get all of the titles of playlists
+	var playlists = await client.query(`SELECT name FROM playlists WHERE UPPER(name) LIKE UPPER($1)`, ["%" + searchquery + "%"]);
+	playlists = playlists.rows;
 
-		//get all of the titles of videos and streams that are most similar to the search query
-		var videos = await client.query(`SELECT title FROM videos WHERE title LIKE $1 OR title LIKE $2 OR title LIKE $3 LIMIT 15`, ['%' + searchCases[0] + '%', '%' + searchCases[1] + '%', '%' + searchCases[2] + '%']);
-		videos = videos.rows;
-		console.log("VIDEOS:", videos);
-	} else {
-		//get all of the possible cases for the search query string
-		var searchCases = middleware.getAllStringCases(req.query.searchquery);
+	//get all of the channels with the search query in the title
+	var channels = await client.query(`SELECT username FROM users WHERE UPPER(username) LIKE UPPER($1) ORDER BY subscribers`, ["%" + searchquery + "%"]);
+	channels = channels.rows;
 
-		//get all of the titles of videos and streams that are similar to the search query
-		var videos = await client.query(`SELECT title FROM videos WHERE title LIKE $1 OR title LIKE $2 OR title LIKE $3 LIMIT 15`, [searchCases[0], searchCases[1], searchCases[2]]);
-		videos = videos.rows;
-		console.log("VIDEOS:", videos);
-	}
+	//get popular channels which contain occurrences of the keyword(s) in the search query
+	var popchannels = await client.query(`SELECT username FROM users WHERE id IN (SELECT user_id FROM videos WHERE UPPER(title) LIKE UPPER($1)) ORDER BY subscribers`, ["%" + searchquery.trim() + "%"]);;
+	popchannels = popchannels.rows;
+
+	//get popular keywords associated with the channel (if there is one) typed into the search query
+	var popkeywords = await client.query(`SELECT title FROM videos WHERE user_id IN (SELECT id FROM users WHERE UPPER(username) LIKE UPPER($1)) ORDER BY likes`, ["%" + searchquery.trim() + "%"]);
+	popkeywords = popkeywords.rows;
+
+	//combine the total results of all of the reccomendations, with videos and channels being the top priority before playlists
+	var results = videos.concat(channels, playlists, popchannels, popkeywords);
+
+	//get all of the values of each object, as these are the reccomendation values
+	results = results.map((item, index) => {
+		return Object.values(item);
+	});
+
+	//concatenate with the ellipsis (...) to turn the 2d array to a 1d array
+	results = [].concat(...results);
+
+	//send the resulting video titles to the client side
+	res.send(results);
 });
 
 

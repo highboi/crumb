@@ -92,15 +92,35 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 
 .banner #searchbar {
 	display: inline-block;
+	position: relative;
 	margin: auto;
 }
 
 .banner #searchbar button {
 	width: 45px;
 	height: 45px;
+	float: left;
 	background-color: #7dff12;
 	border-color: black;
 	border-width: 4px;
+}
+
+.banner #searchbar #searchquerydiv, #searchrecsdiv {
+	margin-left: 47px;
+}
+
+.banner #searchbar #searchrecs {
+	display: none;
+	position: absolute;
+	text-align: center;
+	background-color: #adff12;
+	color: #2f2f2f;
+	min-width: 160px;
+	z-index: 1;
+}
+
+.banner #searchbar #searchrecs a {
+	color: #2f2f2f;
 }
 
 .banner #settings {
