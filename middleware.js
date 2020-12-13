@@ -11,7 +11,7 @@ const readline = require("readline");
 const schedule = require("node-schedule");
 
 //get the write stream to write to the log file
-const { stream } = require("./logger");
+const logger = require("./logger");
 
 middleware = {
 	//this is a function that redirects users to the login page if the user is not signed in
@@ -466,26 +466,32 @@ middleware = {
 	},
 
 	//this is a function that counts the amount of hits on the site
-	hitCounter: function(req, res, next) {
-		//get the time of the hit on the site
-		var currenttime = middleware.getHumanDate();
-
-		//get the time and date in a readable manner
-		var time = currenttime[0];
-		var date = currenttime[1];
+	hitCounter: async function(req, res, next) {
+		//get the session info of the user
+		if (typeof req.cookies.sessionid != 'undefined') {
+			var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+		}
 
 		//if this is a get request, then this is a hit
 		if (req.method == "GET") {
 			console.log("HIT FROM: " + req.ip.toString());
-			var logstring = "Hit From: " + req.ip.toString() + " on " + req.url.toString() + " at " + time + " on " + date;
-			middleware.log(logstring);
+			if (typeof userinfo != 'undefined') {
+				var logstring = `GET ${req.url.toString()} FROM --> IP: ${req.ip.toString()}, ID: ${userinfo.id}, USERNAME: ${userinfo.username}`;
+			} else {
+				var logstring = `GET ${req.url.toString()} FROM --> IP: ${req.ip.toString()}`;
+			}
+			middleware.log("info", logstring);
 		}
 
 		//check to see if this is a post request in order to log actions on the site
 		if (req.method == "POST") {
 			console.log("ACTION FROM: " + req.ip.toString());
-			var logstring = "Action From: " + req.ip.toString() + " on " + req.url.toString() + " at " + time + " on " + date;
-			middleware.log(logstring);
+			if (typeof userinfo != 'undefined') {
+				var logstring = `POST ${req.url.toString()} FROM --> IP: ${req.ip.toString()}, ID: ${userinfo.id}, USERNAME: ${userinfo.username}`;
+			} else {
+				var logstring = `POST ${req.url.toString()} FROM --> IP: ${req.ip.toString()}`;
+			}
+			middleware.log("info", logstring);
 		}
 
 		//go to the next action on the server
@@ -493,16 +499,19 @@ middleware = {
 	},
 
 	//this is a function that writes to a log file to see the traffic
-	log: function(string) {
-		//write the given string to the write stream in logger.js
-		stream.write(string + "\n");
+	log: function(level, message) {
+		//get the human readable time/date info
+		var currenttime = middleware.getHumanDate();
+
+		//combine the date and time with the message
+		message = `(${currenttime[1]} : ${currenttime[0]}) --> ${message}`;
+
+		//log the message to the file
+		logger.log({level: level, message: message})
 	},
 
 	//this is a function that executes whenever the node process is killed (server shuts down)
 	shutDown: function() {
-		//end the write stream to the traffic log file
-		stream.end();
-
 		//message that the server is shutting down
 		console.log("Shutting Down...");
 

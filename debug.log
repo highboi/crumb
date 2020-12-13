@@ -1,3 +1,50 @@
+{"level":"info","message":"12-12-2020 : 13:42:31 --> Hit From: 127.0.0.1 on /"}
+{"level":"info","message":"12-12-2020 : 13:42:35 --> Hit From: 127.0.0.1 on /v/41b17822-8a0f-446d-978f-ca1d0829f72a"}
+{"level":"info","message":"12-12-2020 : 13:42:35 --> Hit From: 127.0.0.1 on /video/41b17822-8a0f-446d-978f-ca1d0829f72a"}
+{"level":"info","message":"12-12-2020 : 13:42:36 --> Hit From: 127.0.0.1 on /"}
+{"level":"info","message":"12-12-2020 : 13:42:38 --> Hit From: 127.0.0.1 on /login"}
+{"level":"info","message":"12-12-2020 : 13:42:44 --> Action From: 127.0.0.1 on /login"}
+{"level":"info","message":"12-12-2020 : 13:42:45 --> Hit From: 127.0.0.1 on /"}
+{"level":"info","message":"12-12-2020 : 13:47:53 --> Hit From: 127.0.0.1 on /"}
+{"level":"info","message":"12-12-2020 : 13:47:57 --> Hit From: 127.0.0.1 on /logout"}
+{"level":"info","message":"12-12-2020 : 13:47:57 --> Hit From: 127.0.0.1 on /"}
+{"level":"info","message":"12-12-2020 : 13:47:59 --> Hit From: 127.0.0.1 on /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50"}
+{"level":"info","message":"12-12-2020 : 13:47:59 --> Hit From: 127.0.0.1 on /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50"}
+{"level":"info","message":"12-12-2020 : 13:48:04 --> Hit From: 127.0.0.1 on /"}
+{"level":"info","message":"12-12-2020 : 13:58:30 --> GET ${req.url.toString()} FROM --> IP: ${req.ip.toString()}"}
+{"level":"info","message":"12-12-2020 : 13:59:14 --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"12-12-2020 : 13:59:22 --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"12-12-2020 : 13:59:22 --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"12-12-2020 : 13:59:23 --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"12-12-2020 : 13:59:34 --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:01:27) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:01:28) --> GET /v/41b17822-8a0f-446d-978f-ca1d0829f72a FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:01:29) --> GET /video/41b17822-8a0f-446d-978f-ca1d0829f72a FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:01:52) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:01:53) --> GET /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:02:00) --> POST /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:02:00) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:02:08) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:02:09) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:02:21) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:07:54) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:08:04) --> GET /u/319d6fad-2946-405b-be30-1c1be4055e0b FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:08:43) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:08:55) --> GET /logout FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:08:55) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:08:57) --> GET /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:09:04) --> POST /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:09:04) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:09:08) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:09:59) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:10:13) --> GET /logout FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:10:13) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:10:16) --> GET /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:10:22) --> POST /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:10:27) --> POST /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:10:27) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(12-12-2020 : 14:10:43) --> GET / FROM --> IP: 127.0.0.1, ID: undefined, USERNAME: undefined"}
+{"level":"info","message":"(12-12-2020 : 14:11:02) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
 {"level":"info","message":"(12-12-2020 : 22:38:10) --> GET /getsearchrecs/?searchquery=hellp FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
 {"level":"info","message":"(12-12-2020 : 22:38:13) --> GET /getsearchrecs/?searchquery=hello FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
 {"level":"info","message":"(12-12-2020 : 22:38:13) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
