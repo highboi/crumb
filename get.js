@@ -52,7 +52,7 @@ app.get('/', async (req, res) => {
 	var viewObj = {message: req.flash("message"), videos: videos}
 
 	//select all of the playlists in the database that belong to the user if they are signed in
-	if (req.cookies.sessionid) {
+	if (typeof req.cookies.sessionid != 'undefined') {
 		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 		var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [userinfo.id]);
 		playlists = playlists.rows;
@@ -309,6 +309,16 @@ app.get("/video/:id", async (req, res) => {
 		//pipe the complete contents of the file to the response with a read stream of the file
 		fs.createReadStream(path).pipe(res)
 	}
+});
+
+//this is a get path for the TV/Random video feature on the site
+app.get("/tv", async (req, res) => {
+	
+});
+
+//example path for testing ejs
+app.get("/example", (req, res) => {
+	res.render("example.ejs", {variable: "this is the value of the variable"});
 });
 
 

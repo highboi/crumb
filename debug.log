@@ -161,3 +161,267 @@
 {"level":"info","message":"(12-12-2020 : 23:18:28) --> GET /getsearchrecs/?searchquery=OBS+topics+test FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
 {"level":"info","message":"(12-12-2020 : 23:18:30) --> GET /getsearchrecs/?searchquery=OBS+topics+test+sam FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
 {"level":"info","message":"(12-12-2020 : 23:18:30) --> GET /search?searchquery=OBS+topics+test+sam FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(16-12-2020 : 13:07:34) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:07:37) --> GET /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:07:42) --> POST /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:07:42) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(16-12-2020 : 13:08:01) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(16-12-2020 : 13:09:08) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(16-12-2020 : 13:11:32) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(16-12-2020 : 13:11:43) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(16-12-2020 : 13:11:46) --> GET /logout FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(16-12-2020 : 13:11:46) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:13:10) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:13:27) --> GET /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:14:14) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:15:08) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:17:43) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:18:44) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:19:30) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:19:52) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(16-12-2020 : 13:21:30) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:25:15) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:25:46) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:43:07) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:44:45) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:45:00) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:45:45) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:47:12) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:48:13) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:49:08) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 20:49:20) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:02:12) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:02:20) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:02:30) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:03:01) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:03:26) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:04:38) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:04:40) --> GET /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:04:45) --> POST /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:04:45) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:04:50) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(18-12-2020 : 23:06:30) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:06:34) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:07:27) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:07:54) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:09:52) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:45:32) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:46:04) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:47:04) --> GET /favicon.ico FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:53:53) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:53:57) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:54:17) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:54:21) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:54:31) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:54:34) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:54:59) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:55:03) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:55:15) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:55:45) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:56:14) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:57:00) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:57:11) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:57:14) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:57:35) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:58:47) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:59:14) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(18-12-2020 : 23:59:34) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:02:03) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:02:40) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:02:51) --> GET /login FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:02:51) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:03:08) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:04:32) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:06:29) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:08:04) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:11:00) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 00:22:04) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:23:24) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:24:19) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:25:00) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:25:56) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:26:33) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:26:54) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:27:51) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:28:36) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:55:29) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:57:52) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 00:59:23) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:00:16) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:00:22) --> GET /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:01:09) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:01:30) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:02:23) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:08:11) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:08:26) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:09:44) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:10:54) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:11:42) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:14:24) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:15:54) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:16:32) --> GET / FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:16:34) --> GET /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:16:42) --> POST /login FROM --> IP: 127.0.0.1"}
+{"level":"info","message":"(19-12-2020 : 01:16:42) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 01:25:53) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 01:25:55) --> GET /v/19674674-63ea-47af-8e75-ace6893c9162 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 01:28:22) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 01:28:23) --> GET /v/41b17822-8a0f-446d-978f-ca1d0829f72a FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 01:28:24) --> GET /video/41b17822-8a0f-446d-978f-ca1d0829f72a FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:34) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:35) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:39) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:39) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:39) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:44) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:44) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=07c1269e-b8e6-4600-b27e-1cbe04212b25 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:45) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:45) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:53) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=07c1269e-b8e6-4600-b27e-1cbe04212b25 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:53) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=974779b1-83be-4a60-aca4-31e77d59183e FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:53) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:11:53) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:44) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:44) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:45) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:45) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:45) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:57) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=974779b1-83be-4a60-aca4-31e77d59183e FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:57) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=6080c4ee-388c-40ca-8318-7166681e4e71 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:57) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:13:58) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:35) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:35) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:36) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:36) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:36) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:46) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:46) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=5cbd7860-3715-498d-ae64-5c6caabb8f93 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:46) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:46) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:55) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=5cbd7860-3715-498d-ae64-5c6caabb8f93 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:55) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=1bc3dc25-5317-4e35-97ff-8af6371b8cbb FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:55) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:20:55) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:21:07) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=1bc3dc25-5317-4e35-97ff-8af6371b8cbb FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:21:07) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=8b41ea31-73d7-46e1-a74e-3bf7f3df62ca FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:21:07) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:21:07) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:21:43) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=8b41ea31-73d7-46e1-a74e-3bf7f3df62ca FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:21:43) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:21:43) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:23:56) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=8b41ea31-73d7-46e1-a74e-3bf7f3df62ca FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:23:56) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:23:56) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:03) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:03) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=3bad5fec-e177-45dd-ab1d-92724309c789 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:04) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:04) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:12) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=3bad5fec-e177-45dd-ab1d-92724309c789 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:12) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=7e136b6e-b0dc-4f69-a6a3-a5651d48d539 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:13) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:13) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:23) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=7e136b6e-b0dc-4f69-a6a3-a5651d48d539 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:23) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=0ccce6b6-2185-4979-a832-6b8ffca20b77 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:23) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:24:23) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:05) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:05) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:07) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:07) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:07) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:14) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=0ccce6b6-2185-4979-a832-6b8ffca20b77 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:14) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=f8cb45a0-0c5f-4948-a928-1252966ab96c FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:14) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:14) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:58) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=f8cb45a0-0c5f-4948-a928-1252966ab96c FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:58) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:25:58) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:02) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:03) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=a4858654-6a08-4aaa-8d2d-568a6a655796 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:03) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:03) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:14) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=a4858654-6a08-4aaa-8d2d-568a6a655796 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:14) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=912ef150-ce1e-4856-86da-c7a5bbb2b231 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:15) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:15) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:22) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=912ef150-ce1e-4856-86da-c7a5bbb2b231 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:22) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=90816e25-2bcf-4a82-88a5-861f80b6e5c3 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:23) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:23) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:32) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=90816e25-2bcf-4a82-88a5-861f80b6e5c3 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:32) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=1e2d9e62-b24c-40bb-8ec9-cfe80595267f FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:32) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:26:32) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:30:47) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:30:48) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:30:49) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:30:49) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:30:49) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:13) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:13) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:14) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:35) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:35) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:35) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:49) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:49) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:31:49) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:32:37) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:32:37) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:32:37) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:33:19) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:33:19) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:33:19) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:34:38) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:34:39) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:34:39) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:10) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:10) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:10) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:38) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:38) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:38) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:44) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:44) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:44) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:50) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:50) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:35:50) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:36:38) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:36:38) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:36:38) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:36:45) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:36:45) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:36:45) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:15) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:15) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:15) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:24) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:24) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:24) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:33) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:33) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:37:33) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:15) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:15) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:15) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:29) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:30) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:30) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:56) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:56) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:38:56) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:39:13) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=90816e25-2bcf-4a82-88a5-861f80b6e5c3 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:39:13) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=e337e9ee-11d3-4560-b745-c80a1fbfb1b4 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:39:13) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:39:13) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:39:29) --> POST /comment/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50?parent_id=912ef150-ce1e-4856-86da-c7a5bbb2b231 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:39:29) --> GET /v/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50/?scrollToComment=true&commentid=5bea371e-baa4-4c30-aa2e-0687ad269316 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:39:29) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 02:39:29) --> GET /video/23f8ea1f-a61a-4a96-bc38-9c3a01d89d50 FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 13:14:42) --> GET /example FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 13:45:51) --> GET /example FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 13:46:04) --> GET /example FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 14:44:46) --> GET / FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}
+{"level":"info","message":"(19-12-2020 : 14:44:46) --> GET /content/style/navbar.css FROM --> IP: 127.0.0.1, ID: 319d6fad-2946-405b-be30-1c1be4055e0b, USERNAME: sam"}

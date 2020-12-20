@@ -10,6 +10,8 @@
 
 		<%- include('content/html/body.html') %>
 
+		<%- include('content/html/navbar.html') %>
+
 		<div class="search-videos">
 			<% if (search.channels.length > 0) { %>
 				<h1>Channels:</h1>
@@ -84,7 +86,6 @@
 								    </object>
 									<object id="<%= item.id %>reportform">
 										<form action="/report/<%= item.id %>" method="post">
-											<%- include('content/ejs/reportform.ejs') %>
 										</form>
 									</object>
 								</div>

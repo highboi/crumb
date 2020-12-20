@@ -1,0 +1,5 @@
+.env
+node_modules
+storage/users
+storage/videos
+redis_dump

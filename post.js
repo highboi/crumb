@@ -226,12 +226,28 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 
 	//check to see if the comment belongs to a thread of some sort
 	if (typeof req.query.parent_id != 'undefined') {
-		//add the comment to the database with the parent id
+		//add the parent id to the values array
 		valuesarr.push(req.query.parent_id.toString());
-		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, valuesarr);
+
+		//get the parent depth level
+		var parent_depth = await client.query(`SELECT depth_level FROM comments WHERE id=$1`, [req.query.parent_id]);
+		parent_depth = parent_depth.rows[0].depth_level;
+		valuesarr.push(parseInt(parent_depth)+1);
+
+		//get the base parent id and put it into the list
+		valuesarr.push(req.body.base_parent_id);
+
+		//add the comment into the database
+		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, parent_id, depth_level, base_parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, valuesarr);
 	} else {
+		//add 0 into the list as the depth level
+		valuesarr.push(0);
+
+		//add the base parent id into the list
+		valuesarr.push(parseInt(req.body.base_parent_id));
+
 		//add the comment to the database
-		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, valuesarr);
+		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, depth_level, base_parent_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, valuesarr);
 	}
 
 	//redirect to the same view url (the back end will show an updated list of comments)

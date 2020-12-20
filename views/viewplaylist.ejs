@@ -10,6 +10,8 @@
 
 		<%- include('content/html/body.html') %>
 
+		<%- include('content/html/navbar.html') %>
+
 		<h1><%= playlist.name %></h1>
 		<% if (typeof user != 'undefined') { %>
 			<% if (creator.id == user.id && playlist.candelete) { %>

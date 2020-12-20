@@ -38,6 +38,5 @@ trap ctrl_c SIGINT SIGTSTP SIGQUIT
 #without exiting in order for the program to detect a Ctrl+C
 while true
 do
-	echo "[+] Server Running..."
 	sleep 10
 done

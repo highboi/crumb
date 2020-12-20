@@ -59,7 +59,7 @@ const client = require("./dbConfig");
 const middleware = require("./middleware");
 
 //set up the rendering engine for the views
-app.set("view engine", "ejs");
+app.set("view engine", require("ejs").renderFile);
 
 //allow the server to parse requests with url encoded payloads
 app.use(express.urlencoded({ extended: false }));

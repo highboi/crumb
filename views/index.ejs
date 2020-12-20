@@ -1,26 +1,15 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
+		<%- include('content/html/head.html'); %>
 		<title>Home - Crumb</title>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<%- include('content/html/banner.html'); %>
 
-		<%- include('content/html/body.html') %>
+		<%- include('content/html/body.html'); %>
 
-		<% if (typeof user != 'undefined') { %>
-			<% var channellink = `/u/${user.id}`; %>
-			<button><a href="<%= channellink %>">My Channel</a></button><br>
-			<button><a href="<%= channellink %>/?section=playlists">My Playlists</a></button><br>
-			<button><a href="/v/submit">Submit a Video</a></button><br>
-			<button><a href="/playlist/new">Make a Playlist</a></button><br>
-			<button><a href="/l/start">Start a Live Stream</a></button><br>
-			<button><a href="/logout">Log Out</a></button>
-		<% } else { %>
-			<button><a href="/login">Login</a></button><br>
-			<button><a href="/register">Register</a></button>
-		<% } %>
+		<%- include('content/html/navbar.html'); %>
 
 		<h1>Videos:</h1>
 		<div class="home-videos">
@@ -28,11 +17,11 @@
 				<% videos.forEach((item, index) => { %>
 					<div class="video">
 						<% if (item.streaming == 'true') { %>
-							<% var videolink = `/l/view/${item.id}` %>
+							<% var videolink = `/l/view/${item.id}`; %>
 						<% } else { %>
-							<% var videolink = `/v/${item.id}` %>
+							<% var videolink = `/v/${item.id}`; %>
 						<% } %>
-						<% var channellink = `/u/${item.user_id}` %>
+						<% var channellink = `/u/${item.user_id}`; %>
 						<div class="thumbnail">
 							<a href="<%= videolink %>">
 								<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
@@ -70,7 +59,7 @@
 									</object>
 									<object id="<%= item.id %>reportform">
 										<form action="/report/<%= item.id %>" method="post">
-											<%- include('content/ejs/reportform.ejs') %>
+											
 										</form>
 									</object>
 								</div>

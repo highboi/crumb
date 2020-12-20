@@ -475,7 +475,7 @@ middleware = {
 		//if this is a get request, then this is a hit
 		if (req.method == "GET") {
 			console.log("HIT FROM: " + req.ip.toString());
-			if (typeof userinfo != 'undefined') {
+			if (typeof userinfo != 'undefined' && userinfo != null) {
 				var logstring = `GET ${req.url.toString()} FROM --> IP: ${req.ip.toString()}, ID: ${userinfo.id}, USERNAME: ${userinfo.username}`;
 			} else {
 				var logstring = `GET ${req.url.toString()} FROM --> IP: ${req.ip.toString()}`;
