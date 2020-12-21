@@ -7,11 +7,11 @@
 	<body>
 		<%- include('content/html/banner.html') %>
 
+		<%- include('content/ejs/body.ejs') %>
+
+		<%- include('content/ejs/navbar.ejs') %>
+
 		<h1>Submit A Video:</h1>
-
-		<%- include('content/html/body.html') %>
-
-		<%- include('content/html/navbar.html') %>
 
 		<form action="/v/submit" method="POST" enctype='multipart/form-data'>
 			<div>

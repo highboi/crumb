@@ -1,6 +1,7 @@
 <div id="navbar">
 	<% if (typeof user != 'undefined') { %>
 		<% var channellink = `/u/${user.id}`; %>
+		<button><a href="/">Home</a></button><br>
 		<button><a href="<%= channellink %>">My Channel</a></button><br>
 		<button><a href="<%= channellink %>/?section=playlists">My Playlists</a></button><br>
 		<button><a href="/v/submit">Submit a Video</a></button><br>
