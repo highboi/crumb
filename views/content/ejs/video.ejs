@@ -1,0 +1,110 @@
+<div class="container">
+	<div class="video-contents">
+		<div class="video-container">
+			<div id="loading"></div>
+			<video poster="<%= video.thumbnail %>" id="video">
+				<source src="http://localhost/video/<%= video.id %>" type="video/mp4">
+				<source src="http://localhost/video/<%= video.id %>" type="video/webm">
+				<source src="http://localhost/video/<%= video.id %>" type="video/ogg">
+				<h1>HTML Video is not supported in your browser, sorry.</h1>
+			</video>
+			<div class="fullscreen-text">
+				<h1 id="TitleFullscreen"><%= video.title %></h1>
+			</div>
+			<div class="video-controls">
+				<button id="playBtn"><img src="/content/icons/play.ico"></button>
+				<input id="seeker" type="range" min="0" max="100" value="0" step="1" oninput="vidSeek()">
+				<p id="videotime"></p>
+				<button id="muteBtn"><img src="/content/icons/sound.ico"></button>
+				<input id="volumeslider" type="range" min="0" max="100" step="1" oninput="changeVolume()">
+				<button id="fullscreenBtn"><img src="/content/icons/fullscreen.ico"></button>
+			</div>
+		</div>
+
+		<div class="videotext">
+			<h1 id="title"><%= video.title %></h1>
+			<% if (typeof video.topics != 'object') { %>
+				<hr>
+				<p>
+				<% var topicsarray = video.topics.split(","); %>
+				<% topicsarray.forEach((item, index) => { %>
+					<%= item %> 
+				<% }); %>
+				</p>
+			<% } %>
+			<hr>
+			<div class="extralinks" id="<%= video.id %>extralinks">
+				<button onclick='showform(&quot;<%= video.id %>&quot;, &quot;playlistform&quot;)'>Add To Playlist</button>
+				<button onclick='showform(&quot;<%= video.id %>&quot;, &quot;reportform&quot;)'>Report</button>
+			</div>
+			<div class="extralinkforms" id="<%= video.id %>extralinkforms">
+				<object id="<%= video.id %>playlistform">
+					<h3><a href="/playlist/new/?videoid=<%= video.id %>">Create Playlist</a></h3><br>
+					<% if (typeof playlists != 'undefined') { %>
+						<% playlists.forEach((plist, index) => { %>
+							<h3><a href="/playlistvideo/add/<%= plist.id %>/<%= video.id %>"><%= plist.name %></a></h3><br>
+						<% }); %>
+					<% } %>
+				</object>
+				<object id="<%= video.id %>reportform">
+					<form action="/report/<%= video.id %>" method="post">
+					</form>
+				</object>
+			</div>
+			<hr>
+			<div class="channel-details">
+				<% var channellink = `/u/${videocreator.id}` %>
+				<div id="icon">
+					<a href="<%= channellink %>">
+						<img src="<%= videocreator.channelicon %>">
+					</a>
+				</div>
+				<div id="channel-text">	
+					<a href="<%= channellink %>">
+						<h2><%= videocreator.username %></h2>
+					</a>
+				</div>
+				<div class="video-buttons">
+					<div class="subscribe-section">
+						<% if (typeof subscribed != 'undefined') { %>
+							<% if (subscribed != 0) { %>
+								<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribed</button>
+							<% } else { %>
+								<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribe</button>
+							<% } %>
+						<% } else { %>
+							<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribe</button>
+						<% } %>
+						<p><%= videocreator.subscribers %></p>
+					</div>
+					<div class="likesection">
+						<button class="likebuttons" onclick="likeVideo()"><img src="/content/icons/like.ico"></button>
+						<p id="likes"><%= video.likes %></p>
+						<button class="likebuttons" onclick="dislikeVideo()"><img src="/content/icons/dislike.ico"></button>
+						<p id="dislikes"><%= video.dislikes %></p>
+					</div>
+				</div>
+			</div>
+			<hr>
+			<% var datestring = video.posttime.split("-"); %>
+			<p><%= approx(video.views) %> Views | Posted: <%= datestring[1] + "-" + datestring[2] + "-" + datestring[0] %></p>
+			<hr>
+			<div class="description">
+				<% if (video.description.length > 100) { %>
+					<p>
+						<%= video.description.substr(0, 100) %>
+						<span id="dots">...</span>
+					</p>
+					<% var moretext = video.description.substr(100); %>
+					<div id="more" style="display: none">
+						<p><%= moretext %></p>
+					</div>
+					<button onclick="readMore()" id="readMoreBtn">Read More</button>
+				<% } else { %>
+					<p><%= video.description %></p>
+				<% } %>
+			</div>
+			<hr>
+		</div>
+	</div>
+</div>

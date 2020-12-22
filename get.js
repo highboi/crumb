@@ -313,7 +313,53 @@ app.get("/video/:id", async (req, res) => {
 
 //this is a get path for the TV/Random video feature on the site
 app.get("/tv", async (req, res) => {
-	
+	//create a view object
+	var viewObj = {};
+
+	//create an array for the basic "types" of videos to search for
+	var types = ["meme", "funny", "short", "gaming", "satisfying", "crime", "documentaries", "news", "horror", "conspiracy"];
+
+	//check the query parameters for showing the user specific stuff
+	if (typeof req.query.type == 'undefined') { //if the user is going to the TV link for the first time this session
+		//get a random video from the database
+		var video = await client.query("SELECT * FROM videos ORDER BY RANDOM() LIMIT 1");
+		video = video.rows[0];
+	} else { //if the user wanted a specific type of video/channel by clicking the buttons on the "remote"
+		//select a video from the database that includes this topic (of course select this randomly)
+		var video = await client.query("SELECT * FROM videos WHERE UPPER(topics) LIKE UPPER($1) ORDER BY RANDOM() LIMIT 1", ["%" + req.query.type + "%"]);
+		video = video.rows[0];
+	}
+
+	//a video was found
+	if (typeof video != 'undefined') {
+		//get the creator of the video
+		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1`, [video.user_id]);
+		videocreator = videocreator.rows[0];
+
+		//insert messages and errors into the view object
+		viewObj.message = req.flash("message");
+
+		//insert the necessary elements into the view object
+		viewObj.video = video;
+		viewObj.types = types;
+		viewObj.videocreator = videocreator;
+		viewObj.approx = approx;
+
+		//insert user info
+		if (typeof req.cookies.sessionid != 'undefined') {
+			viewObj.user = await middleware.getUserSession(req.cookies.sessionid);
+			console.log(viewObj.user);
+		}
+
+		//render the view
+		res.render("tv.ejs", viewObj);
+	} else { //there was no video found to show the user
+		//let the user know that there are no videos in this category and show a random video
+		req.flash("message", `No videos found for \"${req.query.type}\", here's a random video!:`);
+
+		//redirect to the same /tv url to get a truly random video
+		res.redirect("/tv");
+	}
 });
 
 //example path for testing ejs

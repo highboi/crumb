@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/html/head.html') %>
+		<title>TV! - Crumb</title>
+	</head>
+	<body>
+		<%- include('content/html/banner.html') %>
+
+		<%- include('content/ejs/navbar.ejs') %>
+
+		<%- include('content/ejs/body.ejs') %>
+
+		<h1>TV!</h1>
+
+		<%- include('content/ejs/video.ejs') %>
+
+		<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button>
+
+		<div class="tv-remote">
+			<% if (typeof types != 'undefined') { %>
+				<% types.forEach((item, index) => { %>
+					<button><a href="/tv/?type=<%= item %>"><%= item %></a></button>
+				<% }); %>
+			<% } %>
+		</div>
+
+		<script>
+			var videoelement = document.getElementById("video");
+			var videovar = <%- JSON.stringify(video) %>;
+		</script>
+
+		<script src="content/javascript/videocontroller.js"></script>
+	</body>
+</html>
