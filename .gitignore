@@ -1,4 +1,7 @@
 .env
 node_modules
-storage
 redis_dump
+traffic.log
+keypair.pem
+certificate.pem
+dump.rdb
