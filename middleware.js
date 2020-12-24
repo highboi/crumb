@@ -9,6 +9,8 @@ const crypto = require("crypto");
 const {v4: uuidv4} = require("uuid");
 const readline = require("readline");
 const schedule = require("node-schedule");
+const translate = require("translate");
+const approx = require("approximate-number");
 
 //get the write stream to write to the log file
 const logger = require("./logger");
@@ -34,6 +36,33 @@ middleware = {
 		} else {
 			next();
 		}
+	},
+
+	//this is a function to insert universal things into the view object such as flash messages
+	//and language translation
+	getViewObj: async function(req) {
+		//create the view object
+		var viewObj = {};
+
+		//insert the user info and list of playlists if the session id is there
+		if (typeof req.cookies.sessionid != 'undefined') {
+			viewObj.user = await middleware.getUserSession(req.cookies.sessionid);
+		}
+
+		//insert the flash message
+		viewObj.message = req.flash("message");
+
+		//insert the flash errors
+		viewObj.errors = req.flash("errors");
+
+		//insert the language translator
+		viewObj.translate = translate;
+
+		//insert the number approximator (turns 1000 to 1k, etc)
+		viewObj.approx = approx;
+
+		//return the view object with the complete set of stuff
+		return viewObj;
 	},
 
 	//this is the function that generates a unique id for each video

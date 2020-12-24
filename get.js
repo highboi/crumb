@@ -45,28 +45,34 @@ server.on("upgrade", (req, socket, head) => {
 
 //get the index of the site working
 app.get('/', async (req, res) => {
+	//get the view object
+	var viewObj = await middleware.getViewObj(req);
+
 	//select all of the videos from the database to be displayed
 	var videos = await client.query("SELECT * FROM videos LIMIT 50");
 	videos = videos.rows;
 
-	var viewObj = {message: req.flash("message"), videos: videos}
+	//select all of the playlists belonging to the user
+	var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [viewObj.user.id]);
+	playlists = playlists.rows;
 
-	//select all of the playlists in the database that belong to the user if they are signed in
-	if (typeof req.cookies.sessionid != 'undefined') {
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-		var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [userinfo.id]);
-		playlists = playlists.rows;
-		//object for the view with the playlists included
-		var viewObj = Object.assign({}, {user: userinfo, playlists: playlists}, viewObj);
-	}
+	//insert the videos and playlists into the view object
+	viewObj.videos = videos;
+	viewObj.playlists = playlists;
 
 	//render the view
 	res.render("index.ejs", viewObj);
 });
 
+//the error path for error rendering
+app.get('/error', async (req, res) => {
+	var viewObj = await middleware.getViewObj(req);
+	res.render("error.ejs", viewObj);
+});
+
 //get the registration page
-app.get('/register', middleware.checkNotSignedIn, (req, res) => {
-	var viewObj = {message: req.flash("message")};
+app.get('/register', middleware.checkNotSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req);
 	res.render("register.ejs", viewObj);
 });
 
@@ -118,8 +124,8 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 });
 
 //get the login page
-app.get('/login', middleware.checkNotSignedIn, (req, res) => {
-	var viewObj = {message: req.flash("message")};
+app.get('/login', middleware.checkNotSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req);
 	res.render("login.ejs", viewObj);
 });
 
@@ -142,12 +148,15 @@ app.get("/logout", middleware.checkSignedIn, (req, res) => {
 
 //view the channel of the user
 app.get("/u/:userid", async (req, res) => {
+	//get the base view object
+	var viewObj = await middleware.getViewObj(req);
+
 	//get the actual user that the channel belongs to
 	var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [req.params.userid]);
 	creator = creator.rows[0];
 
-	//create an object for passing into the view
-	var viewObj = {creator: creator, message: req.flash("message")};
+	//put the creator into the view object
+	viewObj.creator = creator;
 
 	//get any variables from the query string in order to render the right things
 	if (Object.keys(req.query).length && typeof req.query.section != 'undefined') {
@@ -163,6 +172,7 @@ app.get("/u/:userid", async (req, res) => {
 		case "home":
 			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1 ORDER BY views DESC LIMIT 10`, [req.params.userid]);
 			videos = videos.rows;
+			viewObj.videos = videos;
 			break;
 		case "videos":
 			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1`, [req.params.userid]);
@@ -176,12 +186,6 @@ app.get("/u/:userid", async (req, res) => {
 			break;
 	}
 
-	//get the full view object
-	if (req.cookies.sessionid) {
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-		viewObj.user = userinfo;
-	}
-
 	//render the view
 	res.render("viewchannel.ejs", viewObj);
 });
@@ -192,11 +196,7 @@ app.get("/u/:userid", async (req, res) => {
 
 //get the form for submitting videos
 app.get("/v/submit", middleware.checkSignedIn, async (req, res) => {
-	var viewObj = {message: req.flash("message")};
-	if (req.cookies.sessionid) {
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-		viewObj.user = userinfo;
-	}
+	var viewObj = await middleware.getViewObj(req);
 	res.render("submitvideo.ejs", viewObj);
 });
 
@@ -227,7 +227,8 @@ app.get("/v/:videoid", async (req, res) => {
 	chatReplayMessages = chatReplayMessages.rows;
 
 	//set the object to be passed to the rendering function
-	var viewObj = {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments, message: req.flash("message")};
+	var viewObj = await middleware.getViewObj(req);
+	viewObj = Object.assign({}, viewObj, {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments});
 
 	//check to see if there are any chat messages to replay
 	if (chatReplayMessages.length > 0) {
@@ -236,9 +237,7 @@ app.get("/v/:videoid", async (req, res) => {
 
 	//render the video view based on whether or not the user is logged in and has a session variable
 	if (req.cookies.sessionid) {
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-		viewObj.user = userinfo;
-		var subscribed = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [videocreator.id, userinfo.id]);
+		var subscribed = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [videocreator.id, viewObj.user.id]);
 		viewObj.subscribed = subscribed.rows.length;
 	}
 
@@ -336,20 +335,13 @@ app.get("/tv", async (req, res) => {
 		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1`, [video.user_id]);
 		videocreator = videocreator.rows[0];
 
-		//insert messages and errors into the view object
-		viewObj.message = req.flash("message");
+		//get the view object
+		var viewObj = await middleware.getViewObj(req);
 
 		//insert the necessary elements into the view object
 		viewObj.video = video;
 		viewObj.types = types;
 		viewObj.videocreator = videocreator;
-		viewObj.approx = approx;
-
-		//insert user info
-		if (typeof req.cookies.sessionid != 'undefined') {
-			viewObj.user = await middleware.getUserSession(req.cookies.sessionid);
-			console.log(viewObj.user);
-		}
 
 		//render the view
 		res.render("tv.ejs", viewObj);
@@ -383,7 +375,8 @@ app.get("/l/view/:streamid", async (req, res) => {
 		var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.streamid]);
 		video = video.rows[0];
 		if (typeof video != 'undefined' && video.streaming == false) {
-			res.render("error.ejs", {error: `Stream with ID: '${req.params.streamid}' does not exist.`});
+			req.flash("message", `Stream with ID: '${req.params.streamid}' does not exist.`);
+			res.redirect("/error");
 		} else {
 			if (!video.streaming) { //redirect to the recorded stream
 				res.redirect(`/v/${req.params.streamid}`);
@@ -404,8 +397,8 @@ app.get("/l/view/:streamid", async (req, res) => {
 				streamkey = streamkey.rows[0].streamkey;
 
 				//make the view object
-				var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-				var viewObj = {user: userinfo, streamid: req.params.streamid, enableChat: video.enablechat, streamname: video.title, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, message: req.flash("message")};
+				var viewObj = await middleware.getViewObj(req);
+				viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: video.enablechat, streamname: video.title, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`});
 
 				//render the view for the stream
 				res.render("viewStreamObs.ejs", viewObj);
@@ -413,11 +406,8 @@ app.get("/l/view/:streamid", async (req, res) => {
 		}
 	} else {
 		//create a view object
-		var viewObj = {streamid: req.params.streamid, enableChat: streams[0].enableChat, message: req.flash("message")};
-		if (req.cookies.sessionid) {
-			var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-			viewObj.user = userinfo;
-		}
+		var viewObj = await middleware.getViewObj(req);
+		viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: streams[0].enableChat});
 
 		//check for connections to the server
 		liveWss.on("connection", (ws, request) => {
@@ -444,19 +434,14 @@ app.get("/l/view/:streamid", async (req, res) => {
 
 //this is a get request to get basic info about a live stream
 app.get("/l/start", middleware.checkSignedIn, async (req, res) => {
-	var viewObj = {};
-	if (req.cookies.sessionid) {
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-		viewObj.user = userinfo;
-	}
-
+	var viewObj = await middleware.getViewObj(req);
 	res.render("startstream.ejs", viewObj);
 });
 
 //this is a get request for the admin panel of a live stream
 app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
-	//get the user
-	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+	//get the view object
+	var viewObj = await middleware.getViewObj(req);
 
 	//get the stream info
 	var stream = await client.query(`SELECT * FROM videos WHERE id=$1 AND user_id=$2`, [req.params.streamid, userinfo.id]);
@@ -465,7 +450,7 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 	console.log(stream);
 
 	//view object for the views, other values can be added later
-	var viewObj = {user: userinfo, streamname: stream.name, enableChat: stream.enableChat, streamid: stream.id, isStreamer: true};
+	var viewObj = Object.assign({}, viewObj, {streamname: stream.name, enableChat: stream.enableChat, streamid: stream.id, isStreamer: true});
 
 	//if there is a stream that exists, then render the admin panel
 	if (typeof stream != 'undefined') {
@@ -486,11 +471,8 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 				});
 			});
 
-			//make the view object
-			var viewObj = {user: userinfo, streamname: stream.name, enableChat: stream.enablechat, streamid: stream.id, };
-
 			//set the additional values for the view object
-			viewObj = Object.assign({}, viewObj, {streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://localhost/live", streamKey: streamkey, message: req.flash("message")});
+			viewObj = Object.assign({}, viewObj, {streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://localhost/live", streamKey: streamkey});
 
 			//render the admin panel
 			res.render("obsAdminPanel.ejs", viewObj);
@@ -635,14 +617,11 @@ app.get("/p/:playlistid", async(req, res) => {
 	var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [playlist.user_id]);
 	creator = creator.rows[0];
 
-	//create view object to pass into the view
-	var viewObj = {creator: creator, videos: videos, playlist: playlist, message: req.flash("message")};
+	//get the view object
+	var viewObj = await middleware.getViewObj(req);
 
-	//make the full view object
-	if (req.cookies.sessionid) {
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-		viewObj.user = userinfo;
-	}
+	//create view object to pass into the view
+	viewObj = Object.assign({}, viewObj, {creator: creator, videos: videos, playlist: playlist});
 
 	//render the view for the playlist
 	res.render("viewplaylist.ejs", viewObj);
@@ -663,8 +642,8 @@ app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, asy
 
 	//check to see if the video is in the playlist already
 	if (typeof playlistvideo != 'undefined') { //if the video has already been added, then render an error
-		var viewObj = {user: userinfo, error: "Video has already been added to the playlist."};
-		res.render("error.ejs", viewObj);
+		req.flash("message", "Video has already been added to the playlist.");
+		res.redirect("/error");
 	} else {
 		//do something based on if the playlist belongs to the user or not
 		if (typeof playlist != 'undefined') {
@@ -678,8 +657,8 @@ app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, asy
 			//redirect to the playlist again
 			res.redirect(`/p/${req.params.playlistid}`);
 		} else { //if the playlist does not belong to the user, render an error
-			var viewObj = {user: userinfo, error: "This playlist does not belong to you."};
-			res.render("error.ejs", viewObj);
+			req.flash("message", "This playlist does not belong to you.");
+			res.redirect("/error");
 		}
 	}
 });
@@ -712,27 +691,24 @@ app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, 
 			//redirect to the playlist again
 			res.redirect(`/p/${req.params.playlistid}`);
 		} else { //if the playlist does not belong to the user, then render an error
-			var viewObj = {user: userinfo, error: "Playlist does not belong to you."};
-			res.render("error.ejs", viewObj);
+			req.flash("message", "Playlist does not belong to you.")
+			res.redirect("/error");
 		}
 	} else { //if the video is not in the playlist, then render an error
-		var viewObj = {user: userinfo, error: `Video with ID: ${playlistvideo.video_id} not in playlist.`};
-		res.render("error.ejs", viewObj);
+		req.flash("message", `Video with ID: ${playlistvideo.video_id} not in playlist.`);
+		res.redirect("/error");
 	}
 });
 
 //this is a get request for creating a new playlist
 app.get("/playlist/new", middleware.checkSignedIn, async (req, res) => {
-	//get the user info
-	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+	//get the view object
+	var viewObj = await middleware.getViewObj(req);
 
+	//insert the video id to insert into the playlist on creation
 	if (typeof req.query.videoid != 'undefined') {
-		var viewObj = {user: userinfo, videoid: req.query.videoid};
-	} else {
-		var viewObj = {user: userinfo};
+		viewObj.videoid = req.query.videoid;
 	}
-
-	viewObj.message = req.flash("message");
 
 	//render the form for creating a new playlist
 	res.render("createplaylist.ejs", viewObj);
@@ -761,8 +737,8 @@ app.get("/playlist/delete/:playlistid", middleware.checkSignedIn, async (req, re
 		req.flash("message", "Playlist cannot be deleted, it is a default.");
 		res.redirect(`/p/${playlist.id}`);
 	} else { //if the playlist does not exist or does not belong to the user, then render an error
-		var viewObj = {user: userinfo, error: `Playlist with ID: ${playlist.id} is nonexistent or does not belong to you.`};
-		res.render("error.ejs", viewObj);
+		req.flash("message", `Playlist with ID: ${playlist.id} is nonexistent or does not belong to you.`);
+		res.redirect("/error");
 	}
 });
 
@@ -901,15 +877,9 @@ app.get("/search", async (req, res) => {
 	search.channels = channels;
 	search.playlists = playlists;
 
-	console.log("Search: " + search.humanquery);
-
-	viewObj = {search: search, message: req.flash("message")};
-
-	//create the view object
-	if (req.cookies.sessionid) {
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-		viewObj.user = userinfo;
-	}
+	//get the view object and insert the search results
+	var viewObj = await middleware.getViewObj(req);
+	viewObj.search = search;
 
 	res.render("searchresults.ejs", viewObj);
 });
@@ -1014,17 +984,15 @@ app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res
 
 //this is a get request for sections of videos on the site
 app.get("/s/:topic", async (req, res) => {
+	//get the view object
+	var viewObj = await middleware.getViewObj(req);
+
 	//select all of the videos in the database with topics that include the topic in the link
 	var videos = await client.query(`SELECT * FROM videos WHERE topics LIKE $1`, ["%" + req.params.topic + "%"]);
 	videos = videos.rows;
 
-	var viewObj = {videos: videos, sectionname: req.params.topic, message: req.flash("message")};
-
-	//have a view object
-	if (req.cookies.sessionid) {
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
-		viewObj.user = userinfo;
-	}
+	//insert extra info into the view object
+	viewObj = Object.assign({}, viewObj, {videos: videos, sectionname: req.params.topic});
 
 	//render the view for the section
 	res.render("viewsection.ejs", viewObj);

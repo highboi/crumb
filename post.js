@@ -34,9 +34,10 @@ app.post('/register', (req, res) => {
 		}
 
 		if (errors.length > 0) {
-			var viewObj = {errors: errors};
-			//render the register page with errors if there are errors to show the user
-			res.render('register.ejs', viewObj);
+			//insert the errors into a flash message
+			req.flash("errors", errors);
+			//redirect to the registration page
+			res.redirect("/register");
 		} else {
 			//hash the password for secure storage in database
 			var hashedPassword = await bcrypt.hash(fields.password, 10);
@@ -70,7 +71,8 @@ app.post('/register', (req, res) => {
 					req.flash("message", "Email is Already Registered. Please Log In.");
 					return res.redirect("/login");
 				} else if (existinguser.rows[0].username == field.username) {
-					return res.render("register.ejs", {message: "Username Already Taken, Please Try Again."});
+					req.flash("message", "Username Already Taken, Please Try Again.")
+					return res.redirect("/register");
 				}
 			} else { //if the user is a new user, then register them
 				var valuesarr = [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath, fields.channeldesc, fields.topics, streamkey];
@@ -113,8 +115,8 @@ app.post("/login", async (req, res) => {
 	}
 
 	if (errors.length > 0) {
-		var viewObj = {errors: errors};
-		res.render("login.ejs", viewObj);
+		req.flash("errors", errors);
+		res.redirect("/login");
 	} else {
 		//select the users from the database with the specified fields
 		var user = await client.query(`SELECT * FROM users WHERE email=$1 OR username=$2`, [req.body.email, req.body.username]);
@@ -139,12 +141,12 @@ app.post("/login", async (req, res) => {
 				//redirect to the home page
 				res.redirect("/");
 			} else { //if the password is incorrect, then let the user know
-				var viewObj = {message: "Password Incorrect."};
-				res.render("login.ejs", viewObj);
+				req.flash("message", "Password Incorrect.");
+				res.redirect("/login");
 			}
 		} else { // if the user does not exist, then tell the user
-			var viewObj = {message: "User does not exist yet, please register."};
-			res.render("login.ejs", viewObj);
+			req.flash("message", "User does not exist yet, please register.");
+			res.redirect("/register");
 		}
 	}
 });
@@ -204,11 +206,11 @@ app.post("/v/submit", (req, res) => {
 			var videourl = `/v/${id.rows[0].id}`; //get the url to redirect to now that the video has been created
 			res.redirect(videourl); //redirect to the url
 		} else if (!(thumbext in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
-			var viewObj = Object.assign({}, userinfo, {message: "Unsupported file type for thumbnail, please use png, jpeg, or jpg."});
-			res.render("submitvideo.ejs", viewObj);
+			req.flash("message", "Unsupported file type for thumbnail, please use png, jpeg or jpg.");
+			res.redirect("/v/submit");
 		} else if (!(videoext in acceptedvideo)) { //if the video file types are not supported, then show errors
-			var viewObj = Object.assign({}, userinfo, {message: "Unsupported file type for video, please use mp4, ogg, or webm."});
-			res.render("submitvideo.ejs", viewObj);
+			req.flash("Unsupported file type for video, please use mp4, ogg, or webm.");
+			res.redirect("/v/submit");
 		}
 	});
 });
@@ -268,12 +270,10 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 
 	//check to see if this playlist already exists
 	if (results.rows.length > 0) { //if the playlist already exists
-		//create an array of errors
-		var errors = [{message: "Playlist with the same name already exists."}];
-		//view object to be passed to the view
-		var viewObj = Object.assign({}, userinfo, {errors: errors});
-		//render the create playlist view with errors
-		res.render("createplaylist.ejs", viewObj);
+		//set a flash message to let the user know that the playlist already exists
+		req.flash("message", "Playlist with the same name already exists.");
+		//redirect the user to the playlist in question
+		res.redirect(`/p/${results.rows[0].id}`);
 	} else { //add the playlist into the db
 		//add the details of the playlist into the database
 		await client.query(`INSERT INTO playlists (id, name, user_id) VALUES ($1, $2, $3)`, [newid, req.body.name, userinfo.id]);
