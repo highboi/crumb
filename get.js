@@ -53,12 +53,14 @@ app.get('/', async (req, res) => {
 	videos = videos.rows;
 
 	//select all of the playlists belonging to the user
-	var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [viewObj.user.id]);
-	playlists = playlists.rows;
+	if (typeof viewObj.user != 'undefined') {
+		var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [viewObj.user.id]);
+		playlists = playlists.rows;
+		viewObj.playlists = playlists;
+	}
 
 	//insert the videos and playlists into the view object
 	viewObj.videos = videos;
-	viewObj.playlists = playlists;
 
 	//render the view
 	res.render("index.ejs", viewObj);
@@ -68,6 +70,13 @@ app.get('/', async (req, res) => {
 app.get('/error', async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
 	res.render("error.ejs", viewObj);
+});
+
+//example path for testing ejs
+app.get("/example", async (req, res) => {
+	var viewObj = await middleware.getViewObj(req);
+	viewObj.language = "es";
+	res.render("example.ejs", viewObj);
 });
 
 //get the registration page
@@ -352,11 +361,6 @@ app.get("/tv", async (req, res) => {
 		//redirect to the same /tv url to get a truly random video
 		res.redirect("/tv");
 	}
-});
-
-//example path for testing ejs
-app.get("/example", (req, res) => {
-	res.render("example.ejs", {variable: "this is the value of the variable"});
 });
 
 

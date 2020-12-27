@@ -93,6 +93,8 @@ app.post('/register', (req, res) => {
 				redisClient.set(newsessid, JSON.stringify(newuser));
 				//store the session id in the browser of the user
 				res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
+				//set the default language to english
+				res.cookie("language", "en", {httpOnly: false, expires: 0});
 				//flash message to let the user know they are registered
 				req.flash("message", "Registered!");
 				//redirect to the home page
@@ -135,6 +137,8 @@ app.post("/login", async (req, res) => {
 				redisClient.set(newsessid, JSON.stringify(user));
 				//store the session id on the client side
 				res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
+				//set the default language to english
+				res.cookie("language", "en", {httpOnly: false, expires: 0});
 				//messages to let the server and the client know that a user logged in
 				console.log("Logged In!");
 				req.flash("message", "Logged In!");

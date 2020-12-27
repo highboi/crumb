@@ -9,7 +9,6 @@ const crypto = require("crypto");
 const {v4: uuidv4} = require("uuid");
 const readline = require("readline");
 const schedule = require("node-schedule");
-const translate = require("translate");
 const approx = require("approximate-number");
 
 //get the write stream to write to the log file
@@ -55,11 +54,13 @@ middleware = {
 		//insert the flash errors
 		viewObj.errors = req.flash("errors");
 
-		//insert the language translator
-		viewObj.translate = translate;
-
 		//insert the number approximator (turns 1000 to 1k, etc)
 		viewObj.approx = approx;
+
+		//insert the language cookie value
+		if (typeof req.cookies.language != 'undefined') {
+			viewObj.language = req.cookies.language;
+		}
 
 		//return the view object with the complete set of stuff
 		return viewObj;
