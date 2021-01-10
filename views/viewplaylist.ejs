@@ -2,8 +2,7 @@
 
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title><%= playlist.name %> - <%= creator.username %> - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: `${playlist.name} - ${creator.username}`}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -63,5 +62,7 @@
 				<% } %>
 			<% } %>
 		</div>
+
+		<%- include('content/ejs/scripts.ejs') %>
 	</body>
 </html>

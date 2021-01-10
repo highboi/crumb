@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title><%= sectionname %> - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: sectionname}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -13,7 +12,7 @@
 
 		<div class="section-header">
 			<h1>/s/<%= sectionname %> Videos:</h1>
-			<button id="joinbutton" onclick='join(&quot;<%= sectionname %>&quot;)'>Join</button>
+			<button id="joinbutton" onclick="join('<%= sectionname %>', this)">Join</button>
 		</div>
 
 		<div class="home-videos">
@@ -45,6 +44,6 @@
 			<% } %>
 		</div>
 
-		<script src="/content/javascript/subscribe.js"></script>
+		<%- include('content/ejs/scripts.ejs') %>
 	</body>
 </html>

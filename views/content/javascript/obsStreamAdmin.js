@@ -20,7 +20,7 @@ function hlsStart() {
 				console.log("Manifest Parsed!");
 				video.muted = true;
 				video.play();
-				video.muted = true;
+				video.muted = false;
 			});
 		});
 	}

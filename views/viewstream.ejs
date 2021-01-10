@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title>Livestream - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: "Livestream"}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -26,6 +25,7 @@
 			<button id="submitBtnChat" onclick="sendMessage()">Post</button>
 		</div>
 
+		<%- include('content/ejs/scripts.ejs') %>
 		<script>
 			var enableChat = <%- JSON.stringify(enableChat) %>;
 			var streamid = <%- JSON.stringify(streamid) %>;

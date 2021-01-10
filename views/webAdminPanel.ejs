@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title>Livestream - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: "Livestream"}) %>
 	</head>
 	<body>
+		<%- include('content/html/banner.html') %>
+
 		<%- include('content/ejs/body.ejs') %>
 
 		<%- include('content/ejs/navbar.ejs') %>
@@ -24,6 +25,9 @@
 			<input type="text" id="message" name="message" placeholder="Description" maxlength="150">
 			<button id="submitBtnChat" onclick="sendMessage()">Send Message</button>
 		</div>
+
+
+		<%- include('content/ejs/scripts.ejs') %>
 		<script>
 			var enableChat = <%- JSON.stringify(enableChat) %>;
 			var streamid = <%- JSON.stringify(streamid) %>;

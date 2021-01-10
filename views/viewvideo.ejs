@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title><%= video.title %> - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: video.title}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -47,8 +46,8 @@
 					<% } %>
 					<hr>
 					<div class="extralinks" id="<%= video.id %>extralinks">
-						<button onclick='showform(&quot;<%= video.id %>&quot;, &quot;playlistform&quot;)'>Add To Playlist</button>
-						<button onclick='showform(&quot;<%= video.id %>&quot;, &quot;reportform&quot;)'>Report</button>
+						<button onclick="showform('<%= video.id %>', 'playlistform')">Add To Playlist</button>
+						<button onclick="showform('<%= video.id %>', 'reportform')">Report</button>
 					</div>
 					<div class="extralinkforms" id="<%= video.id %>extralinkforms">
 						<object id="<%= video.id %>playlistform">
@@ -81,19 +80,19 @@
 							<div class="subscribe-section">
 								<% if (typeof subscribed != 'undefined') { %>
 									<% if (subscribed != 0) { %>
-										<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribed</button>
+										<button id="subscribebutton" onclick="subscribe('<%= videocreator.id %>', this)">Subscribed</button>
 									<% } else { %>
-										<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribe</button>
+										<button id="subscribebutton" onclick="subscribe('<%= videocreator.id %>', this)">Subscribe</button>
 									<% } %>
 								<% } else { %>
-									<button id="subscribebutton" onclick='subscribe(&quot;<%= videocreator.id %>&quot;)'>Subscribe</button>
+									<button id="subscribebutton" onclick="subscribe('<%= videocreator.id %>', this)">Subscribe</button>
 								<% } %>
 								<p><%= videocreator.subscribers %></p>
 							</div>
 							<div class="likesection">
-								<button class="likebuttons" onclick="likeVideo()"><img src="/content/icons/like.ico"></button>
+								<button class="likebuttons" onclick="likeVideo('<%= video.id %>')"><img src="/content/icons/like.ico"></button>
 								<p id="likes"><%= video.likes %></p>
-								<button class="likebuttons" onclick="dislikeVideo()"><img src="/content/icons/dislike.ico"></button>
+								<button class="likebuttons" onclick="dislikeVideo('<%= video.id %>')"><img src="/content/icons/dislike.ico"></button>
 								<p id="dislikes"><%= video.dislikes %></p>
 							</div>
 						</div>
@@ -128,85 +127,7 @@
 					<% } %>
 				<% } %>
 
-				<div class="comments">
-					<h2>Comments:</h2>
-					<p>Sort Comments:</p>
-					<select id="commentSort" onchange="sortComments(this);">
-						<option value="top" selected>Top</option>
-						<option value="bottom">Bottom</option>
-						<option value="oldest">Oldest</option>
-						<option value="newest">Newest</option>
-					</select>
-					<div id="commentform">
-						<% var commentlink = `/comment/${video.id}`; %>
-						<form action="<%= commentlink %>" method="post">
-							<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br>
-							<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
-						</form>
-					</div>
-					<div id="theComments">
-						<% if (typeof comments != 'undefined') { %>
-							<% comments.forEach((item, index) => { %>
-								<% if (!item.parent_id) { %>
-									<hr>
-									<div class="comment" id="<%= item.id %>" likes="<%= item.likes %>" dislikes="<%= item.dislikes %>" posttime="<%= item.posttime %>">
-										<h3>&nbsp<%= item.username %></h3>
-										<p>&nbsp;&nbsp<%= item.comment %></p>
-										<div class="commentlikes" id="<%= item.id %>">
-											&nbsp
-											<button id="commentLike" onclick="likeComment('<%= item.id %>')"><img src="/content/icons/like.ico"></button>
-											<p id="<%= item.id %>likes"><%= item.likes %></p>
-											<button id="commentDislike" onclick="dislikeComment('<%= item.id %>')"><img src="/content/icons/dislike.ico"></button>
-											<p id="<%= item.id %>dislikes"><%= item.dislikes %></p>
-											<button id="replybtn" onclick='showbox(&quot;<%= item.id %>replybox&quot;)'>Reply</button>
-											<button id="showreplies" onclick='showbox(&quot;<%= item.id %>replies&quot;)'>Replies</button>
-										</div>
-										<div class="replybox" id="<%= item.id %>replybox">
-											<% var replylink = commentlink + `?parent_id=${item.id}`; %>
-											<form action="<%= replylink %>" method="post">
-												<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br>
-												<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
-												<input type="hidden" id="base_parent_id" name="base_parent_id" value="<%= item.id %>">
-												<input type="button" onclick='showbox(&quot;<%= item.id %>replybox&quot;)' value="Cancel">
-											</form>
-										</div>
-										<div class="replies" id="<%= item.id %>replies">
-											<% var replies = comments.filter((obj) => obj.base_parent_id == item.id); %>
-											<% var base_parent_id = item.id; %>
-											<% replies.forEach((item, index) => { %>
-												<svg height="20" width="500">
-													<% for (var i=1; i < parseInt(item.depth_level) + 1; i++) { %>
-														<circle cx="<%= i*20 %>" cy="10" r="5" fill="#adff12"/>
-													<% } %>
-												</svg>
-												<h3>&nbsp;&nbsp<%= item.username %></h3>
-												<p>&nbsp;&nbsp;&nbsp<%= item.comment %></p>
-												<div class="commentlikes" id="<%= item.id %>">
-													&nbsp;&nbsp
-													<button id="commentLike" onclick="likeComment('<%= item.id %>')"><img src="/content/icons/like.ico"></button>
-													<p id="<%= item.id %>likes"><%= item.likes %></p>
-													<button id="commentDislike" onclick="dislikeComment('<%= item.id %>')"><img src="/content/icons/dislike.ico"></button>
-													<p id="<%= item.id %>dislikes"><%= item.dislikes %></p>
-													<button id="replybtn" onclick='showbox(&quot;<%= item.id %>replybox&quot;)'>Reply</button>
-												</div>
-												<div class="replybox" id="<%= item.id %>replybox">
-													<% var replylink = commentlink + `?parent_id=${item.id}`; %>
-													<form action="<%= replylink %>" method="post">
-														<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br>
-														<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
-														<input type="hidden" id="base_parent_id" name="base_parent_id" value="<%= base_parent_id %>">
-														<input type="button" onclick='showbox(&quot;<%= item.id %>replybox&quot;)' value="Cancel">
-													</form>
-												</div>
-											<% }); %>
-										</div>
-									</div>
-									<hr>
-								<% } %>
-							<% }); %>
-						<% } %>
-					</div>
-				</div>
+				<%- include('content/ejs/comments.ejs', {video: video, comments: comments}) %>
 
 				<div id="chatReplay">
 					<% if (typeof chatReplayMessages != 'undefined') { %>
@@ -215,48 +136,17 @@
 				</div>
 			</div>
 			<div class="reccomendations">
-				<h2>&nbspUp Next</h2>
+				<h2>&nbspUp Next</h2><hr>
 				<% if (typeof videos != 'undefined') { %>
 					<% videos.forEach((item, index) => { %>
-						<div class="links">
-							<div class="text">
-								<a href="/v/<%= item.id %>">
-									<img src="<%= item.thumbnail %>" width="600px" height="500px">
-								</a>
-								<a href="/v/<%= item.id %>">
-									<h2><strong>&nbsp;&nbsp<%= item.title %></strong></h2>
-								</a>
-								<p>&nbsp;&nbsp<%= item.description.substr(0, 14) %>...</p>
-							</div>
-							<svg width="10" height="40" class="extras" onclick='showlinks(&quot;<%= item.id %>extralinks&quot;, &quot;<%= item.id %>&quot;)'>
-								<circle cx="5" cy="5" r="5" fill="#adff12"/>
-								<circle cx="5" cy="20" r="5" fill="#adff12"/>
-								<circle cx="5" cy="35" r="5" fill="#adff12"/>
-							</svg>
-							<div id="<%= item.id %>extralinks" class="extralinks">
-								<button onclick='showform(&quot;<%= item.id %>&quot;, &quot;playlistform&quot;)'>Add To Playlist</button>
-								<button>Not Interested</button>
-								<button onclick='showform(&quot;<%= item.id %>&quot;, &quot;reportform&quot;)'>Report</button>
-							</div>
-							<div class="extralinkforms" id="<%= item.id %>extralinkforms">
-								<object id="<%= item.id %>playlistform">
-									<h3><a href="/playlist/new/?videoid=<%= item.id %>">Create Playlist</a></h3><br>
-									<% if (typeof playlists != 'undefined') { %>
-										<% playlists.forEach((plist, index) => { %>
-											<h3><a href="/playlistvideo/add/<%= plist.id %>/<%= item.id %>"><%= plist.name %></a></h3><br>
-										<% }); %>
-									<% } %>
-								</object>
-								<object id="<%= item.id %>reportform">
-									<form action="/report/<%= item.id %>" method="post">
-									</form>
-								</object>
-							</div>
-						</div>
+						<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+						<hr>
 					<% }); %>
 				<% } %>
 			</div>
 		</div>
+
+		<%- include('content/ejs/scripts.ejs') %>
 
 		<script type="text/javascript">
 			function readMore() {
@@ -298,8 +188,6 @@
 		</script>
 
 		<script src="/content/javascript/videocontroller.js"></script>
-		<script src="/content/javascript/likedislike.js"></script>
-		<script src="/content/javascript/subscribe.js"></script>
 		<script src="/content/javascript/elementclicks.js"></script>
 		<script src="/content/javascript/chatreplay.js"></script>
 		<script src="/content/javascript/sortcomments.js"></script>

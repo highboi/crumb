@@ -2,8 +2,7 @@
 
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title>Results For "<%= search.humanquery %>" - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: `Results For ${search.humanquery}`}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -11,87 +10,24 @@
 		<%- include('content/ejs/body.ejs') %>
 
 		<%- include('content/ejs/navbar.ejs') %>
+
 		<div class="search-videos">
 			<% if (search.channels.length > 0) { %>
 				<h1>Channels:</h1>
 				<hr>
 				<% search.channels.forEach((item, index) => { %>
-					<% var channellink = `/u/${item.id}`; %>
-					<% var subscribelink = `/subscribe/${item.id}`; %>
-					<div class="channel">
-						<a href="<%= channellink %>">
-							<img id="channel-icon" src="<%= item.channelicon %>" alt="Channelicon">
-						</a>
-						<a href="<%= channellink %>">
-							<h1 id="channel-link"><%= item.username %></h1>
-						</a>
-						<% if (typeof user != 'undefined') { %>
-							<% if (user.id != item.id) { %>
-								<% if (user.subscribedChannels.includes(item.id)) { %>
-									<button id="subscribebutton" onclick='subscribe(&quot;<%= item.id %>&quot;)'>Subscribed</button>
-								<% } else { %>
-									<button id="subscribebutton" onclick='subscribe(&quot;<%= item.id %>&quot;)'>Subscribe</button>
-								<% } %>
-							<% } %>
-						<% } else { %>
-							<button id="subscribebutton" onclick='subscribe(&quot;<%= item.id %>&quot;)'>Subscribe</button>
-						<% } %>
-						<p><%= item.subscribers %></p>
-					</div>
+					<%- include('content/ejs/minichannel.ejs', {channel: item}) %>
 				<% }); %>
 			<% } %>
 
 			<% if (search.videos.length > 0) { %>
 				<h1>Videos:</h1>
 				<hr>
-				<% search.videos.forEach((item, index) => { %>
-					<div class="video">
-						<% var videolink = `/v/${item.id}`; %>
-						<% var channellink = `/u/${item.user_id}`; %>
-						<div class="thumbnail">
-							<a href="<%= videolink %>">
-								<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
-							</a>
-						</div>
-						<div class="links">
-							<a href="<%= videolink %>">
-								<h3 style="text-transform: capitalize;"><strong><%= item.title %></strong></h3>
-							</a>
-							<div class="channel-links">
-								<a href="<%= channellink %>">
-									<img id="channel-icon" src="<%= item.channelicon %>">
-								</a>
-								<a href="<%= channellink %>">
-									<p><%= item.username %></p>
-								</a>
-								<svg width="10" height="40" id="extras" onclick='showlinks(&quot;<%= item.id %>extralinks&quot;, &quot;<%= item.id %>&quot;)'>
-									<circle cx="5" cy="5" r="5" fill="#adff12"/>
-									<circle cx="5" cy="20" r="5" fill="#adff12"/>
-									<circle cx="5" cy="35" r="5" fill="#adff12"/>
-								</svg>
-								<div class="extralinks" id="<%= item.id %>extralinks">
-									<button onclick='showform(&quot;<%= item.id %>&quot;, &quot;playlistform&quot;)'>Add To Playlist</button>
-									<button>Not Interested</button>
-									<button onclick='showform(&quot;<%= item.id %>&quot;, &quot;reportform&quot;)'>Report</button>
-								</div>
-								<div class="extralinkforms" id="<%= item.id %>extralinkforms">
-									<object id="<%= item.id %>playlistform">
-										<h3><a href="/playlist/new/?videoid=<%= item.id %>">Create Playlist</a></h3><br>
-										<% if (typeof playlists != 'undefined') { %>
-											<% playlists.forEach((plist, index) => { %>
-								                <h3><a href="/playlistvideo/add/<%= plist.id %>/<%= item.id %>"><%= plist.name %></a></h3><br>
-											<% }); %>
-										<% } %>
-								    </object>
-									<object id="<%= item.id %>reportform">
-										<form action="/report/<%= item.id %>" method="post">
-										</form>
-									</object>
-								</div>
-							</div>
-						</div>
-					</div>
-				<% }); %>
+				<div class="search-videos">
+					<% search.videos.forEach((item, index) => { %>
+						<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+					<% }); %>
+				</div>
 			<% } %>
 
 			<% if (search.playlists.length > 0) { %>
@@ -110,7 +46,7 @@
 				<p>No Results Returned</p>
 			<% } %>
 		</div>
-		<script src="/content/javascript/subscribe.js"></script>
+		<%- include('content/ejs/scripts.ejs') %>
 		<script src="/content/javascript/elementclicks.js"></script>
 	</body>
 </html>

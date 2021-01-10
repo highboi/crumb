@@ -43,9 +43,15 @@ middleware = {
 		//create the view object
 		var viewObj = {};
 
-		//insert the user info and list of playlists if the session id is there
+		//insert the user info and other info related to a user
 		if (typeof req.cookies.sessionid != 'undefined') {
+			//get user info
 			viewObj.user = await middleware.getUserSession(req.cookies.sessionid);
+			//insert subscribed channels
+			viewObj.subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [viewObj.user.id]);
+			viewObj.subscribedChannels = viewObj.subscribedChannels.rows.map((obj) => {return obj.channel_id});
+		} else {
+			viewObj.subscribedChannels = [];
 		}
 
 		//insert the flash message

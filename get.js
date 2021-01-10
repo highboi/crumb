@@ -75,7 +75,8 @@ app.get('/error', async (req, res) => {
 //example path for testing ejs
 app.get("/example", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
-	viewObj.language = "es";
+	var videourl = await client.query(`SELECT video FROM videos`);
+	viewObj.videourl = videourl.rows[0].video;
 	res.render("example.ejs", viewObj);
 });
 
@@ -146,6 +147,7 @@ app.get("/logout", middleware.checkSignedIn, (req, res) => {
 		console.log("Redis Session Deleted");
 	});
 	res.cookie('sessionid', '', {expires: new Date(0)});
+	res.cookie("hasSession", false, {httpOnly: false, expires: 0});
 	console.log("[+] Logged out.");
 	req.flash("message", "Logged out!");
 	res.redirect("/");
@@ -193,12 +195,16 @@ app.get("/u/:userid", async (req, res) => {
 			playlists = playlists.rows;
 			viewObj.playlists = playlists;
 			break;
+		case "shoutouts":
+			var shoutouts = await client.query(`SELECT * FROM shoutouts WHERE user_id=$1`, [req.params.userid]);
+			shoutouts = shoutouts.rows;
+			viewObj.shoutouts = shoutouts;
+			break;
 	}
 
 	//render the view
 	res.render("viewchannel.ejs", viewObj);
 });
-
 
 
 
@@ -316,6 +322,32 @@ app.get("/video/:id", async (req, res) => {
 		res.writeHead(200, head)
 		//pipe the complete contents of the file to the response with a read stream of the file
 		fs.createReadStream(path).pipe(res)
+	}
+});
+
+//this is a get path to set the magnet link for a video
+app.get("/setmagnet/:id", async (req, res) => {
+	//get the video specified in the url
+	var magnet = await client.query(`SELECT magnetlink FROM videos WHERE id=$1`, [req.params.id]);
+	magnet = magnet.rows[0].magnetlink;
+
+	//check to see if the magnet link is blank
+	if (typeof magnet == 'undefined') {
+		try {
+			//set the new magnetlink to the video in the database
+			await client.query(`UPDATE videos SET magnetlink=$1 WHERE id=$2`, [req.query.magnet, req.params.id]);
+
+			//send a response of "true" to let the client know that we have successfully updated the magnet link status
+			res.send("true");
+		} catch(e) {
+			//console log the error
+			console.log(e);
+
+			//send a response of "false" back to the client
+			res.send("false");
+		}
+	} else { //send a response of "false" to the client as there is a magnet link already set
+		res.send("false");
 	}
 });
 

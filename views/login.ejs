@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title>Login - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: "Login"}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -29,5 +28,7 @@
 				<a href="/register">Register?</a>
 			</div>
 		</form>
+
+		<%- include('content/ejs/scripts.ejs') %>
 	</body>
 </html>

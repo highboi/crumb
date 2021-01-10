@@ -1,0 +1,132 @@
+/*
+STYLESHEET FOR THE LANDING PAGE OF THE SITE
+*/
+
+
+/*
+THE VIDEOS IN THE HOMEPAGE
+*/
+.home-videos {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.home-videos .video {
+	padding-right: 0.5vw;
+	padding-left: 0.5vw;
+}
+
+.home-videos .video .thumbnail {
+	vertical-align: top;
+}
+
+.home-videos .video .links {
+	font-size: 15px;
+}
+
+.home-videos .video .links #channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.home-videos .video .links #channel-links #channel-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+}
+
+.home-videos .video .links #channel-links #extras:hover {
+	cursor: pointer;
+}
+
+.home-videos .video .links #channel-links .extralinks {
+	display: none;
+}
+
+.home-videos .video .links #channel-links .extralinkforms object {
+	display: none;
+}
+
+
+/*
+VIDEOS IN THE SEARCH RESULTS
+*/
+.search-videos {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.search-videos .video {
+	padding-right: 0.5vw;
+	padding-left: 0.5vw;
+}
+
+.search-videos .video .thumbnail {
+	vertical-align: top;
+}
+
+.search-videos .video .links {
+	font-size: 15px;
+}
+
+.search-videos .video .links #channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.search-videos .video .links #channel-links #channel-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+}
+
+.search-videos .video .links #channel-links #extras:hover {
+	cursor: pointer;
+}
+
+.search-videos .video .links #channel-links .extralinks {
+	display: none;
+}
+
+.search-videos .video .links #channel-links .extralinkforms object {
+	display: none;
+}
+
+/*
+ANY OTHER THUMBNAILS
+*/
+.video-thumbnail {
+	padding-right: 0.5vw;
+	padding-left: 0.5vw;
+}
+
+.video-thumbnail .thumbnail {
+	vertical-align: top;
+}
+
+.video-thumbnail .links {
+	font-size: 15px;
+}
+
+.video-thumbnail .links #channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.video-thumbnail .links #channel-links #channel-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+}
+
+.video-thumbnail .links #channel-links #extras:hover {
+	cursor: pointer;
+}
+
+.video-thumbnail .links #channel-links .extralinks {
+	display: none;
+}
+
+.video-thumbnail .links #channel-links .extralinkforms object {
+	display: none;
+}

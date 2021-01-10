@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title>Submit A Video - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: "Submit A Video"}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -40,5 +39,7 @@
 				<input type="submit" value="Submit Video">
 			</div>
 		</form>
+
+		<%- include('content/ejs/scripts.ejs') %>
 	</body>
 </html>

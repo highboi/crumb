@@ -1,5 +1,5 @@
 /*
-CREATE BASIC VARIABLES
+BASIC VARIABLES
 */
 
 //get the search bar element
@@ -24,36 +24,30 @@ var mouseoverquery = false;
 //a variable to store the current reccomendation that the user is highlighting with their arrows
 var highlightedrec;
 
-//create a new xhttp object to make ajax requests
-var xhttpSearch = new XMLHttpRequest();
-
 /*
-FUNCTIONS TO IMPLEMENT SEARCH RECCOMENDATIONS
+BASIC FUNCTIONS FOR GETTING THE SEARCH RECCOMENDATIONS FROM THE SERVER
 */
 
-//recieve a response from the server
-xhttpSearch.onreadystatechange = function () {
-	if (this.readyState == 4 && this.status == 200) {
-		//get the reccomendation arrays and delete duplicates with a set
-		recsArr = JSON.parse(this.responseText);
-		recsArr = [...new Set(recsArr)];
+//callback function for search reccomendations
+function searchCallback(response) {
+	//get the reccomendation arrays and delete duplicates with a set
+	recsArr = [...new Set(response)];
 
-		//clear out the reccomendations html and add the p tags that contain reccomendations
-		searchDropdown.innerHTML = "";
-		recsArr.forEach((item, index) => {
-			if (item.includes(searchqueryinput.value)) {
-				var components = item.split(searchqueryinput.value);
-				var rectext = components[0] + searchqueryinput.value + components[1];
-				var hreflink = `/search/?searchquery=${rectext.split(" ").join("+")}`;
-				searchDropdown.innerHTML = searchDropdown.innerHTML + `<p><a href=\'${hreflink}\'>` + components[0] + "<strong>" + searchqueryinput.value + "</strong>" + components[1] + "</a></p>";
-			} else {
-				var rectext = searchqueryinput.value + " " + item;
-				var hreflink = `/search/?searchquery=${rectext.split(" ").join("+")}`;
-				searchDropdown.innerHTML = searchDropdown.innerHTML + `<p><a href=\'${hreflink}\'><strong>` + searchqueryinput.value + " </strong>" + item + "</a></p>";
-			}
-		});
-	}
-};
+	//clear out the reccomendations html and add the p tags that contain reccomendations
+	searchDropdown.innerHTML = "";
+	recsArr.forEach((item, index) => {
+		if (item.includes(searchqueryinput.value)) {
+		    var components = item.split(searchqueryinput.value);
+		    var rectext = components[0] + searchqueryinput.value + components[1];
+		    var hreflink = `/search/?searchquery=${rectext.split(" ").join("+")}`;
+		    searchDropdown.innerHTML = searchDropdown.innerHTML + `<p><a href=\'${hreflink}\'>` + components[0] + "<strong>" + searchqueryinput.value + "</strong>" + "</a></p>";
+		} else {
+		    var rectext = searchqueryinput.value + " " + item;
+		    var hreflink = `/search/?searchquery=${rectext.split(" ").join("+")}`;
+		    searchDropdown.innerHTML = searchDropdown.innerHTML + `<p><a href=\'${hreflink}\'><strong>` + searchqueryinput.value + " </strong>" + item + "</a></p>";
+		}
+	});
+}
 
 //a function to respond to the "keyup" event on the search bar
 function keyupSearch() {
@@ -64,20 +58,19 @@ function keyupSearch() {
 	timer = setTimeout(getSearchRec, 500);
 }
 
-//function to make a get request for search reccomendations
 function getSearchRec() {
 	//check to see if the searchbar value is nothing
 	if (searchqueryinput.value != "") {
 		var searchquery = searchqueryinput.value.split(" ").join("+");
 
-		xhttpSearch.open("GET", `/getsearchrecs/?searchquery=${searchquery}`, true);
-		xhttpSearch.send();
+		getAjaxData(`/getsearchrecs/?searchquery=${searchquery}`, searchCallback);
 
 		searchDropdown.style.display = "block";
 	} else {
 		searchDropdown.style.display = "none";
 	}
 }
+
 
 /*
 PROGRAM EVENTS TO RESPOND TO KEYS AND MOUSE FOR STYLING

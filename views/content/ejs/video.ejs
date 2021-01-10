@@ -2,15 +2,15 @@
 	<div class="video-contents">
 		<div class="video-container">
 			<div id="loading"></div>
+			<div class="fullscreen-text">
+				<h1 id="TitleFullscreen"><%= video.title %></h1>
+			</div>
 			<video poster="<%= video.thumbnail %>" id="video">
 				<source src="http://localhost/video/<%= video.id %>" type="video/mp4">
 				<source src="http://localhost/video/<%= video.id %>" type="video/webm">
 				<source src="http://localhost/video/<%= video.id %>" type="video/ogg">
 				<h1>HTML Video is not supported in your browser, sorry.</h1>
 			</video>
-			<div class="fullscreen-text">
-				<h1 id="TitleFullscreen"><%= video.title %></h1>
-			</div>
 			<div class="video-controls">
 				<button id="playBtn"><img src="/content/icons/play.ico"></button>
 				<input id="seeker" type="range" min="0" max="100" value="0" step="1" oninput="vidSeek()">

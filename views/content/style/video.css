@@ -162,6 +162,7 @@ VIDEO CONTROLS
 	margin: 0px 2vw 0px 2vw;
 }
 
+
 .container .video-contents .video-container:not(:fullscreen) .fullscreen-text {
 	display: none;
 }

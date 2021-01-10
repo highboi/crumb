@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title>TV! - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: "TV!"}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -13,7 +12,7 @@
 
 		<h1>TV!</h1>
 
-		<%- include('content/ejs/video.ejs') %>
+		<%- include('content/ejs/videoplayer.ejs') %>
 
 		<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button>
 
@@ -24,6 +23,8 @@
 				<% }); %>
 			<% } %>
 		</div>
+
+		<%- include('content/ejs/scripts.ejs') %>
 
 		<script>
 			var videoelement = document.getElementById("video");

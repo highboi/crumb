@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title><%= creator.username %>'s Channel - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: `${creator.username}'s Channel`}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -18,7 +17,7 @@
 				<div id="channel-name" class="hardtoseetext">
 					<h1><%= creator.username %></h1>
 				</div>
-				<button id="subscribebutton" onclick="subscribe();">Subscribe</button>
+				<button id="subscribebutton" onclick="subscribe('<%= creator.id %>', this);">Subscribe</button>
 			</div>
 			<hr>
 			<div id="tabs">
@@ -26,6 +25,7 @@
 				<button onclick="window.location.href = '<%= channellink %>/?section=home';">Home</button>
 				<button onclick="window.location.href = '<%= channellink %>/?section=videos';">Videos</button>
 				<button onclick="window.location.href = '<%= channellink %>/?section=playlists';">Playlists</button>
+				<button onclick="window.location.href = '<%= channellink %>/?section=shoutouts'">Shoutouts</button>
 				<button onclick="window.location.href = '<%= channellink %>/?section=about';">About</button>
 				<button onclick="window.location.href = '<%= channellink %>/?section=settings';">Settings</button>
 			</div>
@@ -84,12 +84,23 @@
 					<% } else { %>
 						<h3><a href="/playlist/new">Create New Playlist</a></h3>
 					<% } %>
+				<% } else if (section == "shoutouts") { %>
+					<% if (typeof shoutouts != 'undefined') { %>
+						<form method="post" action="/shoutout/add">
+							<label for="shoutout">Shoutout Channel URL:</label>
+							<input type="text" id="shoutout" name="shoutout"><br>
+							<button type="submit">Submit</button>
+						</form><br>
+						<% shoutouts.forEach((item, index) => { %>
+							<% var shoutoutlink = `/u/${item.shoutout_id}` %>
+							<h1><a href="<%= shoutoutlink %>">Shoutout Channel</a></h1>
+						<% }); %>
+					<% } %>
 				<% } else if (section == "settings") { %>
 					<button onclick="confirm('Delete Channel?')"><a href="/u/delete/<%= creator.id %>">Delete Channel?</a></button>
 				<% } %>
 			</div>
 		</div>
-		<script type="text/javascript">var channelvar = <%- JSON.stringify(creator) %>;</script>
-		<script src="/content/javascript/subscribe.js"></script>
+		<%- include('content/ejs/scripts.ejs') %>
 	</body>
 </html>

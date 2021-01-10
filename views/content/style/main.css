@@ -1,8 +1,8 @@
 @import url("general.css");
 @import url("channel.css");
-@import url("home.css");
+@import url("thumbnail.css");
 @import url("video.css");
+@import url("videoplayer.css");
 @import url("search.css");
 @import url("playlist.css");
 @import url("stream.css");
-@import url("navbar.css")

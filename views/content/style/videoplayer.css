@@ -1,0 +1,141 @@
+/*
+VIDEO AND RECCOMENDATIONS
+*/
+
+.player-container {
+	display: flex;
+}
+
+/*
+VIDEO BEING VIEWED
+*/
+
+.player-container .video-container {
+	position: relative;
+	width: 60vw;
+	height: 45vw;
+}
+
+.player-container .video-container #video {
+	object-fit: cover;
+	width: 60vw;
+	height: 45vw;
+}
+
+.player-container .video-container:fullscreen #video {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.player-container .video-container #loading {
+	display: none;
+}
+
+/*
+VIDEO CONTROLS
+*/
+
+.player-container .video-container .video-controls {
+	display: flex;
+	align-items: center;
+	width: 60vw;
+	position: absolute;
+	bottom: 10px;
+	opacity: 0;
+	transition: opacity .3s;
+	margin: 0px 2vw 0px 2vw;
+}
+
+.player-container .video-container:not(:fullscreen) .fullscreen-text {
+	display: none;
+}
+
+.player-container .video-container:fullscreen .fullscreen-text {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	bottom: 90%;
+	padding: 5%;
+	opacity: 0;
+	margin: 0px auto;
+}
+
+.player-container .video-container:hover .video-controls {
+	opacity: 0.9;
+}
+
+.player-container .video-container:hover .fullscreen-text {
+	opacity: 0.9;
+}
+
+.player-container .video-container .video-controls button {
+	cursor: pointer;
+	padding: 10px 10px 10px 10px;
+	background: #adff12;
+	border-radius: 50%;
+}
+
+.player-container .video-container .video-controls button {
+	width: auto;
+	height: 50px;
+}
+
+.player-container .video-container .video-controls img {
+	width: auto;
+	height: 50px;
+}
+
+.player-container .video-container .video-controls #seeker {
+	width: 40%;
+}
+
+.player-container .video-container .video-controls #volumeslider {
+	width: 19%;
+}
+
+.player-container .video-container .video-controls #videotime {
+	font-size: 2vw;
+	color: black;
+	text-shadow: 1px 1px 0 #adff12, -1px -1px 0 #adff12, 1px -1px 0 #adff12, -1px 1px 0 #adff12;
+}
+
+.player-container .video-container .video-controls #muteBtn, #fullscreenBtn, #playBtn {
+	border: none;
+}
+
+.player-container .video-container:fullscreen .video-controls {
+	position: absolute;
+	width: 100%;
+	margin: 0px auto;
+	padding: 20px;
+}
+
+.player-container .video-container:fullscreen button {
+	width: 100px;
+	height: 100px;
+}
+
+.player-container .video-container:fullscreen #seeker{
+	width: 50vw;
+}
+
+.player-container .video-container:fullscreen #volumeslider {
+	width: 19vw;
+}
+
+/*
+MEDIA QUERY FOR RESIZING THE VIDEO
+*/
+@media all and (max-width: 1500px) {
+	.player-container .video-container {
+		width: 100vw;
+	}
+
+	.player-container .video-container #video {
+		width: 100vw;
+	}
+}

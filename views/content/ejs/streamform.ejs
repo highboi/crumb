@@ -1,0 +1,33 @@
+<% if (typeof posturl != 'undefined') { %>
+	<form action="<%= posturl %>" method="POST" enctype="multipart/form-data">
+		<div>
+			<label for="name">Name your Livestream:</label>
+			<input id="name" name="name" type="text" required>
+		</div>
+		<div>
+			<label for="enableChat">Enable/Disable Chat:</label>
+			<select id="enableChat" name="enableChat">
+				<option value="true">Yes</option>
+				<option value="false">No</option>
+			</select>
+		</div>
+		<div>
+			<label for="liveThumbnail">Pick a Thumbnail</label>
+			<input type="file" id="liveThumbnail" name="liveThumbnail" accept="image/*" required>
+		</div>
+		<div>
+			<label for="includeChannelTopics">Include Channel Topics? </label>
+			<input type="checkbox" id="includeChannelTopics" name="includeChannelTopics">
+		</div>
+		<div>
+			<label for="topics">Topics:</label>
+			<input type="text" id="topics" name="topics">
+		</div>
+		<div>
+			<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000" required></textarea>
+		</div>
+		<div>
+			<input type="submit" value="Start Streaming">
+		</div>
+	</form>
+<% } %>

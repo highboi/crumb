@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<%- include('content/html/head.html') %>
-		<title>Start a Live Stream - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: "Start a Live Stream"}) %>
 	</head>
 	<body>
 		<%- include('content/html/banner.html') %>
@@ -11,69 +10,15 @@
 
 		<%- include('content/ejs/navbar.ejs') %>
 
-		<h1>Browser Streaming:</h1>
-		<form action="/l/stream/browser" method="POST" enctype='multipart/form-data'>
-			<div>
-				<label for="name">Name your Livestream:</label>
-				<input id="name" name="name" type="text" required>
-			</div>
-			<div>
-				<label for="enableChat">Enable/Disable Chat:</label>
-				<select id="enableChat" name="enableChat">
-					<option value="true">Yes</option>
-					<option value="false">No</option>
-				</select>
-			</div>
-			<div>
-				<label for="liveThumbnail">Pick a Thumbnail</label>
-				<input type="file" id="liveThumbnail" name="liveThumbnail" accept="image/*" required>
-			</div>
-			<div>
-				<label for="includeChannelTopics">Include Channel Topics? </label>
-				<input type="checkbox" id="includeChannelTopics" name="includeChannelTopics">
-			</div>
-			<div>
-				<label for="topics">Topics:</label>
-				<input type="text" id="topics" name="topics">
-			</div>
-			<div>
-				<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000" required></textarea>
-			</div>
-			<div>
-				<input type="submit" value="Start Streaming">
-			</div>
-		</form>
-		<h1>OBS:</h1>
-		<form action="/l/stream/obs" method="POST" enctype="multipart/form-data">
-			<div>
-				<label for="name">Name your Livestream:</label>
-				<input id="name" name="name" type="text" required>
-			</div>
-			<div>
-				<label for="enableChat">Enable/Disable Chat:</label>
-				<select id="enableChat" name="enableChat">
-					<option value="true">Yes</option>
-					<option value="false">No</option>
-				</select>
-			</div>
-			<div>
-				<label for="liveThumbnail">Pick a Thumbnail</label>
-				<input type="file" id="liveThumbnail" name="liveThumbnail" accept="image/*" required>
-			</div>
-			<div>
-				<label for="includeChannelTopics">Include Channel Topics? </label>
-				<input type="checkbox" id="includeChannelTopics" name="includeChannelTopics">
-			</div>
-			<div>
-				<label for="topics">Topics:</label>
-				<input type="text" id="topics" name="topics">
-			</div>
-			<div>
-				<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000" required></textarea>
-			</div>
-			<div>
-				<input type="submit" value="Start Streaming">
-			</div>
-		</form>
+		<div>
+			<h1>Browser Streaming:</h1>
+			<%- include('content/ejs/streamform.ejs', {posturl: "/l/stream/browser"}) %>
+		</div>
+		<div>
+			<h1>OBS:</h1>
+			<%- include('content/ejs/streamform.ejs', {posturl: "/l/stream/obs"}) %>
+		</div>
+
+		<%- include('content/ejs/scripts.ejs') %>
 	</body>
 </html>

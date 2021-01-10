@@ -93,6 +93,8 @@ app.post('/register', (req, res) => {
 				redisClient.set(newsessid, JSON.stringify(newuser));
 				//store the session id in the browser of the user
 				res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
+				//store a cookie that stores a boolean value letting javascript know the session exists (javascript and httponly coexist)
+				res.cookie("hasSession", true, {httpOnly: false, expires: 0});
 				//set the default language to english
 				res.cookie("language", "en", {httpOnly: false, expires: 0});
 				//flash message to let the user know they are registered
@@ -137,6 +139,8 @@ app.post("/login", async (req, res) => {
 				redisClient.set(newsessid, JSON.stringify(user));
 				//store the session id on the client side
 				res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
+				//store a cookie to alert javascript of the existence of a session/logged-in user
+				res.cookie("hasSession", true, {httpOnly: false, expires: 0});
 				//set the default language to english
 				res.cookie("language", "en", {httpOnly: false, expires: 0});
 				//messages to let the server and the client know that a user logged in
@@ -207,6 +211,11 @@ app.post("/v/submit", (req, res) => {
 
 			//load the video into the database
 			var id = await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`, valuesArr);
+
+			//change the video count on the user db entry
+			await client.query(`UPDATE users SET videos=$1 WHERE id=$2`, [userinfo.videos+1, userinfo.id]);
+
+			//redirect the user to their video
 			var videourl = `/v/${id.rows[0].id}`; //get the url to redirect to now that the video has been created
 			res.redirect(videourl); //redirect to the url
 		} else if (!(thumbext in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
@@ -351,4 +360,22 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 		//render the view for the streamer based on the stream type
 		res.redirect(`/l/admin/${streamid}?streamtype=${streamtype}`);
 	});
+});
+
+//this is a post path to post a shoutout channel in the "shoutouts" section of one's channel
+app.post("/shoutout/add", middleware.checkSignedIn, async (req, res) => {
+	//get the channel id of the shoutout channel
+	var channelreq = req.body.shoutout.split("?")[0];
+	channelreq = channelreq.split("/");
+	channelreq = channelreq.filter(word => word);
+	var channelid = channelreq[channelreq.length-1];
+
+	//get the user info
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	//insert the shoutout channel into the database
+	await client.query(`INSERT INTO shoutouts (user_id, shoutout_id) VALUES ($1, $2)`, [userinfo.id, channelid]);
+
+	//redirect the user to the channel section with the new channel added
+	res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
 });
