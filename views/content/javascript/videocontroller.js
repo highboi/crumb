@@ -149,6 +149,10 @@ function toggleMute() {
 
 //a function to return a time string in readable format (hours:minutes:seconds)
 function findTime(time) {
+	if (time == null || typeof time == undefined) {
+		return "00:00";
+	}
+
 	//get the time as a string
 	time = time.toString();
 	//get the part of the time left of the "." as this is the number of seconds

@@ -4,46 +4,49 @@
 		<%- include('content/ejs/head.ejs', {title: sectionname}) %>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
 
-		<%- include('content/ejs/body.ejs') %>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
 
-		<%- include('content/ejs/navbar.ejs') %>
+			<div class="section-header">
+				<h1>/s/<%= sectionname %> Videos:</h1>
+				<button id="joinbutton" onclick="join('<%= sectionname %>', this)">Join</button>
+			</div>
 
-		<div class="section-header">
-			<h1>/s/<%= sectionname %> Videos:</h1>
-			<button id="joinbutton" onclick="join('<%= sectionname %>', this)">Join</button>
-		</div>
-
-		<div class="home-videos">
-			<% if (typeof videos != 'undefined') { %>
-				<% videos.forEach((item, index) => { %>
-					<div class="video">
-						<% var videolink = `/v/${item.id}` %>
-						<% var channellink = `/u/${item.user_id}` %>
-						<div class="thumbnail">
-							<a href="<%= videolink %>">
-								<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
-							</a>
-						</div>
-						<div class="links">
-							<a href="<%= videolink %>">
-								<h3 style="text-transform: capitalize"><strong><%= item.title %></strong></h3>
-							</a>
-							<div id="channel-links">
-								<a href="<%= channellink %>">
-									<img id="channel-icon" src="<%= item.channelicon %>">
-								</a>
-								<a href="<%= channellink %>">
-									<p><%= item.username %></p>
+			<div class="home-videos">
+				<% if (typeof videos != 'undefined') { %>
+					<% videos.forEach((item, index) => { %>
+						<div class="video">
+							<% var videolink = `/v/${item.id}` %>
+							<% var channellink = `/u/${item.user_id}` %>
+							<div class="thumbnail">
+								<a href="<%= videolink %>">
+									<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
 								</a>
 							</div>
+							<div class="links">
+								<a href="<%= videolink %>">
+									<h3 style="text-transform: capitalize"><strong><%= item.title %></strong></h3>
+								</a>
+								<div id="channel-links">
+									<a href="<%= channellink %>">
+										<img id="channel-icon" src="<%= item.channelicon %>">
+									</a>
+									<a href="<%= channellink %>">
+										<p><%= item.username %></p>
+									</a>
+								</div>
+							</div>
 						</div>
-					</div>
-				<% }); %>
-			<% } %>
-		</div>
+					<% }); %>
+				<% } %>
+			</div>
 
-		<%- include('content/ejs/scripts.ejs') %>
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
 	</body>
 </html>

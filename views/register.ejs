@@ -4,49 +4,54 @@
 		<%- include('content/ejs/head.ejs', {title: "Register"}) %>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
 
-		<h1>Register:</h1>
+		<main>
+			<h1>Register:</h1>
 
-		<%- include('content/ejs/body.ejs') %>
+			<%- include('content/ejs/body.ejs') %>
 
-		<form action="/register" method="POST" class="authform" enctype="multipart/form-data">
-			<div>
-				<input id="username" name="username" type="text" placeholder="Username" autofocus>
-			</div>
-			<div>
-				<input id="email" name="email" type="email" placeholder="Email (Optional)">
-			</div>
-			<div>
-				<input id="password" name="password" type="password" placeholder="Password">
-			</div>
-			<div>
-				<input id="password2" name="password2" type="password" placeholder="Password Confirmation">
-			</div><br>
-			<div class="authfileinput">
-				<h4>Channel Icon (optional): </h4>
-				<input id="channelicon" name="channelicon" type="file" accept="image/*">
-			</div><br>
-			<div class="authfileinput">
-				<h4>Channel Banner Image (optional): </h4>
-				<input id="channelbanner" name="channelbanner" type="file" accept="image/*">
-			</div><br>
-			<div>
-				<label for="channeldesc"><h4>Channel Description (1000 characters):</h4></label><br>
-				<textarea id="channeldesc" name="channeldesc" rows="6" cols="40" maxlength="1000" placeholder="Channel Description Here"></textarea>
-			</div><br>
-			<div>
-				<label for="topics"><h4>Topics of Channel</h4></label>
-				<input type="text" id="topics" name="topics" placeholder="topic1 topic2 etc" maxlength="300">
-			</div><br>
-			<div>
-				<input type="submit" value="Register">
-			</div><br>
-			<div class="underlinelinks">
-				<a href="/login">Existing User?</a>
-			</div>
-		</form>
+			<form action="/register" method="POST" class="authform" enctype="multipart/form-data">
+				<div>
+					<input id="username" name="username" type="text" placeholder="Username" autofocus>
+				</div>
+				<div>
+					<input id="email" name="email" type="email" placeholder="Email (Optional)">
+				</div>
+				<div>
+					<input id="password" name="password" type="password" placeholder="Password">
+				</div>
+				<div>
+					<input id="password2" name="password2" type="password" placeholder="Password Confirmation">
+				</div><br>
+				<div class="authfileinput">
+					<h4>Channel Icon (optional): </h4>
+					<input id="channelicon" name="channelicon" type="file" accept="image/*">
+				</div><br>
+				<div class="authfileinput">
+					<h4>Channel Banner Image (optional): </h4>
+					<input id="channelbanner" name="channelbanner" type="file" accept="image/*">
+				</div><br>
+				<div>
+					<label for="channeldesc"><h4>Channel Description (1000 characters):</h4></label><br>
+					<textarea id="channeldesc" name="channeldesc" rows="6" cols="40" maxlength="1000" placeholder="Channel Description Here"></textarea>
+				</div><br>
+				<div>
+					<label for="topics"><h4>Topics of Channel</h4></label>
+					<input type="text" id="topics" name="topics" placeholder="topic1 topic2 etc" maxlength="300">
+				</div><br>
+				<div>
+					<input type="submit" value="Register">
+				</div><br>
+				<div class="underlinelinks">
+					<a href="/login">Existing User?</a>
+				</div>
+			</form>
 
-		<%- include('content/ejs/scripts.ejs') %>
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
 	</body>
 </html>

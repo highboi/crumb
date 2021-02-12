@@ -170,8 +170,8 @@ app.post("/v/submit", (req, res) => {
 		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 		//get the video and thumbnail extensions to be checked (file upload vuln)
-		var videoext = path.extname(middleware.getFilePath(files.video, "/storage/videos/files/"));
-		var thumbext = path.extname(middleware.getFilePath(files.thumbnail, "/storage/videos/thumbnails/"));
+		var videoext = path.extname(files.video.name);
+		var thumbext = path.extname(files.thumbnail.name);
 
 		//make arrays of accepted file types
 		var acceptedvideo = [".mp4", ".ogg", ".webm"];
@@ -230,6 +230,47 @@ app.post("/v/submit", (req, res) => {
 
 //post request for commenting on videos
 app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
+	/*
+	var form = new formidable.IncomingForm();
+
+	//parse the form and the submitted files
+	form.parse(req, async(err, fields, files) => {
+		//get the user session info
+		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+		//get the comment id
+		var commentid = await middleware.generateAlphanumId();
+
+		//check to see if there is a reaction video/image
+		if (typeof files.reactionfile != 'undefined') {
+			//get the accepted file types
+			var acceptedvideo = [".mp4", ".ogg", ".webm"];
+			var acceptedimg = [".png", ".jpeg", ".jpg"];
+
+			//get the file extension
+			var fileext = path.extname(files.reactionfile);
+
+			//check for the validity of the file being submitted
+			if (acceptedvideo.includes(fileext) || acceptedimg.includes(fileext)) {
+				var filepath = await middleware.saveFile(files.reactionfile, "/storage/users/comments");
+			} else {
+				req.flash("message", "Unsupported file type, please try again.");
+				res.redirect(`/v/${req.params.videoid}`);
+			}
+		}
+
+		//create a values array for the comment db entry
+		var valuesarr = [commentid, userinfo.username, userinfo.id, fields.commenttext, req.params.videoid, middleware.getDate(), 0, 0];
+
+		//check for a parent comment id for comment thread functionality
+		if (typeof req.query.parent_id != 'undefined') {
+			valuesarr.push(req.query.parent_id);
+		} else {
+
+		}
+	});
+	*/
+
 	//get the user from redis
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
@@ -378,4 +419,24 @@ app.post("/shoutout/add", middleware.checkSignedIn, async (req, res) => {
 
 	//redirect the user to the channel section with the new channel added
 	res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+});
+
+//this is a post path to set the magnet link for a video if there are no peers/seeders for a file
+app.post("/setmagnet/:id", async (req, res) => {
+	console.log("SETTING MAGNET:", req.body.magnet);
+
+	//try catch for the query
+	try {
+		//set the new magnetlink to the video in the database
+		await client.query(`UPDATE videos SET magnetlink=$1 WHERE id=$2`, [req.body.magnet, req.params.id]);
+
+		//send a response of "true" to let the client know that we have successfully updated the magnet link status
+		res.send("true");
+	} catch(e) {
+		//console log the error
+		console.log(e);
+
+		//send a response of "false" back to the client
+		res.send("false");
+	}
 });

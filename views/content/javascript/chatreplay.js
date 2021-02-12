@@ -1,3 +1,5 @@
+var chatreplayelement = document.getElementById("chatReplay");
+
 if (typeof chatReplayMessages != 'undefined') {
 	videoelement.ontimeupdate = () => {
 		if (chatReplayMessages[0].time <= videoelement.currentTime) {

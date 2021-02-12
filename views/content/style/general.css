@@ -28,6 +28,7 @@ a img:hover {
 }
 
 button {
+	color: #adff12;
 	background-color: #3f3f3f;
 }
 
@@ -66,37 +67,84 @@ STYLING FOR FORMS
 	margin: 3px;
 }
 
+
+/*
+NAVBAR STYLING
+*/
+
+nav {
+	position: sticky;
+	top: 0;
+	z-index: 2;
+}
+
+main {
+	margin-left: 120px;
+	margin-top: 120px;
+}
+
+nav .navbar {
+	background-color: #adff12;
+	width: 100px;
+	height: 100vh;
+	position: fixed;
+	top: 0px;
+	margin-left: 0px;
+	z-index: auto;
+}
+
+nav .navbar #navbar-icon {
+	margin: auto;
+	background-color: #adff12;
+}
+
+nav .navbar #navbar-icon img {
+	width: 100px;
+	height: 80px;
+}
+
+nav .navbar #navbar-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0;
+	margin: 0;
+}
+
+
 /*
 THE SITE BANNER AT THE TOP OF EACH PAGE
 */
 
-.banner {
+nav .banner {
 	background-color: #adff12;
-	position: sticky;
+	position: fixed;
 	top: 0px;
-	z-index: 1;
+	margin-left: 100px;
+	width: 100vw;
+	z-index: auto;
 }
 
-.banner #banner-text {
+nav .banner #banner-text {
 	display: inline-block;
 }
 
-.banner #banner-text a {
+nav .banner #banner-text a {
 	color: #2f2f2f;
 }
 
-.banner #banner-icon{
+nav .banner #banner-icon{
 	display: inline-block;
 	vertical-align: top;
 }
 
-.banner #searchbar {
+nav .banner #searchbar {
 	display: inline-block;
 	position: relative;
 	margin: auto;
 }
 
-.banner #searchbar button {
+nav .banner #searchbar button {
 	width: 45px;
 	height: 45px;
 	float: left;
@@ -105,11 +153,11 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 	border-width: 4px;
 }
 
-.banner #searchbar #searchquerydiv, #searchrecsdiv {
+nav .banner #searchbar #searchquerydiv, #searchrecsdiv {
 	margin-left: 47px;
 }
 
-.banner #searchbar #searchrecs {
+nav .banner #searchbar #searchrecs {
 	display: none;
 	position: absolute;
 	text-align: center;
@@ -119,26 +167,33 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 	z-index: 1;
 }
 
-.banner #searchbar #searchrecs a {
+nav .banner #searchbar #searchrecs a {
 	color: #2f2f2f;
 }
 
-.banner #settings {
+nav .banner #settings {
 	display: inline-block;
 }
 
-.banner #settings #dropbtn {
+nav .banner #settings #dropbtn {
 	width: 45px;
 	height: 45px;
 	display: inline-block;
 }
 
-.banner #settings #dropdown-content {
+nav .banner #settings #dropdown-content {
 	display: none;
 }
 
-.banner #settings:hover #dropdown-content {
+nav .banner #settings:hover #dropdown-content {
 	background-color: #ddd;
 	color: black;
 	display: block;
+}
+
+/*MEDIA QUERIES*/
+@media (max-width: 1060px) {
+	nav .banner {
+		width: 1060px;
+	}
 }

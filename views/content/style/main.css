@@ -1,8 +1,8 @@
-@import url("general.css");
-@import url("channel.css");
-@import url("thumbnail.css");
-@import url("video.css");
-@import url("videoplayer.css");
-@import url("search.css");
-@import url("playlist.css");
-@import url("stream.css");
+@import url("/content/style/general.css");
+@import url("/content/style/channel.css");
+@import url("/content/style/thumbnail.css");
+@import url("/content/style/video.css");
+@import url("/content/style/videoplayer.css");
+@import url("/content/style/search.css");
+@import url("/content/style/playlist.css");
+@import url("/content/style/stream.css");

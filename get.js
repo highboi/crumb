@@ -75,8 +75,6 @@ app.get('/error', async (req, res) => {
 //example path for testing ejs
 app.get("/example", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
-	var videourl = await client.query(`SELECT video FROM videos`);
-	viewObj.videourl = videourl.rows[0].video;
 	res.render("example.ejs", viewObj);
 });
 
@@ -325,28 +323,21 @@ app.get("/video/:id", async (req, res) => {
 	}
 });
 
-//this is a get path to set the magnet link for a video
+//this is a get path to set the magnet link for a video if there are no peers/seeders for a file
 app.get("/setmagnet/:id", async (req, res) => {
-	//get the video specified in the url
-	var magnet = await client.query(`SELECT magnetlink FROM videos WHERE id=$1`, [req.params.id]);
-	magnet = magnet.rows[0].magnetlink;
+	console.log("SETTING MAGNET:", req.query.magnet);
 
-	//check to see if the magnet link is blank
-	if (typeof magnet == 'undefined') {
-		try {
-			//set the new magnetlink to the video in the database
-			await client.query(`UPDATE videos SET magnetlink=$1 WHERE id=$2`, [req.query.magnet, req.params.id]);
+	try {
+		//set the new magnetlink to the video in the database
+		await client.query(`UPDATE videos SET magnetlink=$1 WHERE id=$2`, [req.query.magnet, req.params.id]);
 
-			//send a response of "true" to let the client know that we have successfully updated the magnet link status
-			res.send("true");
-		} catch(e) {
-			//console log the error
-			console.log(e);
+		//send a response of "true" to let the client know that we have successfully updated the magnet link status
+		res.send("true");
+	} catch(e) {
+		//console log the error
+		console.log(e);
 
-			//send a response of "false" back to the client
-			res.send("false");
-		}
-	} else { //send a response of "false" to the client as there is a magnet link already set
+		//send a response of "false" back to the client
 		res.send("false");
 	}
 });

@@ -8,31 +8,30 @@ VIDEO AND RECCOMENDATIONS
 */
 
 .container {
-	display: flex;
+	display: grid;
+	grid-template-areas: 
+	"video reccomendations"
+	"comments reccomendations";
 }
 
 /*
 VIDEO BEING VIEWED
 */
 
+.container .video-contents {
+	grid-area: video;
+}
+
 .container .video-contents .video-container {
 	position: relative;
-	width: 60vw;
-	height: 45vw;
-}
-
-.container .video-contents .videotext button {
-	color: black;
-}
-
-.container .video-contents .videotext hr {
-	margin: 0;
+	width: 100%;
+	height: auto;
 }
 
 .container .video-contents .video-container #video {
 	object-fit: cover;
-	width: 60vw;
-	height: 45vw;
+	width: 100%;
+	height: auto;
 }
 
 .container .video-contents .video-container:fullscreen #video {
@@ -51,96 +50,62 @@ STYLE VIDEO TEXT
 */
 
 .container .video-contents .videotext {
-	display: block;
-	width: 60vw;
+	width: 100%;
+}
+
+.container .video-contents .videotext button {
+	color: #adff12;
+	background-color: #2f2f2f;
 }
 
 .container .video-contents .videotext .channel-details {
 	display: flex;
 	align-items: center;
 	flex-direction: row;
-	padding: 1%;
-}
-
-.container .video-contents .videotext .channel-details #icon {
-	display: inline-block;
 }
 
 .container .video-contents .videotext .channel-details #icon img {
-	width: 100%;
-	height: 100%;
+	width: 100px;
+	height: 100px;
 	border-radius: 50px;
 	text-align: center;
 	margin: auto;
-}
-
-.container .video-contents .videotext .channel-details #channel-text {
-	display: inline-block;
-	font-size: 1vw;
 }
 
 .container .video-contents .videotext .channel-details .video-buttons {
 	margin-left: auto;
 }
 
-.container .video-contents .videotext .channel-details .video-buttons #subscribebutton {
+.container .video-contents .videotext .channel-details .video-buttons .subscribe-section #subscribebutton {
 	width: 100%;
 	height: 100%;
 	font-size: 20px;
 	color: #adff12;
 	border: 2px solid #adff12;
 	background-color: #2f2f2f;
-	vertical-align: text-top;
-}
-
-.container .video-contents .videotext .channel-details .video-buttons .likesection * {
-	display: inline-block;
-}
-
-.container .video-contents .videotext .channel-details .video-buttons .likesection .likebuttons {
-	width: 3vw;
-	height: 3vw;
-	color: #adff12;
-	border: 2px solid #adff12;
-	background-color: #adff12;
-	vertical-align: text-top;
 }
 
 .container .video-contents .videotext .channel-details .video-buttons .likesection {
-	font-size: 1vw;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 
-.container .video-contents .videotext #title {
-	font-size: 2vw;
-	text-transform: capitalize;
+.container .video-contents .videotext .channel-details .video-buttons .likesection * {
+	margin: 5px;
+	font-size: 25px;
 }
 
-.container .video-contents.videotext .channel-details {
-	font-size: 1vw;
-}
-
-.container .video-contents .videotext .channel-details #icon img {
-	width: 4.5vw;
-	height: 4.5vw;
-}
-
-.container .video-contents .videotext .channel-details #video-buttons button {
-	width: 7.5vw;
-	height: 2vw;
-}
-
-.container .video-contents .videotext .channel-details #video-buttons #subscribebutton {
-	display: inline-block;
-	text-align: center;
+.container .video-contents .videotext .channel-details .video-buttons .likesection .likebuttons {
+	width: 60px;
+	height: 60px;
+	color: #adff12;
+	border: 2px solid #adff12;
+	background-color: #adff12;	
 }
 
 .container .video-contents .videotext .description {
 	font-size: 15px;
-}
-
-.container .video-contents .videotext .description button {
-	color: #adff12;
-	background-color: #3f3f3f;
 }
 
 .container .video-contents .videotext .extralinkforms object {
@@ -154,9 +119,9 @@ VIDEO CONTROLS
 .container .video-contents .video-container .video-controls {
 	display: flex;
 	align-items: center;
-	width: 60vw;
-	position: absolute;
-	bottom: 10px;
+	width: 100%;
+	position: relative;
+	bottom: 100px;
 	opacity: 0;
 	transition: opacity .3s;
 	margin: 0px 2vw 0px 2vw;
@@ -189,19 +154,17 @@ VIDEO CONTROLS
 }
 
 .container .video-contents .video-container .video-controls button {
+	width: 50px;
+	height: 50px;
 	cursor: pointer;
 	padding: 10px 10px 10px 10px;
-	background: #adff12;
+	background-color: #adff12;
 	border-radius: 50%;
-}
-
-.container .video-contents .video-container .video-controls button {
-	width: auto;
-	height: 50px;
+	border: none;
 }
 
 .container .video-contents .video-container .video-controls img {
-	width: auto;
+	width: 50px;
 	height: 50px;
 }
 
@@ -214,13 +177,9 @@ VIDEO CONTROLS
 }
 
 .container .video-contents .video-container .video-controls #videotime {
-	font-size: 2vw;
+	font-size: 2em;
 	color: black;
 	text-shadow: 1px 1px 0 #adff12, -1px -1px 0 #adff12, 1px -1px 0 #adff12, -1px 1px 0 #adff12;
-}
-
-.container .video-contents .video-container .video-controls #muteBtn, #fullscreenBtn, #playBtn {
-	border: none;
 }
 
 .container .video-contents .video-container:fullscreen .video-controls {
@@ -236,16 +195,20 @@ VIDEO CONTROLS
 }
 
 .container .video-contents .video-container:fullscreen #seeker{
-	width: 50vw;
+	width: 50%;
 }
 
 .container .video-contents .video-container:fullscreen #volumeslider {
-	width: 19vw;
+	width: 19%;
 }
 
 /*
 COMMENTS SECTION
 */
+
+.container .comments {
+	grid-area: comments;
+}
 
 .container .comments #commentform form button{
 	color: #adff12;
@@ -315,7 +278,7 @@ COMMENTS SECTION
 RECCOMENDATIONS WHILE VIEWING VIDEOS
 */
 .container .reccomendations {
-	flex-direction: column;
+	grid-area: reccomendations;
 }
 
 .container .reccomendations .links .text img {
@@ -354,13 +317,24 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 	display: none;
 }
 
-/**/
-@media all and (max-width: 1500px) {
-	.container .video-contents .video-container {
-		width: 100vw;
-	}
+/*
+Media Queries for rearranging elements
+*/
 
-	.container .video-contents .video-container #video {
-		width: 100vw;
+/*rearrange the layout of videos, reccomendations, and comments*/
+@media (max-width: 1500px) {
+	.container {
+		display: grid;
+		grid-template-areas:
+		"video video"
+		"reccomendations reccomendations"
+		"comments comments";
+	}
+}
+
+/*Make sure the contents stay at this width to prevent weird rearrangement*/
+@media (max-width: 1050px) {
+	.container {
+		width: 1050px;
 	}
 }

@@ -4,21 +4,24 @@
 		<%- include('content/ejs/head.ejs', {title: "Start a Live Stream"}) %>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
 
-		<%- include('content/ejs/body.ejs') %>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
 
-		<%- include('content/ejs/navbar.ejs') %>
+			<div>
+				<h1>Browser Streaming:</h1>
+				<%- include('content/ejs/streamform.ejs', {posturl: "/l/stream/browser"}) %>
+			</div>
+			<div>
+				<h1>OBS:</h1>
+				<%- include('content/ejs/streamform.ejs', {posturl: "/l/stream/obs"}) %>
+			</div>
 
-		<div>
-			<h1>Browser Streaming:</h1>
-			<%- include('content/ejs/streamform.ejs', {posturl: "/l/stream/browser"}) %>
-		</div>
-		<div>
-			<h1>OBS:</h1>
-			<%- include('content/ejs/streamform.ejs', {posturl: "/l/stream/obs"}) %>
-		</div>
-
-		<%- include('content/ejs/scripts.ejs') %>
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
 	</body>
 </html>

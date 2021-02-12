@@ -10,8 +10,12 @@
 		</select>
 		<div id="commentform">
 			<% var commentlink = `/comment/${video.id}`; %>
-			<form action="<%= commentlink %>" method="post">
-				<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br>
+			<form action="<%= commentlink %>" method="post" enctype='multipart/form-data'>
+				<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br><br>
+
+				<label for="reactionfile">Reaction Image/Video:</label><br>
+				<input type="file" id="reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
+
 				<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
 			</form>
 		</div>

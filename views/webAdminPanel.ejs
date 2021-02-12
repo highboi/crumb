@@ -4,36 +4,39 @@
 		<%- include('content/ejs/head.ejs', {title: "Livestream"}) %>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
 
-		<%- include('content/ejs/body.ejs') %>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
 
-		<%- include('content/ejs/navbar.ejs') %>
+			<video id="livestream"></video>
+			<h1><%= streamname %></h1>
+			<h3>Enable Chat: <%= enableChat %></h3>
 
-		<video id="livestream"></video>
-		<h1><%= streamname %></h1>
-		<h3>Enable Chat: <%= enableChat %></h3>
+			<% if (enableChat) { %>
+				<h3>Live Chat:</h3>
+			<% } else { %>
+				<h3>Chat disabled for this live stream.</h3>
+			<% } %>
 
-		<% if (enableChat) { %>
-			<h3>Live Chat:</h3>
-		<% } else { %>
-			<h3>Chat disabled for this live stream.</h3>
-		<% } %>
-
-		<div id="chatBox"></div>
-		<div id="chatForm">
-			<input type="text" id="message" name="message" placeholder="Description" maxlength="150">
-			<button id="submitBtnChat" onclick="sendMessage()">Send Message</button>
-		</div>
+			<div id="chatBox"></div>
+			<div id="chatForm">
+				<input type="text" id="message" name="message" placeholder="Description" maxlength="150">
+				<button id="submitBtnChat" onclick="sendMessage()">Send Message</button>
+			</div>
 
 
-		<%- include('content/ejs/scripts.ejs') %>
-		<script>
-			var enableChat = <%- JSON.stringify(enableChat) %>;
-			var streamid = <%- JSON.stringify(streamid) %>;
-			var isStreamer = <%- JSON.stringify(isStreamer) %>;
-		</script>
-		<script src="/content/javascript/stream.js"></script>
-		<script src="/content/javascript/livechat.js"></script>
+			<%- include('content/ejs/scripts.ejs') %>
+			<script>
+				var enableChat = <%- JSON.stringify(enableChat) %>;
+				var streamid = <%- JSON.stringify(streamid) %>;
+				var isStreamer = <%- JSON.stringify(isStreamer) %>;
+			</script>
+			<script src="/content/javascript/stream.js"></script>
+			<script src="/content/javascript/livechat.js"></script>
+		</main>
 	</body>
 </html>

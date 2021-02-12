@@ -5,64 +5,67 @@
 		<%- include('content/ejs/head.ejs', {title: `${playlist.name} - ${creator.username}`}) %>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
 
-		<%- include('content/ejs/body.ejs') %>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
 
-		<%- include('content/ejs/navbar.ejs') %>
-
-		<h1><%= playlist.name %></h1>
-		<% if (typeof user != 'undefined') { %>
-			<% if (creator.id == user.id && playlist.candelete) { %>
-				<% var deletelink = `/playlist/delete/${playlist.id}` %>
-				<button><a href="<%= deletelink %>">Delete Playlist</a></button>
-			<% } %>
-		<% } %>
-		<hr>
-
-		<div class="playlist-videos">
-			<% if (typeof videos != 'undefined') { %>
-				<% if (videos.length > 0) { %>
-					<% videos.forEach((item, index) => { %>
-						<div class="video">
-							<% var videolink = `/v/${item.id}` %>
-							<% var channellink = `/u/${item.user_id}` %>
-							<div class="thumbnail">
-								<a href="<%= videolink %>">
-									<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
-								</a>
-							</div>
-							<div class="links">
-								<a href="<%= videolink %>">
-									<h3 style="text-transform: capitalize"><strong><%= item.title %></strong></h3>
-								</a>
-								<div id="channel-links">
-									<a href="<%= channellink %>">
-										<img id="channel-icon" src="<%= item.channelicon %>">
-									</a>
-									<a href="<%= channellink %>">
-										<p><%= item.username %></p>
-									</a>
-									<svg width="10" height="40">
-										<circle cx="5" cy="5" r="5" fill="#adff12"/>
-										<circle cx="5" cy="20" r="5" fill="#adff12"/>
-										<circle cx="5" cy="35" r="5" fill="#adff12"/>
-									</svg>
-								</div>
-							</div>
-						</div>
-						<% if (typeof user != undefined) { %>
-							<% if (creator.id == user.id) { %>
-								<button><a href="/playlistvideo/delete/<%= playlist.id %>/<%= item.id %>">Delete Video</a></button>
-							<% } %>
-						<% } %>
-					<% }); %>
-				<% } else { %>
-					<h2>No videos yet!</h2>
+			<h1><%= playlist.name %></h1>
+			<% if (typeof user != 'undefined') { %>
+				<% if (creator.id == user.id && playlist.candelete) { %>
+					<% var deletelink = `/playlist/delete/${playlist.id}` %>
+					<button><a href="<%= deletelink %>">Delete Playlist</a></button>
 				<% } %>
 			<% } %>
-		</div>
+			<hr>
 
-		<%- include('content/ejs/scripts.ejs') %>
+			<div class="playlist-videos">
+				<% if (typeof videos != 'undefined') { %>
+					<% if (videos.length > 0) { %>
+						<% videos.forEach((item, index) => { %>
+							<div class="video">
+								<% var videolink = `/v/${item.id}` %>
+								<% var channellink = `/u/${item.user_id}` %>
+								<div class="thumbnail">
+									<a href="<%= videolink %>">
+										<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
+									</a>
+								</div>
+								<div class="links">
+									<a href="<%= videolink %>">
+										<h3 style="text-transform: capitalize"><strong><%= item.title %></strong></h3>
+									</a>
+									<div id="channel-links">
+										<a href="<%= channellink %>">
+											<img id="channel-icon" src="<%= item.channelicon %>">
+										</a>
+										<a href="<%= channellink %>">
+											<p><%= item.username %></p>
+										</a>
+										<svg width="10" height="40">
+											<circle cx="5" cy="5" r="5" fill="#adff12"/>
+											<circle cx="5" cy="20" r="5" fill="#adff12"/>
+											<circle cx="5" cy="35" r="5" fill="#adff12"/>
+										</svg>
+									</div>
+								</div>
+							</div>
+							<% if (typeof user != undefined) { %>
+								<% if (creator.id == user.id) { %>
+									<button><a href="/playlistvideo/delete/<%= playlist.id %>/<%= item.id %>">Delete Video</a></button>
+								<% } %>
+							<% } %>
+						<% }); %>
+					<% } else { %>
+						<h2>No videos yet!</h2>
+					<% } %>
+				<% } %>
+			</div>
+
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
 	</body>
 </html>

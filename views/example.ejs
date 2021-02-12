@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html>
+	<head>
+		<link rel="stylesheet" href="/content/style/example.css">
+	</head>
 	<body>
 		<h1>EXAMPLE PAGE:</h1>
 
-		<p><%= videourl %></p>
+		<%- include('content/ejs/navbar.ejs') %>
 
-		<video id="videotag" controls></video>
-
-		<script>
-			var videourl = <%- JSON.stringify(videourl) %>;
-		</script>
-		<script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
-		<script src="/content/javascript/torrentvid.js"></script>
+		<%- include('content/ejs/scripts.ejs') %>
 	</body>
 </html>

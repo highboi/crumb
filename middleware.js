@@ -548,6 +548,13 @@ middleware = {
 
 	//this is a function that executes whenever the node process is killed (server shuts down)
 	shutDown: function() {
+		//delete all magnet links from all videos in the database (these are invalid now)
+		client.query("UPDATE videos SET magnetlink = null").then((res) => {
+			console.log("DELETED MAGNET LINKS");
+		}).catch((err) => {
+			console.log(err);
+		});
+
 		//message that the server is shutting down
 		console.log("Shutting Down...");
 

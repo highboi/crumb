@@ -4,31 +4,36 @@
 		<%- include('content/ejs/head.ejs', {title: "Login"}) %>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
 
-		<h1>Login:</h1>
+		<main>
+			<h1>Login:</h1>
 
-		<%- include('content/ejs/body.ejs') %>
+			<%- include('content/ejs/body.ejs') %>
 
-		<form action="/login" method="POST" class="authform">
-			<p>Enter Email or Username to Log in.</p>
-			<div>
-				<input id="username" name="username" placeholder="Username" autofocus>
-			</div>
-			<div>
-				<input id="email" name="email" type="email" placeholder="Email">
-			</div>
-			<div>
-				<input id="password" name="password" type="password" placeholder="Password">
-			</div><br>
-			<div>
-				<input type="submit" value="Login">
-			</div><br>
-			<div class="underlinelinks">
-				<a href="/register">Register?</a>
-			</div>
-		</form>
+			<form action="/login" method="POST" class="authform">
+				<p>Enter Email or Username to Log in.</p>
+				<div>
+					<input id="username" name="username" placeholder="Username" autofocus>
+				</div>
+				<div>
+					<input id="email" name="email" type="email" placeholder="Email">
+				</div>
+				<div>
+					<input id="password" name="password" type="password" placeholder="Password">
+				</div><br>
+				<div>
+					<input type="submit" value="Login">
+				</div><br>
+				<div class="underlinelinks">
+					<a href="/register">Register?</a>
+				</div>
+			</form>
 
-		<%- include('content/ejs/scripts.ejs') %>
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
 	</body>
 </html>

@@ -4,103 +4,107 @@
 		<%- include('content/ejs/head.ejs', {title: `${creator.username}'s Channel`}) %>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
 
-		<%- include('content/ejs/body.ejs') %>
-
-		<%- include('content/ejs/navbar.ejs') %>
-		<div class="channel">
-			<div class="channel-banner" style="background-image: url(<%= creator.channelbanner %>)">
-				<div id="channel-icon">
-					<img src="<%= creator.channelicon %>" width="80px" height="80px">
-				</div>
-				<div id="channel-name" class="hardtoseetext">
-					<h1><%= creator.username %></h1>
-				</div>
-				<button id="subscribebutton" onclick="subscribe('<%= creator.id %>', this);">Subscribe</button>
-			</div>
-			<hr>
-			<div id="tabs">
-				<% var channellink = `/u/${creator.id}` %>
-				<button onclick="window.location.href = '<%= channellink %>/?section=home';">Home</button>
-				<button onclick="window.location.href = '<%= channellink %>/?section=videos';">Videos</button>
-				<button onclick="window.location.href = '<%= channellink %>/?section=playlists';">Playlists</button>
-				<button onclick="window.location.href = '<%= channellink %>/?section=shoutouts'">Shoutouts</button>
-				<button onclick="window.location.href = '<%= channellink %>/?section=about';">About</button>
-				<button onclick="window.location.href = '<%= channellink %>/?section=settings';">Settings</button>
-			</div>
-			<hr>
-			<div class="channel-content" id="<%= section %>">
-				<% if (section == "home" || section == "videos") { %>
-					<% if (typeof videos != 'undefined') { %>
-						<% videos.forEach((item, index) => { %>
-							<div class="video">
-								<% var videolink = `/v/${item.id}` %>
-								<div class="thumbnail">
-									<a href="<%= videolink %>">
-										<img src="<%= item.thumbnail %>" alt="thumbnail" width="450" height="300">
-									</a>
-								</div>
-								<div class="links">
-									<a href="<%= videolink %>">
-										<h3 style="text-transform: capitalize;"><strong><%= item.title %></strong></h3>
-									</a>
-								</div>
-							</div>
-						<% }); %>
-					<% } else { %>
-						<p>No Videos Yet!</p>
-					<% } %>
-				<% } else if (section == "about") { %>
-					<div>
-						<h1>Description:</h1>
-						<% if (creator.description) { %>
-							<p><%= creator.description %></p>
-						<% } else { %>
-							<pre>
-┏━┓┃┏┓┃┃┃┃┃┃━━━┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┏┓┃┃┃┃┃┃┃┃┃┃┃┓┃┏┓┃┃┃┃┃┃┃┃
-┃┃┗┓┃┃┃┃┃┃┃┃┓┏┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┛┗┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
-┃┏┓┗┛┃━━┓┃┃┃┃┃┃┃━━┓━━┓━━┓━┓┓━━┓┓┏┛┓━━┓━┓┃┃┃┃┗━┛┃━━┓━┓━━┓
-┃┃┗┓┃┃┏┓┃┃┃┃┃┃┃┃┏┓┃━━┫┏━┛┏┛┫┏┓┃┃┃┃┫┏┓┃┏┓┓┃┃┃┏━┓┃┏┓┃┏┛┏┓┃
-┃┃┃┃┃┃┗┛┃┃┃┃┛┗┛┃┃━┫━━┃┗━┓┃┃┃┗┛┃┃┗┓┃┗┛┃┃┃┃┃┃┃┃┃┃┃┃━┫┃┃┃━┫
-┗┛┃┗━┛━━┛┃┃┃━━━┛━━┛━━┛━━┛┛┃┛┏━┛┗━┛┛━━┛┛┗┛┃┃┃┛┃┗┛━━┛┛┃━━┛
-┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
-┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┛┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
-							</pre>
-						<% } %>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+			
+			<div class="channel">
+				<div class="channel-banner" style="background-image: url(<%= creator.channelbanner %>)">
+					<div id="channel-icon">
+						<img src="<%= creator.channelicon %>" width="80px" height="80px">
 					</div>
-				<% } else if (section == "playlists") { %>
-					<% if (typeof playlists != 'undefined') { %>
+					<div id="channel-name" class="hardtoseetext">
+						<h1><%= creator.username %></h1>
+					</div>
+					<button id="subscribebutton" onclick="subscribe('<%= creator.id %>', this);">Subscribe</button>
+				</div>
+				<hr>
+				<div id="tabs">
+					<% var channellink = `/u/${creator.id}` %>
+					<button onclick="window.location.href = '<%= channellink %>/?section=home';">Home</button>
+					<button onclick="window.location.href = '<%= channellink %>/?section=videos';">Videos</button>
+					<button onclick="window.location.href = '<%= channellink %>/?section=playlists';">Playlists</button>
+					<button onclick="window.location.href = '<%= channellink %>/?section=shoutouts'">Shoutouts</button>
+					<button onclick="window.location.href = '<%= channellink %>/?section=about';">About</button>
+					<button onclick="window.location.href = '<%= channellink %>/?section=settings';">Settings</button>
+				</div>
+				<hr>
+				<div class="channel-content" id="<%= section %>">
+					<% if (section == "home" || section == "videos") { %>
+						<% if (typeof videos != 'undefined') { %>
+							<% videos.forEach((item, index) => { %>
+								<div class="video">
+									<% var videolink = `/v/${item.id}` %>
+									<div class="thumbnail">
+										<a href="<%= videolink %>">
+											<img src="<%= item.thumbnail %>" alt="thumbnail" width="450" height="300">
+										</a>
+									</div>
+									<div class="links">
+										<a href="<%= videolink %>">
+											<h3 style="text-transform: capitalize;"><strong><%= item.title %></strong></h3>
+										</a>
+									</div>
+								</div>
+							<% }); %>
+						<% } else { %>
+							<p>No Videos Yet!</p>
+						<% } %>
+					<% } else if (section == "about") { %>
 						<div>
-							<h3><a href="/playlist/new">Create New Playlist</a></h3>
+							<h1>Description:</h1>
+							<% if (creator.description) { %>
+								<p><%= creator.description %></p>
+							<% } else { %>
+								<pre>
+	┏━┓┃┏┓┃┃┃┃┃┃━━━┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┏┓┃┃┃┃┃┃┃┃┃┃┃┓┃┏┓┃┃┃┃┃┃┃┃
+	┃┃┗┓┃┃┃┃┃┃┃┃┓┏┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┛┗┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
+	┃┏┓┗┛┃━━┓┃┃┃┃┃┃┃━━┓━━┓━━┓━┓┓━━┓┓┏┛┓━━┓━┓┃┃┃┃┗━┛┃━━┓━┓━━┓
+	┃┃┗┓┃┃┏┓┃┃┃┃┃┃┃┃┏┓┃━━┫┏━┛┏┛┫┏┓┃┃┃┃┫┏┓┃┏┓┓┃┃┃┏━┓┃┏┓┃┏┛┏┓┃
+	┃┃┃┃┃┃┗┛┃┃┃┃┛┗┛┃┃━┫━━┃┗━┓┃┃┃┗┛┃┃┗┓┃┗┛┃┃┃┃┃┃┃┃┃┃┃┃━┫┃┃┃━┫
+	┗┛┃┗━┛━━┛┃┃┃━━━┛━━┛━━┛━━┛┛┃┛┏━┛┗━┛┛━━┛┛┗┛┃┃┃┛┃┗┛━━┛┛┃━━┛
+	┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
+	┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┛┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
+								</pre>
+							<% } %>
 						</div>
-						<% playlists.forEach((item, index) => { %>
+					<% } else if (section == "playlists") { %>
+						<% if (typeof playlists != 'undefined') { %>
 							<div>
-								<% var playlistlink = `/p/${item.id}` %>
-								<h1><a href="<%= playlistlink %>"><%= item.name %></a></h1>
-								<p><%= item.videocount %> Videos</p>
+								<h3><a href="/playlist/new">Create New Playlist</a></h3>
 							</div>
-						<% }); %>
-					<% } else { %>
-						<h3><a href="/playlist/new">Create New Playlist</a></h3>
+							<% playlists.forEach((item, index) => { %>
+								<div>
+									<% var playlistlink = `/p/${item.id}` %>
+									<h1><a href="<%= playlistlink %>"><%= item.name %></a></h1>
+									<p><%= item.videocount %> Videos</p>
+								</div>
+							<% }); %>
+						<% } else { %>
+							<h3><a href="/playlist/new">Create New Playlist</a></h3>
+						<% } %>
+					<% } else if (section == "shoutouts") { %>
+						<% if (typeof shoutouts != 'undefined') { %>
+							<form method="post" action="/shoutout/add">
+								<label for="shoutout">Shoutout Channel URL:</label>
+								<input type="text" id="shoutout" name="shoutout"><br>
+								<button type="submit">Submit</button>
+							</form><br>
+							<% shoutouts.forEach((item, index) => { %>
+								<% var shoutoutlink = `/u/${item.shoutout_id}` %>
+								<h1><a href="<%= shoutoutlink %>">Shoutout Channel</a></h1>
+							<% }); %>
+						<% } %>
+					<% } else if (section == "settings") { %>
+						<button onclick="confirm('Delete Channel?')"><a href="/u/delete/<%= creator.id %>">Delete Channel?</a></button>
 					<% } %>
-				<% } else if (section == "shoutouts") { %>
-					<% if (typeof shoutouts != 'undefined') { %>
-						<form method="post" action="/shoutout/add">
-							<label for="shoutout">Shoutout Channel URL:</label>
-							<input type="text" id="shoutout" name="shoutout"><br>
-							<button type="submit">Submit</button>
-						</form><br>
-						<% shoutouts.forEach((item, index) => { %>
-							<% var shoutoutlink = `/u/${item.shoutout_id}` %>
-							<h1><a href="<%= shoutoutlink %>">Shoutout Channel</a></h1>
-						<% }); %>
-					<% } %>
-				<% } else if (section == "settings") { %>
-					<button onclick="confirm('Delete Channel?')"><a href="/u/delete/<%= creator.id %>">Delete Channel?</a></button>
-				<% } %>
+				</div>
 			</div>
-		</div>
-		<%- include('content/ejs/scripts.ejs') %>
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
 	</body>
 </html>

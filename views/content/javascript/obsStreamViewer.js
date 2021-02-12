@@ -14,16 +14,16 @@ function urlExists(url) {
 function hlsStart() {
 	if (Hls.isSupported()) {
 		var hls = new Hls();
-		hls.attachMedia(video);
+		hls.attachMedia(livestream);
 		hls.on(Hls.Events.MEDIA_ATTACHED, () => {
 			console.log("Media Attached!");
 			console.log("Loading Source: ", streamURL);
 			hlsLoad(hls, streamURL);
 			hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
 				console.log("Manifest Parsed!");
-				video.muted = true;
-				video.play();
-				video.muted = true;
+				livestream.muted = true;
+				livestream.play();
+				livestream.muted = true;
 			});
 		});
 	}

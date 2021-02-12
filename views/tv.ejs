@@ -4,33 +4,35 @@
 		<%- include('content/ejs/head.ejs', {title: "TV!"}) %>
 	</head>
 	<body>
-		<%- include('content/html/banner.html') %>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
 
-		<%- include('content/ejs/navbar.ejs') %>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
 
-		<%- include('content/ejs/body.ejs') %>
+			<h1>TV!</h1>
 
-		<h1>TV!</h1>
+			<%- include('content/ejs/videoplayer.ejs') %>
 
-		<%- include('content/ejs/videoplayer.ejs') %>
+			<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button>
 
-		<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button>
+			<div class="tv-remote">
+				<% if (typeof types != 'undefined') { %>
+					<% types.forEach((item, index) => { %>
+						<button><a href="/tv/?type=<%= item %>"><%= item %></a></button>
+					<% }); %>
+				<% } %>
+			</div>
 
-		<div class="tv-remote">
-			<% if (typeof types != 'undefined') { %>
-				<% types.forEach((item, index) => { %>
-					<button><a href="/tv/?type=<%= item %>"><%= item %></a></button>
-				<% }); %>
-			<% } %>
-		</div>
+			<%- include('content/ejs/scripts.ejs') %>
 
-		<%- include('content/ejs/scripts.ejs') %>
+			<script>
+				var videovar = <%- JSON.stringify(video) %>;
+			</script>
 
-		<script>
-			var videoelement = document.getElementById("video");
-			var videovar = <%- JSON.stringify(video) %>;
-		</script>
-
-		<script src="content/javascript/videocontroller.js"></script>
+			<script src="content/javascript/videocontroller.js"></script>
+		</main>
 	</body>
 </html>
