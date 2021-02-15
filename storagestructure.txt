@@ -1,0 +1,8 @@
+storage:
+- users:
+	- banners
+	- comments
+	- icons
+- videos:
+	- files
+	- thumbnails
