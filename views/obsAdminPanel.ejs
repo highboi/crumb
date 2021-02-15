@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Livestream"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/html/banner.html') %>
+		</nav>
+
+		<main>
+			<%- include('content/ejs/body.ejs') %>		
+
+			<video id="livestream" controls=""></video>
+			<h1><%= streamname %></h1>
+
+			<div>
+				<p>RTMP Server: <%= rtmpServer %></p>
+				<p>Stream Key: <%= streamKey %></p>
+				<p>Stream ID: <%= streamid %></p>
+				<a href="http://localhost/l/view/<%= streamid %>">Link to viewer end of stream.</a>
+			</div>
+
+			<% if (enableChat) { %>
+				<h3>Live Chat:</h3>
+			<% } else { %>
+				<h3>Chat disabled for this live stream.</h3>
+			<% } %>
+
+			<div id="chatBox"></div>
+			<div id="chatForm">
+				<textarea id="message" name="message" rows="4" cols="50" placeholder="Say Something!" maxlength="200"></textarea>
+				<button id="submitBtnChat" onclick="sendMessage()">Post</button>
+			</div>
+
+			<%- include('content/ejs/scripts.ejs') %>
+			<script>
+				var enableChat = <%- JSON.stringify(enableChat) %>;
+				var streamURL = <%- JSON.stringify(streamURL) %>;
+				var streamid = <%- JSON.stringify(streamid) %>;
+				var video = document.getElementById("livestream");
+			</script>
+			<script src="/content/javascript/livechat.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+			<script src="/content/javascript/obsStreamAdmin.js"></script>
+		</main>
+	</body>
+</html>

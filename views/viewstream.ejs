@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Livestream"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
+
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<video id="livestream" controls=""></video>
+
+			<% if (enableChat) { %>
+				<h3>Live Chat:</h3>
+			<% } else { %>
+				<h3>Chat disabled for this live stream.</h3>
+			<% } %>
+
+			<div id="chatBox"></div>
+
+			<div id="chatForm">
+				<textarea id="message" name="message" rows="4" cols="50" placeholder="Say Something!" maxlength="200"></textarea>
+				<button id="submitBtnChat" onclick="sendMessage()">Post</button>
+			</div>
+
+			<%- include('content/ejs/scripts.ejs') %>
+			<script>
+				var enableChat = <%- JSON.stringify(enableChat) %>;
+				var streamid = <%- JSON.stringify(streamid) %>;
+				var isStreamer = false;
+			</script>
+			<script src="/content/javascript/showstream.js"></script>
+			<script src="/content/javascript/livechat.js"></script>
+		</main>
+	</body>
+</html>

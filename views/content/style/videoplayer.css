@@ -1,0 +1,31 @@
+/*
+VIDEO AND RECCOMENDATIONS
+*/
+
+.player-container {
+	display: flex;
+}
+
+/*
+VIDEO BEING VIEWED
+*/
+
+.player-container .video-container {
+	position: relative;
+	width: 50%;
+	height: auto;
+}
+
+.player-container .video-container #video {
+	object-fit: cover;
+}
+
+.player-container .video-container:fullscreen #video {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.player-container .video-container #loading {
+	display: none;
+}

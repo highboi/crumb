@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Submit A Video"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
+
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<h1>Submit A Video:</h1>
+
+			<form action="/v/submit" method="POST" enctype='multipart/form-data'>
+				<div>
+					<input type="text" placeholder="Title" id="title" name="title" maxlength="300" required>
+				</div>
+				<div>
+					<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000" required></textarea>
+				</div>
+				<div>
+					<label for="thumbnail">Choose a Thumbnail:</label><br>
+					<input type="file" id="thumbnail" name="thumbnail" accept="image/*" required>
+				</div>
+				<div>
+					<label for="video">Choose a Video:</label><br>
+					<input type="file" id="video" name="video" accept="video/*" required>
+				</div>
+				<div>
+					<label for="includeChannelTopics">Include your channel topics? </label>
+					<input type="checkbox" id="includeChannelTopics" name="includeChannelTopics">
+				</div>
+				<div>
+					<label for="topics">Topics for Video (seperated by spaces):</label><br>
+					<input type="text" placeholder="topic1 topic2" id="topics" name="topics">
+				</div>
+				<div>
+					<input type="submit" value="Submit Video">
+				</div>
+			</form>
+
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
+	</body>
+</html>

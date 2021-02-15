@@ -1,0 +1,22 @@
+<% if (typeof channel != 'undefined') { %>
+	<div class="channel">
+		<% var channellink = `/u/${channel.id}` %>
+
+		<a href="<%= channellink %>">
+			<img id="channel-icon" src="<%= channel.channelicon %>" alt="channelicon">
+		</a>
+
+		<a href="<%= channellink %>">
+			<h1 id="channel-link"><%= channel.username %></h1>
+		</a>
+
+		<% if (subscribedChannels.includes(channel.id)) { %>
+			<button id="subscribebutton" onclick="subscribe('<%= channel.id %>', this)">Subscribed</button>
+		<% } else { %>
+			<button id="subscribebutton" onclick="subscribe('<%= channel.id %>', this)">Subscribe</button>
+		<% } %>
+
+		<p><%= channel.subscribers %> Subscribers</p>
+		<p><%= channel.videos %> Videos</p>
+	</div>
+<% } %>

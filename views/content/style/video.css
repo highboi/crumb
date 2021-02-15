@@ -1,0 +1,252 @@
+/*
+STYLESHEET FOR THE VIDEO ELEMENT IN VIDEO VIEWS
+*/
+
+
+/*
+VIDEO AND RECCOMENDATIONS
+*/
+
+.container {
+	display: grid;
+	grid-template-areas: 
+	"video reccomendations"
+	"comments reccomendations";
+}
+
+/*
+VIDEO BEING VIEWED
+*/
+
+.container .video-contents {
+	grid-area: video;
+}
+
+.container .video-contents .video-container {
+	position: relative;
+	width: 100%;
+	height: auto;
+}
+
+.container .video-contents .video-container #video {
+	object-fit: cover;
+	width: 100%;
+	height: auto;
+}
+
+.container .video-contents .video-container:fullscreen #video {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.container .video-contents .video-container #loading {
+	display: none;
+}
+
+
+/*
+STYLE VIDEO TEXT
+*/
+
+.container .video-contents .videotext {
+	width: 100%;
+}
+
+.container .video-contents .videotext button {
+	color: #adff12;
+	background-color: #2f2f2f;
+}
+
+.container .video-contents .videotext .channel-details {
+	display: flex;
+	align-items: center;
+	flex-direction: row;
+}
+
+.container .video-contents .videotext .channel-details #icon img {
+	width: 100px;
+	height: 100px;
+	border-radius: 50px;
+	text-align: center;
+	margin: auto;
+}
+
+.container .video-contents .videotext .channel-details .video-buttons {
+	margin-left: auto;
+}
+
+.container .video-contents .videotext .channel-details .video-buttons .subscribe-section #subscribebutton {
+	width: 100%;
+	height: 100%;
+	font-size: 20px;
+	color: #adff12;
+	border: 2px solid #adff12;
+	background-color: #2f2f2f;
+}
+
+.container .video-contents .videotext .channel-details .video-buttons .likesection {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.container .video-contents .videotext .channel-details .video-buttons .likesection * {
+	margin: 5px;
+	font-size: 25px;
+}
+
+.container .video-contents .videotext .channel-details .video-buttons .likesection .likebuttons {
+	width: 60px;
+	height: 60px;
+	color: #adff12;
+	border: 2px solid #adff12;
+	background-color: #adff12;	
+}
+
+.container .video-contents .videotext .description {
+	font-size: 15px;
+}
+
+.container .video-contents .videotext .extralinkforms object {
+	display: none;
+}
+
+/*
+COMMENTS SECTION
+*/
+
+.container .comments {
+	grid-area: comments;
+}
+
+.container .comments #commentform form button{
+	color: #adff12;
+	background-color: #3f3f3f;
+}
+
+.container .comments #commentform form #commentbtn {
+	width: 200px;
+	height: 40px;
+}
+
+.container .comments #theComments {
+	
+}
+
+.container .comments #theComments .commentlikes {
+}
+
+.container .comments #theComments .commentlikes * {
+	display: inline-block;
+}
+
+.container .comments #theComments .commentlikes button {
+	width: 2.5rem;
+	height: 2.5rem;
+	color: #3f3f3f;
+	background-color: #adff12;
+	border: 2px solid #adff12;
+	vertical-align: text-top;
+}
+
+.container .comments #theComments .commentlikes #replybtn {
+	width: 5rem;
+	height: 2.5rem;
+	border-width: 4px;
+	border-color: black;
+}
+
+
+.container .comments #theComments .commentlikes #showreplies {
+	width: 5rem;
+	height: 2.5rem;
+	border-width: 4px;
+	border-color: black;
+}
+
+.container .comments #theComments .replybox {
+	display: none;
+}
+
+.container .comments #theComments .replybox button {
+	width: 5rem;
+	height: 2.5rem;
+	background-color: #adff12;
+	color: #3f3f3f;
+}
+
+.container .comments #theComments .replybox input[type="button"] {
+	width: 5rem;
+	height: 2.5rem;
+	background-color: #adff12;
+}
+
+.container .comments #theComments .replies {
+	display: none;
+}
+
+/*
+RECCOMENDATIONS WHILE VIEWING VIDEOS
+*/
+.container .reccomendations {
+	grid-area: reccomendations;
+}
+
+.container .reccomendations .links .text img {
+	width: 20vw;
+	height: 15vw;
+	padding: 10px;
+	float: left;
+}
+
+.container .reccomendations .links .text {
+	display: inline-block;
+	font-size: 0.8vw;
+}
+
+.container .reccomendations .links .text :not(a) :not(img) {
+	display: inline;
+	margin: 0px;
+}
+
+.container .reccomendations .links .text a {
+	text-decoration: none;
+}
+
+.container .reccomendations .links .extras {
+}
+
+.container .reccomendations .links .extras:hover {
+	cursor: pointer;
+}
+
+.container .reccomendations .links .extralinks {
+	display: none;
+}
+
+.container .reccomendations .links .extralinkforms object {
+	display: none;
+}
+
+/*
+Media Queries for rearranging elements
+*/
+
+/*rearrange the layout of videos, reccomendations, and comments*/
+@media (max-width: 1500px) {
+	.container {
+		display: grid;
+		grid-template-areas:
+		"video video"
+		"reccomendations reccomendations"
+		"comments comments";
+	}
+}
+
+/*Make sure the contents stay at this width to prevent weird rearrangement*/
+@media (max-width: 1050px) {
+	.container {
+		width: 1050px;
+	}
+}

@@ -1,0 +1,6 @@
+#chatBox {
+	overflow-y: auto;
+	width: 400px;
+	height: 450px;
+	background-color: grey;
+}

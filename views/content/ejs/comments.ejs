@@ -1,0 +1,40 @@
+<% if (typeof video != 'undefined') { %>
+	<div class="comments">
+		<h2>Comments:</h2>
+		<p>Sort Comments:</p>
+		<select id="commentSort" onchange="sortComments(this);">
+			<option value="top" selected>Top</option>
+			<option value="bottom">Bottom</option>
+			<option value="oldest">Oldest</option>
+			<option value="newest">Newest</option>
+		</select>
+		<div id="commentform">
+			<% var commentlink = `/comment/${video.id}`; %>
+			<form action="<%= commentlink %>" method="post" enctype='multipart/form-data'>
+				<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br><br>
+
+				<label for="reactionfile">Reaction Image/Video:</label><br>
+				<input type="file" id="reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
+
+				<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
+			</form>
+		</div>
+		<div id="theComments">
+			<% if (typeof comments != 'undefined') { %>
+				<% comments.forEach((item, index) => { %>
+					<% if (!item.parent_id) { %>
+						<hr>
+						<div class="comment" id="<%= item.id %>" likes="<%= item.likes %>" dislikes="<%= item.dislikes %>" posttime="<%= item.posttime %>">
+							<%- include('./comment.ejs', {comment: item}) %>
+
+							<%- include('./commentreplyform.ejs', {comment: item, base_parent_id: item.id, commentlink: commentlink}) %>
+
+							<%- include('./commentreplies.ejs', {parent: item, comments: comments, commentlink: commentlink}) %>
+						</div>
+						<hr>
+					<% } %>
+				<% }); %>
+			<% } %>
+		</div>
+	</div>
+<% } %>

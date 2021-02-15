@@ -1,0 +1,19 @@
+<h3>&nbsp<%= comment.username %></h3>
+<p>&nbsp;&nbsp<%= comment.comment %></p>
+<% if (typeof comment.reactionfile != 'undefined') { %>
+	<% if (comment.filetype == 'img') { %>
+		&nbsp;&nbsp;<img src=<%= comment.reactionfile %> width="80" height="80">
+	<% } else if (comment.filetype == 'video') { %>
+		<%- include('./miniplayer.ejs', {videoid: comment.id}) %>
+	<% } %>
+<% } %>
+
+<div class="commentlikes" id="<%= comment.id %>">
+	&nbsp
+	<button id="commentLike" onclick="likeComment('<%= comment.id %>')"><img src="/content/icons/like.ico"></button>
+	<p id="<%= comment.id %>likes"><%= comment.likes %></p>
+	<button id="commentDislike" onclick="dislikeComment('<%= comment.id %>')"><img src="/content/icons/dislike.ico"></button>
+	<p id="<%= comment.id %>dislikes"><%= comment.dislikes %></p>
+	<button id="replybtn" onclick="showbox('<%= comment.id %>replybox')">Reply</button>
+	<button id="showreplies" onclick="showbox('<%= comment.id %>replies')">Replies</button>
+</div>

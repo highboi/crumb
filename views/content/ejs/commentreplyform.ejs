@@ -1,0 +1,15 @@
+<div class="replybox" id="<%= comment.id %>replybox">
+	<% var replylink = commentlink + `?parent_id=${comment.id}` %>
+	<form action="<%= replylink %>" method="post" enctype='multipart/form-data'>
+		<textarea id="commenttext" name="commenttext" placeholder="Say Something!" maxlength="1000" rows="10" cols="50"></textarea><br>
+
+		<label for="reactionfile">Reaction Image/Video:</label><br>
+		<input type="file" id="reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
+
+		<input type="hidden" id="base_parent_id" name="base_parent_id" value="<%= base_parent_id %>">
+
+		<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
+		<input type="button" onclick="showbox('<%= comment.id %>replybox')" value="Cancel">
+	</form>
+</div>
+

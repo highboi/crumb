@@ -1,0 +1,30 @@
+<div class="banner">
+	<div id="banner-icon">
+		<a href="/" target="_parent">
+			<img src="/content/icons/favicon.ico" width="80px" height="80px">
+		</a>
+	</div>
+	<div id="banner-text">
+		<a href="/" target="_parent">
+			<h1>Gem Sweeper</h1>
+		</a>
+	</div>
+	<div id="searchbar">
+		<form action="/search" method="get" target="_parent">
+			<div id="searchbtn">
+				<button type="submit" value="Submit"><img src="/content/icons/search.ico"></button>
+			</div>
+			<div id="searchquerydiv">
+				<input type="text" id="searchquery" name="searchquery" onkeyup="keyupSearch()" required>
+			</div>
+			<div id="searchrecsdiv">
+				<div id="searchrecs"></div>
+			</div>
+		</form>
+	</div>
+	<div id="settings">
+		<button id="dropbtn"><img src="/content/icons/gear.ico"></button>
+		<div id="dropdown-content">
+		</div>
+	</div>
+</div>

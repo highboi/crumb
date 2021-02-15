@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "TV!"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
+
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<h1>TV!</h1>
+
+			<%- include('content/ejs/videoplayer.ejs') %>
+
+			<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button>
+
+			<div class="tv-remote">
+				<% if (typeof types != 'undefined') { %>
+					<% types.forEach((item, index) => { %>
+						<button><a href="/tv/?type=<%= item %>"><%= item %></a></button>
+					<% }); %>
+				<% } %>
+			</div>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<script>
+				var videovar = <%- JSON.stringify(video) %>;
+			</script>
+
+			<script src="content/javascript/videocontroller.js"></script>
+		</main>
+	</body>
+</html>

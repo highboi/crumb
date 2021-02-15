@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Home"}); %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/html/banner.html') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<h1>Videos:</h1>
+			<div class="home-videos">
+				<% if (typeof videos != 'undefined') { %>
+					<% videos.forEach((item, index) => { %>
+						<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+					<% }); %>
+				<% } %>
+			</div>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<script src="/content/javascript/elementclicks.js"></script>
+		</main>
+	</body>
+</html>
