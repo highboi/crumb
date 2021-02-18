@@ -48,8 +48,8 @@ middleware = {
 			//get user info
 			viewObj.user = await middleware.getUserSession(req.cookies.sessionid);
 			//insert subscribed channels
-			viewObj.subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [viewObj.user.id]);
-			viewObj.subscribedChannels = viewObj.subscribedChannels.rows.map((obj) => {return obj.channel_id});
+			var subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [viewObj.user.id]);
+			viewObj.subscribedChannels = subscribedChannels.rows.map((obj) => {return obj.channel_id});
 		} else {
 			viewObj.subscribedChannels = [];
 		}
@@ -160,7 +160,8 @@ middleware = {
 			await client.query(`DELETE FROM playlistvideos WHERE video_id=$1`, [videoid]);
 			//delete all of the comments for this video
 			await client.query(`DELETE FROM comments WHERE video_id=$1`, [videoid]);
-			//delete the video file entry
+			//delete the video file entry and the comment file entries
+			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
 			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
 			//delete the video details in the database
 			await client.query(`DELETE FROM videos WHERE id=$1`, [videoid]);

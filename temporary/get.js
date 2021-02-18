@@ -17,6 +17,8 @@ app.use(middleware.hitCounter);
 server.on("upgrade", (req, socket, head) => {
 	var pathname = url.parse(req.url).pathname;
 
+	console.log("PROTOCOL UPGRADE");
+
 	switch (pathname) {
 		case "/live":
 			console.log("Live Streaming Server Connection...");
@@ -50,17 +52,15 @@ app.get('/', async (req, res) => {
 
 	//select all of the videos from the database to be displayed
 	var videos = await client.query("SELECT * FROM videos LIMIT 50");
-	videos = videos.rows;
+
+	//insert the video rows into the view object
+	viewObj.videos = videos.rows;
 
 	//select all of the playlists belonging to the user
 	if (typeof viewObj.user != 'undefined') {
 		var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [viewObj.user.id]);
-		playlists = playlists.rows;
-		viewObj.playlists = playlists;
+		viewObj.playlists = playlists.rows;
 	}
-
-	//insert the videos and playlists into the view object
-	viewObj.videos = videos;
 
 	//render the view
 	res.render("index.ejs", viewObj);
@@ -162,13 +162,12 @@ app.get("/u/:userid", async (req, res) => {
 
 	//get the actual user that the channel belongs to
 	var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [req.params.userid]);
-	creator = creator.rows[0];
 
 	//put the creator into the view object
-	viewObj.creator = creator;
+	viewObj.creator = creator.rows[0];
 
 	//get any variables from the query string in order to render the right things
-	if (Object.keys(req.query).length && typeof req.query.section != 'undefined') {
+	if (typeof req.query.section != 'undefined') {
 		//add the section that the user wants to see in the channel page
 		viewObj.section = req.query.section;
 	} else {
@@ -180,23 +179,19 @@ app.get("/u/:userid", async (req, res) => {
 	switch(viewObj.section) {
 		case "home":
 			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1 ORDER BY views DESC LIMIT 10`, [req.params.userid]);
-			videos = videos.rows;
-			viewObj.videos = videos;
+			viewObj.videos = videos.rows;
 			break;
 		case "videos":
 			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1`, [req.params.userid]);
-			videos = videos.rows;
-			viewObj.videos = videos;
+			viewObj.videos = videos.rows;
 			break;
 		case "playlists":
 			var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [req.params.userid]);
-			playlists = playlists.rows;
-			viewObj.playlists = playlists;
+			viewObj.playlists = playlists.rows;
 			break;
 		case "shoutouts":
 			var shoutouts = await client.query(`SELECT * FROM shoutouts WHERE user_id=$1`, [req.params.userid]);
-			shoutouts = shoutouts.rows;
-			viewObj.shoutouts = shoutouts;
+			viewObj.shoutouts = shoutouts.rows;
 			break;
 	}
 
@@ -471,7 +466,7 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
 
 	//get the stream info
-	var stream = await client.query(`SELECT * FROM videos WHERE id=$1 AND user_id=$2`, [req.params.streamid, userinfo.id]);
+	var stream = await client.query(`SELECT * FROM videos WHERE id=$1 AND user_id=$2`, [req.params.streamid, viewObj.user.id]);
 	stream = stream.rows[0];
 
 	console.log(stream);
@@ -506,6 +501,7 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 		} else if (req.query.streamtype == "browser") {
 			//handle the websocket connections and the handling of video data
 			liveWss.on("connection", async (ws) => {
+				console.log("STREAM CONNECTION");
 				//set the stream id for this socket
 				ws.streamid = req.params.streamid;
 
@@ -525,6 +521,9 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 
 				//set the video path in the database entry
 				await client.query(`UPDATE videos SET video=$1 WHERE id=$2`, [videopath, req.params.streamid]);
+
+				//set the video path in the videofiles table
+				await client.query(`INSERT INTO videofiles (id, video) VALUES ($1, $2)`, [req.params.streamid, videopath]);
 
 				//message that we got a connection from the streamer
 				console.log("Connection from Streamer.");

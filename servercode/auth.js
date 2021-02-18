@@ -1,0 +1,230 @@
+const {app, client, middleware, redisClient} = require("./configBasic");
+const bcrypt = require("bcrypt");
+const formidable = require("formidable");
+
+/*
+GET FILE PATHS FOR USER AUTH
+*/
+
+//get the registration page
+app.get('/register', middleware.checkNotSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req);
+	res.render("register.ejs", viewObj);
+});
+
+//delete the user and all traces of the user like videos
+app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
+	//get the user info for verification later on
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	//get all of the videos belonging to this user
+	var videos = await client.query(`SELECT id FROM videos WHERE user_id=$1`, [req.params.userid]);
+	videos = videos.rows;
+
+	//delete all of the video details for this video
+	videos.forEach(async (item, index) => {
+		await middleware.deleteVideoDetails(userinfo, item.id);
+	});
+
+	//delete all of the playlists of the user
+	var playlistids = await client.query(`SELECT id FROM playlists WHERE user_id=$1`, [req.params.userid]);
+	playlistids = playlistids.rows;
+	//loop through the playlist ids and delete the playlist details
+	playlistids.forEach(async (item, index) => {
+		await middleware.deletePlaylistDetails(userinfo, item.id);
+	});
+
+	//check to see if the user id in the url matches the one in the session
+	if (userinfo.id == req.params.userid) {
+		//delete the comments of this user
+		await client.query(`DELETE FROM comments WHERE userid=$1`, [req.params.userid]);
+
+		//delete the actual user
+		await client.query(`DELETE FROM users WHERE id=$1`, [req.params.userid]);
+
+		//delete the session on the browser
+		redisClient.del(req.cookies.sessionid, (err, reply) => {
+			if (err) throw err;
+			console.log("Redis Session Deleted");
+		});
+		res.cookie('sessionid', '', {expires: new Date(0)});
+
+		//redirect to the index page after setting a flash message
+		req.flash("message", "Deleted Your Account!");
+		res.redirect("/");
+	} else {
+		//let the user know that this is not their account
+		req.flash("message", "Not Your Account!");
+		res.redirect("/");
+	}
+});
+
+//get the login page
+app.get('/login', middleware.checkNotSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req);
+	res.render("login.ejs", viewObj);
+});
+
+//log the user out of the session
+app.get("/logout", middleware.checkSignedIn, (req, res) => {
+	//delete the session from redis
+	redisClient.del(req.cookies.sessionid, (err, reply) => {
+		if (err) throw err;
+		console.log("Redis Session Deleted");
+	});
+	res.cookie('sessionid', '', {expires: new Date(0)});
+	res.cookie("hasSession", false, {httpOnly: false, expires: 0});
+	console.log("[+] Logged out.");
+	req.flash("message", "Logged out!");
+	res.redirect("/");
+});
+
+
+/*
+POST PATHS FOR USER AUTH
+*/
+
+//handle the user registrations
+app.post('/register', (req, res) => {
+	var form = new formidable.IncomingForm();
+
+	form.parse(req, async (err, fields, files) => {
+		//store errors to be shown in the registration page (if needed)
+		var errors = [];
+
+		//check for empty values (the email entry is optional, but we need a username)
+		if (!fields.username || !fields.password || !fields.password2) {
+			errors.push({message: "Please fill all fields."});
+		}
+
+		//check for the length of the password (minimum 6 chars)
+		if (fields.password.length < 6) {
+			errors.push({message: "Password must be at least 6 chars."});
+		}
+
+		//check for mismatched passwords
+		if (fields.password != fields.password2) {
+			errors.push({message: "Passwords do not match"});
+		}
+
+		if (errors.length > 0) {
+			//insert the errors into a flash message
+			req.flash("errors", errors);
+			//redirect to the registration page
+			res.redirect("/register");
+		} else {
+			//hash the password for secure storage in database
+			var hashedPassword = await bcrypt.hash(fields.password, 10);
+
+			//generate an alphanumeric id inside the async function here
+			var newuserid = await middleware.generateAlphanumId();
+
+			//get a stream key for obs streaming
+			var streamkey = await middleware.generateStreamKey();
+
+			//save the channel icon submitted in the form
+			if (files.channelicon.name != '') { //if the name is not blank, then a file was submitted
+				var channeliconpath = middleware.saveFile(files.channelicon, "/storage/users/icons/");
+			} else { //if the channel icon file field was empty, use the default image
+				var channeliconpath = middleware.copyFile("/views/content/default.png", "/storage/users/icons/", "default.png");
+			}
+
+			//save the channel banner submitted in the form
+			if (files.channelbanner.name != '') { //if the name is not blank, then the file was submitted
+				var channelbannerpath = middleware.saveFile(files.channelbanner, "/storage/users/banners/");
+			} else { //if the name is blank, then the file was not submitted
+				var channelbannerpath = middleware.copyFile("/views/content/default.png", "/storage/users/banners/", "default.png");
+			}
+
+			//check to see if the user does not already exist
+			var existinguser = await client.query(`SELECT * FROM users WHERE email=$1 OR username=$2`, [fields.email, fields.username]);
+
+			//do something according to if the user is already registered or not
+			if (existinguser.rows.length > 0) { //if the user is registered
+				if (existinguser.rows[0].email == fields.email) {
+					req.flash("message", "Email is Already Registered. Please Log In.");
+					return res.redirect("/login");
+				} else if (existinguser.rows[0].username == field.username) {
+					req.flash("message", "Username Already Taken, Please Try Again.")
+					return res.redirect("/register");
+				}
+			} else { //if the user is a new user, then register them
+				var valuesarr = [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath, fields.channeldesc, fields.topics, streamkey];
+				var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, username, email, password, channelicon, channelbanner, streamkey`, valuesarr);
+				newuser = newuser.rows[0];
+				console.log("Registered User.");
+				//add a "Watch Later"playlist into the database which the user cannot delete
+				var newplaylistid = await middleware.generateAlphanumId();
+				valuesarr = [newuserid, "Watch Later", newplaylistid, 0, false];
+				await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES ($1, $2, $3, $4, $5)`, valuesarr);
+				//generate a new session id
+				var newsessid = middleware.generateSessionId();
+				//store the user info inside redis db
+				redisClient.set(newsessid, JSON.stringify(newuser));
+				//store the session id in the browser of the user
+				res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
+				//store a cookie that stores a boolean value letting javascript know the session exists (javascript and httponly coexist)
+				res.cookie("hasSession", true, {httpOnly: false, expires: 0});
+				//set the default language to english
+				res.cookie("language", "en", {httpOnly: false, expires: 0});
+				//flash message to let the user know they are registered
+				req.flash("message", "Registered!");
+				//redirect to the home page
+				res.redirect("/");
+			}
+		}
+	});
+});
+
+//have the user log in
+app.post("/login", async (req, res) => {
+	var errors = [];
+
+	if (!req.body.username && !req.body.email) {
+		errors.push({message: "Enter a Username or Email please."});
+	}
+
+	if (!req.body.password) {
+		errors.push({message: "Fill out password please."});
+	}
+
+	if (errors.length > 0) {
+		req.flash("errors", errors);
+		res.redirect("/login");
+	} else {
+		//select the users from the database with the specified fields
+		var user = await client.query(`SELECT * FROM users WHERE email=$1 OR username=$2`, [req.body.email, req.body.username]);
+		user = user.rows[0];
+		//check to see if the user exists
+		if (typeof user != 'undefined') { //if the user exists, then log them in
+			var match = await bcrypt.compare(req.body.password, user.password); //compare the password entered with the password in the db
+			if (match) { //if the password is a match, log the user in
+				//get the list of the channels that the user is subscribed to
+				var subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [user.id]);
+				//store the values of the objects inside the rows array into one array of values into the user session variable
+				user.subscribedChannels = subscribedChannels.rows.map(({channel_id}) => channel_id);
+				//generate a new session id
+				var newsessid = middleware.generateSessionId();
+				//store the user in redis
+				redisClient.set(newsessid, JSON.stringify(user));
+				//store the session id on the client side
+				res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
+				//store a cookie to alert javascript of the existence of a session/logged-in user
+				res.cookie("hasSession", true, {httpOnly: false, expires: 0});
+				//set the default language to english
+				res.cookie("language", "en", {httpOnly: false, expires: 0});
+				//messages to let the server and the client know that a user logged in
+				console.log("Logged In!");
+				req.flash("message", "Logged In!");
+				//redirect to the home page
+				res.redirect("/");
+			} else { //if the password is incorrect, then let the user know
+				req.flash("message", "Password Incorrect.");
+				res.redirect("/login");
+			}
+		} else { // if the user does not exist, then tell the user
+			req.flash("message", "User does not exist yet, please register.");
+			res.redirect("/register");
+		}
+	}
+});

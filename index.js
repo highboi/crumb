@@ -1,5 +1,5 @@
 //get the variables to work with in the config file
-const { client, middleware, server, nms, obsWss } = require("./configBasic");
+const { client, middleware, server, nms, obsWss } = require("./servercode/configBasic");
 
 //handle the shutting down of the server
 middleware.onShutdown();
@@ -22,10 +22,16 @@ CRON FORMAT:
 //middleware.scheduleFunction("0 0 0 * * 0", (async () => {await middleware.changeAllWordScore(false, 0.000001)})());
 
 //handle the get requests
-require("./get");
+//require("./servercode/get");
 
 //handle the post requests
-require("./post");
+//require("./servercode/post");
+
+//set the global app root for saving files and stuff
+global.appRoot = __dirname;
+
+//handle paths and stuff
+require("./servercode/testpath");
 
 //listen for connections to the server
 server.listen(process.env.SERVERPORT, '0.0.0.0', () => {
@@ -102,6 +108,3 @@ nms.on("donePublish", async (id, streamPath, args) => {
 		item.send("ended");
 	});
 });
-
-//handle errors
-require("./errors");

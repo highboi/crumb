@@ -245,7 +245,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 		var commentid = await middleware.generateAlphanumId();
 
 		//create a values array for the comment db entry
-		var valuesarr = [commentid, userinfo.username, userinfo.id, fields.commenttext, req.params.videoid, middleware.getDate(), 0, 0];
+		var valuesarr = [commentid, userinfo.username, userinfo.id, fields.commenttext, req.params.videoid, new Date().toISOString(), 0, 0];
 
 		//check for a parent comment id for comment thread functionality
 		if (typeof req.query.parent_id != 'undefined') {
@@ -288,7 +288,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 				var filepath = await middleware.saveFile(files.reactionfile, "/storage/users/comments/");
 
 				//save the file path into the database
-				await client.query(`INSERT INTO videofiles (id, video) VALUES ($1, $2)`, [commentid, filepath]);
+				await client.query(`INSERT INTO videofiles (id, video, parentid) VALUES ($1, $2)`, [commentid, filepath, req.params.videoid]);
 
 				//get the filetype for the submitted file
 				if (acceptedvideo.includes(fileext)) {
@@ -372,14 +372,14 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
 
 			//set all of the database details
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, middleware.getDate(), fields.topics, userinfo.username, userinfo.channelicon, 'true'];
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, 'true'];
 			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, valuesarr);
 		} else if (req.params.type == "obs") {
 			//save the thumbnail and return the path to the thumbnail
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
 
 			//save the details into the db excluding the video path
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, middleware.getDate(), fields.topics, userinfo.username, userinfo.channelicon, 'true', fields.enableChat.toString()];
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, 'true', fields.enableChat.toString()];
 			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, enableChat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesarr);
 		}
 		//change the word scores for the words in the stream title and the channel name
