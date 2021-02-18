@@ -19,13 +19,14 @@
 					<input id="username" name="username" type="text" placeholder="Username" autofocus>
 				</div>
 				<div>
-					<input id="email" name="email" type="email" placeholder="Email (Optional)">
+					<input id="email" name="email" type="email" placeholder="Email">
 				</div>
 				<div>
-					<input id="password" name="password" type="password" placeholder="Password">
+					<input class="passwordconf" id="password" name="password" type="password" placeholder="Password">
 				</div>
 				<div>
-					<input id="password2" name="password2" type="password" placeholder="Password Confirmation">
+					<input class="passwordconf" id="password2" name="password2" type="password" oninput="confirmPassword('passwordconf')" placeholder="Password Confirmation" style="display: inline;">
+					<p class="passwordconf" id="passwordconfalert" style="display: inline;"></p>
 				</div><br>
 				<div class="authfileinput">
 					<h4>Channel Icon (optional): </h4>
@@ -52,6 +53,7 @@
 			</form>
 
 			<%- include('content/ejs/scripts.ejs') %>
+			<script src="/content/javascript/passwordconf.js"></script>
 		</main>
 	</body>
 </html>

@@ -21,7 +21,7 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 	var videos = await client.query(`SELECT id FROM videos WHERE user_id=$1`, [req.params.userid]);
 	videos = videos.rows;
 
-	//delete all of the video details for this video
+	//delete all of the video details for the videos belonging to this user
 	videos.forEach(async (item, index) => {
 		await middleware.deleteVideoDetails(userinfo, item.id);
 	});
@@ -29,6 +29,7 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 	//delete all of the playlists of the user
 	var playlistids = await client.query(`SELECT id FROM playlists WHERE user_id=$1`, [req.params.userid]);
 	playlistids = playlistids.rows;
+
 	//loop through the playlist ids and delete the playlist details
 	playlistids.forEach(async (item, index) => {
 		await middleware.deletePlaylistDetails(userinfo, item.id);
@@ -72,9 +73,12 @@ app.get("/logout", middleware.checkSignedIn, (req, res) => {
 		if (err) throw err;
 		console.log("Redis Session Deleted");
 	});
+	//set the session cookies to expire immediately to delete them
 	res.cookie('sessionid', '', {expires: new Date(0)});
 	res.cookie("hasSession", false, {httpOnly: false, expires: 0});
+	//message to the server
 	console.log("[+] Logged out.");
+	//tell the user that they have logged out of the site
 	req.flash("message", "Logged out!");
 	res.redirect("/");
 });
@@ -92,9 +96,9 @@ app.post('/register', (req, res) => {
 		//store errors to be shown in the registration page (if needed)
 		var errors = [];
 
-		//check for empty values (the email entry is optional, but we need a username)
-		if (!fields.username || !fields.password || !fields.password2) {
-			errors.push({message: "Please fill all fields."});
+		//check for empty values
+		if (!fields.username || !fields.email || !fields.password || !fields.password2) {
+			errors.push({message: "Please fill all username, email, and password fields."});
 		}
 
 		//check for the length of the password (minimum 6 chars)
@@ -102,7 +106,7 @@ app.post('/register', (req, res) => {
 			errors.push({message: "Password must be at least 6 chars."});
 		}
 
-		//check for mismatched passwords
+		//check for mismatched passwords if the user accidentally mismatches them
 		if (fields.password != fields.password2) {
 			errors.push({message: "Passwords do not match"});
 		}
@@ -123,39 +127,45 @@ app.post('/register', (req, res) => {
 			var streamkey = await middleware.generateStreamKey();
 
 			//save the channel icon submitted in the form
-			if (files.channelicon.name != '') { //if the name is not blank, then a file was submitted
+			if (files.channelicon.size > 0) { //if the file size is more than 0, then a file was submitted
 				var channeliconpath = middleware.saveFile(files.channelicon, "/storage/users/icons/");
 			} else { //if the channel icon file field was empty, use the default image
 				var channeliconpath = middleware.copyFile("/views/content/default.png", "/storage/users/icons/", "default.png");
 			}
 
 			//save the channel banner submitted in the form
-			if (files.channelbanner.name != '') { //if the name is not blank, then the file was submitted
+			if (files.channelbanner.size > 0) { //if the file size is more than 0, then a file was submitted
 				var channelbannerpath = middleware.saveFile(files.channelbanner, "/storage/users/banners/");
 			} else { //if the name is blank, then the file was not submitted
 				var channelbannerpath = middleware.copyFile("/views/content/default.png", "/storage/users/banners/", "default.png");
 			}
 
-			//check to see if the user does not already exist
+			//check to see if the user does not already exist to not register identical accounts
 			var existinguser = await client.query(`SELECT * FROM users WHERE email=$1 OR username=$2`, [fields.email, fields.username]);
 
 			//do something according to if the user is already registered or not
 			if (existinguser.rows.length > 0) { //if the user is registered
-				if (existinguser.rows[0].email == fields.email) {
+				if (existinguser.rows[0].email == fields.email) { //if the email is the same, then alert the user
 					req.flash("message", "Email is Already Registered. Please Log In.");
 					return res.redirect("/login");
-				} else if (existinguser.rows[0].username == field.username) {
+				} else if (existinguser.rows[0].username == field.username) { //if the username already exists, then alert the user
 					req.flash("message", "Username Already Taken, Please Try Again.")
 					return res.redirect("/register");
 				}
 			} else { //if the user is a new user, then register them
+				//create an array of all of the important values
 				var valuesarr = [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath, fields.channeldesc, fields.topics, streamkey];
+				//push the user into the database and get the important values as an object
 				var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, username, email, password, channelicon, channelbanner, streamkey`, valuesarr);
 				newuser = newuser.rows[0];
 				console.log("Registered User.");
-				//add a "Watch Later"playlist into the database which the user cannot delete
+				//add a "Watch Later" playlist into the database which the user cannot delete
 				var newplaylistid = await middleware.generateAlphanumId();
 				valuesarr = [newuserid, "Watch Later", newplaylistid, 0, false];
+				await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES ($1, $2, $3, $4, $5)`, valuesarr);
+				//add a "Liked Videos" playlist into the database which the user also cannot delete
+				var newplaylistid = await middleware.generateAlphanumId();
+				valuesarr = [newuserid, "Liked Videos", newplaylistid, 0, false];
 				await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES ($1, $2, $3, $4, $5)`, valuesarr);
 				//generate a new session id
 				var newsessid = middleware.generateSessionId();
@@ -180,15 +190,12 @@ app.post('/register', (req, res) => {
 app.post("/login", async (req, res) => {
 	var errors = [];
 
-	if (!req.body.username && !req.body.email) {
-		errors.push({message: "Enter a Username or Email please."});
+	//check for empty fields in the login form
+	if (!req.body.username || !req.body.email || !req.body.password) {
+		errors.push({message: "One or more fields are empty, please fill out all fields."});
 	}
 
-	if (!req.body.password) {
-		errors.push({message: "Fill out password please."});
-	}
-
-	if (errors.length > 0) {
+	if (errors.length > 0) { //if there are form errors, then alert the user
 		req.flash("errors", errors);
 		res.redirect("/login");
 	} else {
