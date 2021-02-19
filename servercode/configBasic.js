@@ -31,7 +31,7 @@ const nmsConfig = {
 	},
 	http: {
 		port: 8000,
-		mediaroot: "./storage/videos/nmsMedia",
+		mediaroot: `${global.appRoot}/storage/videos/nmsMedia`,
 		allow_origin: "*"
 	},
 	trans: {

@@ -5,6 +5,7 @@
 	</head>
 	<body>
 		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/html/banner.html') %>
 		</nav>
 
@@ -35,10 +36,9 @@
 
 			<%- include('content/ejs/scripts.ejs') %>
 			<script>
-				var enableChat = <%- JSON.stringify(enableChat) %>;
+				//var enableChat = <%- JSON.stringify(enableChat) %>;
 				var streamURL = <%- JSON.stringify(streamURL) %>;
 				var streamid = <%- JSON.stringify(streamid) %>;
-				var video = document.getElementById("livestream");
 			</script>
 			<script src="/content/javascript/livechat.js"></script>
 			<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>

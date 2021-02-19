@@ -40,7 +40,7 @@ function sendMessage() {
 
 //if we recieve a message, then add the message to the chat
 chatSocket.onmessage = (event) => {
-	if (enableChat && initSent) {
+	if (true && initSent) {
 		var msg = document.createElement("p");
 		msg.innerHTML = event.data;
 		chatbox.appendChild(msg);

@@ -1,4 +1,4 @@
-const {app, server, client, middleware, chatWss} = require("./configBasic");
+const {app, server, client, middleware, chatWss, obsWss, liveWss, nms} = require("./configBasic");
 const fs = require("fs");
 const WebSocket = require("ws");
 const url = require("url");
@@ -18,7 +18,7 @@ app.get("/l/view/:streamid", async (req, res) => {
 		return socket.streamid == req.params.streamid;
 	});
 
-	//if there are no streams with the id in the url, then redirect to an error or the recorded stream
+	//if there are no streams with the id in the url, then redirect to an error or the recorded stream or the OBS stream
 	if (streams.length == 0) {
 		var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.streamid]);
 		video = video.rows[0];
@@ -52,7 +52,7 @@ app.get("/l/view/:streamid", async (req, res) => {
 				res.render("viewStreamObs.ejs", viewObj);
 			}
 		}
-	} else {
+	} else { //redirect the user to the vanilla websocket streams
 		//create a view object
 		var viewObj = await middleware.getViewObj(req);
 		viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: streams[0].enableChat});
@@ -103,10 +103,6 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 	//if there is a stream that exists, then render the admin panel
 	if (typeof stream != 'undefined') {
 		if (req.query.streamtype == "obs") {
-			//get the stream key
-			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1`, [stream.user_id]);
-			streamkey = streamkey.rows[0].streamkey;
-
 			//this is a websocket connection handler for the obs stream sockets in order to handle the obs stream clients and end streams
 			obsWss.on("connection", (ws, request) => {
 				ws.room = stream.id;
@@ -118,6 +114,10 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 					}
 				});
 			});
+
+			//get the stream key
+			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1`, [stream.user_id]);
+			streamkey = streamkey.rows[0].streamkey;
 
 			//set the additional values for the view object
 			viewObj = Object.assign({}, viewObj, {streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://localhost/live", streamKey: streamkey});
@@ -230,15 +230,21 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
 
 			//set all of the database details
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, 'true'];
-			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, valuesarr);
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, fields.enableChat.toString()];
+			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enableChat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, valuesarr);
+
+			//insert the file details into the videofiles table
+			await client.query(`INSERT INTO videofiles (id, thumbnail) VALUES ($1, $2)`, [streamid, thumbnailpath]);
 		} else if (req.params.type == "obs") {
 			//save the thumbnail and return the path to the thumbnail
 			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
 
 			//save the details into the db excluding the video path
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, 'true', fields.enableChat.toString()];
-			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, enableChat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesarr);
+			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, fields.enableChat.toString()];
+			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enableChat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, valuesarr);
+
+			//insert the file details into the videofiles table
+			await client.query(`INSERT INTO videofiles (id, thumbnail) VALUES ($1, $2)`, [streamid, thumbnailpath]);
 		}
 		//render the view for the streamer based on the stream type
 		res.redirect(`/l/admin/${streamid}?streamtype=${streamtype}`);
@@ -328,4 +334,119 @@ chatWss.on("connection", async (ws, req) => {
 			await client.query(`INSERT INTO livechat (message, stream_id, user_id, time) VALUES ($1, $2, $3, $4)`, [data[2], data[1], userinfo.id, parseInt(data[3], 10)]);
 		}
 	});
+});
+
+
+/*
+NODE-MEDIA-SERVER RTMP OBS STREAM HANDLING
+*/
+
+//check for invalid stream keys and store details of live streams if keys are valid
+nms.on("postPublish", async (id, streamPath, args) => {
+	//get the session for later rejection if necessary
+	var session = nms.getSession(id);
+	console.log("NMS SESSION:", session);
+
+	//get the supposed stream path (the directory after /live is the stream key provided)
+	var givenKey = streamPath.replace("/live/", "");
+
+	//make a query to the DB to check to see if this stream key exists
+	var res = await client.query(`SELECT id FROM users WHERE streamkey=$1`, [givenKey]);
+	res = res.rows;
+
+	//if the stream key does not exist, then reject this session
+	if (res.length == 0) {
+		session.reject();
+		console.log("SESSION REJECTED");
+	} else { //get information about the live stream from the user and store the file path in the database
+		//get the user info
+		var user = res[0];
+
+		//get the pending streams where the video path is undefined and where the userid is the same as the user variable
+		var streamid = await client.query(`SELECT id FROM videos WHERE user_id=$1 AND streamtype=$2 AND video IS NULL`, [user.id, "obs"]);
+
+		//set the value of a "wasPublished" value in the session as to not save invalid streams without first having preexisting live streams
+		if (streamid.rows.length > 0) {
+			streamid = streamid.rows[0].id;
+			session.wasPublished = true;
+
+			//set the streamid in the session object
+			session.streamid = streamid;
+
+			//send a message to all of the OBS WSS sockets that the stream has started
+			var viewers = Array.from(obsWss.clients).filter((socket) => {
+				return socket.room == streamid;
+			});
+
+			viewers.forEach((item, index) => {
+				item.send("started");
+				console.log("STREAM STARTED");
+			});
+		} else {
+			session.wasPublished = false;
+		}
+	}
+});
+
+//rename/move the recorded streams elsewhere for convenience and save the path to the DB
+nms.on("donePublish", async (id, streamPath, args) => {
+	console.log("DONE PUBLISH");
+
+	var session = nms.getSession(id);
+
+	console.log("\n\nSTREAMID:", session.streamid, "\n\n")
+
+	//get the name of the obs stream file
+	var filename = middleware.getObsName(session.startTimestamp);
+
+	//get the stream key
+	var streamkey = streamPath.replace("/live/", "");
+
+	if (session.wasPublished) {
+		//get the user id associated with the stream key
+		var user = await client.query(`SELECT id FROM users WHERE streamkey=$1`, [streamkey]);
+		userid = user.rows[0].id;
+
+		console.log("SUPPOSED FILE NAME: ", filename);
+
+		//create a full relative filepath to the mp4 file
+		var path = `/videos/nmsMedia/live/${streamkey}/${filename}.mp4`;
+
+		console.log(path);
+
+		//add the path into the main DB entry
+		await client.query(`UPDATE videos SET video=$1 WHERE id=$2 AND user_id=$3`, [path, session.streamid, userid]);
+
+		//add the video path into the videofiles table as well
+		await client.query(`UPDATE videofiles SET video=$1 WHERE id=$2`, [path, session.streamid]);
+
+		//set the "streaming" value to "false" as this is a normal video now
+		await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', session.streamid]);
+
+		//notify the users that the stream has ended
+		var viewers = Array.from(obsWss.clients).filter((socket) => {
+			return socket.room == session.streamid;
+		});
+
+		viewers.forEach((item, index) => {
+			item.send("ended");
+		});
+	} else {
+		//delete the file of the unapproved obs stream
+		fs.unlink(`${global.appRoot}/storage/videos/nmsMedia/live/${streamkey}/${filename}.mp4`, (err) => {
+			if (err) throw err;
+		});
+
+		//select the first null video entry
+		var videoid = await client.query(`SELECT id FROM videos WHERE user_id IN (SELECT id FROM users WHERE streamkey=$1) AND streamtype=$2 AND video IS NULL`, [streamkey, "obs"]);
+		videoid = videoid.rows[0].id;
+
+		//delete all stray database entries
+		await client.query(`DELETE FROM videos WHERE id=$1`, [videoid]);
+		await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
+
+		//reject the obs session to delete it
+		session.reject();
+		console.log("SESSION REJECTED");
+	}
 });

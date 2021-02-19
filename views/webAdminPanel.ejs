@@ -14,6 +14,9 @@
 
 			<video id="livestream"></video>
 			<h1><%= streamname %></h1>
+
+			<button onclick="stopStream()">End Web Stream</button>
+
 			<h3>Enable Chat: <%= enableChat %></h3>
 
 			<% if (enableChat) { %>
@@ -31,7 +34,7 @@
 
 			<%- include('content/ejs/scripts.ejs') %>
 			<script>
-				var enableChat = <%- JSON.stringify(enableChat) %>;
+				//var enableChat = <%- JSON.stringify(enableChat) %>;
 				var streamid = <%- JSON.stringify(streamid) %>;
 				var isStreamer = <%- JSON.stringify(isStreamer) %>;
 			</script>

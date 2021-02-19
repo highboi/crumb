@@ -41,6 +41,7 @@ async function sendVideoChunks(event) {
 //function to tell the server to end the stream on the client side
 function stopStream() {
 	streamSocket.send("ended");
+	window.location.href = `/v/${streamid}`;
 }
 
 //add a video stream to the html document

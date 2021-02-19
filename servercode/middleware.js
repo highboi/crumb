@@ -130,6 +130,13 @@ middleware = {
 		return JSON.parse(userinfo);
 	},
 
+	//this function gets the filename of an OBS stream file from a timestamp
+	getObsName: function(timestamp) {
+		var offset = new Date(timestamp).getTimezoneOffset()*60000;
+		var newtimestamp = new Date(timestamp - offset).toISOString();
+		return newtimestamp.replace(/T/, "-").replace(/\..+/, "").replace(/:/g, "-");
+	},
+
 	//this is a function to return all of the cases of a string (titlecase, all caps, lowercase)
 	getAllStringCases: function (words) {
 		//get the string version in lowercase, uppercase, and titlecase
