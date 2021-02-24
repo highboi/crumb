@@ -51,8 +51,6 @@ app.get("/l/view/:streamid", async (req, res) => {
 		var viewObj = await middleware.getViewObj(req);
 		viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: streams[0].enableChat});
 
-		console.log("VIEWOBJ ENABLECHAT:", viewObj.enableChat);
-
 		//render the view with the stream
 		res.render("viewStreamWeb.ejs", viewObj);
 	}
@@ -72,8 +70,6 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 	//get the stream info
 	var stream = await client.query(`SELECT * FROM videos WHERE id=$1 AND user_id=$2`, [req.params.streamid, viewObj.user.id]);
 	stream = stream.rows[0];
-
-	console.log(stream);
 
 	//view object for the views, other values can be added later
 	var viewObj = Object.assign({}, viewObj, {streamname: stream.title, enableChat: stream.enablechat, streamid: stream.id});
@@ -114,8 +110,6 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 
 	//generate a unique stream id
 	var streamid = await middleware.generateAlphanumId();
-
-	console.log("Stream Id: " + streamid);
 
 	//parse the form and files such as the thumbnail
 	form.parse(req, async (err, fields, files) => {

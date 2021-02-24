@@ -1,4 +1,4 @@
-var obsSocket = new WebSocket("ws://localhost/obslive");
+var obsSocket = new WebSocket(`ws://localhost/obslive/?streamid=${streamid}`);
 var livestream = document.getElementById("livestream");
 
 //start the live stream immediately since this is the user

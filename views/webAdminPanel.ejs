@@ -26,20 +26,27 @@
 			<% } %>
 
 			<div id="chatBox"></div>
-			<div id="chatForm">
-				<input type="text" id="message" name="message" placeholder="Description" maxlength="150">
-				<button id="submitBtnChat" onclick="sendMessage()">Send Message</button>
-			</div>
 
+			<% if (typeof user != 'undefined') { %>
+				<%- include('content/ejs/chatform.ejs') %>
+			<% } else { %>
+				<button><a href="/login">Login to Chat!</a></button>
+			<% } %>
 
 			<%- include('content/ejs/scripts.ejs') %>
-			<script>
-				//var enableChat = <%- JSON.stringify(enableChat) %>;
+			<script type="text/javascript">
+				<% if (typeof user != 'undefined') { %>
+					var user_id = <%- JSON.stringify(user.id); %>;
+					var username = <%- JSON.stringify(user.username) %>;
+					var channelicon = <%- JSON.stringify(user.channelicon) %>;
+				<% } %>
+				var enableChat = <%- JSON.stringify(enableChat) %>;
 				var streamid = <%- JSON.stringify(streamid) %>;
-				var isStreamer = <%- JSON.stringify(isStreamer) %>;
+				var isStreamer = true;
 			</script>
 			<script src="/content/javascript/stream.js"></script>
 			<script src="/content/javascript/livechat.js"></script>
 		</main>
 	</body>
 </html>
+

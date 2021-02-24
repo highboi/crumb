@@ -119,6 +119,12 @@
 				</div>
 
 				<div class="reccomendations">
+					<% if (typeof chatReplayMessages != 'undefined') { %>
+						<div id="chatReplay">
+							<h3 id="replayTitle">Chat Replay:</h3>
+							<div id="chatReplayMessages"></div>
+						</div>
+					<% } %>
 					<h2>&nbspUp Next</h2><hr>
 					<% if (typeof videos != 'undefined') { %>
 						<% videos.forEach((item, index) => { %>
@@ -129,12 +135,6 @@
 				</div>
 
 				<%- include('content/ejs/comments.ejs', {video: video, comments: comments}) %>
-
-				<div id="chatReplay">
-					<% if (typeof chatReplayMessages != 'undefined') { %>
-						<h3>Chat Replay:</h3>
-					<% } %>
-				</div>
 			</div>
 
 			<%- include('content/ejs/scripts.ejs') %>

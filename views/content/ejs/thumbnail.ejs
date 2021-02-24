@@ -1,6 +1,6 @@
 <% if (typeof video != 'undefined') { %>
 	<div class="video-thumbnail">
-		<% if (video.streaming == 'true') { %>
+		<% if (video.streaming) { %>
 			<% var videolink = `/l/view/${video.id}`; %>
 		<% } else { %>
 			<% var videolink = `/v/${video.id}`; %>

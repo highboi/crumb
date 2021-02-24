@@ -1,5 +1,5 @@
 //get a connection with the obs websocket server
-var obsSocket = new WebSocket("ws://localhost/obslive");
+var obsSocket = new WebSocket(`ws://localhost/obslive/?streamid=${streamid}`);
 
 //get the livestream video element
 var livestream = document.getElementById("livestream");

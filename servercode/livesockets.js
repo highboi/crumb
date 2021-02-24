@@ -163,7 +163,6 @@ obsWss.on("connection", async (ws, req) => {
 chatWss.on("connection", async (ws, req) => {
 	//get the user info from the cookies in the headers
 	var sessionid = cookie.parse(req.headers.cookie).sessionid;
-	console.log(sessionid);
 
 	var userinfo = await middleware.getUserSession(sessionid);
 
@@ -175,9 +174,6 @@ chatWss.on("connection", async (ws, req) => {
 
 	//whenever we get a message
 	ws.on("message", async (message) => {
-		console.log(typeof message);
-		console.log("Message: ", message);
-
 		//get the streamid and the actual message
 		var data = message.split(",");
 

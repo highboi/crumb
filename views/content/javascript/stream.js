@@ -1,4 +1,4 @@
-var streamSocket = new WebSocket(`ws://localhost/live`);
+var streamSocket = new WebSocket(`ws://localhost/live/?isClient=false&isStreamer=true&streamid=${streamid}`);
 var livestream = document.getElementById("livestream");
 
 streamSocket.onopen = (e) => {

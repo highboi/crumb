@@ -22,13 +22,19 @@
 
 			<div id="chatBox"></div>
 
-			<div id="chatForm">
-				<textarea id="message" name="message" rows="4" cols="50" placeholder="Say Something!" maxlength="200"></textarea>
-				<button id="submitBtnChat" onclick="sendMessage()">Post</button>
-			</div>
+			<% if (typeof user != 'undefined') { %>
+				<%- include('content/ejs/chatform.ejs') %>
+			<% } else { %>
+				<button><a href="/login">Login to Chat!</a></button>
+			<% } %>
 
 			<%- include('content/ejs/scripts.ejs') %>
 			<script>
+				<% if (typeof user != 'undefined') { %>
+					var user_id = <%- JSON.stringify(user.id) %>;
+					var username = <%- JSON.stringify(user.username) %>;
+					var channelicon = <%- JSON.stringify(user.channelicon) %>;
+				<% } %>
 				var enableChat = <%- JSON.stringify(enableChat) %>;
 				var streamid = <%- JSON.stringify(streamid) %>;
 				var isStreamer = false;
