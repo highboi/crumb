@@ -172,6 +172,8 @@ middleware = {
 			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
 			//delete the video details in the database
 			await client.query(`DELETE FROM videos WHERE id=$1`, [videoid]);
+			//delete the live chat messages from the video
+			await client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
 			//delete the actual files for the video and thumbnail
 			fs.unlink(videopath, (err) => {
 				if (err) throw err;
@@ -215,7 +217,6 @@ middleware = {
 		var newpath = global.appRoot + path + Date.now() + "-" + file.name; //new path to save the file on the server
 		fs.rename(oldpath, newpath, function(err) { //save the file to the server on the desired path
 			if (err) throw err;
-			console.log("Saved file to server.");
 		});
 		//remove the dirname and the /storage folder from the string
 		//this is because the ejs views look inside the storage folder already

@@ -38,7 +38,31 @@ app.get("/v/:videoid", async (req, res) => {
 
 	//select all of the chat messages that were typed if this was a live stream
 	var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE stream_id=$1`, [req.params.videoid]);
-	chatReplayMessages = chatReplayMessages.rows;
+
+	//get all of the user ids from the live chat and remove duplicates by putting them in a set
+	var chatUserIds = chatReplayMessages.rows.map((item) => {
+		return item.user_id;
+	});
+	chatUserIds = [...new Set(chatUserIds)];
+
+	//put the channel icons and usernames associated with the user ids above into an object
+	var chatMessageInfo = {};
+
+	//use the .map() method with async function to iterate over promises which are passed to Promise.all(),
+	//which can then be "awaited" on to finish/complete all promises being iterated before proceeding
+	await Promise.all(chatUserIds.map(async (item) => {
+		//get the channel icon and username if this user with this id
+		var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1`, [item]);
+		userChatInfo = userChatInfo.rows[0];
+
+		//insert the channel icon and username into the object with the key being the user id
+		chatMessageInfo[item] = userChatInfo;
+	}));
+
+	//map the chat replay messages to have both the original chat message object and the extra user info all in one object
+	chatReplayMessages = chatReplayMessages.rows.map((item) => {
+		return Object.assign({}, item, chatMessageInfo[item.user_id]);
+	});
 
 	//set the object to be passed to the rendering function
 	var viewObj = await middleware.getViewObj(req);
@@ -309,7 +333,7 @@ app.post("/v/submit", (req, res) => {
 			var videoid = await middleware.generateAlphanumId();
 
 			//the array to contain the values to insert into the db
-			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, true];
+			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, false];
 
 			//load the video into the database
 			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, valuesArr);
