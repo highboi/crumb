@@ -8,7 +8,7 @@ const { client, middleware, server, nms, obsWss } = require("./servercode/config
 middleware.onShutdown();
 
 //handle paths and stuff
-require("./servercode/testpath");
+require("./servercode/mainpath");
 
 //listen for connections to the server
 server.listen(process.env.SERVERPORT, '0.0.0.0', () => {

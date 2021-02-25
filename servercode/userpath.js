@@ -414,7 +414,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 				var filepath = await middleware.saveFile(files.reactionfile, "/storage/users/comments/");
 
 				//save the file path into the database
-				await client.query(`INSERT INTO videofiles (id, video, parentid) VALUES ($1, $2)`, [commentid, filepath, req.params.videoid]);
+				await client.query(`INSERT INTO videofiles (id, video, parentid) VALUES ($1, $2, $3)`, [commentid, filepath, req.params.videoid]);
 
 				//get the filetype for the submitted file
 				if (acceptedvideo.includes(fileext)) {

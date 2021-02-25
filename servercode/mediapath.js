@@ -311,16 +311,16 @@ app.post("/v/submit", (req, res) => {
 		//get user from redis
 		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-		//get the video and thumbnail extensions to be checked (file upload vuln)
-		var videoext = path.extname(files.video.name);
-		var thumbext = path.extname(files.thumbnail.name);
+		//get the video and thumbnail file types to be checked (file upload vuln)
+		var videotype = files.video.type;
+		var thumbtype = files.thumbnail.type;
 
 		//make arrays of accepted file types
-		var acceptedvideo = [".mp4", ".ogg", ".webm"];
-		var acceptedthumbnail = [".png", ".jpeg", ".jpg"];
+		var acceptedvideo = ["video/mp4", "video/ogg", "video/webm"];
+		var acceptedthumbnail = ["image/png", "image/jpeg", "image/jpg"];
 
 		//if the video has an mp4, ogg, or webm extension and the thumbnail is a png, jpeg or jpg image, load the video
-		if ( (acceptedvideo.includes(videoext)) && (acceptedthumbnail.includes(thumbext)) ) {
+		if ( (acceptedvideo.includes(videotype)) && (acceptedthumbnail.includes(thumbtype)) ) {
 			//store the video file submitted
 			var videopath = await middleware.saveFile(files.video, "/storage/videos/files/");
 
@@ -347,10 +347,10 @@ app.post("/v/submit", (req, res) => {
 			//redirect the user to their video
 			var videourl = `/v/${videoid}`; //get the url to redirect to now that the video has been created
 			res.redirect(videourl); //redirect to the url
-		} else if (!(thumbext in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
+		} else if (!(thumbtype in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
 			req.flash("message", "Unsupported file type for thumbnail, please use png, jpeg or jpg.");
 			res.redirect("/v/submit");
-		} else if (!(videoext in acceptedvideo)) { //if the video file types are not supported, then show errors
+		} else if (!(videotype in acceptedvideo)) { //if the video file types are not supported, then show errors
 			req.flash("Unsupported file type for video, please use mp4, ogg, or webm.");
 			res.redirect("/v/submit");
 		}

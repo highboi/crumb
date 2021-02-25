@@ -6,8 +6,14 @@
 	<body>
 		<h1>EXAMPLE PAGE:</h1>
 
-		<%- include('content/ejs/navbar.ejs') %>
+		<button onclick="redirectTo('Really?', '/')">Home</button>
 
-		<%- include('content/ejs/scripts.ejs') %>
+		<script>
+			function redirectTo(confirmPrompt, link) {
+				if (confirm(confirmPrompt)) {
+					window.location.href = link;
+				}
+			}
+		</script>
 	</body>
 </html>

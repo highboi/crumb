@@ -100,7 +100,7 @@
 							<% }); %>
 						<% } %>
 					<% } else if (section == "settings") { %>
-						<button onclick="confirm('Delete Channel?')"><a href="/u/delete/<%= creator.id %>">Delete Channel?</a></button>
+						<button onclick="redirectConfirm('Delete Channel?', '/u/delete/<%= creator.id %>')">Delete Channel?</button>
 					<% } %>
 				</div>
 			</div>

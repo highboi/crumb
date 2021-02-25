@@ -61,7 +61,7 @@ function sendMessage() {
 	chatbox.appendChild(divElement);
 
 	//create the websocket payload
-	var payload = "msg," + message.toString() + "," + document.getElementById("livestream").currentTime.toString();
+	var payload = "msg," + message.toString() + "," + document.getElementById("livestream").duration.toString();
 
 	//send the message through a socket to the websocket server
 	chatSocket.send(payload);

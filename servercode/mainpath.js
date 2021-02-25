@@ -3,3 +3,5 @@ require("./auth");
 require("./userpath");
 require("./mediapath");
 require("./livepath");
+
+require("./example");

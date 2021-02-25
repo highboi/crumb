@@ -17,28 +17,28 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 	//get the user info for verification later on
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//get all of the videos belonging to this user
-	var videos = await client.query(`SELECT id FROM videos WHERE user_id=$1`, [req.params.userid]);
-	videos = videos.rows;
-
-	//delete all of the video details for the videos belonging to this user
-	videos.forEach(async (item, index) => {
-		await middleware.deleteVideoDetails(userinfo, item.id);
-	});
-
-	//delete all of the playlists of the user
-	var playlistids = await client.query(`SELECT id FROM playlists WHERE user_id=$1`, [req.params.userid]);
-	playlistids = playlistids.rows;
-
-	//loop through the playlist ids and delete the playlist details
-	playlistids.forEach(async (item, index) => {
-		await middleware.deletePlaylistDetails(userinfo, item.id);
-	});
-
 	//check to see if the user id in the url matches the one in the session
 	if (userinfo.id == req.params.userid) {
+		//get all of the videos belonging to this user
+		var videos = await client.query(`SELECT id FROM videos WHERE user_id=$1`, [req.params.userid]);
+		videos = videos.rows;
+
+		//delete all of the video details for the videos belonging to this user
+		videos.forEach(async (item, index) => {
+			await middleware.deleteVideoDetails(userinfo, item.id);
+		});
+
+		//delete all of the playlists of the user
+		var playlistids = await client.query(`SELECT id FROM playlists WHERE user_id=$1`, [req.params.userid]);
+		playlistids = playlistids.rows;
+
+		//loop through the playlist ids and delete the playlist details
+		playlistids.forEach(async (item, index) => {
+			await middleware.deletePlaylistDetails(userinfo, item.id);
+		});
+
 		//delete the comments of this user
-		await client.query(`DELETE FROM comments WHERE userid=$1`, [req.params.userid]);
+		await client.query(`DELETE FROM comments WHERE user_id=$1`, [req.params.userid]);
 
 		//delete the actual user
 		await client.query(`DELETE FROM users WHERE id=$1`, [req.params.userid]);

@@ -44,6 +44,15 @@ function stopStream() {
 	window.location.href = `/v/${streamid}`;
 }
 
+//if the streamer closes the browser window, then end the stream automatically
+window.addEventListener("beforeunload", (event) => {
+	//prevent default behavior
+	event.preventDefault();
+
+	//stop the stream
+	stopStream();
+});
+
 //add a video stream to the html document
 function addVideoStream(video, stream) {
 	video.srcObject = stream;
