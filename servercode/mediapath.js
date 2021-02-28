@@ -16,6 +16,9 @@ app.get("/v/submit", middleware.checkSignedIn, async (req, res) => {
 
 //views individual videos on the site
 app.get("/v/:videoid", async (req, res) => {
+	//set the object to be passed to the rendering function
+	var viewObj = await middleware.getViewObj(req);
+
 	//select the video from the database
 	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
 	video = video.rows[0];
@@ -24,65 +27,65 @@ app.get("/v/:videoid", async (req, res) => {
 	var videocreator = await client.query(`SELECT * FROM users WHERE id=$1`, [video.user_id]);
 	videocreator = videocreator.rows[0];
 
-	//update the views on the video
-	var views = parseInt(video.views, 10); //get the current amount of views on the video
-	var newcount = views + 1; //increase the amount of views on the video
-	await client.query(`UPDATE videos SET views=$1 WHERE id=$2`, [newcount, req.params.videoid]); //update the views on the video
+	if (!video.deleted) {
+		//update the views on the video
+		await client.query(`UPDATE videos SET views=views+1 WHERE id=$1`, [req.params.videoid]); //update the views on the video
 
-	//get videos for the reccomendations
-	var videos = await middleware.getReccomendations(video);
+		//get videos for the reccomendations
+		var reccomendations = await middleware.getReccomendations(video);
 
-	//select the comments that belong to the video and order the comments by the amount of likes (most likes to least likes)
-	var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1 ORDER BY likes DESC`, [req.params.videoid]);
-	comments = comments.rows;
+		//select the comments that belong to the video and order the comments by the amount of likes (most likes to least likes)
+		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1 ORDER BY likes DESC`, [req.params.videoid]);
+		comments = comments.rows;
 
-	//select all of the chat messages that were typed if this was a live stream
-	var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE stream_id=$1`, [req.params.videoid]);
+		//select all of the chat messages that were typed if this was a live stream
+		var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE stream_id=$1`, [req.params.videoid]);
 
-	//get all of the user ids from the live chat and remove duplicates by putting them in a set
-	var chatUserIds = chatReplayMessages.rows.map((item) => {
-		return item.user_id;
-	});
-	chatUserIds = [...new Set(chatUserIds)];
+		//get all of the user ids from the live chat and remove duplicates by putting them in a set
+		var chatUserIds = chatReplayMessages.rows.map((item) => {
+			return item.user_id;
+		});
+		chatUserIds = [...new Set(chatUserIds)];
 
-	//put the channel icons and usernames associated with the user ids above into an object
-	var chatMessageInfo = {};
+		//put the channel icons and usernames associated with the user ids above into an object
+		var chatMessageInfo = {};
 
-	//use the .map() method with async function to iterate over promises which are passed to Promise.all(),
-	//which can then be "awaited" on to finish/complete all promises being iterated before proceeding
-	await Promise.all(chatUserIds.map(async (item) => {
-		//get the channel icon and username if this user with this id
-		var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1`, [item]);
-		userChatInfo = userChatInfo.rows[0];
+		//use the .map() method with async function to iterate over promises which are passed to Promise.all(),
+		//which can then be "awaited" on to finish/complete all promises being iterated before proceeding
+		await Promise.all(chatUserIds.map(async (item) => {
+			//get the channel icon and username if this user with this id
+			var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1`, [item]);
+			userChatInfo = userChatInfo.rows[0];
 
-		//insert the channel icon and username into the object with the key being the user id
-		chatMessageInfo[item] = userChatInfo;
-	}));
+			//insert the channel icon and username into the object with the key being the user id
+			chatMessageInfo[item] = userChatInfo;
+		}));
 
-	//map the chat replay messages to have both the original chat message object and the extra user info all in one object
-	chatReplayMessages = chatReplayMessages.rows.map((item) => {
-		return Object.assign({}, item, chatMessageInfo[item.user_id]);
-	});
+		//map the chat replay messages to have both the original chat message object and the extra user info all in one object
+		chatReplayMessages = chatReplayMessages.rows.map((item) => {
+			return Object.assign({}, item, chatMessageInfo[item.user_id]);
+		});
 
-	//set the object to be passed to the rendering function
-	var viewObj = await middleware.getViewObj(req);
-	viewObj = Object.assign({}, viewObj, {video: video, videos: videos, videocreator: videocreator, approx: approx, comments: comments});
+		viewObj = Object.assign({}, viewObj, {video: video, reccomendations: reccomendations, videocreator: videocreator, approx: approx, comments: comments});
 
-	//check to see if there are any chat messages to replay
-	if (chatReplayMessages.length > 0) {
-		viewObj.chatReplayMessages = chatReplayMessages;
-	}
+		//check to see if there are any chat messages to replay
+		if (chatReplayMessages.length > 0) {
+			viewObj.chatReplayMessages = chatReplayMessages;
+		}
 
-	//render the video view based on whether or not the user is logged in and has a session variable
-	if (req.cookies.sessionid) {
-		var subscribed = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [videocreator.id, viewObj.user.id]);
-		viewObj.subscribed = subscribed.rows.length;
-	}
+		//render the video view based on whether or not the user is logged in and has a session variable
+		if (req.cookies.sessionid) {
+			var subscribed = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [videocreator.id, viewObj.user.id]);
+			viewObj.subscribed = subscribed.rows.length;
+		}
 
-	//check to see if the video needs to scroll down to a comment that was just posted
-	if (req.query.scrollToComment == "true" && typeof req.query.commentid != 'undefined') {
-		viewObj.scrollToComment = true;
-		viewObj.commentid = req.query.commentid;
+		//check to see if the video needs to scroll down to a comment that was just posted
+		if (req.query.scrollToComment == "true" && typeof req.query.commentid != 'undefined') {
+			viewObj.scrollToComment = true;
+			viewObj.commentid = req.query.commentid;
+		}
+	} else {
+		viewObj = Object.assign({}, viewObj, {video: video, videocreator: videocreator});
 	}
 
 	//render the view
@@ -342,7 +345,7 @@ app.post("/v/submit", (req, res) => {
 			await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);
 
 			//change the video count on the user db entry
-			await client.query(`UPDATE users SET videos=$1 WHERE id=$2`, [userinfo.videos+1, userinfo.id]);
+			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
 
 			//redirect the user to their video
 			var videourl = `/v/${videoid}`; //get the url to redirect to now that the video has been created

@@ -139,6 +139,7 @@ liveWss.on("connection", async (ws, req) => {
 				console.log("Finished writing to file");
 			});
 			await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', stream.id]);
+			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [stream.user_id]);
 		} else if (queryparams.isClient == 'true') {
 			console.log("Stream Viewer Disconnected.");
 		}
@@ -147,14 +148,20 @@ liveWss.on("connection", async (ws, req) => {
 
 //this is a websocket connection handler for the obs server which handles the ending of OBS streams
 obsWss.on("connection", async (ws, req) => {
+	//get the user info from the cookies in the headers
+	var sessionid = cookie.parse(req.headers.cookie).sessionid;
+
+	var userinfo = await middleware.getUserSession(sessionid);
+
 	//get the query parameters of the connecting url
 	var queryparams = url.parse(req.url, true).query;
 
 	ws.room = queryparams.streamid;
 
-	ws.on("message", (message) => {
+	ws.on("message", async (message) => {
 		if (message == "ended") {
 			console.log("OBS STREAM ENDED:", ws.room);
+			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
 		}
 	});
 });

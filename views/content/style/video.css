@@ -230,6 +230,19 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 }
 
 /*
+STYLING THE "DELETED VIDEO" RECTANGLE
+*/
+
+.container .video-contents .video-container .deletedvideo {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background-color: black;
+	width: 100%;
+	height: auto;
+}
+
+/*
 Media Queries for rearranging elements
 */
 

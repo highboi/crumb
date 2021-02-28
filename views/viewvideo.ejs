@@ -15,171 +15,93 @@
 			<div class="container">
 				<div class="video-contents">
 					<div class="video-container">
-						<div id="loading"></div>
-						<video poster="<%= video.thumbnail %>" id="video" controls="">
-							<source src="http://localhost/video/<%= video.id %>" type="video/mp4">
-							<source src="http://localhost/video/<%= video.id %>" type="video/webm">
-							<source src="http://localhost/video/<%= video.id %>" type="video/ogg">
-							<h1>HTML Video is not supported in your browser, sorry.</h1>
-						</video>
+						<% if (video.deleted) { %>
+							<div class="deletedvideo">
+								<h1>Video was deleted, sorry.</h1>
+								<img src="<%= video.thumbnail %>">
+							</div>
+							<h1><%= video.title %></h1>
+						<% } else { %>
+							<div id="loading"></div>
+							<video poster="<%= video.thumbnail %>" id="video" controls="">
+								<source src="http://localhost/video/<%= video.id %>" type="video/mp4">
+								<source src="http://localhost/video/<%= video.id %>" type="video/webm">
+								<source src="http://localhost/video/<%= video.id %>" type="video/ogg">
+								<h1>HTML Video is not supported in your browser, sorry.</h1>
+							</video>
+						<% } %>
 					</div>
+					<% if (!video.deleted) { %>
+						<%- include('content/ejs/videotext.ejs') %>
+					<% } %>
+				</div>
 
-					<div class="videotext">
-						<h1 id="title"><%= video.title %></h1>
-						<% if (typeof video.topics != 'object') { %>
-							<hr>
-							<p>
-							<% var topicsarray = video.topics.split(","); %>
-							<% topicsarray.forEach((item, index) => { %>
-								<%= item %> 
+				<% if (!video.deleted) { %>
+					<div class="reccomendations">
+						<% if (typeof chatReplayMessages != 'undefined') { %>
+							<div id="chatReplay">
+								<h3 id="replayTitle">Chat Replay:</h3>
+								<div id="chatReplayMessages"></div>
+							</div>
+						<% } %>
+						<h2>&nbspUp Next</h2><hr>
+						<% if (typeof reccomendations != 'undefined') { %>
+							<% reccomendations.forEach((item, index) => { %>
+								<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+								<hr>
 							<% }); %>
-							</p>
 						<% } %>
-						<hr>
-						<div class="extralinks" id="<%= video.id %>extralinks">
-							<button onclick="showform('<%= video.id %>', 'playlistform')">Add To Playlist</button>
-							<button onclick="showform('<%= video.id %>', 'reportform')">Report</button>
-						</div>
-						<div class="extralinkforms" id="<%= video.id %>extralinkforms">
-							<object id="<%= video.id %>playlistform">
-								<h3><a href="/playlist/new/?videoid=<%= video.id %>">Create Playlist</a></h3><br>
-								<% if (typeof playlists != 'undefined') { %>
-									<% playlists.forEach((plist, index) => { %>
-										<h3><a href="/playlistvideo/add/<%= plist.id %>/<%= video.id %>"><%= plist.name %></a></h3><br>
-									<% }); %>
-								<% } %>
-							</object>
-							<object id="<%= video.id %>reportform">
-								<form action="/report/<%= video.id %>" method="post">
-								</form>
-							</object>
-						</div>
-						<hr>
-						<div class="channel-details">
-							<% var channellink = `/u/${videocreator.id}` %>
-							<div id="icon">
-								<a href="<%= channellink %>">
-									<img src="<%= videocreator.channelicon %>">
-								</a>
-							</div>
-							<div id="channel-text">	
-								<a href="<%= channellink %>">
-									<h2><%= videocreator.username %></h2>
-								</a>
-							</div>
-							<div class="video-buttons">
-								<div class="subscribe-section">
-									<% if (typeof subscribed != 'undefined') { %>
-										<% if (subscribed != 0) { %>
-											<button id="subscribebutton" onclick="subscribe('<%= videocreator.id %>', this)">Subscribed</button>
-										<% } else { %>
-											<button id="subscribebutton" onclick="subscribe('<%= videocreator.id %>', this)">Subscribe</button>
-										<% } %>
-									<% } else { %>
-										<button id="subscribebutton" onclick="subscribe('<%= videocreator.id %>', this)">Subscribe</button>
-									<% } %>
-									<p><%= videocreator.subscribers %></p>
-								</div>
-								<div class="likesection">
-									<button class="likebuttons" onclick="likeVideo('<%= video.id %>')"><img src="/content/icons/like.ico"></button>
-									<p id="likes"><%= video.likes %></p>
-									<button class="likebuttons" onclick="dislikeVideo('<%= video.id %>')"><img src="/content/icons/dislike.ico"></button>
-									<p id="dislikes"><%= video.dislikes %></p>
-								</div>
-							</div>
-						</div>
-						<hr>
-						<p><%= approx(video.views) %> Views | Posted: <%= new Date(video.posttime).toLocaleDateString(undefined, {}) %></p>
-						<hr>
-						<div class="description">
-							<% if (video.description.length > 100) { %>
-								<p>
-									<%= video.description.substr(0, 100) %>
-									<span id="dots">...</span>
-								</p>
-								<% var moretext = video.description.substr(100); %>
-								<div id="more" style="display: none">
-									<p><%= moretext %></p>
-								</div>
-								<button onclick="readMore()" id="readMoreBtn">Read More</button>
-							<% } else { %>
-								<p><%= video.description %></p>
-							<% } %>
-						</div>
-						<hr>
 					</div>
 
-					<% if (typeof user != 'undefined') { %>
-						<% if (video.user_id == user.id) { %>
-							<% var deletelink = `/v/delete/${video.id}` %>
-							<button><a href="<%= deletelink %>">Delete Video</a></button>
-							<hr>
-						<% } %>
-					<% } %>
-				</div>
-
-				<div class="reccomendations">
-					<% if (typeof chatReplayMessages != 'undefined') { %>
-						<div id="chatReplay">
-							<h3 id="replayTitle">Chat Replay:</h3>
-							<div id="chatReplayMessages"></div>
-						</div>
-					<% } %>
-					<h2>&nbspUp Next</h2><hr>
-					<% if (typeof videos != 'undefined') { %>
-						<% videos.forEach((item, index) => { %>
-							<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
-							<hr>
-						<% }); %>
-					<% } %>
-				</div>
-
-				<%- include('content/ejs/comments.ejs', {video: video, comments: comments}) %>
+					<%- include('content/ejs/comments.ejs', {video: video, comments: comments}) %>
+				<% } %>
 			</div>
 
-			<%- include('content/ejs/scripts.ejs') %>
+			<% if (!video.deleted) { %>
+				<%- include('content/ejs/scripts.ejs') %>
 
-			<script type="text/javascript">
-				function readMore() {
-					var dots = document.getElementById("dots");
-					var moreText = document.getElementById("more");
-					var btnText = document.getElementById("readMoreBtn");
+				<script type="text/javascript">
+					function readMore() {
+						var dots = document.getElementById("dots");
+						var moreText = document.getElementById("more");
+						var btnText = document.getElementById("readMoreBtn");
 
-					if (dots.style.display === "none") {
-						dots.style.display = "inline";
-						btnText.innerHTML = "Read More";
-						moreText.style.display = "none";
-					} else {
-						dots.style.display = "none";
-						btnText.innerHTML = "Read Less";
-						moreText.style.display = "inline";
+						if (dots.style.display === "none") {
+							dots.style.display = "inline";
+							btnText.innerHTML = "Read More";
+							moreText.style.display = "none";
+						} else {
+							dots.style.display = "none";
+							btnText.innerHTML = "Read Less";
+							moreText.style.display = "inline";
+						}
 					}
-				}
-			</script>
+				</script>
 
-			<script type="text/javascript">
-				var videovar = <%- JSON.stringify(video) %>;
-				<% if (typeof videos[0] != 'undefined') { %>
-					var nextvideo = <%- JSON.stringify(videos[0]) %>;
-				<% } %>
-				<% if (typeof commentid != 'undefined') { %>
-					var commentid = <%- JSON.stringify(commentid) %>;
-					var commentElement = document.getElementById(commentid);
-					commentElement.scrollIntoView();
-					commentElement.style.backgroundColor = "#1a1a1a";
-					commentElement.style.borderStyle = "solid";
-					commentElement.style.borderWidth = "5px";
-					commentElement.style.borderColor = "#adff12";
-				<% } %>
-				<% if (typeof chatReplayMessages != 'undefined') { %>
-					var chatReplayMessages = <%- JSON.stringify(chatReplayMessages) %>;
-				<% } %>
-			</script>
+				<script type="text/javascript">
+					var videovar = <%- JSON.stringify(video) %>;
+					<% if (typeof reccomendations[0] != 'undefined') { %>
+						var nextvideo = <%- JSON.stringify(reccomendations[0]) %>;
+					<% } %>
+					<% if (typeof commentid != 'undefined') { %>
+						var commentid = <%- JSON.stringify(commentid) %>;
+						var commentElement = document.getElementById(commentid);
+						commentElement.scrollIntoView();
+						commentElement.style.backgroundColor = "#1a1a1a";
+						commentElement.style.borderStyle = "solid";
+						commentElement.style.borderWidth = "5px";
+						commentElement.style.borderColor = "#adff12";
+					<% } %>
+					<% if (typeof chatReplayMessages != 'undefined') { %>
+						var chatReplayMessages = <%- JSON.stringify(chatReplayMessages) %>;
+					<% } %>
+				</script>
 
-			<script src="/content/javascript/likedislike.js"></script>
-			<script src="/content/javascript/elementclicks.js"></script>
-			<script src="/content/javascript/chatreplay.js"></script>
-			<script src="/content/javascript/sortcomments.js"></script>
+				<script src="/content/javascript/likedislike.js"></script>
+				<script src="/content/javascript/elementclicks.js"></script>
+				<script src="/content/javascript/chatreplay.js"></script>
+				<script src="/content/javascript/sortcomments.js"></script>
+			<% } %>
 		</main>
 	</body>
 </html>

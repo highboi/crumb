@@ -46,9 +46,6 @@ function stopStream() {
 
 //if the streamer closes the browser window, then end the stream automatically
 window.addEventListener("beforeunload", (event) => {
-	//prevent default behavior
-	event.preventDefault();
-
 	//stop the stream
 	stopStream();
 });

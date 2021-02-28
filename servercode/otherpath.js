@@ -6,7 +6,7 @@ app.get('/', async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
 
 	//select all of the videos from the database to be displayed
-	var videos = await client.query("SELECT * FROM videos LIMIT 50");
+	var videos = await client.query(`SELECT * FROM videos WHERE deleted=${false} LIMIT 50`);
 
 	//insert the video rows into the view object
 	viewObj.videos = videos.rows;

@@ -156,24 +156,29 @@ middleware = {
 	//this is a function to delete video details
 	deleteVideoDetails: async function (userinfo, videoid) {
 		//get the video to be deleted
-		var video = await client.query(`SELECT thumbnail, video, user_id FROM videos WHERE id=$1`, [videoid]);
+		var video = await client.query(`SELECT thumbnail, video FROM videofiles WHERE id=$1`, [videoid]);
 		video = video.rows[0];
 		//get the paths of the files for the thumbnail and the video
 		var thumbnailpath = global.appRoot + "/storage" + video.thumbnail;
 		var videopath = global.appRoot + "/storage" + video.video;
+
+		var video_user_id = await client.query(`SELECT user_id FROM videos WHERE id=$1`, [videoid]);
+		video_user_id = video_user_id.rows[0].user_id;
+
 		//check to see if the user trying to delete the video actually owns the video
-		if (userinfo.id == video.user_id) {
-			//delete all of the playlist entries for this video
-			await client.query(`DELETE FROM playlistvideos WHERE video_id=$1`, [videoid]);
+		if (userinfo.id == video_user_id) {
 			//delete all of the comments for this video
 			await client.query(`DELETE FROM comments WHERE video_id=$1`, [videoid]);
 			//delete the video file entry and the comment file entries
 			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
 			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
 			//delete the video details in the database
-			await client.query(`DELETE FROM videos WHERE id=$1`, [videoid]);
+			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["[deleted video]", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
+			//await client.query(`DELETE FROM videos WHERE id=$1`, [videoid]);
 			//delete the live chat messages from the video
 			await client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
+			//update the amount of videos the user has
+			await client.query(`UPDATE users SET videocount=videocount-1 WHERE id=$1`, [userinfo.id]);
 			//delete the actual files for the video and thumbnail
 			fs.unlink(videopath, (err) => {
 				if (err) throw err;
@@ -365,7 +370,7 @@ middleware = {
 		//get all of the videos from the database with titles like the search term
 		for (var i=0; i<phrases.length; i++) {
 			//get all of the videos from the database with a title matching the current term
-			var result = await client.query(`SELECT ${selector} FROM videos WHERE UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1)`, ["%" + phrases[i] + "%"]);
+			var result = await client.query(`SELECT ${selector} FROM videos WHERE deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
 			//check to see that the same video is not included in the results twice
 			result.rows.forEach((item, index) => {
 				//a boolean to check to see if the video has been added

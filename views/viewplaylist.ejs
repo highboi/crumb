@@ -26,33 +26,7 @@
 				<% if (typeof videos != 'undefined') { %>
 					<% if (videos.length > 0) { %>
 						<% videos.forEach((item, index) => { %>
-							<div class="video">
-								<% var videolink = `/v/${item.id}` %>
-								<% var channellink = `/u/${item.user_id}` %>
-								<div class="thumbnail">
-									<a href="<%= videolink %>">
-										<img src="<%= item.thumbnail %>" alt="Thumbnail" width="450" height="300">
-									</a>
-								</div>
-								<div class="links">
-									<a href="<%= videolink %>">
-										<h3 style="text-transform: capitalize"><strong><%= item.title %></strong></h3>
-									</a>
-									<div id="channel-links">
-										<a href="<%= channellink %>">
-											<img id="channel-icon" src="<%= item.channelicon %>">
-										</a>
-										<a href="<%= channellink %>">
-											<p><%= item.username %></p>
-										</a>
-										<svg width="10" height="40">
-											<circle cx="5" cy="5" r="5" fill="#adff12"/>
-											<circle cx="5" cy="20" r="5" fill="#adff12"/>
-											<circle cx="5" cy="35" r="5" fill="#adff12"/>
-										</svg>
-									</div>
-								</div>
-							</div>
+							<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
 							<% if (typeof user != undefined) { %>
 								<% if (creator.id == user.id) { %>
 									<button><a href="/playlistvideo/delete/<%= playlist.id %>/<%= item.id %>">Delete Video</a></button>

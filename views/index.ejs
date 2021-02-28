@@ -12,7 +12,7 @@
 			<%- include('content/ejs/body.ejs') %>
 
 			<h1>Videos:</h1>
-			<div class="home-videos">
+			<div class="group-videos">
 				<% if (typeof videos != 'undefined') { %>
 					<% videos.forEach((item, index) => { %>
 						<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
