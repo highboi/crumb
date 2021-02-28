@@ -19,10 +19,17 @@
 					<input id="name" name="name" type="text" placeholder="Name your playlist" autofocus>
 				</div><br>
 				<div>
-					<% if (typeof videoid != 'undefined') { %>
-						<input type="hidden" id="videoid" name="videoid" value="<%= videoid %>">
-					<% } %>
+					<label for="private">Make playlist private?</label>
+					<select id="private" name="private">
+						<option value="false">No</option>
+						<option value="true">Yes</option>
+					</select>
 				</div><br>
+				<% if (typeof videoid != 'undefined') { %>
+					<div>
+						<input type="hidden" id="videoid" name="videoid" value="<%= videoid %>">
+					</div><br>
+				<% } %>
 				<div>
 					<input type="submit" value="Create">
 				</div>

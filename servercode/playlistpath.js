@@ -6,23 +6,30 @@ GET PATHS FOR PLAYLISTS
 
 //this is a get request for the playlists on the site
 app.get("/p/:playlistid", async(req, res) => {
-	//get all of the videos in the db
-	var videos = await client.query(`SELECT * FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1)`, [req.params.playlistid]);
-	videos = videos.rows;
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	//get the view object
+	var viewObj = await middleware.getViewObj(req);
 
 	//get the playlist object which contains the name of the playlist and the id of the user that created it
 	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1`, [req.params.playlistid]);
 	playlist = playlist.rows[0];
 
-	//get the creator of the playlist
-	var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [playlist.user_id]);
-	creator = creator.rows[0];
 
-	//get the view object
-	var viewObj = await middleware.getViewObj(req);
+	if (!(playlist.private && (typeof userinfo == 'undefined' || userinfo.id != playlist.user_id))) {
+		//get all of the videos in the db
+		var videos = await client.query(`SELECT * FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1)`, [req.params.playlistid]);
+		videos = videos.rows;
 
-	//create view object to pass into the view
-	viewObj = Object.assign({}, viewObj, {creator: creator, videos: videos, playlist: playlist});
+		//get the creator of the playlist
+		var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [playlist.user_id]);
+		creator = creator.rows[0];
+
+		//create view object to pass into the view
+		viewObj = Object.assign({}, viewObj, {creator: creator, videos: videos, playlist: playlist});
+	} else {
+		viewObj = Object.assign({}, viewObj, {playlist: playlist});
+	}
 
 	//render the view for the playlist
 	res.render("viewplaylist.ejs", viewObj);
@@ -166,7 +173,7 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 		res.redirect(`/p/${results.rows[0].id}`);
 	} else { //add the playlist into the db
 		//add the details of the playlist into the database
-		await client.query(`INSERT INTO playlists (id, name, user_id, candelete) VALUES ($1, $2, $3, $4)`, [newid, req.body.name, userinfo.id, true]);
+		await client.query(`INSERT INTO playlists (id, name, user_id, candelete, private) VALUES ($1, $2, $3, $4, $5)`, [newid, req.body.name, userinfo.id, true, req.body.private]);
 		//check to see if there is a video that needs to be added to the new playlist
 		if (typeof req.body.videoid != 'undefined') {
 			//insert the video id and playlist id into the playlistvideos table

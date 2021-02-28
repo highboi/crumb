@@ -2,7 +2,11 @@
 
 <html>
 	<head>
-		<%- include('content/ejs/head.ejs', {title: `${playlist.name} - ${creator.username}`}) %>
+		<% if (!playlist.private) { %>
+			<%- include('content/ejs/head.ejs', {title: `${playlist.name} - ${creator.username}`}) %>
+		<% } else { %>
+			<%- include('content/ejs/head.ejs', {title: 'Playlist has been set to private by the user'}) %>
+		<% } %>
 	</head>
 	<body>
 		<nav>
@@ -13,31 +17,35 @@
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
-			<h1><%= playlist.name %></h1>
-			<% if (typeof user != 'undefined') { %>
-				<% if (creator.id == user.id && playlist.candelete) { %>
-					<% var deletelink = `/playlist/delete/${playlist.id}` %>
-					<button><a href="<%= deletelink %>">Delete Playlist</a></button>
-				<% } %>
-			<% } %>
-			<hr>
-
-			<div class="playlist-videos">
-				<% if (typeof videos != 'undefined') { %>
-					<% if (videos.length > 0) { %>
-						<% videos.forEach((item, index) => { %>
-							<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
-							<% if (typeof user != undefined) { %>
-								<% if (creator.id == user.id) { %>
-									<button><a href="/playlistvideo/delete/<%= playlist.id %>/<%= item.id %>">Delete Video</a></button>
-								<% } %>
-							<% } %>
-						<% }); %>
-					<% } else { %>
-						<h2>No videos yet!</h2>
+			<% if (playlist.private && (typeof user == 'undefined' || user.id != playlist.user_id)) { %>
+				<h1>[This playlist has been set to private by the user]</h1>
+			<% } else { %>
+				<h1><%= playlist.name %></h1>
+				<% if (typeof user != 'undefined') { %>
+					<% if (creator.id == user.id && playlist.candelete) { %>
+						<% var deletelink = `/playlist/delete/${playlist.id}` %>
+						<button><a href="<%= deletelink %>">Delete Playlist</a></button>
 					<% } %>
 				<% } %>
-			</div>
+				<hr>
+
+				<div class="playlist-videos">
+					<% if (typeof videos != 'undefined') { %>
+						<% if (videos.length > 0) { %>
+							<% videos.forEach((item, index) => { %>
+								<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+								<% if (typeof user != undefined) { %>
+									<% if (creator.id == user.id) { %>
+										<button><a href="/playlistvideo/delete/<%= playlist.id %>/<%= item.id %>">Delete Video</a></button>
+									<% } %>
+								<% } %>
+							<% }); %>
+						<% } else { %>
+							<h2>No videos yet!</h2>
+						<% } %>
+					<% } %>
+				</div>
+			<% } %>
 
 			<%- include('content/ejs/scripts.ejs') %>
 		</main>

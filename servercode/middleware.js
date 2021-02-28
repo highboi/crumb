@@ -417,7 +417,7 @@ middleware = {
 	searchPlaylists: async (selector, phrases) => {
 		var results = [];
 		for (var i=0; i < phrases.length; i++) {
-			var result = await client.query(`SELECT ${selector} FROM playlists WHERE UPPER(name) LIKE UPPER($1)`, ["%" + phrases[i] + "%"]);
+			var result = await client.query(`SELECT ${selector} FROM playlists WHERE private=${false} AND (UPPER(name) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
 			result.rows.forEach((item, index) => {
 				var added = false;
 				for (var j=0; j < results.length; j++) {
