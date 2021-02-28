@@ -126,8 +126,10 @@ middleware = {
 
 	//this gets a user from the redis session store and returns the object for this user
 	getUserSession: async function (sessionid) {
-		var userinfo = await redisClient.getAsync(sessionid);
-		return JSON.parse(userinfo);
+		if (typeof sessionid != 'undefined') {
+			var userinfo = await redisClient.getAsync(sessionid);
+			return JSON.parse(userinfo);
+		}
 	},
 
 	//this function gets the filename of an OBS stream file from a timestamp
@@ -173,8 +175,7 @@ middleware = {
 			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
 			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
 			//delete the video details in the database
-			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["[deleted video]", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
-			//await client.query(`DELETE FROM videos WHERE id=$1`, [videoid]);
+			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
 			//delete the live chat messages from the video
 			await client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
 			//update the amount of videos the user has
@@ -370,7 +371,7 @@ middleware = {
 		//get all of the videos from the database with titles like the search term
 		for (var i=0; i<phrases.length; i++) {
 			//get all of the videos from the database with a title matching the current term
-			var result = await client.query(`SELECT ${selector} FROM videos WHERE deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
+			var result = await client.query(`SELECT ${selector} FROM videos WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
 			//check to see that the same video is not included in the results twice
 			result.rows.forEach((item, index) => {
 				//a boolean to check to see if the video has been added

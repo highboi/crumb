@@ -86,7 +86,7 @@
 <% if (typeof user != 'undefined') { %>
 	<% if (video.user_id == user.id && !video.deleted) { %>
 		<% var deletelink = `/v/delete/${video.id}` %>
-		<button><a href="<%= deletelink %>">Delete Video</a></button>
+		<button onclick="redirectConfirm('Delete Video?', '<%= deletelink %>')">Delete Video</a></button>
 		<hr>
 	<% } %>
 <% } %>

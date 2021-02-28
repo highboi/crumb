@@ -233,7 +233,7 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 STYLING THE "DELETED VIDEO" RECTANGLE
 */
 
-.container .video-contents .video-container .deletedvideo {
+.container .video-contents .video-container .novideo {
 	display: flex;
 	flex-direction: column;
 	align-items: center;

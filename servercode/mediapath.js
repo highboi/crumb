@@ -27,7 +27,7 @@ app.get("/v/:videoid", async (req, res) => {
 	var videocreator = await client.query(`SELECT * FROM users WHERE id=$1`, [video.user_id]);
 	videocreator = videocreator.rows[0];
 
-	if (!video.deleted) {
+	if (!video.deleted && !video.private) {
 		//update the views on the video
 		await client.query(`UPDATE videos SET views=views+1 WHERE id=$1`, [req.params.videoid]); //update the views on the video
 
@@ -336,10 +336,10 @@ app.post("/v/submit", (req, res) => {
 			var videoid = await middleware.generateAlphanumId();
 
 			//the array to contain the values to insert into the db
-			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, false];
+			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, false, true];
 
 			//load the video into the database
-			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, valuesArr);
+			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, private) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesArr);
 
 			//insert the video file paths into the db
 			await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);

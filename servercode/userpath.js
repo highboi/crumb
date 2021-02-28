@@ -6,6 +6,9 @@ GET PATHS FOR USER-RELATED CONTENT
 
 //view the channel of the user
 app.get("/u/:userid", async (req, res) => {
+	//get the user session info if there is any to get
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
 	//get the base view object
 	var viewObj = await middleware.getViewObj(req);
 
@@ -37,11 +40,19 @@ app.get("/u/:userid", async (req, res) => {
 		case "playlists":
 			var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [req.params.userid]);
 			viewObj.playlists = playlists.rows;
+			viewObj.videos = [];
 			break;
 		case "shoutouts":
 			var shoutouts = await client.query(`SELECT * FROM shoutouts WHERE user_id=$1`, [req.params.userid]);
 			viewObj.shoutouts = shoutouts.rows;
+			viewObj.videos = [];
 			break;
+	}
+
+	if (typeof userinfo == 'undefined' || userinfo.id != viewObj.creator.id) {
+		viewObj.videos = viewObj.videos.filter((item) => {
+			return !item.private;
+		});
 	}
 
 	//render the view
