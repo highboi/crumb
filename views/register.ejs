@@ -14,7 +14,7 @@
 
 			<%- include('content/ejs/body.ejs') %>
 
-			<form action="/register" method="POST" class="authform" enctype="multipart/form-data">
+			<form action="/register" method="POST" class="authform" enctype="multipart/form-data" onsubmit="return validateForm('passwordconf');">
 				<div>
 					<input id="username" name="username" type="text" placeholder="Username" autofocus>
 				</div>
@@ -53,7 +53,7 @@
 			</form>
 
 			<%- include('content/ejs/scripts.ejs') %>
-			<script src="/content/javascript/passwordconf.js"></script>
+			<script src="/content/javascript/validateform.js"></script>
 		</main>
 	</body>
 </html>

@@ -14,7 +14,7 @@
 
 			<%- include('content/ejs/body.ejs') %>
 
-			<form action="/login" method="POST" class="authform">
+			<form action="/login" method="POST" class="authform" onsubmit="return validateForm();">
 				<p>Enter your Information to Log in.</p>
 				<div>
 					<input id="username" name="username" placeholder="Username" autofocus>
@@ -34,6 +34,7 @@
 			</form>
 
 			<%- include('content/ejs/scripts.ejs') %>
+			<script src="/content/javascript/validateform.js"></script>
 		</main>
 	</body>
 </html>
