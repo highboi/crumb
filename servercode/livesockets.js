@@ -45,18 +45,20 @@ liveWss.on("connection", async (ws, req) => {
 	var queryparams = url.parse(req.url, true).query;
 
 	//isolate the websocket with the livestream id in the url query parameters
-	var streams = Array.from(liveWss.clients).filter((socket) => {
-		return typeof socket.streamid != 'undefined';
-	}).filter((socket) => {
+	var streams = global.webStreamers.filter((socket) => {
 		return socket.streamid == queryparams.streamid;
 	});
 
 	//close the socket if there are no live streams and if this is a client and not an streamer
+	//(no stream is being started, only connected to)
 	if (streams.length <= 0 && queryparams.isClient == 'true') {
 		ws.close();
-	} else if (streams.length > 0 && queryparams.isClient == 'true') {
+	} else if (streams.length > 0 && queryparams.isClient == 'true') { //if the client is connecting to a valid stream
 		//set the room to the stream id
 		ws.room = queryparams.streamid;
+
+		//add this client to the global array for web stream clients
+		global.webStreamClients.push(ws);
 
 		//send the data buffer to the client
 		var dataBuf = Buffer.concat(streams[0].dataBuffer);
@@ -74,6 +76,9 @@ liveWss.on("connection", async (ws, req) => {
 
 		//create a data buffer array to create a video buffer to load the full video into the client side if they join late
 		ws.dataBuffer = [];
+
+		//add this websocket client to the global array for web streamers
+		global.webStreamers.push(ws);
 
 		//get the stream from the database
 		var stream = await client.query(`SELECT * FROM videos WHERE id=$1`, [queryparams.streamid]);
@@ -100,7 +105,7 @@ liveWss.on("connection", async (ws, req) => {
 
 	//event handling for socket messages
 	ws.on("message", (message) => {
-		if (queryparams.isStreamer == 'true') {
+		if (queryparams.isStreamer == 'true') { //if the socket is from a streamer, then do stuff
 			if (typeof message == 'object') {
 				//write the new data to the file
 				writeStream.write(message, () => {
@@ -113,7 +118,7 @@ liveWss.on("connection", async (ws, req) => {
 
 			//sort the clients for the websocket server to only the stream
 			//viewers
-			var clients = Array.from(liveWss.clients).filter((socket) => {
+			var clients = global.webStreamClients.filter((socket) => {
 				return socket.room == stream.id;
 			}).filter((socket) => {
 				return socket.readyState == WebSocket.OPEN;
@@ -132,15 +137,25 @@ liveWss.on("connection", async (ws, req) => {
 
 	//event handling for a closing/disconnecting socket
 	ws.on("close", async () => {
-		if (queryparams.isStreamer == 'true') {
+		//filter for streamers vs clients
+		if (queryparams.isStreamer == 'true') { //if a streamer
+			//remove the websocket object from the global var
+			global.webStreamers.splice(global.webStreamers.indexOf(ws), 1);
+
 			console.log("Streamer Disconnected.");
+
+			//end the writing to the video file
 			writeStream.end();
 			writeStream.on("finish", () => {
 				console.log("Finished writing to file");
 			});
+
+			//set the "streaming" field in the videos table to "false" and increase the video count for the streamer
 			await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', stream.id]);
 			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [stream.user_id]);
-		} else if (queryparams.isClient == 'true') {
+		} else if (queryparams.isClient == 'true') { //if a client
+			//remove the websocket object from the global variable
+			global.webStreamClients.splice(global.webStreamClients.indexOf(ws), 1);
 			console.log("Stream Viewer Disconnected.");
 		}
 	});
@@ -168,9 +183,10 @@ obsWss.on("connection", async (ws, req) => {
 
 //this is a websocket connection handler for the chat server which handles the transmitting of chat data between clients of a live stream
 chatWss.on("connection", async (ws, req) => {
-	//get the user info from the cookies in the headers
+	//get the session id cookie value from the headers
 	var sessionid = cookie.parse(req.headers.cookie).sessionid;
 
+	//get the user info based on the session id cookie value
 	var userinfo = await middleware.getUserSession(sessionid);
 
 	//get the query parameters of the connecting user
@@ -187,8 +203,6 @@ chatWss.on("connection", async (ws, req) => {
 		if (data[0] == "msg") { //if the data is a message to send, then send it
 			//get the recipients from the chat wss for this live stream
 			var recipients = Array.from(chatWss.clients).filter((socket) => {
-				return typeof socket.room != 'undefined';
-			}).filter((socket) => {
 				return socket.room == queryparams.streamid;
 			});
 

@@ -17,9 +17,7 @@ GET PATHS FOR LIVE MEDIA
 
 app.get("/l/view/:streamid", async (req, res) => {
 	//isolate the websocket with the livestream id in the url
-	var streams = Array.from(liveWss.clients).filter((socket) => {
-		return typeof socket.streamid != 'undefined';
-	}).filter((socket) => {
+	var streams = global.webStreamers.filter((socket) => {
 		return socket.streamid == req.params.streamid;
 	});
 

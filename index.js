@@ -1,6 +1,10 @@
 //set the global app root for saving files and stuff (this is at the start of everything else)
 global.appRoot = __dirname;
 
+//set global variables for websocket clients to avoid unnecessary computations
+global.webStreamClients = [];
+global.webStreamers = [];
+
 //get the variables to work with in the config file
 const { client, middleware, server, nms, obsWss } = require("./servercode/configBasic");
 
