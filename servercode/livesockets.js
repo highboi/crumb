@@ -44,26 +44,24 @@ liveWss.on("connection", async (ws, req) => {
 	//get the query parameter in the connecting url
 	var queryparams = url.parse(req.url, true).query;
 
-	//isolate the websocket with the livestream id in the url query parameters
-	var streams = global.webStreamers.filter((socket) => {
-		return socket.streamid == queryparams.streamid;
-	});
+	//get the stream entry in the global object
+	var wsEntry = global.webWssClients[queryparams.streamid];
 
 	//close the socket if there are no live streams and if this is a client and not an streamer
 	//(no stream is being started, only connected to)
-	if (streams.length <= 0 && queryparams.isClient == 'true') {
+	if (typeof wsEntry == 'undefined' && queryparams.isClient == 'true') {
 		ws.close();
-	} else if (streams.length > 0 && queryparams.isClient == 'true') { //if the client is connecting to a valid stream
+	} else if (typeof wsEntry != 'undefined' && queryparams.isClient == 'true') { //if the client is connecting to a valid stream
 		//set the room to the stream id
 		ws.room = queryparams.streamid;
 
-		//add this client to the global array for web stream clients
-		global.webStreamClients.push(ws);
+		//add this client to the global object entry
+		global.webWssClients[queryparams.streamid].push(ws);
 
 		//send the data buffer to the client
-		var dataBuf = Buffer.concat(streams[0].dataBuffer);
+		var dataBuf = Buffer.concat(wsEntry[0].dataBuffer);
 		ws.send(dataBuf);
-	} else if (streams.length <= 0 && queryparams.isStreamer == 'true') { //if the connecting client is a streamer, then do stuff
+	} else if (typeof wsEntry == 'undefined' && queryparams.isStreamer == 'true') { //if the connecting client is a streamer, then do stuff
 		//set the streamid
 		ws.streamid = queryparams.streamid;
 
@@ -77,8 +75,8 @@ liveWss.on("connection", async (ws, req) => {
 		//create a data buffer array to create a video buffer to load the full video into the client side if they join late
 		ws.dataBuffer = [];
 
-		//add this websocket client to the global array for web streamers
-		global.webStreamers.push(ws);
+		//create a new object entry in the global variable and add the streamer as the first element in the array
+		global.webWssClients[queryparams.streamid] = [ws];
 
 		//get the stream from the database
 		var stream = await client.query(`SELECT * FROM videos WHERE id=$1`, [queryparams.streamid]);
@@ -116,11 +114,8 @@ liveWss.on("connection", async (ws, req) => {
 				ws.dataBuffer.push(message);
 			}
 
-			//sort the clients for the websocket server to only the stream
-			//viewers
-			var clients = global.webStreamClients.filter((socket) => {
-				return socket.room == stream.id;
-			}).filter((socket) => {
+			//get all of the open clients in the global object
+			var clients = global.webWssClients[queryparams.streamid].slice(1).filter((socket) => {
 				return socket.readyState == WebSocket.OPEN;
 			});
 
@@ -139,9 +134,6 @@ liveWss.on("connection", async (ws, req) => {
 	ws.on("close", async () => {
 		//filter for streamers vs clients
 		if (queryparams.isStreamer == 'true') { //if a streamer
-			//remove the websocket object from the global var
-			global.webStreamers.splice(global.webStreamers.indexOf(ws), 1);
-
 			console.log("Streamer Disconnected.");
 
 			//end the writing to the video file
@@ -150,12 +142,16 @@ liveWss.on("connection", async (ws, req) => {
 				console.log("Finished writing to file");
 			});
 
+			//delete the websocket entry in the global variable
+			delete global.webWssClients[queryparams.streamid];
+
 			//set the "streaming" field in the videos table to "false" and increase the video count for the streamer
-			await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', stream.id]);
+			await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', queryparams.streamid]);
 			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [stream.user_id]);
 		} else if (queryparams.isClient == 'true') { //if a client
-			//remove the websocket object from the global variable
-			global.webStreamClients.splice(global.webStreamClients.indexOf(ws), 1);
+			//remove this websocket client from the global object entry
+			global.webWssClients[queryparams.streamid].splice(global.webWssClients[queryparams.streamid].indexOf(ws), 1);
+
 			console.log("Stream Viewer Disconnected.");
 		}
 	});

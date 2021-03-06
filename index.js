@@ -2,8 +2,7 @@
 global.appRoot = __dirname;
 
 //set global variables for websocket clients to avoid unnecessary computations
-global.webStreamClients = [];
-global.webStreamers = [];
+global.webWssClients = {};
 
 //get the variables to work with in the config file
 const { client, middleware, server, nms, obsWss } = require("./servercode/configBasic");

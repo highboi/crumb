@@ -17,12 +17,10 @@ GET PATHS FOR LIVE MEDIA
 
 app.get("/l/view/:streamid", async (req, res) => {
 	//isolate the websocket with the livestream id in the url
-	var streams = global.webStreamers.filter((socket) => {
-		return socket.streamid == req.params.streamid;
-	});
+	var stream = global.webWssClients[req.params.streamid];
 
 	//if there are no streams with the id in the url, then redirect to an error or the recorded stream or the OBS stream
-	if (streams.length == 0) {
+	if (typeof stream == 'undefined') {
 		var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.streamid]);
 		video = video.rows[0];
 		if (typeof video != 'undefined' && video.streaming == false) {
@@ -47,7 +45,7 @@ app.get("/l/view/:streamid", async (req, res) => {
 	} else { //redirect the user to the vanilla websocket streams
 		//create a view object
 		var viewObj = await middleware.getViewObj(req);
-		viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: streams[0].enableChat});
+		viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: stream[0].enableChat});
 
 		//render the view with the stream
 		res.render("viewStreamWeb.ejs", viewObj);
