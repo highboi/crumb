@@ -52,9 +52,6 @@ liveWss.on("connection", async (ws, req) => {
 	if (typeof wsEntry == 'undefined' && queryparams.isClient == 'true') {
 		ws.close();
 	} else if (typeof wsEntry != 'undefined' && queryparams.isClient == 'true') { //if the client is connecting to a valid stream
-		//set the room to the stream id
-		ws.room = queryparams.streamid;
-
 		//add this client to the global object entry
 		global.webWssClients[queryparams.streamid].push(ws);
 
@@ -62,9 +59,6 @@ liveWss.on("connection", async (ws, req) => {
 		var dataBuf = Buffer.concat(wsEntry[0].dataBuffer);
 		ws.send(dataBuf);
 	} else if (typeof wsEntry == 'undefined' && queryparams.isStreamer == 'true') { //if the connecting client is a streamer, then do stuff
-		//set the streamid
-		ws.streamid = queryparams.streamid;
-
 		//get the value that enables the chat
 		var enablechat = await client.query(`SELECT enablechat FROM videos WHERE id=$1`, [queryparams.streamid]);
 		enablechat = enablechat.rows[0].enablechat;
@@ -159,20 +153,26 @@ liveWss.on("connection", async (ws, req) => {
 
 //this is a websocket connection handler for the obs server which handles the ending of OBS streams
 obsWss.on("connection", async (ws, req) => {
-	//get the user info from the cookies in the headers
-	var sessionid = cookie.parse(req.headers.cookie).sessionid;
-
-	var userinfo = await middleware.getUserSession(sessionid);
-
 	//get the query parameters of the connecting url
 	var queryparams = url.parse(req.url, true).query;
 
-	ws.room = queryparams.streamid;
+	//add/push the websocket into a global object array
+	if (queryparams.isStreamer == 'true' && typeof global.obsWssClients[queryparams.streamid] == 'undefined') { //if this is a connecting streamer then add a new stream
+		global.obsWssClients[queryparams.streamid] = [ws];
+	} else if (queryparams.isClient == 'true' && typeof global.obsWssClients[queryparams.streamid] != 'undefined') { //connect to an existing stream
+		global.obsWssClients[queryparams.streamid].push(ws);
+	} else { //close if none of the cases pan out
+		ws.close();
+	}
 
-	ws.on("message", async (message) => {
-		if (message == "ended") {
-			console.log("OBS STREAM ENDED:", ws.room);
-			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
+	//check for closed sockets
+	ws.on("close", async (message) => {
+		if (queryparams.isStreamer) {
+			//delete the global object entry for this stream entirely
+			delete global.obsWssClients[queryparams.streamid];
+		} else if (queryparams.isClient) {
+			//delete this websocket from the entry in the global object
+			global.obsWssClients[queryparams.streamid]
 		}
 	});
 });

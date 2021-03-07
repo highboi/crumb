@@ -175,13 +175,10 @@ nms.on("postPublish", async (id, streamPath, args) => {
 			session.streamid = streamid;
 
 			//send a message to all of the OBS WSS sockets that the stream has started
-			var viewers = Array.from(obsWss.clients).filter((socket) => {
-				return socket.room == streamid;
-			});
+			var viewers = global.obsWssClients[streamid];
 
 			viewers.forEach((item, index) => {
 				item.send("started");
-				console.log("STREAM STARTED");
 			});
 		} else {
 			session.wasPublished = false;
@@ -224,10 +221,11 @@ nms.on("donePublish", async (id, streamPath, args) => {
 		//set the "streaming" value to "false" as this is a normal video now
 		await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', session.streamid]);
 
+		//increase the video count of the user now that the stream has finished
+		await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userid]);
+
 		//notify the users that the stream has ended
-		var viewers = Array.from(obsWss.clients).filter((socket) => {
-			return socket.room == session.streamid;
-		});
+		var viewers = global.obsWssClients[session.streamid];
 
 		viewers.forEach((item, index) => {
 			item.send("ended");
