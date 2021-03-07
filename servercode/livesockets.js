@@ -172,7 +172,8 @@ obsWss.on("connection", async (ws, req) => {
 			delete global.obsWssClients[queryparams.streamid];
 		} else if (queryparams.isClient) {
 			//delete this websocket from the entry in the global object
-			global.obsWssClients[queryparams.streamid]
+			var indexofws = global.obsWssClients[queryparams.streamid].indexOf(ws);
+			global.obsWssClients[queryparams.streamid].splice(indexofws, 1);
 		}
 	});
 });
@@ -188,8 +189,12 @@ chatWss.on("connection", async (ws, req) => {
 	//get the query parameters of the connecting user
 	var queryparams = url.parse(req.url, true).query;
 
-	//set the room id of this socket
-	ws.room = queryparams.streamid;
+	//add this websocket to the global object
+	if (typeof global.chatWssClients[queryparams.streamid] == 'undefined') {
+		global.chatWssClients[queryparams.streamid] = [ws];
+	} else {
+		global.chatWssClients[queryparams.streamid].push(ws);
+	}
 
 	//whenever we get a message
 	ws.on("message", async (message) => {
@@ -197,14 +202,19 @@ chatWss.on("connection", async (ws, req) => {
 		var data = message.split(",");
 
 		if (data[0] == "msg") { //if the data is a message to send, then send it
-			//get the recipients from the chat wss for this live stream
-			var recipients = Array.from(chatWss.clients).filter((socket) => {
-				return socket.room == queryparams.streamid;
+			//get the recipients from the chat wss for this live stream while slicing this websocket object out of the array entry
+			var indexofws = global.chatWssClients[queryparams.streamid].indexOf(ws);
+			var recipients = global.chatWssClients[queryparams.streamid].filter((socket) => {
+				return socket.readyState == WebSocket.OPEN;
 			});
+
+			//create the chat message object
+			var chatmessage = userinfo.channelicon + "," + userinfo.username + "," + data[1];
 
 			//send the message to each of the recipients
 			recipients.forEach((item, index) => {
-				var chatmessage = userinfo.channelicon + "," + userinfo.username + "," + data[1];
+				//check to see if this ws object is the same as the sender of the message
+				//so that we do not send the chat message back to the sender
 				if (item != ws) {
 					//create a string containing the channel icon and the username of the one who sent this message
 					console.log("CHAT MESSAGE:", chatmessage);

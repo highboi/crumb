@@ -4,6 +4,7 @@ global.appRoot = __dirname;
 //set global variables for websocket clients to avoid unnecessary computations
 global.webWssClients = {};
 global.obsWssClients = {};
+global.chatWssClients = {};
 
 //get the variables to work with in the config file
 const { client, middleware, server, nms, obsWss } = require("./servercode/configBasic");
