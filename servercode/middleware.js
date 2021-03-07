@@ -139,22 +139,6 @@ middleware = {
 		return newtimestamp.replace(/T/, "-").replace(/\..+/, "").replace(/:/g, "-");
 	},
 
-	//this is a function to return all of the cases of a string (titlecase, all caps, lowercase)
-	getAllStringCases: function (words) {
-		//get the string version in lowercase, uppercase, and titlecase
-		var lowercase = words.toLowerCase();
-		var uppercase = words.toUpperCase();
-		var titlecase = words.replace(
-			/\w\S*/g,
-			function(txt) {
-				return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-			}
-		);
-
-		//return an array with all of these types of cases
-		return [lowercase, titlecase, uppercase];
-	},
-
 	//this is a function to delete video details
 	deleteVideoDetails: async function (userinfo, videoid) {
 		//get the video to be deleted
@@ -210,13 +194,6 @@ middleware = {
 		}
 	},
 
-	//this is a function that returns a path for a file you want to save
-	getFilePath: function (file, path) {
-		var filepath = path + Date.now() + "-" + file.name;
-		filepath = filepath.replace("/storage", "");
-		return filepath;
-	},
-
 	//this is a function for saving a file on to the server
 	saveFile: function (file, path) {
 		var oldpath = file.path; //default path for the file to be saved
@@ -231,25 +208,6 @@ middleware = {
 		//return the new file path to be stored in the database for reference
 		return newpath;
 	},
-
-	//this is a function to copy files on the server (used to save default images to peoples channels such as default icons etc.)
-	copyFile: function (oldpath, newpath, filename) {
-		//make a full path out of the given path
-		oldpath = global.appRoot + oldpath;
-		//make a new path with a timestamp to uniquely identify the file
-		var newfilepath = global.appRoot + newpath + Date.now() + "-" + filename;
-		fs.copyFile(oldpath, newfilepath, (err) => {
-			if (err) throw err;
-			console.log("Copied file on server.");
-		});
-		//remove the dirname and the /storage folder from the string
-		//this is because the ejs views look inside the storage folder already
-		newfilepath = newfilepath.replace(global.appRoot, "");
-		newfilepath = newfilepath.replace("/storage", "");
-		//return the new file path to be stored in the database
-		return newfilepath;
-	},
-
 
 	//this is a function to increase/decrease likes/dislikes of videos in the database
 	changeLikes: async function (req, res, increase, changelikes) {
@@ -279,12 +237,6 @@ middleware = {
 			//return the value of the updated dislikes
 			return newcount.toString();
 		}
-	},
-
-	//this is a function to schedule a job for a function. this uses the cron format for
-	//scheduling jobs
-	scheduleFunction: function(cronstring, job) {
-		schedule.scheduleJob(cronstring, job);
 	},
 
 	//this is a function that changes the word score in the wordlist file

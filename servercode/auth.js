@@ -138,14 +138,14 @@ app.post('/register', (req, res) => {
 			if (files.channelicon.size > 0) { //if the file size is more than 0, then a file was submitted
 				var channeliconpath = middleware.saveFile(files.channelicon, "/storage/users/icons/");
 			} else { //if the channel icon file field was empty, use the default image
-				var channeliconpath = middleware.copyFile("/views/content/default.png", "/storage/users/icons/", "default.png");
+				var channeliconpath = "/views/content/default.png";
 			}
 
 			//save the channel banner submitted in the form
 			if (files.channelbanner.size > 0) { //if the file size is more than 0, then a file was submitted
 				var channelbannerpath = middleware.saveFile(files.channelbanner, "/storage/users/banners/");
 			} else { //if the name is blank, then the file was not submitted
-				var channelbannerpath = middleware.copyFile("/views/content/default.png", "/storage/users/banners/", "default.png");
+				var channelbannerpath = "/views/content/default.png";
 			}
 
 			//create an array of all of the important values
