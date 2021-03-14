@@ -21,26 +21,26 @@ app.get("/l/view/:streamid", async (req, res) => {
 
 	//if there are no streams with the id in the url, then redirect to an error or the recorded stream or the OBS stream
 	if (typeof stream == 'undefined') {
-		var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.streamid]);
+		var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.streamid]);
 		video = video.rows[0];
-		if (typeof video != 'undefined' && video.streaming == false) {
+
+
+		if (typeof video != 'undefined') { //if the video does not exist, then show an error
 			req.flash("message", `Stream with ID: '${req.params.streamid}' does not exist.`);
 			res.redirect("/error");
-		} else {
-			if (!video.streaming) { //redirect to the recorded stream
-				res.redirect(`/v/${req.params.streamid}`);
-			} else { //render the OBS stream
-				//get the stream key of the streamer
-				var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1`, [video.user_id]);
-				streamkey = streamkey.rows[0].streamkey;
+		} else if (!video.streaming) { //if the video is not streaming, redirect to the video url
+			res.redirect(`/v/${req.params.streamid}`);
+		} else { //if the video is streaming and does exist, then render the stream
+			//get the stream key of the streamer
+			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
+			streamkey = streamkey.rows[0].streamkey;
 
-				//make the view object
-				var viewObj = await middleware.getViewObj(req);
-				viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: video.enablechat, streamname: video.title, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`});
+			//make the view object
+			var viewObj = await middleware.getViewObj(req);
+			viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: video.enablechat, streamname: video.title, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`});
 
-				//render the view for the stream
-				res.render("viewStreamObs.ejs", viewObj);
-			}
+			//render the view for the stream
+			res.render("viewStreamObs.ejs", viewObj);
 		}
 	} else { //redirect the user to the vanilla websocket streams
 		//create a view object
@@ -64,7 +64,7 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
 
 	//get the stream info
-	var stream = await client.query(`SELECT * FROM videos WHERE id=$1 AND user_id=$2`, [req.params.streamid, viewObj.user.id]);
+	var stream = await client.query(`SELECT * FROM videos WHERE id=$1 AND user_id=$2 LIMIT 1`, [req.params.streamid, viewObj.user.id]);
 	stream = stream.rows[0];
 
 	//view object for the views, other values can be added later
@@ -74,7 +74,7 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 	if (typeof stream != 'undefined') {
 		if (req.query.streamtype == "obs") {
 			//get the stream key
-			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1`, [stream.user_id]);
+			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1 LIMIT 1`, [stream.user_id]);
 			streamkey = streamkey.rows[0].streamkey;
 
 			//set the additional values for the view object
@@ -152,7 +152,7 @@ nms.on("postPublish", async (id, streamPath, args) => {
 	var givenKey = streamPath.replace("/live/", "");
 
 	//make a query to the DB to check to see if this stream key exists
-	var res = await client.query(`SELECT id FROM users WHERE streamkey=$1`, [givenKey]);
+	var res = await client.query(`SELECT id FROM users WHERE streamkey=$1 LIMIT 1`, [givenKey]);
 	res = res.rows;
 
 	//if the stream key does not exist, then reject this session
@@ -164,7 +164,7 @@ nms.on("postPublish", async (id, streamPath, args) => {
 		var user = res[0];
 
 		//get the pending streams where the video path is undefined and where the userid is the same as the user variable
-		var streamid = await client.query(`SELECT id FROM videos WHERE user_id=$1 AND streamtype=$2 AND video IS NULL`, [user.id, "obs"]);
+		var streamid = await client.query(`SELECT id FROM videos WHERE user_id=$1 AND streamtype=$2 AND video IS NULL LIMIT 1`, [user.id, "obs"]);
 
 		//set the value of a "wasPublished" value in the session as to not save invalid streams without first having preexisting live streams
 		if (streamid.rows.length > 0) {
@@ -204,7 +204,7 @@ nms.on("donePublish", async (id, streamPath, args) => {
 
 	if (session.wasPublished) {
 		//get the user id associated with the stream key
-		var user = await client.query(`SELECT id FROM users WHERE streamkey=$1`, [streamkey]);
+		var user = await client.query(`SELECT id FROM users WHERE streamkey=$1 LIMIT 1`, [streamkey]);
 		userid = user.rows[0].id;
 
 		console.log("SUPPOSED FILE NAME: ", filename);
@@ -241,7 +241,7 @@ nms.on("donePublish", async (id, streamPath, args) => {
 		});
 
 		//select the first null video entry
-		var videoid = await client.query(`SELECT id FROM videos WHERE user_id IN (SELECT id FROM users WHERE streamkey=$1) AND streamtype=$2 AND video IS NULL`, [streamkey, "obs"]);
+		var videoid = await client.query(`SELECT id FROM videos WHERE user_id IN (SELECT id FROM users WHERE streamkey=$1) AND streamtype=$2 AND video IS NULL LIMIT 1`, [streamkey, "obs"]);
 		videoid = videoid.rows[0].id;
 
 		//delete all stray database entries

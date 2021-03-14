@@ -11,10 +11,9 @@ app.get("/p/:playlistid", async(req, res) => {
 	//get the view object
 	var viewObj = await middleware.getViewObj(req);
 
-	//get the playlist object which contains the name of the playlist and the id of the user that created it
-	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1`, [req.params.playlistid]);
+	//get the playlist object which contains the name of the playlist and the user who created it
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 LIMIT 1`, [req.params.playlistid]);
 	playlist = playlist.rows[0];
-
 
 	if (!(playlist.private && (typeof userinfo == 'undefined' || userinfo.id != playlist.user_id))) {
 		//get all of the videos in the db
@@ -22,7 +21,7 @@ app.get("/p/:playlistid", async(req, res) => {
 		videos = videos.rows;
 
 		//get the creator of the playlist
-		var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [playlist.user_id]);
+		var creator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [playlist.user_id]);
 		creator = creator.rows[0];
 
 		//create view object to pass into the view
@@ -40,34 +39,24 @@ app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, asy
 	//get the user info from the session store
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//get the playlist from the database
-	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, userinfo.id]);
-	playlist = playlist.rows[0];
+	//check to see if the playlist exists and if the playlist video entry exists
+	var playlistexists = await client.query(`SELECT EXISTS(SELECT * FROM playlists WHERE id=$1 AND user_id=$2 LIMIT 1)`, [req.params.playlistid, userinfo.id]);
+	playlistexists = playlistexists.rows[0].exists;
 
-	//get the playlist-video relation from the database
-	var playlistvideo = await client.query(`SELECT * FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
-	playlistvideo = playlistvideo.rows[0];
+	var playlistvideoexists = await client.query(`SELECT EXISTS(SELECT * FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2 LIMIT 1)`, [req.params.playlistid, req.params.videoid]);
+	playlistvideoexists = playlistvideoexists.rows[0].exists;
 
-	//check to see if the video is in the playlist already
-	if (typeof playlistvideo != 'undefined') { //if the video has already been added, then render an error
+	//if the playlist video exists, then it has already been added
+	if (playlistvideoexists) {
 		req.flash("message", "Video has already been added to the playlist.");
 		res.redirect("/error");
-	} else {
-		//do something based on if the playlist belongs to the user or not
-		if (typeof playlist != 'undefined') {
-			//get the amount of videos in the playlist
-			var videocount = parseInt(playlist.videocount, 10);
-			videocount = videocount + 1;
-			//add the video into the playlist
-			await client.query(`INSERT INTO playlistvideos (playlist_id, video_id) VALUES ($1, $2)`, [req.params.playlistid, req.params.videoid]);
-			//update the video count in the playlist
-			await client.query(`UPDATE playlists SET videocount=$1 WHERE id=$2`, [videocount, req.params.playlistid]);
-			//redirect to the playlist again
-			res.redirect(`/p/${req.params.playlistid}`);
-		} else { //if the playlist does not belong to the user, render an error
-			req.flash("message", "This playlist does not belong to you.");
-			res.redirect("/error");
-		}
+	} else if (playlistexists) { //if the playlist does exist but the video does not, then add it to the playlist
+		await client.query(`INSERT INTO playlistvideos (playlist_id, video_id) VALUES ($1, $2)`, [req.params.playlistid, req.params.videoid]);
+		await client.query(`UPDATE playlists SET videocount=videocount+1 WHERE id=$1`, [req.params.playlistid]);
+		res.redirect(`/p/${req.params.playlistid}`);
+	} else { //if this playlist does not exist or does not belong to the user, then show the error
+		req.flash("message", "This playlists does not belong to you or doesn't exist.");
+		res.redirect("/error");
 	}
 });
 
@@ -76,34 +65,21 @@ app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, 
 	//get the user from the session store
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//get the playlist from the database
-	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, userinfo.id]);
-	playlist = playlist.rows[0];
+	//get values for the existance of the playlist and the playlist videos
+	var playlistexists = await client.query(`SELECT EXISTS(SELECT * FROM playlists WHERE id=$1 AND user_id=$2 LIMIT 1)`, [req.params.playlistid, userinfo.id]);
+	playlistexists = playlistexists.rows[0].exists;
 
-	//get the playlist-video relation from the database
-	var playlistvideo = await client.query(`SELECT * FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
-	playlistvideo = playlistvideo.rows[0];
+	var playlistvideoexists = await client.query(`SELECT EXISTS(SELECT * FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2 LIMIT 1)`, [req.params.playlistid, req.params.videoid]);
+	playlistvideoexists = playlistvideoexists.rows[0].exists;
 
-	//check to see whether or not the video is in the playlist or not
-	if (typeof playlistvideo != 'undefined') { //if the video is in the playlist, delete it
-		//do something based on if the playlist belongs to the user or not
-		if (typeof playlist != 'undefined') { //if the playlist belongs to the user
-			//get the amount of videos in the playlist
-			var videocount = parseInt(playlist.videocount, 10);
-			videocount = videocount - 1;
-			//delete the video from the playlist
-			await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
-			//update the video count on the playlist
-			await client.query(`UPDATE playlists SET videocount=$1 WHERE id=$2`, [videocount, req.params.playlistid]);
-			req.flash("message", "Video Deleted!");
-			//redirect to the playlist again
-			res.redirect(`/p/${req.params.playlistid}`);
-		} else { //if the playlist does not belong to the user, then render an error
-			req.flash("message", "Playlist does not belong to you.")
-			res.redirect("/error");
-		}
-	} else { //if the video is not in the playlist, then render an error
-		req.flash("message", `Video with ID: ${playlistvideo.video_id} not in playlist.`);
+	//if the playlist video exists and the playlist exists, then delete the video entry
+	if (playlistvideoexists && playlistexists) {
+		await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
+		await client.query(`UPDATE playlists SET videocount=videocount-1 WHERE id=$1`, [req.params.playlistid]);
+		req.flash("message", "Video Deleted from Playlist!");
+		res.redirect(`/p/${req.params.playlistid}`);
+	} else { //if the two conditions above are not met, then the video entry cannot be deleted properly
+		req.flash("message", "Playlist does not exist, does not belong to you, or the video is not in the playlist");
 		res.redirect("/error");
 	}
 });
@@ -128,7 +104,7 @@ app.get("/playlist/delete/:playlistid", middleware.checkSignedIn, async (req, re
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	//check to see if the playlist belongs to the user
-	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 AND user_id=$2`, [req.params.playlistid, userinfo.id]);
+	var playlist = await client.query(`SELECT candelete FROM playlists WHERE id=$1 AND user_id=$2 LIMIT 1`, [req.params.playlistid, userinfo.id]);
 	playlist = playlist.rows[0];
 
 	//check to see if the playlist exists in the first place
@@ -140,12 +116,8 @@ app.get("/playlist/delete/:playlistid", middleware.checkSignedIn, async (req, re
 		//redirect to the index along with a message that the playlist was deleted
 		req.flash("message", "Playlist Deleted!");
 		res.redirect("/");
-	} else if (typeof playlist != 'undefined' && !playlist.candelete) {
-		//reload the playlist and say that the playlist cannot be deleted
-		req.flash("message", "Playlist cannot be deleted, it is a default.");
-		res.redirect(`/p/${playlist.id}`);
 	} else { //if the playlist does not exist or does not belong to the user, then render an error
-		req.flash("message", `Playlist with ID: ${playlist.id} is nonexistent or does not belong to you.`);
+		req.flash("message", `Playlist with ID: ${req.params.playlistid} cannot be deleted, is nonexistent, or does not belong to you.`);
 		res.redirect("/error");
 	}
 });
@@ -163,10 +135,11 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 	var newid = await middleware.generateAlphanumId();
 
 	//get any playlists with matching properties to the one trying to be created
-	var results = await client.query(`SELECT * FROM playlists WHERE user_id=$1 AND name=$2`, [userinfo.id, req.body.name]);
+	var exists = await client.query(`SELECT EXISTS(SELECT * FROM playlists WHERE user_id=$1 AND name=$2 LIMIT 1)`, [userinfo.id, req.body.name]);
+	exists = exists.rows[0].exists;
 
 	//check to see if this playlist already exists
-	if (results.rows.length > 0) { //if the playlist already exists
+	if (exists) { //if the playlist already exists
 		//set a flash message to let the user know that the playlist already exists
 		req.flash("message", "Playlist with the same name already exists.");
 		//redirect the user to the playlist in question

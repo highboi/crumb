@@ -6,14 +6,6 @@
 	<body>
 		<h1>EXAMPLE PAGE:</h1>
 
-		<button onclick="redirectTo('Really?', '/')">Home</button>
-
-		<script>
-			function redirectTo(confirmPrompt, link) {
-				if (confirm(confirmPrompt)) {
-					window.location.href = link;
-				}
-			}
-		</script>
+		<p><%= JSON.stringify(result[0].exists) %></p>
 	</body>
 </html>

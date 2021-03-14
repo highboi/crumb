@@ -97,7 +97,7 @@ app.post('/register', (req, res) => {
 
 	form.parse(req, async (err, fields, files) => {
 		//check to see if the user does not already exist to not register identical accounts
-		var existinguser = await client.query(`SELECT * FROM users WHERE email=$1 OR username=$2`, [fields.email, fields.username]);
+		var existinguser = await client.query(`SELECT username, email FROM users WHERE email=$1 OR username=$2 LIMIT 1`, [fields.email, fields.username]);
 		if (existinguser.rows.length > 0) {
 			if (existinguser.rows[0].email == fields.email) { //if the email is the same, then alert the user
 				req.flash("message", "Email is Already Registered. Please Log In.");
@@ -190,7 +190,7 @@ app.post('/register', (req, res) => {
 //have the user log in
 app.post("/login", async (req, res) => {
 	//select the user from the database with the specified fields
-	var user = await client.query(`SELECT * FROM users WHERE email=$1 AND username=$2`, [req.body.email, req.body.username]);
+	var user = await client.query(`SELECT * FROM users WHERE email=$1 AND username=$2 LIMIT 1`, [req.body.email, req.body.username]);
 	user = user.rows[0];
 
 	//check to see if we need to redirect the user to the registration page

@@ -13,7 +13,7 @@ app.get("/u/:userid", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
 
 	//get the actual user that the channel belongs to
-	var creator = await client.query(`SELECT * FROM users WHERE id=$1`, [req.params.userid]);
+	var creator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [req.params.userid]);
 
 	//put the creator into the view object
 	viewObj.creator = creator.rows[0];
@@ -110,27 +110,21 @@ app.get("/subscribe/:channelid", middleware.checkSignedIn, async (req, res) => {
 	//get the user
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//get the subscribed channel from the database
-	var channel = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [req.params.channelid, userinfo.id]);
-
-	//get the amount of subscribers from the channel
-	var subscriberscount = await client.query(`SELECT subscribers FROM users WHERE id=$1`, [req.params.channelid]);
-	subscriberscount = parseInt(subscriberscount.rows[0].subscribers, 10);
+	//get the target channel to see if it exists
+	var channelexists = await client.query(`SELECT EXISTS(SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2 LIMIT 1)`, [req.params.channelid, userinfo.id]);
+	channelexists = channelexists.rows[0].exists;
 
 	//check to see what to do to update the subscribed list
-	if (channel.rows.length == 0) { //if the user has not subscribed to this channel yet, then add the user id and channel id into the database
-		await client.query(`INSERT INTO subscribed (channel_id, user_id) VALUES ($1, $2)`, [req.params.channelid, userinfo.id]);
-		//increase the amount of subscribers for the user
-		await client.query(`UPDATE users SET subscribers=$1 WHERE id=$2`, [(subscriberscount + 1).toString(), req.params.channelid]);
-		//update the user object inside the videos
-		//send a response that is true, meaning that the user has subscribed
-		res.send("true");
-	} else if (channel.rows.length > 0) { //if the user has already subscribed to the channel, then the user wants to undo the subscription (a confirm in javascript will be done in the front end to check if the user clicked accidentally)
+	if (channelexists) { //if the user has subscribed, then unsubscribe
 		await client.query(`DELETE FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [req.params.channelid, userinfo.id]);
-		//decrease the amount of subscribers that the user has
-		await client.query(`UPDATE users SET subscribers=$1 WHERE id=$2`, [(subscriberscount - 1).toString(), req.params.channelid]);
+		await client.query(`UPDATE users SET subscribers=subscribers-1 WHERE id=$1`, [req.params.channelid]);
 		//send a response that is false, meaning the user unsubscribed
 		res.send("false");
+	} else { //if the user has not subscribed, the subscribe
+		await client.query(`INSERT INTO subscribed (channel_id, user_id) VALUES ($1, $2)`, [req.params.channelid, userinfo.id]);
+		await client.query(`UPDATE users SET subscribers=subscribers+1 WHERE id=$1`, [req.params.channelid]);
+		//send a response that is true, meaning that the user has subscribed
+		res.send("true");
 	}
 });
 
@@ -155,21 +149,17 @@ app.get("/s/subscribe/:topic", middleware.checkSignedIn, async (req, res) => {
 	//get the user
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//get the subscribed topic and the user id from the database to check for joining or unjoining
-	var subscribed = await client.query(`SELECT * FROM subscribedtopics WHERE topicname=$1 AND user_id=$2`, [req.params.topic, userinfo.id]);
-	subscribed = subscribed.rows;
+	//check to see if the user has already subscribed to this particular topic
+	var topicexists = await client.query(`SELECT EXISTS(SELECT * FROM subscribedtopics WHERE topicname=$1 AND user_id=$2 LIMIT 1)`, [req.params.topic, userinfo.id]);
+	topicexists = topicexists.rows[0].exists;
 
-	//check to see if the user is joined or not
-	if (subscribed.length == 0) {
-		//add the user and the topic to the subscribedtopics table
-		await client.query(`INSERT INTO subscribedtopics (topicname, user_id) VALUES ($1, $2)`, [req.params.topic, userinfo.id]);
-		//send a value that shows that the joining happened
-		res.send("true");
-	} else if (subscribed.length > 0) {
-		//delete the user and the topic from the subscribedtopics table
+	//add or delete the subscribed topic entry based on whether or not the user has subscribed to the topic
+	if (topicexists) {
 		await client.query(`DELETE FROM subscribedtopics WHERE topicname=$1 AND user_id=$2`, [req.params.topic, userinfo.id]);
-		//send a value that shows that the unjoining happened
 		res.send("false");
+	} else {
+		await client.query(`INSERT INTO subscribedtopics (topicname, user_id) VALUES ($1, $2)`, [req.params.topic, userinfo.id]);
+		res.send("true");
 	}
 });
 
@@ -188,9 +178,16 @@ app.post("/shoutout/add", middleware.checkSignedIn, async (req, res) => {
 	//get the user info
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//insert the shoutout channel into the database
-	await client.query(`INSERT INTO shoutouts (user_id, shoutout_id) VALUES ($1, $2)`, [userinfo.id, channelid]);
+	//check for the existence of this shoutout
+	var shoutoutexists = await client.query(`SELECT EXISTS(SELECT * FROM shoutouts WHERE shoutout_id=$1 AND user_id=$2 LIMIT 1)`, [channelid, userinfo.id]);
+	shoutoutexists = shoutoutexists.rows[0].exists;
 
-	//redirect the user to the channel section with the new channel added
-	res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+	//do something based on the existence of a shoutout
+	if (shoutoutexists) { //if this shoutout exists, then let the user know
+		req.flash("message", "This shoutout already exists");
+		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+	} else { //if this shoutout does not exist, then insert it into the DB
+		await client.query(`INSERT INTO shoutouts (user_id, shoutout_id) VALUES ($1, $2)`, [userinfo.id, channelid]);
+		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+	}
 });

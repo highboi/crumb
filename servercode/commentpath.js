@@ -12,14 +12,14 @@ app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) =
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	//the comment to edit
-	var comment = await client.query(`SELECT * FROM comments WHERE id=$1`, [req.params.commentid]);
+	var comment = await client.query(`SELECT * FROM comments WHERE id=$1 LIMIT 1`, [req.params.commentid]);
 	comment = comment.rows[0];
 
 	//select the liked comment from the database
-	var likedComment = await client.query(`SELECT * FROM likedComments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, req.params.commentid]);
+	var likedComment = await client.query(`SELECT * FROM likedComments WHERE user_id=$1 AND comment_id=$2 LIMIT 1`, [userinfo.id, req.params.commentid]);
 
 	//select the disliked comment from the database
-	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, req.params.commentid]);
+	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE user_id=$1 AND comment_id=$2 LIMIT 1`, [userinfo.id, req.params.commentid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleLikes(req, comment, likedComment, dislikedComment, "likedComments", "dislikedComments");
@@ -37,14 +37,14 @@ app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	//the comment to edit
-	var comment = await client.query(`SELECT * FROM comments WHERE id=$1`, [req.params.commentid]);
+	var comment = await client.query(`SELECT * FROM comments WHERE id=$1 LIMIT 1`, [req.params.commentid]);
 	comment = comment.rows[0];
 
 	//select the liked comment from the database
-	var likedComment = await client.query(`SELECT * FROM likedComments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, req.params.commentid]);
+	var likedComment = await client.query(`SELECT * FROM likedComments WHERE user_id=$1 AND comment_id=$2 LIMIT 1`, [userinfo.id, req.params.commentid]);
 
 	//select the disliked comment from the database
-	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, req.params.commentid]);
+	var dislikedComment = await client.query(`SELECT * FROM dislikedComments WHERE user_id=$1 AND comment_id=$2 LIMIT 1`, [userinfo.id, req.params.commentid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleDislikes(req, comment, likedComment, dislikedComment, "likedComments", "dislikedComments");
@@ -83,7 +83,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 			valuesarr.push(req.query.parent_id);
 
 			//get the parent depth level for this comment
-			var parent_depth = await client.query(`SELECT depth_level FROM comments WHERE id=$1`, [req.query.parent_id]);
+			var parent_depth = await client.query(`SELECT depth_level FROM comments WHERE id=$1 LIMIT 1`, [req.query.parent_id]);
 			parent_depth = parent_depth.rows[0].depth_level; //get the raw depth value
 			valuesarr.push(parseInt(parent_depth)+1); //insert the depth value +1 into the values array
 

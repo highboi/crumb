@@ -27,12 +27,6 @@ app.get('/error', async (req, res) => {
 	res.render("error.ejs", viewObj);
 });
 
-//example path for testing ejs
-app.get("/example", async (req, res) => {
-	var viewObj = await middleware.getViewObj(req);
-	res.render("example.ejs", viewObj);
-});
-
 //get request for searching for videos
 app.get("/search", async (req, res) => {
 	//a search object to store things about our search

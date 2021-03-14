@@ -20,11 +20,11 @@ app.get("/v/:videoid", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
 
 	//select the video from the database
-	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
+	var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.videoid]);
 	video = video.rows[0];
 
 	//get the video creator
-	var videocreator = await client.query(`SELECT * FROM users WHERE id=$1`, [video.user_id]);
+	var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
 	videocreator = videocreator.rows[0];
 
 	if (!video.deleted && !video.private) {
@@ -54,7 +54,7 @@ app.get("/v/:videoid", async (req, res) => {
 		//which can then be "awaited" on to finish/complete all promises being iterated before proceeding
 		await Promise.all(chatUserIds.map(async (item) => {
 			//get the channel icon and username if this user with this id
-			var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1`, [item]);
+			var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1 LIMIT 1`, [item]);
 			userChatInfo = userChatInfo.rows[0];
 
 			//insert the channel icon and username into the object with the key being the user id
@@ -75,8 +75,8 @@ app.get("/v/:videoid", async (req, res) => {
 
 		//render the video view based on whether or not the user is logged in and has a session variable
 		if (req.cookies.sessionid) {
-			var subscribed = await client.query(`SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [videocreator.id, viewObj.user.id]);
-			viewObj.subscribed = subscribed.rows.length;
+			var subscribed = await client.query(`SELECT EXISTS(SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2 LIMIT 1)`, [videocreator.id, viewObj.user.id]);
+			viewObj.subscribed = subscribed.rows[0].exists;
 		}
 
 		//check to see if the video needs to scroll down to a comment that was just posted
@@ -95,7 +95,7 @@ app.get("/v/:videoid", async (req, res) => {
 //get the video data from the file in chunks for efficiency of the network
 app.get("/video/:id", async (req, res) => {
 	//get the video file from the supposed video id (might be a comment id)
-	var path = await client.query(`SELECT video FROM videofiles WHERE id=$1`, [req.params.id]);
+	var path = await client.query(`SELECT video FROM videofiles WHERE id=$1 LIMIT 1`, [req.params.id]);
 	path = "./storage" + path.rows[0].video;
 
 	//get the extension of the video for the content type of the response
@@ -212,7 +212,7 @@ app.get("/tv", async (req, res) => {
 	//a video was found
 	if (typeof video != 'undefined') {
 		//get the creator of the video
-		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1`, [video.user_id]);
+		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
 		videocreator = videocreator.rows[0];
 
 		//get the view object
@@ -260,14 +260,14 @@ app.get("/v/like/:videoid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	//get the video from the database
-	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
+	var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.videoid]);
 	video = video.rows[0];
 
 	//get the liked video from the database
-	var liked = await client.query(`SELECT * FROM likedVideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, req.params.videoid]);
+	var liked = await client.query(`SELECT * FROM likedVideos WHERE user_id=$1 AND video_id=$2 LIMIT 1`, [userinfo.id, req.params.videoid]);
 
 	//get the disliked video from the database
-	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, req.params.videoid]);
+	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE user_id=$1 AND video_id=$2 LIMIT 1`, [userinfo.id, req.params.videoid]);
 
 	//get the updated amount of likes and dislikes
 	var data = await middleware.handleLikes(req, video, liked, disliked, "likedVideos", "dislikedVideos");
@@ -283,14 +283,14 @@ app.get("/v/dislike/:videoid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	//select the video from the database
-	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
+	var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.videoid]);
 	video = video.rows[0];
 
 	//get the disliked video from the database
-	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, req.params.videoid]);
+	var disliked = await client.query(`SELECT * FROM dislikedVideos WHERE user_id=$1 AND video_id=$2 LIMIT 1`, [userinfo.id, req.params.videoid]);
 
 	//get the liked video from the database
-	var liked = await client.query(`SELECT * FROM likedVideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, req.params.videoid]);
+	var liked = await client.query(`SELECT * FROM likedVideos WHERE user_id=$1 AND video_id=$2 LIMIT 1`, [userinfo.id, req.params.videoid]);
 
 	//get the new amount of likes and dislikes
 	var data = await middleware.handleDislikes(req, video, liked, disliked, "likedVideos", "dislikedVideos");

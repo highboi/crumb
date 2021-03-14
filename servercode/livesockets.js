@@ -60,7 +60,7 @@ liveWss.on("connection", async (ws, req) => {
 		ws.send(dataBuf);
 	} else if (typeof wsEntry == 'undefined' && queryparams.isStreamer == 'true') { //if the connecting client is a streamer, then do stuff
 		//get the value that enables the chat
-		var enablechat = await client.query(`SELECT enablechat FROM videos WHERE id=$1`, [queryparams.streamid]);
+		var enablechat = await client.query(`SELECT enablechat FROM videos WHERE id=$1 LIMIT 1`, [queryparams.streamid]);
 		enablechat = enablechat.rows[0].enablechat;
 
 		//add a value which denotes the enabling of chatting in the chatrooms
@@ -73,7 +73,7 @@ liveWss.on("connection", async (ws, req) => {
 		global.webWssClients[queryparams.streamid] = [ws];
 
 		//get the stream from the database
-		var stream = await client.query(`SELECT * FROM videos WHERE id=$1`, [queryparams.streamid]);
+		var stream = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [queryparams.streamid]);
 		stream = stream.rows[0];
 
 		//create a file stream for saving the contents of the live stream
