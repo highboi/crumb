@@ -43,8 +43,17 @@ app.get("/u/:userid", async (req, res) => {
 			viewObj.videos = [];
 			break;
 		case "shoutouts":
-			var shoutouts = await client.query(`SELECT * FROM shoutouts WHERE user_id=$1`, [req.params.userid]);
-			viewObj.shoutouts = shoutouts.rows;
+			var shoutouts = await client.query(`SELECT shoutout_id FROM shoutouts WHERE user_id=$1`, [req.params.userid]);
+
+			//get each individual shoutout id and wrap in escaped single quotes
+			shoutoutids = shoutouts.rows.map((shoutout) => {
+				return "\'" + shoutout.shoutout_id + "\'";
+			});
+
+			//make SQL search through the array of string values using the IN clause
+			var newshoutouts = await client.query(`SELECT * FROM users WHERE id IN (${shoutoutids})`);
+
+			viewObj.shoutouts = newshoutouts.rows;
 			viewObj.videos = [];
 			break;
 	}

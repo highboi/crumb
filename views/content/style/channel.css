@@ -67,3 +67,18 @@ STYLING CHANNEL PAGES
 .channel .channel-content .video {
 	font-size: 1vw;
 }
+
+/*
+STYLE THE MINI CHANNELS
+*/
+
+.minichannel * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.minichannel #channel-icon {
+	width: 70px;
+	height: 70px;
+	border-radius: 50px;
+}

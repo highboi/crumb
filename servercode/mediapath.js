@@ -205,7 +205,7 @@ app.get("/tv", async (req, res) => {
 		video = video.rows[0];
 	} else { //if the user wanted a specific type of video/channel by clicking the buttons on the "remote"
 		//select a video from the database that includes this topic (of course select this randomly)
-		var video = await client.query("SELECT * FROM videos WHERE UPPER(topics) LIKE UPPER($1) ORDER BY RANDOM() LIMIT 1", ["%" + req.query.type + "%"]);
+		var video = await client.query("SELECT * FROM videos WHERE deleted=false AND private=false AND UPPER(topics) LIKE UPPER($1) ORDER BY RANDOM() LIMIT 1", ["%" + req.query.type + "%"]);
 		video = video.rows[0];
 	}
 

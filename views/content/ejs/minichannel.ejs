@@ -1,5 +1,5 @@
 <% if (typeof channel != 'undefined') { %>
-	<div class="channel">
+	<div class="minichannel">
 		<% var channellink = `/u/${channel.id}` %>
 
 		<a href="<%= channellink %>">
@@ -16,7 +16,7 @@
 			<button id="subscribebutton" onclick="subscribe('<%= channel.id %>', this)">Subscribe</button>
 		<% } %>
 
-		<p><%= channel.subscribers %> Subscribers</p>
+		<p>&nbsp;<%= channel.subscribers %> Subscribers&nbsp;</p>
 		<p><%= channel.videocount %> Videos</p>
 	</div>
 <% } %>

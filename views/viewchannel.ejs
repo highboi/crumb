@@ -59,17 +59,6 @@
 							<h1>Description:</h1>
 							<% if (creator.description) { %>
 								<p><%= creator.description %></p>
-							<% } else { %>
-								<pre>
-	┏━┓┃┏┓┃┃┃┃┃┃━━━┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┏┓┃┃┃┃┃┃┃┃┃┃┃┓┃┏┓┃┃┃┃┃┃┃┃
-	┃┃┗┓┃┃┃┃┃┃┃┃┓┏┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┛┗┓┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
-	┃┏┓┗┛┃━━┓┃┃┃┃┃┃┃━━┓━━┓━━┓━┓┓━━┓┓┏┛┓━━┓━┓┃┃┃┃┗━┛┃━━┓━┓━━┓
-	┃┃┗┓┃┃┏┓┃┃┃┃┃┃┃┃┏┓┃━━┫┏━┛┏┛┫┏┓┃┃┃┃┫┏┓┃┏┓┓┃┃┃┏━┓┃┏┓┃┏┛┏┓┃
-	┃┃┃┃┃┃┗┛┃┃┃┃┛┗┛┃┃━┫━━┃┗━┓┃┃┃┗┛┃┃┗┓┃┗┛┃┃┃┃┃┃┃┃┃┃┃┃━┫┃┃┃━┫
-	┗┛┃┗━┛━━┛┃┃┃━━━┛━━┛━━┛━━┛┛┃┛┏━┛┗━┛┛━━┛┛┗┛┃┃┃┛┃┗┛━━┛┛┃━━┛
-	┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
-	┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┛┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃┃
-								</pre>
 							<% } %>
 						</div>
 					<% } else if (section == "playlists") { %>
@@ -88,15 +77,16 @@
 							<h3><a href="/playlist/new">Create New Playlist</a></h3>
 						<% } %>
 					<% } else if (section == "shoutouts") { %>
+						<form method="post" action="/shoutout/add">
+							<label for="shoutout">Shoutout Channel URL:</label>
+							<input type="text" id="shoutout" name="shoutout"><br>
+							<button type="submit">Submit</button>
+						</form><br>
 						<% if (typeof shoutouts != 'undefined') { %>
-							<form method="post" action="/shoutout/add">
-								<label for="shoutout">Shoutout Channel URL:</label>
-								<input type="text" id="shoutout" name="shoutout"><br>
-								<button type="submit">Submit</button>
-							</form><br>
+							<hr>
 							<% shoutouts.forEach((item, index) => { %>
-								<% var shoutoutlink = `/u/${item.shoutout_id}` %>
-								<h1><a href="<%= shoutoutlink %>">Shoutout Channel</a></h1>
+								<%- include('content/ejs/minichannel.ejs', {channel: item}) %>
+								<hr>
 							<% }); %>
 						<% } %>
 					<% } else if (section == "settings") { %>

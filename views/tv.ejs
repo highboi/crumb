@@ -14,7 +14,7 @@
 
 			<h1>TV!</h1>
 
-			<%- include('content/ejs/videoplayer.ejs') %>
+			<%- include('content/ejs/videoplayer.ejs', {video: video}) %>
 
 			<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button>
 
