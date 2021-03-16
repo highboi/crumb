@@ -41,11 +41,7 @@
 							<% }); %>
 						<% } %>
 					</object>
-					<object id="<%= video.id %>reportform">
-						<form action="/report/<%= video.id %>" method="post">
-							
-						</form>
-					</object>
+					<%- include('./videoreportform.ejs', {video: video}) %>
 				</div>
 			</div>
 		</div>

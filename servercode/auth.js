@@ -149,22 +149,46 @@ app.post('/register', (req, res) => {
 			}
 
 			//create an array of all of the important values
-			var valuesarr = [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath, fields.channeldesc, fields.topics, streamkey];
+			var valuesarr = [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath, fields.channeldesc, " " + fields.topics + " ", streamkey];
+
+			//map the values array with escaped single quotes for all of the string values for the SQL query
+			valuesarr = valuesarr.map((item) => {
+				console.log(typeof item);
+				if (typeof item == 'string') {
+					return "\'"+ item + "\'";
+				} else {
+					return item;
+				}
+			});
 
 			//push the user into the database and get the important values as an object
-			var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, username, email, password, channelicon, channelbanner, streamkey`, valuesarr);
+			var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES (${valuesarr}) RETURNING id, username, email, password, channelicon, channelbanner, streamkey`);
 			newuser = newuser.rows[0];
 			console.log("Registered User.");
 
 			//add a "Watch Later" playlist into the database which the user cannot delete
 			var newplaylistid = await middleware.generateAlphanumId();
 			valuesarr = [newuserid, "Watch Later", newplaylistid, 0, false];
-			await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES ($1, $2, $3, $4, $5)`, valuesarr);
+			valuesarr = valuesarr.map((item) => {
+				if (typeof item == 'string') {
+					return "\'"+ item + "\'";
+				} else {
+					return item;
+				}
+			});
+			await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
 
 			//add a "Liked Videos" playlist into the database which the user also cannot delete
 			var newplaylistid = await middleware.generateAlphanumId();
 			valuesarr = [newuserid, "Liked Videos", newplaylistid, 0, false];
-			await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES ($1, $2, $3, $4, $5)`, valuesarr);
+			valuesarr = valuesarr.map((item) => {
+				if (typeof item == 'string') {
+					return "\'"+ item + "\'";
+				} else {
+					return item;
+				}
+			});
+			await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
 
 			//generate a new session id
 			var newsessid = middleware.generateSessionId();

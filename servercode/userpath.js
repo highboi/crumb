@@ -147,7 +147,7 @@ app.get("/s/:topic", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req);
 
 	//select all of the videos in the database with topics that include the topic in the link
-	var videos = await client.query(`SELECT * FROM videos WHERE topics LIKE $1`, ["%" + req.params.topic + "%"]);
+	var videos = await client.query(`SELECT * FROM videos WHERE topics LIKE $1`, ["% " + req.params.topic + " %"]);
 	videos = videos.rows;
 
 	//insert extra info into the view object
@@ -222,5 +222,38 @@ app.post("/shoutout/add", middleware.checkSignedIn, async (req, res) => {
 	} else { //if this shoutout does not exist, then insert it into the DB
 		await client.query(`INSERT INTO shoutouts (user_id, shoutout_id) VALUES ($1, $2)`, [userinfo.id, channelid]);
 		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+	}
+});
+
+//post path for reporting a video
+app.post("/report/video/:videoid", middleware.checkSignedIn, async (req, res) => {
+	//get the user info
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	//query the DB to see if the video exists or not
+	var videoexists = await client.query(`SELECT EXISTS(SELECT * FROM videos WHERE id=$1 LIMIT 1)`, [req.params.videoid]);
+	videoexists = videoexists.rows[0].exists;
+
+	//do things based off of the existence of the video being reported
+	if (videoexists) {
+		//create the values array
+		var valuesarr = [userinfo.id, req.params.videoid, "video", req.body.reason];
+		valuesarr = valuesarr.map((item) => {
+			if (typeof item == 'string') {
+				return "\'" + item + "\'";
+			} else {
+				return item;
+			}
+		});
+
+		//insert this report into the db
+		await client.query(`INSERT INTO reports (reporter_id, content_id, content_type, reason) VALUES (${valuesarr})`);
+
+		//redirect to the video url
+		req.flash("message", "Video reported.");
+		res.redirect(`/v/${req.params.videoid}`);
+	} else { //redirect to the index and tell the user that the video does not exist
+		req.flash("message", "Video does not exist in the database.");
+		res.redirect("/");
 	}
 });

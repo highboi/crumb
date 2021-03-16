@@ -205,7 +205,7 @@ app.get("/tv", async (req, res) => {
 		video = video.rows[0];
 	} else { //if the user wanted a specific type of video/channel by clicking the buttons on the "remote"
 		//select a video from the database that includes this topic (of course select this randomly)
-		var video = await client.query("SELECT * FROM videos WHERE deleted=false AND private=false AND UPPER(topics) LIKE UPPER($1) ORDER BY RANDOM() LIMIT 1", ["%" + req.query.type + "%"]);
+		var video = await client.query("SELECT * FROM videos WHERE deleted=false AND private=false AND UPPER(topics) LIKE UPPER($1) ORDER BY RANDOM() LIMIT 1", ["% " + req.query.type + " %"]);
 		video = video.rows[0];
 	}
 
@@ -336,7 +336,7 @@ app.post("/v/submit", (req, res) => {
 			var videoid = await middleware.generateAlphanumId();
 
 			//the array to contain the values to insert into the db
-			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, false, fields.private];
+			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), " " + fields.topics + " ", userinfo.username, userinfo.channelicon, false, fields.private];
 
 			//load the video into the database
 			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, private) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesArr);

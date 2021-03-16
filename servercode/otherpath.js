@@ -11,12 +11,6 @@ app.get('/', async (req, res) => {
 	//insert the video rows into the view object
 	viewObj.videos = videos.rows;
 
-	//select all of the playlists belonging to the user
-	if (typeof viewObj.user != 'undefined') {
-		var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [viewObj.user.id]);
-		viewObj.playlists = playlists.rows;
-	}
-
 	//render the view
 	res.render("index.ejs", viewObj);
 });

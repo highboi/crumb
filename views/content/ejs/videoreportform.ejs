@@ -1,0 +1,18 @@
+<% if (typeof video != 'undefined') { %>
+	<object id="<%= video.id %>reportform">
+		<form action="/report/video/<%= video.id %>" method="post">
+			<h2>Why is this bad?</h2><br>
+
+			<label for="cabuse">Child Abuse</label>
+			<input type="radio" id="cabuse" name="reason" value="cabuse"><br>
+
+			<label for="sex">Sexual/NSFW</label>
+			<input type="radio" id="sex" name="reason" value="sex"><br>
+
+			<label for="graphic">Graphic/NSFL</label>
+			<input type="radio" id="graphic" name="reason" value="graphic"><br><br>
+
+			<input type="submit" value="Submit">
+		</form>
+	</object>
+<% } %>

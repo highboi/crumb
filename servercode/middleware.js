@@ -50,6 +50,9 @@ middleware = {
 			//insert subscribed channels
 			var subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [viewObj.user.id]);
 			viewObj.subscribedChannels = subscribedChannels.rows.map((obj) => {return obj.channel_id});
+			//insert the playlists of the users
+			var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [viewObj.user.id]);
+			viewObj.playlists = playlists.rows;
 		} else {
 			viewObj.subscribedChannels = [];
 		}
@@ -323,7 +326,7 @@ middleware = {
 		//get all of the videos from the database with titles like the search term
 		for (var i=0; i<phrases.length; i++) {
 			//get all of the videos from the database with a title matching the current term
-			var result = await client.query(`SELECT ${selector} FROM videos WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
+			var result = await client.query(`SELECT ${selector} FROM videos WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["% " + phrases[i] + " %"]);
 			//check to see that the same video is not included in the results twice
 			result.rows.forEach((item, index) => {
 				//a boolean to check to see if the video has been added
@@ -349,7 +352,7 @@ middleware = {
 	searchChannels: async (selector, phrases) => {
 		var results = [];
 		for (var i=0; i < phrases.length; i++) {
-			var result = await client.query(`SELECT ${selector} FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1)`, ["%" + phrases[i] +"%"]);
+			var result = await client.query(`SELECT ${selector} FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($2)`, ["%" + phrases[i] +"%", "% " + phrases[i] + " %"]);
 			result.rows.forEach((item, index) => {
 				var added = false;
 				for (var j=0; j < results.length; j++) {
