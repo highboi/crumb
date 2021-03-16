@@ -46,14 +46,18 @@ app.get("/u/:userid", async (req, res) => {
 			var shoutouts = await client.query(`SELECT shoutout_id FROM shoutouts WHERE user_id=$1`, [req.params.userid]);
 
 			//get each individual shoutout id and wrap in escaped single quotes
-			shoutoutids = shoutouts.rows.map((shoutout) => {
+			var shoutoutids = shoutouts.rows.map((shoutout) => {
 				return "\'" + shoutout.shoutout_id + "\'";
 			});
 
-			//make SQL search through the array of string values using the IN clause
-			var newshoutouts = await client.query(`SELECT * FROM users WHERE id IN (${shoutoutids})`);
+			if (shoutoutids.length) {
+				//make SQL search through the array of string values using the IN clause
+				newshoutouts = await client.query(`SELECT * FROM users WHERE id IN (${shoutoutids})`);
+				viewObj.shoutouts = newshoutouts.rows;
+			} else {
+				viewObj.shoutouts = [];
+			}
 
-			viewObj.shoutouts = newshoutouts.rows;
 			viewObj.videos = [];
 			break;
 	}
@@ -169,6 +173,26 @@ app.get("/s/subscribe/:topic", middleware.checkSignedIn, async (req, res) => {
 	} else {
 		await client.query(`INSERT INTO subscribedtopics (topicname, user_id) VALUES ($1, $2)`, [req.params.topic, userinfo.id]);
 		res.send("true");
+	}
+});
+
+//get path for deleting a shoutout from a channel
+app.get("/shoutout/delete/:shoutoutid", middleware.checkSignedIn, async (req, res) => {
+	//get the session info from the user
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	//make a query to see if the shoutout entry exists
+	var shoutoutexists = await client.query(`SELECT EXISTS(SELECT * FROM shoutouts WHERE shoutout_id=$1 AND user_id=$2 LIMIT 1)`, [req.params.shoutoutid, userinfo.id]);
+	shoutoutexists = shoutoutexists.rows[0].exists;
+
+	//check to see if the shoutout exists or not
+	if (shoutoutexists) { //if the shoutout exists, delete the entry and redirect to the shoutouts page
+		await client.query(`DELETE FROM shoutouts WHERE shoutout_id=$1 AND user_id=$2`, [req.params.shoutoutid, userinfo.id]);
+		req.flash("message", "Deleted shoutout!");
+		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+	} else { //if the shoutout does not exist on the channel, then let the user know
+		req.flash("message", "Shoutout does not exist.");
+		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
 	}
 });
 

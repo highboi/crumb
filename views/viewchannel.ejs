@@ -77,15 +77,24 @@
 							<h3><a href="/playlist/new">Create New Playlist</a></h3>
 						<% } %>
 					<% } else if (section == "shoutouts") { %>
-						<form method="post" action="/shoutout/add">
-							<label for="shoutout">Shoutout Channel URL:</label>
-							<input type="text" id="shoutout" name="shoutout"><br>
-							<button type="submit">Submit</button>
-						</form><br>
+						<% if (typeof user != 'undefined') { %>
+							<% if (user.id == creator.id) { %>
+								<form method="post" action="/shoutout/add">
+									<label for="shoutout">Shoutout Channel URL:</label>
+									<input type="text" id="shoutout" name="shoutout"><br>
+									<button type="submit">Submit</button>
+								</form><br>
+							<% } %>
+						<% } %>
 						<% if (typeof shoutouts != 'undefined') { %>
 							<hr>
 							<% shoutouts.forEach((item, index) => { %>
 								<%- include('content/ejs/minichannel.ejs', {channel: item}) %>
+								<% if (typeof user != 'undefined') { %>
+									<% if (user.id == creator.id) { %>
+										<button onclick="redirectConfirm('Delete Shoutout?', '/shoutout/delete/<%= item.id %>')">Delete Shoutout</button>
+									<% } %>
+								<% } %>
 								<hr>
 							<% }); %>
 						<% } %>
