@@ -1,7 +1,11 @@
 <% if (typeof video != 'undefined') { %>
 	<object id="<%= video.id %>reportform">
 		<form action="/report/video/<%= video.id %>" method="post">
-			<h2>Why is this bad?</h2><br>
+			<h2>Why is this bad?</h2>
+
+			<p>Timestamp Selected:</p>
+			<input type="text" id="minutes" name="minutes" value="">:
+			<input type="text" id="seconds" name="seconds" value=""><br>
 
 			<label for="cabuse">Child Abuse</label>
 			<input type="radio" id="cabuse" name="reason" value="cabuse"><br>
@@ -16,3 +20,4 @@
 		</form>
 	</object>
 <% } %>
+

@@ -22,17 +22,14 @@
 				<a href="<%= channellink %>">
 					<p><%= video.username %></p>
 				</a>
-				<svg width="10" height="40" id="extras" onclick='showlinks(&quot;<%= video.id %>extralinks&quot;, &quot;<%= video.id %>&quot;)'>
+				<svg width="10" height="40" id="extras" onclick='showelement(&quot;<%= video.id %>extralinks&quot;)'>
 					<circle cx="5" cy="5" r="5" fill="#adff12"/>
 					<circle cx="5" cy="20" r="5" fill="#adff12"/>
 					<circle cx="5" cy="35" r="5" fill="#adff12"/>
 				</svg>
 				<div class="extralinks" id="<%= video.id %>extralinks">
-					<button onclick='showform(&quot;<%= video.id %>&quot;, &quot;playlistform&quot;)'>Add To Playlist</button>
+					<button onclick='showelement(&quot;<%= video.id %>playlistform&quot;)'>Add To Playlist</button>
 					<button>Not Interested</button>
-					<button onclick='showform(&quot;<%= video.id %>&quot;, &quot;reportform&quot;)'>Report</button>
-				</div>
-				<div class="extralinkforms" id="<%= video.id %>extralinkforms">
 					<object id="<%= video.id %>playlistform">
 						<h3><a href="/playlist/new/?videoid=<%= video.id %>">Create Playlist</a></h3><br>
 						<% if (typeof playlists != 'undefined') { %>
@@ -41,7 +38,6 @@
 							<% }); %>
 						<% } %>
 					</object>
-					<%- include('./videoreportform.ejs', {video: video}) %>
 				</div>
 			</div>
 		</div>
