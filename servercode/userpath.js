@@ -236,8 +236,14 @@ app.post("/report/video/:videoid", middleware.checkSignedIn, async (req, res) =>
 
 	//do things based off of the existence of the video being reported
 	if (videoexists) {
+		//get the full timestamp of the video (the time into the video in seconds)
+		var timestamp = 0;
+		timestamp += (req.body.hours*60*60);
+		timestamp += (req.body.minutes*60);
+		timestamp += (req.body.seconds);
+
 		//create the values array
-		var valuesarr = [userinfo.id, req.params.videoid, "video", req.body.reason];
+		var valuesarr = [userinfo.id, req.params.videoid, "video", req.body.reason, timestamp];
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == 'string') {
 				return "\'" + item + "\'";
@@ -247,7 +253,7 @@ app.post("/report/video/:videoid", middleware.checkSignedIn, async (req, res) =>
 		});
 
 		//insert this report into the db
-		await client.query(`INSERT INTO reports (reporter_id, content_id, content_type, reason) VALUES (${valuesarr})`);
+		await client.query(`INSERT INTO reports (reporter_id, content_id, content_type, reason, timestamp) VALUES (${valuesarr})`);
 
 		//redirect to the video url
 		req.flash("message", "Video reported.");

@@ -12,7 +12,7 @@
 	<hr>
 	<div class="extralinks" id="<%= video.id %>extralinks">
 		<button onclick="showelement('<%= video.id %>playlistform')">Add To Playlist</button>
-		<button onclick="showelement('<%= video.id %>reportform')">Report</button>
+		<button onclick="showelement('<%= video.id %>reportform'); insertReportTimestamp('<%= video.id %>reportform')">Report</button>
 		<object id="<%= video.id %>playlistform">
 			<h3><a href="/playlist/new/?videoid=<%= video.id %>">Create Playlist</a></h3><br>
 			<% if (typeof playlists != 'undefined') { %>
