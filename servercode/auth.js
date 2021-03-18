@@ -26,6 +26,8 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 		//delete all of the video details for the videos belonging to this user
 		videos.forEach(async (item, index) => {
 			await middleware.deleteVideoDetails(userinfo, item.id);
+			await middleware.decreaseWordScores(item.title.split(" "));
+			await middleware.decreaseWordScores(item.topics.split(" "));
 		});
 
 		//delete all of the playlists of the user
@@ -39,6 +41,11 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 
 		//delete the comments of this user
 		await client.query(`DELETE FROM comments WHERE user_id=$1`, [req.params.userid]);
+
+		//decrease the wordscores of the user and their topics on their channel
+		await middleware.decreaseWordScores([userinfo.username]);
+		await middleware.decreaseWordScores(userinfo.username.split(" "));
+		await middleware.decreaseWordScores(userinfo.topics.split(" "));
 
 		//delete the actual user
 		await client.query(`DELETE FROM users WHERE id=$1`, [req.params.userid]);
@@ -153,7 +160,6 @@ app.post('/register', (req, res) => {
 
 			//map the values array with escaped single quotes for all of the string values for the SQL query
 			valuesarr = valuesarr.map((item) => {
-				console.log(typeof item);
 				if (typeof item == 'string') {
 					return "\'"+ item + "\'";
 				} else {
@@ -162,7 +168,7 @@ app.post('/register', (req, res) => {
 			});
 
 			//push the user into the database and get the important values as an object
-			var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES (${valuesarr}) RETURNING id, username, email, password, channelicon, channelbanner, streamkey`);
+			var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES (${valuesarr}) RETURNING id, username, email, password, channelicon, channelbanner, streamkey, topics`);
 			newuser = newuser.rows[0];
 			console.log("Registered User.");
 
@@ -201,6 +207,11 @@ app.post('/register', (req, res) => {
 
 			//store a cookie that stores a boolean value letting javascript know the session exists (javascript and httponly coexist)
 			res.cookie("hasSession", true, {httpOnly: false, expires: 0});
+
+			//increase the word scores of the channel name and the channel topics
+			await middleware.increaseWordScores([fields.username]);
+			await middleware.increaseWordScores(fields.username.split(" "));
+			await middleware.increaseWordScores(fields.topics.split(" "));
 
 			//flash message to let the user know they are registered
 			req.flash("message", "Registered!");

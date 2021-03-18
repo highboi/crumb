@@ -85,13 +85,13 @@ middleware = {
 		console.log("Generated new ID: " + newid);
 
 		//get the response from the database
-		var res = await client.query(`SELECT * FROM videos WHERE id=$1`, [newid]);
+		var res = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [newid]);
 
 		//get comment ids
-		var commentres = await client.query(`SELECT * FROM comments WHERE id=$1`, [newid]);
+		var commentres = await client.query(`SELECT * FROM comments WHERE id=$1 LIMIT 1`, [newid]);
 
 		//get the playlist ids
-		var playlistres = await client.query(`SELECT * FROM playlists WHERE id=$1`, [newid]);
+		var playlistres = await client.query(`SELECT * FROM playlists WHERE id=$1 LIMIT 1`, [newid]);
 
 		//if the database returned more than 0 rows, this means that a video
 		//with the generated id exists, meaning that the function must be
@@ -110,7 +110,7 @@ middleware = {
 		var newid = crypto.randomBytes(32).toString("base64");
 
 		//check to see if there are any existing users with the same stream key
-		var res = await client.query(`SELECT * FROM users WHERE streamkey=$1`, [newid]);
+		var res = await client.query(`SELECT * FROM users WHERE streamkey=$1 LIMIT 1`, [newid]);
 
 		if (res.rows.length > 0) {
 			middleware.generateStreamKey();
@@ -145,13 +145,13 @@ middleware = {
 	//this is a function to delete video details
 	deleteVideoDetails: async function (userinfo, videoid) {
 		//get the video to be deleted
-		var video = await client.query(`SELECT thumbnail, video FROM videofiles WHERE id=$1`, [videoid]);
+		var video = await client.query(`SELECT thumbnail, video FROM videofiles WHERE id=$1 LIMIT 1`, [videoid]);
 		video = video.rows[0];
 		//get the paths of the files for the thumbnail and the video
 		var thumbnailpath = global.appRoot + "/storage" + video.thumbnail;
 		var videopath = global.appRoot + "/storage" + video.video;
 
-		var video_user_id = await client.query(`SELECT user_id FROM videos WHERE id=$1`, [videoid]);
+		var video_user_id = await client.query(`SELECT user_id FROM videos WHERE id=$1 LIMIT 1`, [videoid]);
 		video_user_id = video_user_id.rows[0].user_id;
 
 		//check to see if the user trying to delete the video actually owns the video
@@ -161,6 +161,11 @@ middleware = {
 			//delete the video file entry and the comment file entries
 			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
 			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
+			//change the wordscore of the video title and topics
+			var videoobj = await client.query(`SELECT title, topics FROM videos WHERE id=$1 LIMIT 1`, [videoid]);
+			videoobj = videoobj.rows[0];
+			await middleware.decreaseWordScores(videoobj.title.split(" "));
+			await middleware.decreaseWordScores(videoobj.topics.split(" "));
 			//delete the video details in the database
 			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
 			//delete the live chat messages from the video
@@ -183,7 +188,7 @@ middleware = {
 
 	//this is a function to delete playlist details
 	deletePlaylistDetails: async function (userinfo, playlistid) {
-		var playlist = await client.query(`SELECT user_id FROM playlists WHERE id=$1`, [playlistid]);
+		var playlist = await client.query(`SELECT user_id FROM playlists WHERE id=$1 LIMIT 1`, [playlistid]);
 		playlist = playlist.rows[0];
 
 		//if the playlist's user id matches the given user info, then delete the playlist video entries
@@ -214,7 +219,7 @@ middleware = {
 
 	//this is a function to increase/decrease likes/dislikes of videos in the database
 	changeLikes: async function (req, res, increase, changelikes) {
-		var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
+		var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.videoid]);
 		if (changelikes == true) {
 			var likes = parseInt(video.rows[0].likes, 10);
 			//increase or decrease the amount of likes based on the increase parameter
@@ -240,51 +245,6 @@ middleware = {
 			//return the value of the updated dislikes
 			return newcount.toString();
 		}
-	},
-
-	//this is a function that changes the word score in the wordlist file
-	changeWordScore: async function (word, add, amount) {
-		//get the current wordscore
-		var wordscore = await client.query(`SELECT score FROM commonwords WHERE word=$1`, [word]);
-		wordscore = wordscore.rows[0];
-
-		//check to see if this words exists inside the redis store
-		if (typeof wordscore != 'undefined') {
-			//get the actual score attribute now that we know that this is a defined entry in the database
-			wordscore = wordscore.score;
-
-			//check to see if we add or subtract from the wordscore
-			if (add) {
-				wordscore = wordscore + amount;
-			} else {
-				wordscore = wordscore - amount;
-			}
-
-			//set the wordscore of this word
-			await client.query(`UPDATE commonwords SET score=$1 WHERE word=$2`, [wordscore, word]);
-		} else { //if the word does not exist yet
-			//set the default word score
-			await client.query(`INSERT INTO commonwords (word, score) VALUES ($1, $2)`, [word, 0]);
-		}
-	},
-
-	//this is a function that loops through all of the wordlist terms in an array and changes the wordscore
-	changeWordScoreArr: function (words, add, amount) {
-		//loop through the word array provided in the parameters
-		words.forEach(async (item, index) => {
-			await middleware.changeWordScore(item, add, amount);
-		});
-	},
-
-	//this is a function to update the wordscore of a video
-	changeVideoWordScore: async function (videoid) {
-		//get the video information
-		var video = await client.query(`SELECT topics, title, username, user_id FROM videos WHERE id=$1`, videoid);
-		video = video.rows[0];
-		//change the wordscore of each of these attributes
-		var wordsArr = video.title.split(" ").concat([video.username], video.topics.split(" "));
-		//change the actual wordscore for each word/phrase
-		await changeWordScoreArr(wordsArr, true, 1);
 	},
 
 	//this is a function that puts together a list of phrases to use in our search algorithm
@@ -319,7 +279,7 @@ middleware = {
 		return terms;
 	},
 
-	//this is a function that selects videos from the database based on a given array of search terms and a selector (i.e what if we only want titles?)
+	//this is a function that selects videos from the database based on a given array of search terms
 	searchVideos: async (phrases) => {
 		//an array to store all of the video objects selected from the database
 		var results = [];
@@ -565,6 +525,33 @@ middleware = {
 		}
 
 		return [likes, dislikes];
+	},
+
+	//this increases the wordscores of a group of words
+	increaseWordScores: async (words) => {
+		//insert new wordscores into the database
+		for (var i=0; i < words.length; i++) {
+			var wordexists = await client.query(`SELECT EXISTS(SELECT * FROM commonwords WHERE word=$1)`, [words[i]]);
+			wordexists = wordexists.rows[0].exists;
+
+			if (!wordexists) {
+				await client.query(`INSERT INTO commonwords (word, score) VALUES ($1, $2)`, [words[i], 0]);
+			}
+		}
+
+		//change the already existing wordscores and the newly inserted wordscores
+		words = words.map((item) => {
+			return "\'" + item + "\'";
+		});
+		await client.query(`UPDATE commonwords SET score=score+1 WHERE word IN (${words})`);
+	},
+
+	//this decreases the wordscores of a group of words
+	decreaseWordScores: async (words) => {
+		words = words.map((item) => {
+			return "\'" + item + "\'";
+		});
+		await client.query(`UPDATE commonwords SET score=score-1 WHERE word IN (${words})`);
 	}
 }
 

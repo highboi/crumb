@@ -24,7 +24,7 @@
 				<% if (typeof user != 'undefined') { %>
 					<% if (creator.id == user.id && playlist.candelete) { %>
 						<% var deletelink = `/playlist/delete/${playlist.id}` %>
-						<button><a href="<%= deletelink %>">Delete Playlist</a></button>
+						<button onclick="redirectConfirm('Delete Playlist?', '<%= deletelink %>')">Delete Playlist</button>
 					<% } %>
 				<% } %>
 				<hr>
@@ -36,7 +36,8 @@
 								<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
 								<% if (typeof user != undefined) { %>
 									<% if (creator.id == user.id) { %>
-										<button><a href="/playlistvideo/delete/<%= playlist.id %>/<%= item.id %>">Delete Video</a></button>
+										<% var deletelink = `/playlistvideo/delete/${playlist.id}/${item.id}` %>
+										<button onclick="redirectConfirm('Delete video from playlist?', '<%= deletelink %>')">Delete Video</button>
 									<% } %>
 								<% } %>
 							<% }); %>
