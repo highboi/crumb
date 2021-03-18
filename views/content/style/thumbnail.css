@@ -55,3 +55,7 @@ INDIVIDUAL THUMBNAILS
 .video-thumbnail .links .channel-links .extralinks object {
 	display: none;
 }
+
+.not-interested-undo {
+	display: none;
+}

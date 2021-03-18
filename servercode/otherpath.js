@@ -36,13 +36,13 @@ app.get("/search", async (req, res) => {
 	var phrases = middleware.getSearchTerms(search.humanquery);
 
 	//add the results for the regular phrases into the results array
-	var videos = await middleware.searchVideos("*", phrases);
+	var videos = await middleware.searchVideos(phrases);
 
 	//get the channels that match the search terms
-	var channels = await middleware.searchChannels("*", phrases);
+	var channels = await middleware.searchChannels(phrases);
 
 	//get the playlists that match the search terms
-	var playlists = await middleware.searchPlaylists("*", phrases);
+	var playlists = await middleware.searchPlaylists(phrases);
 
 	//store the array of video objects inside the search object
 	search.videos = videos;

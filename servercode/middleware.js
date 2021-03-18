@@ -320,13 +320,13 @@ middleware = {
 	},
 
 	//this is a function that selects videos from the database based on a given array of search terms and a selector (i.e what if we only want titles?)
-	searchVideos: async (selector, phrases) => {
+	searchVideos: async (phrases) => {
 		//an array to store all of the video objects selected from the database
 		var results = [];
 		//get all of the videos from the database with titles like the search term
 		for (var i=0; i<phrases.length; i++) {
 			//get all of the videos from the database with a title matching the current term
-			var result = await client.query(`SELECT ${selector} FROM videos WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["% " + phrases[i] + " %"]);
+			var result = await client.query(`SELECT * FROM videos WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["% " + phrases[i] + " %"]);
 			//check to see that the same video is not included in the results twice
 			result.rows.forEach((item, index) => {
 				//a boolean to check to see if the video has been added
@@ -349,10 +349,10 @@ middleware = {
 	},
 
 	//this is a function that returns the channels that come up in search results
-	searchChannels: async (selector, phrases) => {
+	searchChannels: async (phrases) => {
 		var results = [];
 		for (var i=0; i < phrases.length; i++) {
-			var result = await client.query(`SELECT ${selector} FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($2)`, ["%" + phrases[i] +"%", "% " + phrases[i] + " %"]);
+			var result = await client.query(`SELECT * FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($2)`, ["%" + phrases[i] +"%", "% " + phrases[i] + " %"]);
 			result.rows.forEach((item, index) => {
 				var added = false;
 				for (var j=0; j < results.length; j++) {
@@ -369,10 +369,10 @@ middleware = {
 	},
 
 	//this is a function that returns the playlists that come up in the search results
-	searchPlaylists: async (selector, phrases) => {
+	searchPlaylists: async (phrases) => {
 		var results = [];
 		for (var i=0; i < phrases.length; i++) {
-			var result = await client.query(`SELECT ${selector} FROM playlists WHERE private=${false} AND (UPPER(name) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
+			var result = await client.query(`SELECT * FROM playlists WHERE private=${false} AND (UPPER(name) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
 			result.rows.forEach((item, index) => {
 				var added = false;
 				for (var j=0; j < results.length; j++) {
@@ -394,7 +394,7 @@ middleware = {
 		var phrases = middleware.getSearchTerms(video.title);
 
 		//get the results of searching for the videos based on the list of phrases in the db
-		var vids = await middleware.searchVideos("*", phrases);
+		var vids = await middleware.searchVideos(phrases);
 
 		//eliminate the video from the list if the video being viewed is in the list
 		vids.forEach((item, index) => {
