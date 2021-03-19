@@ -347,10 +347,6 @@ app.post("/v/submit", (req, res) => {
 			//change the video count on the user db entry
 			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
 
-			//change/add wordscores derived from the video title and topics
-			await middleware.increaseWordScores(fields.title.split(" "));
-			await middleware.increaseWordScores(fields.topics.split(" "));
-
 			//redirect the user to their video
 			res.redirect(`/v/${videoid}`); //redirect to the url
 		} else if (!(thumbtype in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors

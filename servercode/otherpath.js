@@ -61,36 +61,26 @@ app.get("/getsearchrecs", async (req, res) => {
 	//get the search query
 	var searchquery = req.query.searchquery;
 
-	//get all of the titles of videos and streams that are most similar to the search query
-	var videos = await client.query(`SELECT title FROM videos WHERE UPPER(title) LIKE UPPER($1) ORDER BY likes`, ["%" + searchquery + "%"]);
-	videos = videos.rows;
+	//get the individual phrases of the search query
+	var phrases = await middleware.getSearchTerms(searchquery);
 
-	//get all of the titles of playlists
-	var playlists = await client.query(`SELECT name FROM playlists WHERE UPPER(name) LIKE UPPER($1)`, ["%" + searchquery + "%"]);
-	playlists = playlists.rows;
+	//get all of the video title values that match the phrases
+	var videos = await middleware.getMatching("videos", "title", phrases);
 
-	//get all of the channels with the search query in the title
-	var channels = await client.query(`SELECT username FROM users WHERE UPPER(username) LIKE UPPER($1) ORDER BY subscribers`, ["%" + searchquery + "%"]);
-	channels = channels.rows;
+	//get all of the channel names that match the search query
+	var channels = await middleware.getMatching("users", "username", phrases);
 
-	//get popular channels which contain occurrences of the keyword(s) in the search query
-	var popchannels = await client.query(`SELECT username FROM users WHERE id IN (SELECT user_id FROM videos WHERE UPPER(title) LIKE UPPER($1)) ORDER BY subscribers`, ["%" + searchquery.trim() + "%"]);;
-	popchannels = popchannels.rows;
+	//get all of the playlist names that match the search query
+	var playlists = await middleware.getMatching("playlists", "name", phrases);
 
-	//get popular keywords associated with the channel (if there is one) typed into the search query
-	var popkeywords = await client.query(`SELECT title FROM videos WHERE user_id IN (SELECT id FROM users WHERE UPPER(username) LIKE UPPER($1)) ORDER BY likes`, ["%" + searchquery.trim() + "%"]);
-	popkeywords = popkeywords.rows;
+	//get all of the channel usernames that match up with videos that have a title similar to the search query
+	var popchannels = await middleware.getPopularChannels(phrases);
+
+	//get all of the popular video titles associated with channels that have a similar title to the search query
+	var popvideos = await middleware.getPopularVideos(phrases);
 
 	//combine the total results of all of the reccomendations, with videos and channels being the top priority before playlists
-	var results = videos.concat(channels, playlists, popchannels, popkeywords);
-
-	//get all of the values of each object, as these are the reccomendation values
-	results = results.map((item, index) => {
-		return Object.values(item);
-	});
-
-	//concatenate with the ellipsis (...) to turn the 2d array to a 1d array
-	results = [].concat(...results);
+	var results = videos.concat(channels, playlists, popchannels, popvideos);
 
 	//send the resulting video titles to the client side
 	res.send(results);

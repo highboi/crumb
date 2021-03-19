@@ -26,8 +26,6 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 		//delete all of the video details for the videos belonging to this user
 		videos.forEach(async (item, index) => {
 			await middleware.deleteVideoDetails(userinfo, item.id);
-			await middleware.decreaseWordScores(item.title.split(" "));
-			await middleware.decreaseWordScores(item.topics.split(" "));
 		});
 
 		//delete all of the playlists of the user
@@ -207,11 +205,6 @@ app.post('/register', (req, res) => {
 
 			//store a cookie that stores a boolean value letting javascript know the session exists (javascript and httponly coexist)
 			res.cookie("hasSession", true, {httpOnly: false, expires: 0});
-
-			//increase the word scores of the channel name and the channel topics
-			await middleware.increaseWordScores([fields.username]);
-			await middleware.increaseWordScores(fields.username.split(" "));
-			await middleware.increaseWordScores(fields.topics.split(" "));
 
 			//flash message to let the user know they are registered
 			req.flash("message", "Registered!");

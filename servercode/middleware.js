@@ -161,11 +161,6 @@ middleware = {
 			//delete the video file entry and the comment file entries
 			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
 			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
-			//change the wordscore of the video title and topics
-			var videoobj = await client.query(`SELECT title, topics FROM videos WHERE id=$1 LIMIT 1`, [videoid]);
-			videoobj = videoobj.rows[0];
-			await middleware.decreaseWordScores(videoobj.title.split(" "));
-			await middleware.decreaseWordScores(videoobj.topics.split(" "));
 			//delete the video details in the database
 			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
 			//delete the live chat messages from the video
@@ -287,23 +282,16 @@ middleware = {
 		for (var i=0; i<phrases.length; i++) {
 			//get all of the videos from the database with a title matching the current term
 			var result = await client.query(`SELECT * FROM videos WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["% " + phrases[i] + " %"]);
-			//check to see that the same video is not included in the results twice
+
+			//add the entries to the results
 			result.rows.forEach((item, index) => {
-				//a boolean to check to see if the video has been added
-				var added = false;
-				//loop through the videos already in the results array and compare the two objects as strings
-				for (var j=0; j<results.length; j++) {
-					//if the video in the results and the video in the results array are the same, then the video has been added
-					if (JSON.stringify(results[j]) == JSON.stringify(item)) {
-						added = true;
-					}
-				}
-				//if the video has not been added, then add the video to the results
-				if (!added) {
-					results.push(item);
-				}
+				results.push(item);
 			});
 		}
+
+		//remove duplicate values using a set
+		results = [...new Set(results)];
+
 		//return the results
 		return results;
 	},
@@ -314,17 +302,16 @@ middleware = {
 		for (var i=0; i < phrases.length; i++) {
 			var result = await client.query(`SELECT * FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($2)`, ["%" + phrases[i] +"%", "% " + phrases[i] + " %"]);
 			result.rows.forEach((item, index) => {
-				var added = false;
-				for (var j=0; j < results.length; j++) {
-					if (JSON.stringify(results[j]) == JSON.stringify(item)) {
-						added = true;
-					}
-				}
-				if (!added) {
-					results.push(item);
-				}
+				results.push(item);
 			});
 		}
+
+		console.log(results);
+
+		results = [...new Set(results)];
+
+		console.log(results);
+
 		return results;
 	},
 
@@ -334,17 +321,12 @@ middleware = {
 		for (var i=0; i < phrases.length; i++) {
 			var result = await client.query(`SELECT * FROM playlists WHERE private=${false} AND (UPPER(name) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
 			result.rows.forEach((item, index) => {
-				var added = false;
-				for (var j=0; j < results.length; j++) {
-					if (JSON.stringify(results[j]) == JSON.stringify(item)) {
-						added = true;
-					}
-				}
-				if (!added) {
-					results.push(item);
-				}
+				results.push(item);
 			});
 		}
+
+		results = [...new Set(results)];
+
 		return results;
 	},
 
@@ -365,6 +347,94 @@ middleware = {
 
 		//return the videos
 		return vids;
+	},
+
+	//this is a function that gets all of the titles from a certain table based on an array of phrases
+	getMatching: async (table, selector, phrases) => {
+		//make an array to store all of the title values
+		var titles = [];
+
+		//loop through all of the phrases
+		for (var i=0; i < phrases.length; i++) {
+			//get the titles of all the matching entries
+			var title = await client.query(`SELECT $1 FROM ${table} WHERE UPPER($1) LIKE UPPER($2)`, [selector, phrases[i]]);
+			title = title.rows;
+
+			//add each title to the array
+			title.forEach((item, index) => {
+				titles.push(item.title);
+			});
+		}
+
+		//remove duplicate title values with a set
+		titles = [...new Set(titles)];
+
+		//return the title values
+		return titles;
+	},
+
+	//this is a function that gets all of the popular channel names based on a list of video titles/phrases
+	getPopularChannels: async (phrases) => {
+		//an array to store all of the usernames
+		var usernames = [];
+
+		//loop through all of the phrases and get all of the channel usernames and subcriber counts
+		for (var i=0; i < phrases.length; i++) {
+			var username = await client.query(`SELECT username, subscribers FROM users WHERE id IN (SELECT user_id FROM videos WHERE UPPER(title) LIKE UPPER($1) LIMIT 10) LIMIT 10`, ["%" + phrases[i] + "%"]);
+			username = username.rows;
+
+			username.forEach((item, index) => {
+				usernames.push(item);
+			});
+		}
+
+		//remove duplicate values
+		usernames = [...new Set(usernames)];
+
+		//sort the usernames by the subscribers in descending order
+		usernames.sort((a, b) => {
+			return b.subscribers-a.subscribers;
+		});
+
+		//get the values of the usernames only instead of an object
+		usernames = usernames.map((item) => {
+			return item.username;
+		});
+
+		//return the username values
+		return usernames;
+	},
+
+	//this is a function that gets all of the popular video titles based on a list of channel names/phrases
+	getPopularVideos: async (phrases) => {
+		//an array to store all of the video titles
+		var titles = [];
+
+		//loop through the phrases to get all of the video titles and view counts
+		for (var i=0; i < phrases.length; i++) {
+			var title = await client.query(`SELECT title, views FROM videos WHERE id IN (SELECT id FROM videos WHERE UPPER(title) LIKE UPPER($1) LIMIT 10) LIMIT 10`, ["%" + phrases[i] + "%"]);
+			title = title.rows;
+
+			title.forEach((item, index) => {
+				titles.push(item);
+			});
+		}
+
+		//remove duplicate values
+		titles = [...new Set(titles)];
+
+		//sort the titles by the view count on the videos
+		titles.sort((a, b) => {
+			return b.views-a.views;
+		});
+
+		//get the values of the titles only
+		titles = titles.map((item) => {
+			return item.title;
+		});
+
+		//return the title values
+		return titles;
 	},
 
 	//this is a function that counts the amount of hits on the site
@@ -525,33 +595,6 @@ middleware = {
 		}
 
 		return [likes, dislikes];
-	},
-
-	//this increases the wordscores of a group of words
-	increaseWordScores: async (words) => {
-		//insert new wordscores into the database
-		for (var i=0; i < words.length; i++) {
-			var wordexists = await client.query(`SELECT EXISTS(SELECT * FROM commonwords WHERE word=$1)`, [words[i]]);
-			wordexists = wordexists.rows[0].exists;
-
-			if (!wordexists) {
-				await client.query(`INSERT INTO commonwords (word, score) VALUES ($1, $2)`, [words[i], 0]);
-			}
-		}
-
-		//change the already existing wordscores and the newly inserted wordscores
-		words = words.map((item) => {
-			return "\'" + item + "\'";
-		});
-		await client.query(`UPDATE commonwords SET score=score+1 WHERE word IN (${words})`);
-	},
-
-	//this decreases the wordscores of a group of words
-	decreaseWordScores: async (words) => {
-		words = words.map((item) => {
-			return "\'" + item + "\'";
-		});
-		await client.query(`UPDATE commonwords SET score=score-1 WHERE word IN (${words})`);
 	}
 }
 
