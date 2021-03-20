@@ -35,17 +35,34 @@ function searchCallback(response) {
 
 	//clear out the reccomendations html and add the p tags that contain reccomendations
 	searchDropdown.innerHTML = "";
+
+	//loop through the search reccomendation values
 	recsArr.forEach((item, index) => {
-		if (item.includes(searchqueryinput.value)) {
-		    var components = item.split(searchqueryinput.value);
-		    var rectext = components[0] + searchqueryinput.value + components[1];
-		    var hreflink = `/search/?searchquery=${rectext.split(" ").join("+")}`;
-		    searchDropdown.innerHTML = searchDropdown.innerHTML + `<p><a href=\'${hreflink}\'>` + components[0] + "<strong>" + searchqueryinput.value + "</strong>" + "</a></p>";
-		} else {
-		    var rectext = searchqueryinput.value + " " + item;
-		    var hreflink = `/search/?searchquery=${rectext.split(" ").join("+")}`;
-		    searchDropdown.innerHTML = searchDropdown.innerHTML + `<p><a href=\'${hreflink}\'><strong>` + searchqueryinput.value + " </strong>" + item + "</a></p>";
-		}
+		//get the components of the search reccomendation
+		var components = item.toLowerCase().split(searchqueryinput.value.toLowerCase());
+
+		//form the highlighted part of the search reccomendation
+		var highlighted = document.createElement("strong");
+		highlighted.innerHTML = searchqueryinput.value;
+
+		//create the anchor tag which will house all of the text
+		var anchor = document.createElement("a");
+
+		//make a valid link to a search and set this as the "href" value for the anchor
+		var hreflink = `/search/?searchquery=${item.split(" ").join("+")}`;
+		anchor.setAttribute("href", hreflink);
+
+		//form the inner text of the anchor tag with both components and the highlighted element
+		anchor.innerHTML = components[0] + highlighted.outerHTML + components[1];
+
+		//create the final "p" tag element that will house the anchor tag
+		var finalelement = document.createElement("p");
+
+		//add the anchor html into the p tag inner html
+		finalelement.innerHTML = anchor.outerHTML;
+
+		//add this element to the child nodes of the search dropdown selection
+		searchDropdown.appendChild(finalelement);
 	});
 }
 

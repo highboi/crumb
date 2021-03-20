@@ -285,12 +285,17 @@ middleware = {
 
 			//add the entries to the results
 			result.rows.forEach((item, index) => {
-				results.push(item);
+				//check to see that the array does not have this item already
+				var isDuplicate = results.some((res) => {
+					return JSON.stringify(res) == JSON.stringify(item);
+				});
+
+				//if this item is not a duplicate, then add it to the array
+				if (!isDuplicate) {
+					results.push(item);
+				}
 			});
 		}
-
-		//remove duplicate values using a set
-		results = [...new Set(results)];
 
 		//return the results
 		return results;
@@ -300,17 +305,17 @@ middleware = {
 	searchChannels: async (phrases) => {
 		var results = [];
 		for (var i=0; i < phrases.length; i++) {
-			var result = await client.query(`SELECT * FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($2)`, ["%" + phrases[i] +"%", "% " + phrases[i] + " %"]);
+			var result = await client.query(`SELECT * FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($2)`, ["%" + phrases[i] +"%", "% " + phrases[i] + " %"]);
 			result.rows.forEach((item, index) => {
-				results.push(item);
+				var isDuplicate = results.some((res) => {
+					return JSON.stringify(res) == JSON.stringify(item);
+				});
+
+				if (!isDuplicate) {
+					results.push(item);
+				}
 			});
 		}
-
-		console.log(results);
-
-		results = [...new Set(results)];
-
-		console.log(results);
 
 		return results;
 	},
@@ -321,11 +326,15 @@ middleware = {
 		for (var i=0; i < phrases.length; i++) {
 			var result = await client.query(`SELECT * FROM playlists WHERE private=${false} AND (UPPER(name) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
 			result.rows.forEach((item, index) => {
-				results.push(item);
+				var isDuplicate = results.some((res) => {
+					return JSON.stringify(res) == JSON.stringify(item);
+				});
+
+				if (!isDuplicate) {
+					results.push(item);
+				}
 			});
 		}
-
-		results = [...new Set(results)];
 
 		return results;
 	},
@@ -357,7 +366,7 @@ middleware = {
 		//loop through all of the phrases
 		for (var i=0; i < phrases.length; i++) {
 			//get the titles of all the matching entries
-			var title = await client.query(`SELECT $1 FROM ${table} WHERE UPPER($1) LIKE UPPER($2)`, [selector, phrases[i]]);
+			var title = await client.query(`SELECT ${selector} FROM ${table} WHERE UPPER(${selector}) LIKE UPPER($1)`, ["%" + phrases[i] + "%"]);
 			title = title.rows;
 
 			//add each title to the array
@@ -384,12 +393,17 @@ middleware = {
 			username = username.rows;
 
 			username.forEach((item, index) => {
-				usernames.push(item);
+				//get a boolean to see if this is a duplicate
+				var isDuplicate = usernames.some((res) => {
+					return JSON.stringify(res) == JSON.stringify(item);
+				});
+
+				//insert the item based on the boolean value above
+				if (!isDuplicate) {
+					usernames.push(item);
+				}
 			});
 		}
-
-		//remove duplicate values
-		usernames = [...new Set(usernames)];
 
 		//sort the usernames by the subscribers in descending order
 		usernames.sort((a, b) => {
@@ -416,12 +430,17 @@ middleware = {
 			title = title.rows;
 
 			title.forEach((item, index) => {
-				titles.push(item);
+				//get a boolean value which tells us if this is a duplicate object
+				var isDuplicate = titles.some((res) => {
+					return JSON.stringify(res) == JSON.stringify(item);
+				});
+
+				//add this object if it is not a duplicate
+				if (!isDuplicate) {
+					titles.push(item);
+				}
 			});
 		}
-
-		//remove duplicate values
-		titles = [...new Set(titles)];
 
 		//sort the titles by the view count on the videos
 		titles.sort((a, b) => {
@@ -435,6 +454,30 @@ middleware = {
 
 		//return the title values
 		return titles;
+	},
+
+	//this is a function that returns combination phrases between two arrays. the functionality of this is used for the purpose of combining search
+	//query input with video and channel titles that are indirectly related to strings in the search query (I.E the term "websocket" in the search query
+	//might be in the title of a video owned by the user "jane", but since we cannot give just the phrase "jane" as a search reccomendation, we have to combine
+	//the word "websocket" with "jane" to have a proper/relevant search reccomendation that matches up with the user input)
+	getPhraseCombos: async (phrases, items) => {
+		//a result array to store all of the phrase combos
+		var result = [];
+
+		//loop through the phrases
+		phrases.forEach((phrase) => {
+			//loop through the items
+			items.forEach((item) => {
+				//add the complete combination to the array
+				result.push(phrase + " " + item);
+			});
+		});
+
+		//remove duplicates
+		result = [...new Set(result)];
+
+		//return the array
+		return result;
 	},
 
 	//this is a function that counts the amount of hits on the site

@@ -62,7 +62,7 @@ app.get("/u/:userid", async (req, res) => {
 			break;
 	}
 
-	if (typeof userinfo == 'undefined' || userinfo.id != viewObj.creator.id) {
+	if ( (typeof userinfo == 'undefined' || userinfo.id != viewObj.creator.id) && (typeof viewObj.videos != 'undefined') ) {
 		viewObj.videos = viewObj.videos.filter((item) => {
 			return !item.private;
 		});

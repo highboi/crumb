@@ -79,8 +79,15 @@ app.get("/getsearchrecs", async (req, res) => {
 	//get all of the popular video titles associated with channels that have a similar title to the search query
 	var popvideos = await middleware.getPopularVideos(phrases);
 
+	//get popular video and channel reccomendation phrase combos
+	var popvideorecs = await middleware.getPhraseCombos(videos, popchannels);
+	var popchannelrecs = await middleware.getPhraseCombos(channels, popvideos);
+
 	//combine the total results of all of the reccomendations, with videos and channels being the top priority before playlists
-	var results = videos.concat(channels, playlists, popchannels, popvideos);
+	var results = videos.concat(channels, playlists, popvideorecs, popchannelrecs);
+
+	//remove duplicate values
+	results = [...new Set(results)];
 
 	//send the resulting video titles to the client side
 	res.send(results);
