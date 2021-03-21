@@ -393,14 +393,17 @@ middleware = {
 			username = username.rows;
 
 			username.forEach((item, index) => {
+				//get the final object with the phrase included
+				var final = Object.assign({}, item, {phrase: phrases[i]});
+
 				//get a boolean to see if this is a duplicate
 				var isDuplicate = usernames.some((res) => {
-					return JSON.stringify(res) == JSON.stringify(item);
+					return JSON.stringify(res) == JSON.stringify(final);
 				});
 
 				//insert the item based on the boolean value above
 				if (!isDuplicate) {
-					usernames.push(item);
+					usernames.push(final);
 				}
 			});
 		}
@@ -410,13 +413,17 @@ middleware = {
 			return b.subscribers-a.subscribers;
 		});
 
-		//get the values of the usernames only instead of an object
-		usernames = usernames.map((item) => {
+		//create the final username and phrase arrays
+		var finalusernames = usernames.map((item) => {
 			return item.username;
 		});
 
+		var finalphrases = usernames.map((item) => {
+			return item.phrase;
+		});
+
 		//return the username values
-		return usernames;
+		return [finalusernames, finalphrases];
 	},
 
 	//this is a function that gets all of the popular video titles based on a list of channel names/phrases
@@ -430,14 +437,16 @@ middleware = {
 			title = title.rows;
 
 			title.forEach((item, index) => {
+				var final = Object.assign({}, item, {phrase: phrases[i]});
+
 				//get a boolean value which tells us if this is a duplicate object
 				var isDuplicate = titles.some((res) => {
-					return JSON.stringify(res) == JSON.stringify(item);
+					return JSON.stringify(res) == JSON.stringify(final);
 				});
 
 				//add this object if it is not a duplicate
 				if (!isDuplicate) {
-					titles.push(item);
+					titles.push(final);
 				}
 			});
 		}
@@ -449,11 +458,21 @@ middleware = {
 
 		//get the values of the titles only
 		titles = titles.map((item) => {
+			delete item.views;
+			return item;
+		});
+
+		//get the final title and phrase array values
+		var finaltitles = titles.map((item) => {
 			return item.title;
 		});
 
-		//return the title values
-		return titles;
+		var finalphrases = titles.map((item) => {
+			return item.phrase;
+		});
+
+		//return the title values and phrase values that match
+		return [finaltitles, finalphrases];
 	},
 
 	//this is a function that returns combination phrases between two arrays. the functionality of this is used for the purpose of combining search

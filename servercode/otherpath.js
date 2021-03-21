@@ -64,27 +64,25 @@ app.get("/getsearchrecs", async (req, res) => {
 	//get the individual phrases of the search query
 	var phrases = await middleware.getSearchTerms(searchquery);
 
-	//get all of the video title values that match the phrases
+	//get all of the video, channel, and playlist titles based on the search query
 	var videos = await middleware.getMatching("videos", "title", phrases);
-
-	//get all of the channel names that match the search query
 	var channels = await middleware.getMatching("users", "username", phrases);
-
-	//get all of the playlist names that match the search query
 	var playlists = await middleware.getMatching("playlists", "name", phrases);
 
-	//get all of the channel usernames that match up with videos that have a title similar to the search query
-	var popchannels = await middleware.getPopularChannels(phrases);
-
-	//get all of the popular video titles associated with channels that have a similar title to the search query
-	var popvideos = await middleware.getPopularVideos(phrases);
+	/*
+	get channel names that belong to channels containing video titles that match the search query
+	and do the opposite as well. Gets two arrays, an array of related names, and the phrases that match
+	with these values
+	*/
+	var [popusernames, usernamephrases] = await middleware.getPopularChannels(phrases);
+	var [popvideos, videophrases] = await middleware.getPopularVideos(phrases);
 
 	//get popular video and channel reccomendation phrase combos
-	var popvideorecs = await middleware.getPhraseCombos(videos, popchannels);
-	var popchannelrecs = await middleware.getPhraseCombos(channels, popvideos);
+	var popvideorecs = await middleware.getPhraseCombos(usernamephrases, popusernames);
+	var popchannelrecs = await middleware.getPhraseCombos(videophrases, popvideos);
 
 	//combine the total results of all of the reccomendations, with videos and channels being the top priority before playlists
-	var results = videos.concat(channels, playlists, popvideorecs, popchannelrecs);
+	var results = [].concat(videos, channels, playlists, popvideorecs, popchannelrecs);
 
 	//remove duplicate values
 	results = [...new Set(results)];

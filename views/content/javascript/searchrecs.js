@@ -75,6 +75,7 @@ function keyupSearch() {
 	timer = setTimeout(getSearchRec, 500);
 }
 
+//get the actual ajax data for the search reccomendations
 function getSearchRec() {
 	//check to see if the searchbar value is nothing
 	if (searchqueryinput.value != "") {
@@ -84,6 +85,7 @@ function getSearchRec() {
 
 		searchDropdown.style.display = "block";
 	} else {
+		searchDropdown.innerHTML = "";
 		searchDropdown.style.display = "none";
 	}
 }
