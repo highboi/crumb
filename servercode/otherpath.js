@@ -84,6 +84,11 @@ app.get("/getsearchrecs", async (req, res) => {
 	//combine the total results of all of the reccomendations, with videos and channels being the top priority before playlists
 	var results = [].concat(videos, channels, playlists, popvideorecs, popchannelrecs);
 
+	//make sure that these are all lowercase values
+	results = results.map((item) => {
+		return item.toLowerCase();
+	});
+
 	//remove duplicate values
 	results = [...new Set(results)];
 

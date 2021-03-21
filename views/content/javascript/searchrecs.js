@@ -36,33 +36,41 @@ function searchCallback(response) {
 	//clear out the reccomendations html and add the p tags that contain reccomendations
 	searchDropdown.innerHTML = "";
 
+	console.log("-".repeat(30));
+
 	//loop through the search reccomendation values
 	recsArr.forEach((item, index) => {
-		//get the components of the search reccomendation
-		var components = item.toLowerCase().split(searchqueryinput.value.toLowerCase());
+		//get the search query input value
+		var query = searchqueryinput.value.toLowerCase();
 
-		//form the highlighted part of the search reccomendation
-		var highlighted = document.createElement("strong");
-		highlighted.innerHTML = searchqueryinput.value;
+		//only show a reccomendation if it includes the search query as a part of it
+		if (item.includes(query)) {
+			//get the components of the search reccomendation
+			var components = item.toLowerCase().split(query).slice(-2);
 
-		//create the anchor tag which will house all of the text
-		var anchor = document.createElement("a");
+			//form the highlighted part of the search reccomendation
+			var highlighted = document.createElement("strong");
+			highlighted.innerHTML = searchqueryinput.value;
 
-		//make a valid link to a search and set this as the "href" value for the anchor
-		var hreflink = `/search/?searchquery=${item.split(" ").join("+")}`;
-		anchor.setAttribute("href", hreflink);
+			//create the anchor tag which will house all of the text
+			var anchor = document.createElement("a");
 
-		//form the inner text of the anchor tag with both components and the highlighted element
-		anchor.innerHTML = components[0] + highlighted.outerHTML + components[1];
+			//make a valid link to a search and set this as the "href" value for the anchor
+			var hreflink = `/search/?searchquery=${item.split(" ").join("+")}`;
+			anchor.setAttribute("href", hreflink);
 
-		//create the final "p" tag element that will house the anchor tag
-		var finalelement = document.createElement("p");
+			//form the inner text of the anchor tag with both components and the highlighted element
+			anchor.innerHTML = components[0] + highlighted.outerHTML + components[1];
 
-		//add the anchor html into the p tag inner html
-		finalelement.innerHTML = anchor.outerHTML;
+			//create the final "p" tag element that will house the anchor tag
+			var finalelement = document.createElement("p");
 
-		//add this element to the child nodes of the search dropdown selection
-		searchDropdown.appendChild(finalelement);
+			//add the anchor html into the p tag inner html
+			finalelement.innerHTML = anchor.outerHTML;
+
+			//add this element to the child nodes of the search dropdown selection
+			searchDropdown.appendChild(finalelement);
+		}
 	});
 }
 
