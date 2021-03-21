@@ -41,7 +41,7 @@ function searchCallback(response) {
 	//loop through the search reccomendation values
 	recsArr.forEach((item, index) => {
 		//get the search query input value
-		var query = searchqueryinput.value.toLowerCase();
+		var query = searchqueryinput.value.toLowerCase().trim();
 
 		//only show a reccomendation if it includes the search query as a part of it
 		if (item.includes(query)) {
@@ -87,7 +87,7 @@ function keyupSearch() {
 function getSearchRec() {
 	//check to see if the searchbar value is nothing
 	if (searchqueryinput.value != "") {
-		var searchquery = searchqueryinput.value.split(" ").join("+");
+		var searchquery = searchqueryinput.value.trim().split(" ").join("+");
 
 		getAjaxData(`/getsearchrecs/?searchquery=${searchquery}`, searchCallback);
 

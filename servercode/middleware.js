@@ -371,7 +371,7 @@ middleware = {
 
 			//add each title to the array
 			title.forEach((item, index) => {
-				titles.push(item.title);
+				titles.push(item[`${selector}`]);
 			});
 		}
 
@@ -433,7 +433,7 @@ middleware = {
 
 		//loop through the phrases to get all of the video titles and view counts
 		for (var i=0; i < phrases.length; i++) {
-			var title = await client.query(`SELECT title, views FROM videos WHERE id IN (SELECT id FROM videos WHERE UPPER(title) LIKE UPPER($1) LIMIT 10) LIMIT 10`, ["%" + phrases[i] + "%"]);
+			var title = await client.query(`SELECT title, views FROM videos WHERE user_id IN (SELECT id FROM users WHERE UPPER(username) LIKE UPPER($1) LIMIT 10) LIMIT 10`, ["%" + phrases[i] + "%"]);
 			title = title.rows;
 
 			title.forEach((item, index) => {
