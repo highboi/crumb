@@ -1,5 +1,5 @@
 var streamSocket = new WebSocket(`ws://localhost/live/?isClient=false&isStreamer=true&streamid=${streamid}`);
-var livestream = document.getElementById("livestream");
+var livestream = document.querySelector(".video-container #video");
 
 streamSocket.onopen = (e) => {
 	console.log("Stream Socket Connected.");

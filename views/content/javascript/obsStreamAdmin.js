@@ -2,7 +2,7 @@
 var obsSocket = new WebSocket(`ws://localhost/obslive/?streamid=${streamid}&isClient=false&isStreamer=true`);
 
 //get the livestream video element
-var livestream = document.getElementById("livestream");
+var livestream = document.querySelector(".video-container #video");
 
 //check to see if a url exists or not
 function urlExists(url) {
@@ -23,6 +23,8 @@ function hlsStart() {
 			hlsLoad(hls, streamURL);
 			hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
 				console.log("Manifest Parsed!");
+				livestream.muted = true;
+				livestream.play();
 			});
 		});
 	} else {
@@ -50,6 +52,7 @@ obsSocket.onopen = (e) => {
 //alert for whenever a socket message has been sent and other things
 obsSocket.onmessage = (event) => {
 	console.log("Message to OBS socket.");
+	console.log(event.data);
 
 	//start the hls stream OR stop the stream and redirect to the video url
 	//depending on the socket data sent

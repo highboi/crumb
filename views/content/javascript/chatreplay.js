@@ -1,4 +1,4 @@
-var chatreplayelement = document.querySelector("#chatReplay #chatReplayMessages");
+var chatreplayelement = document.querySelector(".live-chat #chatBox");
 var videoelement = document.querySelector(".video-container #video");
 
 //a function to create a chat message element

@@ -1,6 +1,6 @@
 //make a websocket connection and get the livestream video tag
 var socket = new WebSocket(`ws://localhost/live/?streamid=${streamid}&isClient=true&isStreamer=false`);
-var livestream = document.getElementById("livestream");
+var livestream = document.getElementById("video");
 
 //make a mediasource, sourcebuffer, and set the stream source
 var mediaSource = new MediaSource();
@@ -62,6 +62,7 @@ socket.onmessage = async (event) => {
 	} else if (typeof event.data == 'string') {
 		if (event.data == "ended") {
 			mediaSource.endOfStream();
+			window.location.pathname = `/v/${streamid}`;
 		}
 	}
 };

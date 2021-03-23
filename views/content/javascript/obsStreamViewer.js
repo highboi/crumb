@@ -1,5 +1,5 @@
 var obsSocket = new WebSocket(`ws://localhost/obslive/?streamid=${streamid}&isClient=true&isStreamer=false`);
-var livestream = document.getElementById("livestream");
+var livestream = document.querySelector(".video-container #video");
 
 //start the live stream immediately since this is the user
 hlsStart();
@@ -23,7 +23,6 @@ function hlsStart() {
 				console.log("Manifest Parsed!");
 				livestream.muted = true;
 				livestream.play();
-				livestream.muted = true;
 			});
 		});
 	}

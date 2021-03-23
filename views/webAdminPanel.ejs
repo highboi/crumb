@@ -12,26 +12,32 @@
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
-			<video id="livestream"></video>
-			<h1><%= streamname %></h1>
+			<div class="container">
+				<div class="video-contents">
+					<div class="video-container">
+						<div id="loading"></div>
+						<video id="video" controls=""></video>
+					</div>
+					<h1><%= stream.name %></h1>
+					<button onclick="stopStream()">End Web Stream</button>
+					<p><a href="http://localhost/l/view/<%= stream.id %>">Link to viewer end of stream.</a></p>
+				</div>
+				<div class="live-chat">
+					<% if (enableChat) { %>
+						<h3>Live Chat:</h3>
+					<% } else { %>
+						<h3>Chat disabled for this live stream.</h3>
+					<% } %>
 
-			<button onclick="stopStream()">End Web Stream</button>
+					<div id="chatBox"></div>
 
-			<h3>Enable Chat: <%= enableChat %></h3>
-
-			<% if (enableChat) { %>
-				<h3>Live Chat:</h3>
-			<% } else { %>
-				<h3>Chat disabled for this live stream.</h3>
-			<% } %>
-
-			<div id="chatBox"></div>
-
-			<% if (typeof user != 'undefined') { %>
-				<%- include('content/ejs/chatform.ejs') %>
-			<% } else { %>
-				<button><a href="/login">Login to Chat!</a></button>
-			<% } %>
+					<% if (typeof user != 'undefined') { %>
+						<%- include('content/ejs/chatform.ejs') %>
+					<% } else { %>
+						<button><a href="/login">Login to Chat!</a></button>
+					<% } %>
+				</div>
+			</div>
 
 			<%- include('content/ejs/scripts.ejs') %>
 			<script type="text/javascript">
@@ -40,8 +46,8 @@
 					var username = <%- JSON.stringify(user.username) %>;
 					var channelicon = <%- JSON.stringify(user.channelicon) %>;
 				<% } %>
-				var enableChat = <%- JSON.stringify(enableChat) %>;
-				var streamid = <%- JSON.stringify(streamid) %>;
+				var enableChat = <%- JSON.stringify(stream.enablechat) %>;
+				var streamid = <%- JSON.stringify(stream.id) %>;
 				var isStreamer = true;
 			</script>
 			<script src="/content/javascript/webStreamAdmin.js"></script>

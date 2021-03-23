@@ -15,17 +15,20 @@ require("./livesockets");
 GET PATHS FOR LIVE MEDIA
 */
 
+//get path for viewing a stream
 app.get("/l/view/:streamid", async (req, res) => {
 	//isolate the websocket with the livestream id in the url
 	var stream = global.webWssClients[req.params.streamid];
+
+	//make the view object
+	var viewObj = await middleware.getViewObj(req);
 
 	//if there are no streams with the id in the url, then redirect to an error or the recorded stream or the OBS stream
 	if (typeof stream == 'undefined') {
 		var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.streamid]);
 		video = video.rows[0];
 
-
-		if (typeof video != 'undefined') { //if the video does not exist, then show an error
+		if (typeof video == 'undefined') { //if the video does not exist, then show an error
 			req.flash("message", `Stream with ID: '${req.params.streamid}' does not exist.`);
 			res.redirect("/error");
 		} else if (!video.streaming) { //if the video is not streaming, redirect to the video url
@@ -35,17 +38,33 @@ app.get("/l/view/:streamid", async (req, res) => {
 			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
 			streamkey = streamkey.rows[0].streamkey;
 
-			//make the view object
-			var viewObj = await middleware.getViewObj(req);
-			viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: video.enablechat, streamname: video.title, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`});
+			//get the video creator
+			var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
+			videocreator = videocreator.rows[0];
+
+			//get the video reccomendations for this live stream
+			var reccomendations = await middleware.getReccomendations(video);
+
+			//add elements to the view object
+			viewObj = Object.assign({}, viewObj, {stream: video, videocreator: videocreator, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, reccomendations: reccomendations});
 
 			//render the view for the stream
 			res.render("viewStreamObs.ejs", viewObj);
 		}
 	} else { //redirect the user to the vanilla websocket streams
-		//create a view object
-		var viewObj = await middleware.getViewObj(req);
-		viewObj = Object.assign({}, viewObj, {streamid: req.params.streamid, enableChat: stream[0].enableChat});
+		//get the video for this websocket stream
+		var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.streamid]);
+		video = video.rows[0];
+
+		//get the creator of the video
+		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
+		videocreator = videocreator.rows[0];
+
+		//get the video reccomendations for this live stream
+		var reccomendations = await middleware.getReccomendations(video);
+
+		//add elements to the view object
+		viewObj = Object.assign({}, viewObj, {stream: video, reccomendations: reccomendations, videocreator: videocreator});
 
 		//render the view with the stream
 		res.render("viewStreamWeb.ejs", viewObj);
@@ -72,17 +91,25 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 
 	//if there is a stream that exists, then render the admin panel
 	if (typeof stream != 'undefined') {
+		//get the video creator
+		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [stream.user_id]);
+		videocreator = videocreator.rows[0];
+
+		//check to see what to do based on the type of live stream in the roster
 		if (req.query.streamtype == "obs") {
 			//get the stream key
 			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1 LIMIT 1`, [stream.user_id]);
 			streamkey = streamkey.rows[0].streamkey;
 
 			//set the additional values for the view object
-			viewObj = Object.assign({}, viewObj, {streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://localhost/live", streamKey: streamkey});
+			viewObj = Object.assign({}, viewObj, {stream: stream, videocreator: videocreator, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://localhost/live", streamKey: streamkey});
 
 			//render the admin panel
 			res.render("obsAdminPanel.ejs", viewObj);
 		} else if (req.query.streamtype == "browser") {
+			//add the stream and videocreator objects to the view object
+			viewObj = Object.assign({}, viewObj, {stream: stream, videocreator: videocreator});
+
 			//render the "admin" panel for the browser streamer
 			res.render("webAdminPanel.ejs", viewObj);
 		}
