@@ -325,7 +325,16 @@ middleware = {
 		var results = [];
 		for (var i=0; i < phrases.length; i++) {
 			var result = await client.query(`SELECT * FROM playlists WHERE private=${false} AND (UPPER(name) LIKE UPPER($1))`, ["%" + phrases[i] + "%"]);
-			result.rows.forEach((item, index) => {
+			result = result.rows;
+
+			for (var j=0; j < result.length; j++) {
+				var item = result[j];
+
+				var video = await client.query(`SELECT id, thumbnail FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1 LIMIT 1) LIMIT 1`, [item.id]);
+				video = video.rows[0];
+
+				item = Object.assign({}, item, {thumbnail: video.thumbnail, firstvideoid: video.id});
+
 				var isDuplicate = results.some((res) => {
 					return JSON.stringify(res) == JSON.stringify(item);
 				});
@@ -333,7 +342,7 @@ middleware = {
 				if (!isDuplicate) {
 					results.push(item);
 				}
-			});
+			};
 		}
 
 		return results;

@@ -36,8 +36,6 @@ function searchCallback(response) {
 	//clear out the reccomendations html and add the p tags that contain reccomendations
 	searchDropdown.innerHTML = "";
 
-	console.log("-".repeat(30));
-
 	//loop through the search reccomendation values
 	recsArr.forEach((item, index) => {
 		//get the search query input value
@@ -46,7 +44,9 @@ function searchCallback(response) {
 		//only show a reccomendation if it includes the search query as a part of it
 		if (item.includes(query)) {
 			//get the components of the search reccomendation
-			var components = item.toLowerCase().split(query).slice(-2);
+			var components = item.toLowerCase();
+			var split = components.indexOf(query);
+			components = [components.slice(0, split), components.slice(split+1)];
 
 			//form the highlighted part of the search reccomendation
 			var highlighted = document.createElement("strong");

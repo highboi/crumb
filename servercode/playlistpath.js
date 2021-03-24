@@ -17,7 +17,7 @@ app.get("/p/:playlistid", async(req, res) => {
 
 	if (!(playlist.private && (typeof userinfo == 'undefined' || userinfo.id != playlist.user_id))) {
 		//get all of the videos in the db
-		var videos = await client.query(`SELECT * FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1)`, [req.params.playlistid]);
+		var videos = await client.query(`SELECT * FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1 ORDER BY videoorder ASC)`, [req.params.playlistid]);
 		videos = videos.rows;
 
 		//get the creator of the playlist
@@ -34,6 +34,75 @@ app.get("/p/:playlistid", async(req, res) => {
 	res.render("viewplaylist.ejs", viewObj);
 });
 
+//this is a get request to display videos as a part of a playlist instead of standalone content
+app.get("/playlistvideo/view/:playlistid/:videoid", async (req, res) => {
+	//get the video associated with the playlist
+	var video = await client.query(`SELECT * FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2 LIMIT 1) LIMIT 1`, [req.params.playlistid, req.params.videoid]);
+	video = video.rows[0];
+
+	if (typeof video == 'undefined') {
+		//let the user know that the video does not exist in the playlist if it is not defined in the DB
+		req.flash("message", "Video does not exist in playlist.");
+		res.redirect("/");
+	}
+
+	//get the view object
+	var viewObj = await middleware.getViewObj(req);
+
+	//get the video creator for the video inside the playlist
+	var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
+	videocreator = videocreator.rows[0];
+
+	//get the playlist itself
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 LIMIT 1`, [req.params.playlistid]);
+	playlist = playlist.rows[0];
+
+	//select all of the other playlist video entries to show the user the playlist contents
+	var playlistvideos = await client.query(`SELECT * FROM videos INNER JOIN playlistvideos ON videos.id=playlistvideos.video_id AND playlistvideos.playlist_id=$1`, [req.params.playlistid]);
+	playlistvideos = playlistvideos.rows;
+
+	//get the reccomendations for this video
+	var reccomendations = await middleware.getReccomendations(video);
+
+	//get all of the comments associated with the video
+	var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1`, [video.id]);
+	comments = comments.rows;
+
+	//select all of the chat messages that were typed if this was a live stream
+	var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE stream_id=$1`, [req.params.videoid]);
+
+	//get all of the user ids from the live chat and remove duplicates by putting them in a set
+	var chatUserIds = chatReplayMessages.rows.map((item) => {
+		return item.user_id;
+	});
+	chatUserIds = [...new Set(chatUserIds)];
+
+	//put the channel icons and usernames associated with the user ids above into an object
+	var chatMessageInfo = {};
+
+	//use the .map() method with async function to iterate over promises which are passed to Promise.all(),
+	//which can then be "awaited" on to finish/complete all promises being iterated before proceeding
+	await Promise.all(chatUserIds.map(async (item) => {
+		//get the channel icon and username if this user with this id
+		var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1 LIMIT 1`, [item]);
+		userChatInfo = userChatInfo.rows[0];
+
+		//insert the channel icon and username into the object with the key being the user id
+		chatMessageInfo[item] = userChatInfo;
+	}));
+
+	//map the chat replay messages to have both the original chat message object and the extra user info all in one object
+	chatReplayMessages = chatReplayMessages.rows.map((item) => {
+		return Object.assign({}, item, chatMessageInfo[item.user_id]);
+	});
+
+	//add the necesary items to the view object
+	viewObj = Object.assign({}, viewObj, {playlist: playlist, video: video, videocreator: videocreator, playlistvideos: playlistvideos, reccomendations: reccomendations, comments: comments, chatReplayMessages: chatReplayMessages});
+
+	//render the playlist video view
+	res.render("viewplaylistvideo.ejs", viewObj);
+});
+
 //this is a get path for adding videos to playlists on the site
 app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, async (req, res) => {
 	//get the user info from the session store
@@ -43,16 +112,29 @@ app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, asy
 	var playlistexists = await client.query(`SELECT EXISTS(SELECT * FROM playlists WHERE id=$1 AND user_id=$2 LIMIT 1)`, [req.params.playlistid, userinfo.id]);
 	playlistexists = playlistexists.rows[0].exists;
 
+	//check to see if the video already exists in the playlist
 	var playlistvideoexists = await client.query(`SELECT EXISTS(SELECT * FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2 LIMIT 1)`, [req.params.playlistid, req.params.videoid]);
 	playlistvideoexists = playlistvideoexists.rows[0].exists;
 
 	//if the playlist video exists, then it has already been added
 	if (playlistvideoexists) {
 		req.flash("message", "Video has already been added to the playlist.");
-		res.redirect("/error");
+		res.redirect(`/p/${req.params.playlistid}`);
 	} else if (playlistexists) { //if the playlist does exist but the video does not, then add it to the playlist
+		//insert the playlist video entry
 		await client.query(`INSERT INTO playlistvideos (playlist_id, video_id) VALUES ($1, $2)`, [req.params.playlistid, req.params.videoid]);
+
+		//update the playlist table to increase the video count
 		await client.query(`UPDATE playlists SET videocount=videocount+1 WHERE id=$1`, [req.params.playlistid]);
+
+		//get the video count from the playlist
+		var videoorder = await client.query(`SELECT videocount FROM playlists WHERE id=$1`, [req.params.playlistid]);
+		videoorder = videoorder.rows[0].videocount;
+
+		//set the video order of the new video to the videocount (as this is the right order numerically speaking)
+		await client.query(`UPDATE playlistvideos SET videoorder=$1 WHERE video_id=$2 AND playlist_id=$3`, [videoorder, req.params.videoid, req.params.playlistid]);
+
+		//redirect the user to the playlist
 		res.redirect(`/p/${req.params.playlistid}`);
 	} else { //if this playlist does not exist or does not belong to the user, then show the error
 		req.flash("message", "This playlists does not belong to you or doesn't exist.");

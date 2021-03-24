@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 	<head>
 		<%- include('content/ejs/head.ejs', {title: video.title}) %>
@@ -8,7 +9,6 @@
 			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/html/banner.html') %>
 		</nav>
-
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
@@ -50,7 +50,11 @@
 								<div id="chatBox"></div>
 							</div>
 						<% } %>
-						<h2>&nbspUp Next</h2><hr>
+						<div class="playlist-content">
+							<% playlistvideos.forEach((item, index) => { %>
+								<%- include('content/ejs/playlistthumbnail.ejs', {playlist: playlist, video: item}) %>
+							<% }) %>
+						</div>
 						<% if (typeof reccomendations != 'undefined') { %>
 							<% reccomendations.forEach((item, index) => { %>
 								<%- include('content/ejs/thumbnail.ejs', {video: item}) %><hr>
@@ -59,34 +63,25 @@
 					</div>
 
 					<%- include('content/ejs/comments.ejs', {video: video, comments: comments}) %>
+				<% } else { %>
+						<div class="playlist-content">
+							<% playlistvideos.forEach((item, index) => { %>
+								<%- include('content/ejs/playlistthumbnail.ejs', {playlist: playlist, video: item}) %>
+							<% }) %>
+						</div>
 				<% } %>
 			</div>
 
-			<% if (!video.deleted && !video.private) { %>
-				<%- include('content/ejs/scripts.ejs') %>
-
-				<script type="text/javascript">
-					<% if (typeof commentid != 'undefined') { %>
-						var commentid = <%- JSON.stringify(commentid) %>;
-						var commentElement = document.getElementById(commentid);
-						commentElement.scrollIntoView();
-						commentElement.style.backgroundColor = "#1a1a1a";
-						commentElement.style.borderStyle = "solid";
-						commentElement.style.borderWidth = "5px";
-						commentElement.style.borderColor = "#adff12";
-					<% } %>
-					<% if (typeof chatReplayMessages != 'undefined') { %>
-						var chatReplayMessages = <%- JSON.stringify(chatReplayMessages) %>;
-					<% } %>
-				</script>
-
-				<script src="/content/javascript/videotext.js"></script>
-				<script src="/content/javascript/likedislike.js"></script>
-				<script src="/content/javascript/chatreplay.js"></script>
-				<script src="/content/javascript/sortcomments.js"></script>
-			<% } else { %>
-				<%- include('content/ejs/scripts.ejs') %>
-			<% } %>
+			<%- include('content/ejs/scripts.ejs') %>
+			<script>
+				<% if (typeof chatReplayMessages != 'undefined') { %>
+					var chatReplayMessages = <%- JSON.stringify(chatReplayMessages) %>;
+				<% } %>
+			</script>
+			<script src="/content/javascript/videotext.js"></script>
+			<script src="/content/javascript/likedislike.js"></script>
+			<script src="/content/javascript/chatreplay.js"></script>
+			<script src="/content/javascript/sortcomments.js"></script>
 		</main>
 	</body>
 </html>
