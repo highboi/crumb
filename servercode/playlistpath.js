@@ -100,7 +100,7 @@ app.get("/playlistvideo/view/:playlistid/:videoid", async (req, res) => {
 	viewObj = Object.assign({}, viewObj, {playlist: playlist, video: video, videocreator: videocreator, playlistvideos: playlistvideos, reccomendations: reccomendations, comments: comments, chatReplayMessages: chatReplayMessages});
 
 	//render the playlist video view
-	res.render("viewplaylistvideo.ejs", viewObj);
+	res.render("viewvideo.ejs", viewObj);
 });
 
 //this is a get path for adding videos to playlists on the site

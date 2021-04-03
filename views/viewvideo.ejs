@@ -50,6 +50,22 @@
 								<div id="chatBox"></div>
 							</div>
 						<% } %>
+						<% if (typeof playlist != 'undefined' && typeof playlistvideos != 'undefined') { %>
+							<div class="playlist-content">
+								<a href="/p/<%= playlist.id %>" target="__blank"><h1><%= playlist.name %></h1></a>
+								<div class="playlist-scroll">
+									<% playlistvideos.forEach((item, index) => { %>
+										<% if (item.id == video.id) { %>
+											<div class="current-video">
+												<%- include('content/ejs/playlistentry.ejs', {playlist: playlist, video: item}) %>
+											</div>
+										<% } else { %>
+											<%- include('content/ejs/playlistentry.ejs', {playlist: playlist, video: item}) %>
+										<% } %>
+									<% }) %>
+								</div>
+							</div><hr>
+						<% } %>
 						<h2>&nbspUp Next</h2><hr>
 						<% if (typeof reccomendations != 'undefined') { %>
 							<% reccomendations.forEach((item, index) => { %>
