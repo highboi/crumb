@@ -44,17 +44,26 @@
 
 				<% if (!video.deleted && !video.private) { %>
 					<div class="reccomendations">
-						<% if (typeof chatReplayMessages != 'undefined') { %>
+						<% if (typeof chatReplayMessages != 'undefined' && chatReplayMessages.length > 0) { %>
 							<div class="live-chat">
 								<h3>Chat Replay:</h3>
 								<div id="chatBox"></div>
-							</div>
+							</div><hr>
 						<% } %>
 						<div class="playlist-content">
-							<% playlistvideos.forEach((item, index) => { %>
-								<%- include('content/ejs/playlistthumbnail.ejs', {playlist: playlist, video: item}) %>
-							<% }) %>
-						</div>
+							<a href="/p/<%= playlist.id %>" target="__blank"><h1><%= playlist.name %></h1></a>
+							<div class="playlist-scroll">
+								<% playlistvideos.forEach((item, index) => { %>
+									<% if (item.id == video.id) { %>
+										<div class="current-video">
+											<%- include('content/ejs/playlistentry.ejs', {playlist: playlist, video: item}) %>
+										</div>
+									<% } else { %>
+										<%- include('content/ejs/playlistentry.ejs', {playlist: playlist, video: item}) %>
+									<% } %>
+								<% }) %>
+							</div>
+						</div><hr>
 						<% if (typeof reccomendations != 'undefined') { %>
 							<% reccomendations.forEach((item, index) => { %>
 								<%- include('content/ejs/thumbnail.ejs', {video: item}) %><hr>
@@ -64,11 +73,20 @@
 
 					<%- include('content/ejs/comments.ejs', {video: video, comments: comments}) %>
 				<% } else { %>
-						<div class="playlist-content">
+					<div class="playlist-content">
+						<a href="/p/<%= playlist.id %>" target="__blank"><h1><%= playlist.name %></h1></a>
+						<div class="playlist-scroll">
 							<% playlistvideos.forEach((item, index) => { %>
-								<%- include('content/ejs/playlistthumbnail.ejs', {playlist: playlist, video: item}) %>
+								<% if (item.id == video.id) { %>
+									<div class="current-video">
+										<%- include('content/ejs/playlistentry.ejs', {playlist: playlist, video: item}) %>
+									</div>
+								<% } else { %>
+									<%- include('content/ejs/playlistentry.ejs', {playlist: playlist, video: item}) %>
+								<% } %>
 							<% }) %>
 						</div>
+					</div><hr>
 				<% } %>
 			</div>
 

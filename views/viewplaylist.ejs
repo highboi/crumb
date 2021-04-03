@@ -33,8 +33,8 @@
 					<% if (typeof videos != 'undefined') { %>
 						<% if (videos.length > 0) { %>
 							<% videos.forEach((item, index) => { %>
-								<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
-								<% if (typeof user != undefined) { %>
+								<%- include('content/ejs/playlistthumbnail.ejs', {video: item, playlist: playlist}) %>
+								<% if (typeof user != 'undefined') { %>
 									<% if (creator.id == user.id) { %>
 										<% var deletelink = `/playlistvideo/delete/${playlist.id}/${item.id}` %>
 										<button onclick="redirectConfirm('Delete video from playlist?', '<%= deletelink %>')">Delete Video</button>

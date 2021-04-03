@@ -1,0 +1,29 @@
+<% if (typeof video != 'undefined' && typeof playlist != 'undefined') { %>
+	<div class="playlist-thumbnail" id="<%= video.id %>thumbnail">
+		<% if (video.streaming) { %>
+			<% var videolink = `/l/view/${video.id}`; %>
+		<% } else { %>
+			<% var videolink = `/playlistvideo/view/${playlist.id}/${video.id}`; %>
+		<% } %>
+		<% var channellink = `/u/${video.user_id}`; %>
+		<h1><%= video.videoorder %></h1>
+		<div class="thumbnail">
+			<a href="<%= videolink %>">
+				<img src="<%= video.thumbnail %>" alt="Thumbnail" width="450" height="300">
+			</a>
+		</div>
+		<div class="links">
+			<a href="<%= videolink %>">
+				<h3><strong><%= video.title %></strong></h3>
+			</a>
+			<div class="channel-links" id="channel-links">
+				<a href="<%= channellink %>">
+					<img id="channel-icon" src="<%= video.channelicon %>">
+				</a>
+				<a href="<%= channellink %>">
+					<p><%= video.username %></p>
+				</a>
+			</div>
+		</div>
+	</div>
+<% } %>
