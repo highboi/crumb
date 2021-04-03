@@ -29,7 +29,12 @@
 				</svg>
 				<div class="extralinks" id="<%= video.id %>extralinks">
 					<button onclick="showelement('<%= video.id %>playlistform')">Add To Playlist</button>
-					<button onclick="notInterested('<%= video.id %>')">Not Interested</button>
+					<% if (typeof user != 'undefined') { %>
+						<% if (creator.id == user.id) { %>
+							<% var deletelink = `/playlistvideo/delete/${playlist.id}/${video.id}` %>
+							<button onclick="redirectConfirm('Delete video from playlist?', '<%= deletelink %>')">Delete Video</button>
+						<% } %>
+					<% } %>
 					<object id="<%= video.id %>playlistform">
 						<h3><a href="/playlist/new/?videoid=<%= video.id %>">Create Playlist</a></h3><br>
 						<% if (typeof playlists != 'undefined') { %>
@@ -41,8 +46,5 @@
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="not-interested-undo" id="<%= video.id %>undo">
-		<button onclick="notInterested('<%= video.id %>')">Undo</button>
 	</div>
 <% } %>

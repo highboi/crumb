@@ -94,12 +94,25 @@
 					<% if (typeof chatReplayMessages != 'undefined') { %>
 						var chatReplayMessages = <%- JSON.stringify(chatReplayMessages) %>;
 					<% } %>
+					<% if (typeof playlistvideos != 'undefined' && typeof playlist != 'undefined') { %>
+						<% var nextvideoid = playlistvideos.filter((item) => {
+							return item.id == video.id;
+						}); %>
+						<% nextvideoid = parseInt(nextvideoid[0].videoorder); %>
+						<% if (nextvideoid < playlistvideos.length) { %>
+							<% nextvideoid = playlistvideos[nextvideoid].id; %>
+							var nextvideolink = `/playlistvideo/view/<%= playlist.id %>/<%= nextvideoid %>`;
+						<% } %>
+					<% } else if (typeof reccomendations != 'undefined') { %>
+						var nextvideolink = `/v/<%= reccomendations[0].id %>`;
+					<% } %>
 				</script>
 
 				<script src="/content/javascript/videotext.js"></script>
 				<script src="/content/javascript/likedislike.js"></script>
 				<script src="/content/javascript/chatreplay.js"></script>
 				<script src="/content/javascript/sortcomments.js"></script>
+				<script src="/content/javascript/autoplay.js"></script>
 			<% } else { %>
 				<%- include('content/ejs/scripts.ejs') %>
 			<% } %>
