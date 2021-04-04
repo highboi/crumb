@@ -66,6 +66,13 @@
 								</div>
 							</div><hr>
 						<% } %>
+						<div class="autoplay">
+							<p>Autoplay:</p>
+							<label class="switch">
+								<input class="switchinput" type="checkbox">
+								<span class="slider"></span>
+							</label>
+						</div>
 						<h2>&nbspUp Next</h2><hr>
 						<% if (typeof reccomendations != 'undefined') { %>
 							<% reccomendations.forEach((item, index) => { %>
