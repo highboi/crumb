@@ -36,7 +36,7 @@
 									<img src="https://media.giphy.com/media/IwSG1QKOwDjQk/giphy.gif" width="150" height="150">
 								</div>
 
-								<button class="morerepliesbtn" onclick="getMoreReplies('<%= item.id %>');">Get more replies.</button>
+								<button class="morerepliesbtn" id="<%= item.id %>morerepliesbtn" onclick="getMoreReplies('<%= item.id %>');">Get more replies.</button>
 							</div>
 
 							<% //include('./commentreplies.ejs', {parent: item, comments: comments, commentlink: commentlink}) %>

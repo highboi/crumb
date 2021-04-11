@@ -44,7 +44,15 @@ function getMoreReplies(commentid) {
 		var limitnum = replycommentids[commentid];
 
 		//get the AJAX data from the comment replies url with a specified limit (i.e 50 would mean getting comments 51-60 instead of getting the same comments)
-		getAjaxData(`/comment/replies/${commentid}/?limit=${limitnum*50}`, handleReplies);
+		getAjaxData(`/comment/replies/${commentid}/?limit=${limitnum*50}`, (replies) => {
+			//get the status of the handling of the replies
+			var result = handleReplies(replies);
+
+			//if there were no replies given by the ajax, then set the "more replies" button to be invisible
+			if (!result) {
+				document.getElementById(`${commentid}morerepliesbtn`).style.display = 'none';
+			}
+		});
 
 		//add 1 to the limit number to access more comments after this group
 		replycommentids[commentid] += 1;
@@ -55,7 +63,7 @@ function getMoreReplies(commentid) {
 function handleReplies(replies) {
 	//if the replies do not exists or there are no replies at all, return and stop the function
 	if (typeof replies == 'undefined' || replies.length == 0) {
-		return;
+		return false;
 	}
 
 	//get the comment replies div
@@ -70,6 +78,9 @@ function handleReplies(replies) {
 
 		//stop the loading animation for the comments
 		document.getElementById(`${replies[0].base_parent_id}loading`).style.display = 'none';
+
+		//return a success
+		return true;
 	}
 }
 
