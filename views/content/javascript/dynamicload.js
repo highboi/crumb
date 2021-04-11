@@ -3,18 +3,43 @@
 //the efficiency, nothing is loaded that is not seen/needed by the user)
 
 //this is an array of the comment ids that have replies that have already been shown
-var replycommentids = [];
+var replycommentids = {};
 
-//a function to make an ajax request for the replies of a certain comment
-function getReplies(commentid) {
-	//if we are getting the first replies of a comment, then get the first 50
+//a function to get the FIRST replies for a certain comment, also works to toggle the display value of the replies div
+function getFirstReplies(commentid) {
+	//only get the first replies if the comment replies button have not been clicked yet
 	if (!Object.keys(replycommentids).includes(commentid)) {
 		//get the AJAX data from the comment replies url
-		getAjaxData(`/comment/replies/${commentid}`, handleReplies);
+		getAjaxData(`/comment/replies/${commentid}`, (replies) => {
+			var repliesdiv = document.getElementById(`${commentid}repliesdiv`);
 
-		//add this comment id to the array and insert a number representative of the amount of AJAX requests previously made
-		replycommentids[commentid] = 1;
-	} else {
+			//make sure the replies exist before doing anything
+			if (typeof replies == 'undefined' || replies.length == 0) {
+				repliesdiv.style.display = 'none';
+
+				//insert an entry with the number 0 to easily identify comments with 0 replies
+				replycommentids[commentid] = 0;
+			} else {
+				//show the replies div element
+				showelement(`${commentid}repliesdiv`);
+
+				//handle the replies in another function
+				handleReplies(replies);
+
+				//add this comment id to the array and insert a number representative of the amount of AJAX requests previously made
+				replycommentids[commentid] = 1;
+			}
+		});
+	} else if (replycommentids[commentid] != 0) { //if this is a comment with existing replies
+		//toggle the display
+		showelement(`${commentid}repliesdiv`);
+	}
+}
+
+//a function to make an ajax request for the replies of a certain comment
+function getMoreReplies(commentid) {
+	//check that the comment id exists in the array
+	if (Object.keys(replycommentids).includes(commentid)) {
 		//get the limit number to only get a portion of replies
 		var limitnum = replycommentids[commentid];
 
@@ -26,7 +51,29 @@ function getReplies(commentid) {
 	}
 }
 
-//a function for creating the "reply" html segment
+//the callback function for handling the reply data from ajax
+function handleReplies(replies) {
+	//if the replies do not exists or there are no replies at all, return and stop the function
+	if (typeof replies == 'undefined' || replies.length == 0) {
+		return;
+	}
+
+	//get the comment replies div
+	var commentreplies = document.getElementById(`${replies[0].base_parent_id}replies`);
+
+	//if the comment replies are not null, then do shit
+	if (commentreplies != null) {
+		//construct the html for each reply sequentially
+		replies.forEach((item, index) => {
+			commentreplies.appendChild(getReplySegment(item));
+		});
+
+		//stop the loading animation for the comments
+		document.getElementById(`${replies[0].base_parent_id}loading`).style.display = 'none';
+	}
+}
+
+//a function for creating the "reply" html segment based off of the data in the reply object
 function getReplySegment(reply) {
 	//create the svg element that indicates the depth level of replies
 	var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -177,17 +224,4 @@ function getReplySegment(reply) {
 	container.style.marginLeft = `${reply.depth_level*30}px`;
 
 	return container;
-}
-
-//the callback function for handling the reply data from ajax
-function handleReplies(replies) {
-	var commentreplies = document.getElementById(`${replies[0].base_parent_id}replies`);
-	if (commentreplies != null) {
-		replies.forEach((item, index) => {
-			commentreplies.appendChild(getReplySegment(item));
-		});
-	} else {
-		console.log("commentreplies variable:", commentreplies);
-		console.log(replies[0].parent_id);
-	}
 }

@@ -29,10 +29,14 @@
 
 							<%- include('./commentreplyform.ejs', {comment: item, base_parent_id: item.id, commentlink: commentlink}) %>
 
-							<div class="replies" id="<%= item.id %>replies"></div>
+							<div class="replies" id="<%= item.id %>repliesdiv">
+								<div id="<%= item.id %>replies"></div>
 
-							<div class="replies" id="<%= item.id %>morereplies">
-								<button class="morerepliesbtn" onclick="getReplies('<%= item.id %>');">Get more replies.</button>
+								<div id="<%= item.id %>loading">
+									<img src="https://media.giphy.com/media/IwSG1QKOwDjQk/giphy.gif" width="150" height="150">
+								</div>
+
+								<button class="morerepliesbtn" onclick="getMoreReplies('<%= item.id %>');">Get more replies.</button>
 							</div>
 
 							<% //include('./commentreplies.ejs', {parent: item, comments: comments, commentlink: commentlink}) %>

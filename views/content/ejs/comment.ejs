@@ -15,5 +15,5 @@
 	<button id="commentDislike" onclick="dislikeComment('<%= comment.id %>')"><img src="/content/icons/dislike.ico"></button>
 	<p id="<%= comment.id %>dislikes"><%= comment.dislikes %></p>
 	<button id="replybtn" onclick="showelement('<%= comment.id %>replybox')">Reply</button>
-	<button id="showreplies" onclick="showelement('<%= comment.id %>replies'); showelement('<%= comment.id %>morereplies'); getReplies('<%= comment.id %>')">Replies</button>
+	<button id="showreplies" onclick="getFirstReplies('<%= comment.id %>')">Replies</button>
 </div>
