@@ -6,6 +6,20 @@ const path = require("path");
 GET PATHS FOR COMMENTS
 */
 
+//a get path for getting the replies for a comment with AJAX
+app.get("/comment/replies/:commentid", async (req, res) => {
+	if (typeof req.query.limit == 'undefined') {
+		//get the replies for the comments
+		var replies = await client.query(`SELECT * FROM comments WHERE base_parent_id=$1 LIMIT 50`, [req.params.commentid]);
+	} else {
+		//get the replies for the comments based on a limit number
+		var replies = await client.query(`SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT '1')) AS rownum, * FROM comments WHERE base_parent_id=$1) AS comments WHERE rownum>$2 LIMIT 50`, [req.params.commentid, req.query.limit]);
+	}
+
+	//send the data directly as a response
+	res.send(replies.rows);
+});
+
 //a get request for liking a comment on the site
 app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) => {
 	//get the user

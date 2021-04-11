@@ -9,11 +9,11 @@
 <% } %>
 
 <div class="commentlikes" id="<%= comment.id %>">
-	&nbsp
+	&nbsp;
 	<button id="commentLike" onclick="likeComment('<%= comment.id %>')"><img src="/content/icons/like.ico"></button>
 	<p id="<%= comment.id %>likes"><%= comment.likes %></p>
 	<button id="commentDislike" onclick="dislikeComment('<%= comment.id %>')"><img src="/content/icons/dislike.ico"></button>
 	<p id="<%= comment.id %>dislikes"><%= comment.dislikes %></p>
-	<button id="replybtn" onclick="showbox('<%= comment.id %>replybox')">Reply</button>
-	<button id="showreplies" onclick="showbox('<%= comment.id %>replies')">Replies</button>
+	<button id="replybtn" onclick="showelement('<%= comment.id %>replybox')">Reply</button>
+	<button id="showreplies" onclick="showelement('<%= comment.id %>replies'); showelement('<%= comment.id %>morereplies'); getReplies('<%= comment.id %>')">Replies</button>
 </div>

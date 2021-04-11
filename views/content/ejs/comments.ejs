@@ -29,7 +29,13 @@
 
 							<%- include('./commentreplyform.ejs', {comment: item, base_parent_id: item.id, commentlink: commentlink}) %>
 
-							<%- include('./commentreplies.ejs', {parent: item, comments: comments, commentlink: commentlink}) %>
+							<div class="replies" id="<%= item.id %>replies"></div>
+
+							<div class="replies" id="<%= item.id %>morereplies">
+								<button class="morerepliesbtn" onclick="getReplies('<%= item.id %>');">Get more replies.</button>
+							</div>
+
+							<% //include('./commentreplies.ejs', {parent: item, comments: comments, commentlink: commentlink}) %>
 						</div>
 						<hr>
 					<% } %>

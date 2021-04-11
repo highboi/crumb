@@ -7,16 +7,16 @@
 				<circle cx="<%= i*20 %>" cy="10" r="5" fill="#adff12"/>
 			<% } %>
 		</svg>
-		<h3>&nbsp;&nbsp<%= reply.username %></h3>
-		<p>&nbsp;&nbsp;&nbsp<%= reply.comment %></p>
+		<h3>&nbsp;&nbsp;<%= reply.username %></h3>
+		<p>&nbsp;&nbsp;&nbsp;<%= reply.comment %></p>
 		<div class="commentlikes" id="<%= reply.id %>">
-			&nbsp;&nbsp
+			&nbsp;&nbsp;
 			<button id="commentLike" onclick="likeComment('<%= reply.id %>')"><img src="/content/icons/like.ico"></button>
 			<p id="<%= reply.id %>likes"><%= reply.likes %></p>
 			<button id="commentDislike" onclick="dislikeComment('<%= reply.id %>')"><img src="/content/icons/dislike.ico"></button>
 			<p id="<%= reply.id %>dislikes"><%= reply.dislikes %></p>
-			<button id="replybtn" onclick="showbox('<%= reply.id %>replybox')">Reply</button>
+			<button id="replybtn" onclick="showelement('<%= reply.id %>replybox')">Reply</button>
 		</div>
 		<%- include('./commentreplyform.ejs', {comment: reply, commentlink: commentlink, base_parent_id: base_parent_id}); %>
-	<% }); %>									
+	<% }); %>
 </div>
