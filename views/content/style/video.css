@@ -9,6 +9,8 @@ VIDEO AND RECCOMENDATIONS
 
 .container {
 	display: grid;
+	margin: auto;
+	width: 1700px;
 	grid-template-areas: 
 	"video reccomendations"
 	"comments reccomendations";
@@ -20,11 +22,12 @@ VIDEO BEING VIEWED
 
 .container .video-contents {
 	grid-area: video;
+	width: 1000px;
 }
 
 .container .video-contents .video-container {
 	position: relative;
-	width: 100%;
+	width: auto;
 	height: auto;
 }
 
@@ -50,7 +53,7 @@ STYLE VIDEO TEXT
 */
 
 .container .video-contents .videotext {
-	width: 100%;
+	width: 1000px;
 }
 
 .container .video-contents .videotext button {
@@ -120,15 +123,15 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 }
 
 .container .reccomendations .links .text img {
-	width: 20vw;
-	height: 15vw;
+	width: 300px;
+	height: 150px;
 	padding: 10px;
 	float: left;
 }
 
 .container .reccomendations .links .text {
 	display: inline-block;
-	font-size: 0.8vw;
+	font-size: 30px;
 }
 
 .container .reccomendations .links .text :not(a) :not(img) {

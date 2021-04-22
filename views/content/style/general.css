@@ -94,13 +94,15 @@ nav .navbar {
 }
 
 nav .navbar #navbar-icon {
-	margin: auto;
 	background-color: #adff12;
+	width: 100px;
+	height: 100px;
 }
 
 nav .navbar #navbar-icon img {
-	width: 100px;
-	height: 80px;
+	width: 70px;
+	height: 70px;
+	margin: 15px;
 }
 
 nav .navbar #navbar-content {
@@ -116,54 +118,79 @@ nav .navbar #navbar-content {
 THE SITE BANNER AT THE TOP OF EACH PAGE
 */
 
+/* style the banner in general */
 nav .banner {
 	background-color: #adff12;
 	position: fixed;
 	top: 0px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 	margin-left: 100px;
-	width: 100vw;
+	width: 100%;
 	z-index: auto;
 }
 
-nav .banner #banner-text {
-	display: inline-block;
-}
-
-nav .banner #banner-text a {
-	color: #2f2f2f;
-}
-
-nav .banner #banner-icon{
+/* style the banner icon to the left of the banner */
+nav .banner #banner-icon {
 	display: inline-block;
 	vertical-align: top;
 }
 
-nav .banner #searchbar {
-	display: inline-block;
-	position: relative;
-	margin: auto;
+nav .banner #banner-icon img {
+	width: 100px;
+	height: 80px;
+	border: solid #3f3f3f;
+	border-radius: 30%;
+	margin: 5px;
 }
 
-nav .banner #searchbar button {
+/* style the search bar in the center of the banner */
+nav .banner #searchbar {
+	position: absolute;
+	right: 50%;
+}
+
+nav .banner #searchbar form {
+	display: grid;
+	grid-template-areas:
+	"searchbtn searchquery searchquery"
+	"searchbtn searchrecs searchrecs";
+}
+
+nav .banner #searchbar #searchbtn {
+	grid-area: searchbtn;
+}
+
+nav .banner #searchbar #searchbtn button {
 	width: 45px;
 	height: 45px;
-	float: left;
 	background-color: #7dff12;
 	border-color: black;
-	border-width: 4px;
+	border-width: 5px;
 }
 
-nav .banner #searchbar #searchquerydiv, #searchrecsdiv {
-	margin-left: 47px;
+nav .banner #searchbar #searchquerydiv {
+	grid-area: searchquery;
+}
+
+nav .banner #searchbar #searchquerydiv input {
+	height: 45px;
+	background-color: #3f3f3f;
+	color: #adff12;
+	outline: none;
+	border: 1px solid black;
+	box-shadow: none;
 }
 
 nav .banner #searchbar #searchrecs {
+	grid-area: searchrecs;
 	display: none;
 	position: absolute;
 	text-align: center;
 	background-color: #adff12;
 	color: #2f2f2f;
-	min-width: 160px;
+	min-width: 80%;
 	z-index: 1;
 }
 
@@ -171,24 +198,25 @@ nav .banner #searchbar #searchrecs a {
 	color: #2f2f2f;
 }
 
-nav .banner #settings {
-	display: inline-block;
+/* style the channel link or sign-in link on the right side of the banner */
+nav .banner #usercorner {
+	position: absolute;
+	left: 90%;
 }
 
-nav .banner #settings #dropbtn {
+nav .banner #usercorner button {
+	background-color: black;
+	width: 50px;
+	height: 50px;
+}
+
+nav .banner #usercorner button:hover {
+	cursor: pointer;
+}
+
+nav .banner #usercorner button img {
 	width: 45px;
 	height: 45px;
-	display: inline-block;
-}
-
-nav .banner #settings #dropdown-content {
-	display: none;
-}
-
-nav .banner #settings:hover #dropdown-content {
-	background-color: #ddd;
-	color: black;
-	display: block;
 }
 
 /*MEDIA QUERIES*/

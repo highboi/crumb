@@ -45,8 +45,6 @@ function searchCallback(response) {
 		if (item.includes(query)) {
 			//get the components of the search reccomendation
 			var components = item.toLowerCase();
-			var split = components.indexOf(query);
-			components = [components.slice(0, split), components.slice(split+1)];
 
 			//form the highlighted part of the search reccomendation
 			var highlighted = document.createElement("strong");
@@ -60,7 +58,7 @@ function searchCallback(response) {
 			anchor.setAttribute("href", hreflink);
 
 			//form the inner text of the anchor tag with both components and the highlighted element
-			anchor.innerHTML = components[0] + highlighted.outerHTML + components[1];
+			anchor.innerHTML = components.replace(searchqueryinput.value, highlighted.outerHTML);
 
 			//create the final "p" tag element that will house the anchor tag
 			var finalelement = document.createElement("p");

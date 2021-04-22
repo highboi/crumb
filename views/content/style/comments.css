@@ -4,6 +4,7 @@ COMMENTS SECTION
 
 .container .comments {
 	grid-area: comments;
+	width: 1000px;
 }
 
 .container .comments #commentform form button{

@@ -1,12 +1,7 @@
 <div class="banner">
 	<div id="banner-icon">
 		<a href="/" target="_parent">
-			<img src="/content/icons/favicon.ico" width="80px" height="80px">
-		</a>
-	</div>
-	<div id="banner-text">
-		<a href="/" target="_parent">
-			<h1>Gem Sweeper</h1>
+			<img src="/content/icons/favicon.ico">
 		</a>
 	</div>
 	<div id="searchbar">
@@ -21,5 +16,12 @@
 				<div id="searchrecs"></div>
 			</div>
 		</form>
+	</div>
+	<div id="usercorner">
+		<% if (typeof user != 'undefined') { %>
+			<button onclick="window.location.href = '/u/<%= user.id %>';"><img src="<%= user.channelicon %>"></button>
+		<% } else { %>
+			<button onclick="window.location.href = '/login';">Sign In</button>
+		<% } %>
 	</div>
 </div>
