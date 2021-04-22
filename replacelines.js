@@ -15,8 +15,6 @@ fs.readdir(dir, (error, list) => {
 
 			if (typeof data == "string") {
 				data = data.replace("<%- include(\'content/html/banner.ejs\') %>", "<%- include(\'content/ejs/banner.ejs\') %>");
-
-				console.log("NEW DATA:", data);
 			}
 
 
