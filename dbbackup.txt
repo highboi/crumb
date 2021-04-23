@@ -1,0 +1,6 @@
+Steps:
+	1. Switch to the postgres user account. If you are prompted for a password and can't remember, change it with this command:
+		- sudo passwd postgres
+
+	2. Use the pg_dump command like this:
+		- pg_dump <database name> <output file>.sql
