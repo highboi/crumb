@@ -69,6 +69,14 @@ STYLING FOR FORMS
 
 
 /*
+MAIN TAG STYLING
+*/
+main {
+	margin-left: 120px;
+	margin-top: 120px;
+}
+
+/*
 NAVBAR STYLING
 */
 
@@ -78,17 +86,13 @@ nav {
 	z-index: 2;
 }
 
-main {
-	margin-left: 120px;
-	margin-top: 120px;
-}
-
 nav .navbar {
 	background-color: #adff12;
 	width: 100px;
 	height: 100vh;
 	position: fixed;
 	top: 0px;
+	left: 0px;
 	margin-left: 0px;
 	z-index: auto;
 }
@@ -126,7 +130,7 @@ nav .banner {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	margin-left: 100px;
+	margin-left: 90px;
 	width: 100%;
 	z-index: auto;
 }
@@ -149,6 +153,8 @@ nav .banner #banner-icon img {
 nav .banner #searchbar {
 	position: absolute;
 	right: 50%;
+	top: 50%;
+	transform: translateY(-50%);
 }
 
 nav .banner #searchbar form {
@@ -160,6 +166,8 @@ nav .banner #searchbar form {
 
 nav .banner #searchbar #searchbtn {
 	grid-area: searchbtn;
+	margin-top: 50%;
+	transform: translateY(-50%);
 }
 
 nav .banner #searchbar #searchbtn button {
@@ -201,22 +209,37 @@ nav .banner #searchbar #searchrecs a {
 /* style the channel link or sign-in link on the right side of the banner */
 nav .banner #usercorner {
 	position: absolute;
-	left: 90%;
+	top: 50%;
+	right: 10%;
+	transform: translateY(-50%);
 }
 
-nav .banner #usercorner button {
-	background-color: black;
-	width: 50px;
-	height: 50px;
+nav .banner #usercorner #channelcorner {
+	width: 80px;
+	height: 80px;
+	background-color: #1f1f1f;
+	border: none;
+	border-radius: 50%;
 }
 
-nav .banner #usercorner button:hover {
+nav .banner #usercorner #channelcorner:hover {
 	cursor: pointer;
 }
 
-nav .banner #usercorner button img {
-	width: 45px;
-	height: 45px;
+nav .banner #usercorner #channelcorner img {
+	width: 60px;
+	height: 60px;
+	min-width: 50px;
+	min-height: 50px;
+	border-radius: 50%;
+}
+
+nav .banner #usercorner #signincorner {
+	width: 100px;
+	height: 60px;
+	border: solid #4f4f4f;
+	background-color: black;
+	font-size: 20px;
 }
 
 /*MEDIA QUERIES*/

@@ -19,9 +19,9 @@
 	</div>
 	<div id="usercorner">
 		<% if (typeof user != 'undefined') { %>
-			<button onclick="window.location.href = '/u/<%= user.id %>';"><img src="<%= user.channelicon %>"></button>
+			<button id="channelcorner" onclick="window.location.href = '/u/<%= user.id %>';"><img src="<%= user.channelicon %>"></button>
 		<% } else { %>
-			<button onclick="window.location.href = '/login';">Sign In</button>
+			<button id="signincorner" onclick="window.location.href = '/login';">Sign In</button>
 		<% } %>
 	</div>
 </div>
