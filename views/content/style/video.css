@@ -176,19 +176,24 @@ Media Queries for rearranging elements
 */
 
 /*rearrange the layout of videos, reccomendations, and comments*/
-@media (max-width: 1500px) {
+@media (max-width: 1800px) {
 	.container {
 		display: grid;
 		grid-template-areas:
-		"video video"
-		"reccomendations reccomendations"
-		"comments comments";
+		"video"
+		"reccomendations"
+		"comments";
+	}
+
+	.container > * {
+		margin: 0 auto;
+		width: 1000px;
 	}
 }
 
-/*Make sure the contents stay at this width to prevent weird rearrangement*/
-@media (max-width: 1050px) {
+/* if the contents go below this width, then keep it visible */
+@media (max-width: 1700px) {
 	.container {
-		width: 1050px;
+		width: 100%;
 	}
 }
