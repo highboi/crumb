@@ -137,8 +137,6 @@ nav .banner {
 
 /* style the banner icon to the left of the banner */
 nav .banner #banner-icon {
-	display: inline-block;
-	vertical-align: top;
 }
 
 nav .banner #banner-icon img {
@@ -151,10 +149,8 @@ nav .banner #banner-icon img {
 
 /* style the search bar in the center of the banner */
 nav .banner #searchbar {
-	position: absolute;
-	right: 50%;
-	top: 50%;
-	transform: translateY(-50%);
+	margin: 0 auto;
+	transform: translateX(-25%);
 }
 
 nav .banner #searchbar form {
@@ -208,10 +204,9 @@ nav .banner #searchbar #searchrecs a {
 
 /* style the channel link or sign-in link on the right side of the banner */
 nav .banner #usercorner {
-	position: absolute;
-	top: 50%;
-	right: 10%;
-	transform: translateY(-50%);
+	position: relative;
+	float: right;
+	transform: translateX(-130%);
 }
 
 nav .banner #usercorner #channelcorner {
@@ -243,8 +238,9 @@ nav .banner #usercorner #signincorner {
 }
 
 /*MEDIA QUERIES*/
-@media (max-width: 1060px) {
+/*@media (max-width: 1060px) {
 	nav .banner {
 		width: 1060px;
 	}
 }
+*/
