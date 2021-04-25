@@ -41,11 +41,31 @@ function getRecCookieId() {
 }
 
 /*
+this is a function that checks for cookie duplicates which have a certain prefix attached to their name.
+it returns a boolean value indicating the actual existence of a duplicate
+*/
+function checkDuplicates(prefix, value) {
+	//get the cookies as an array of strings, with no spaces
+	var cookies = document.cookie.replaceAll(" ", "").split(";");
+
+	//filter the cookies by the prefix of the name and the value of the cookie
+	cookies = cookies.filter((item) => {
+		var regex = new RegExp(`^${prefix}`);
+		return item.split("=")[0].match(regex) && item.split("=")[1] == value;
+	});
+
+	//return the cookies length, as this will indicate if something is a duplicate or not
+	return cookies.length;
+}
+
+/*
 the first main thing to do is to store the search terms that the user uses to search for videos they want.
 the function below executes whenever the search button is clicked
 */
 function storeSearchTerm(searchterm) {
-	setCookie("SR-" + getRecCookieId(), searchterm);
+	if (!checkDuplicates("SR-", searchterm)) {
+		setCookie("SR-" + getRecCookieId(), searchterm);
+	}
 }
 
 /*
@@ -54,7 +74,9 @@ to get more of the types of videos that the user wants. the function below is ex
 reaches past the 10 second mark and is considered "viewed" by the server
 */
 function storeViewedVideo(videoid) {
-	setCookie("VR-" + getRecCookieId(), videoid);
+	if (!checkDuplicates("VR-", videoid)) {
+		setCookie("VR-" + getRecCookieId(), videoid);
+	}
 }
 
 /*
@@ -62,5 +84,7 @@ a third useful feature is to store cookies for visited channels, as this could g
 the user's channel preferences
 */
 function storeViewedChannel(channelid) {
-	setCookie("CR-" + getRecCookieId(), channelid);
+	if (!checkDuplicates("CR-", channelid)) {
+		setCookie("CR-" + getRecCookieId(), channelid);
+	}
 }
