@@ -5,6 +5,9 @@ app.get('/', async (req, res) => {
 	//get the view object
 	var viewObj = await middleware.getViewObj(req);
 
+	//get all of the reccomendation cookies
+	var cookies = await middleware.getReccomendationCookies(req);
+
 	//select all of the videos from the database to be displayed
 	var videos = await client.query(`SELECT * FROM videos WHERE deleted=${false} AND private=${false} LIMIT 50`);
 

@@ -242,6 +242,25 @@ middleware = {
 		}
 	},
 
+	//this is a function to get all of the reccomendation cookies from the user's current session
+	getReccomendationCookies: async function (req) {
+		//get all of the key-value pairs as an array of objects
+		var newCookies = Object.keys(req.cookies).map((item) => {
+			var obj = {};
+			obj[item] = req.cookies[item];
+			return obj;
+		});
+
+		//filter the new cookies based on the beginning prefix with regex
+		newCookies = newCookies.filter((item) => {
+			var cookiename = Object.keys(item)[0];
+			return cookiename.match(/^VR-|^SR-|^CR-/);
+		});
+
+		//return the new reccomendation cookies
+		return newCookies;
+	},
+
 	//this is a function that puts together a list of phrases to use in our search algorithm
 	getSearchTerms: function (searchterm) {
 		//break the search term into individual words

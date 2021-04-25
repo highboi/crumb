@@ -28,9 +28,6 @@ app.get("/v/:videoid", async (req, res) => {
 	videocreator = videocreator.rows[0];
 
 	if (!video.deleted && !video.private) {
-		//update the views on the video
-		await client.query(`UPDATE videos SET views=views+1 WHERE id=$1`, [req.params.videoid]); //update the views on the video
-
 		//get videos for the reccomendations
 		var reccomendations = await middleware.getReccomendations(video);
 
@@ -149,6 +146,15 @@ app.get("/video/:id", async (req, res) => {
 		//pipe the complete contents of the file to the response with a read stream of the file
 		fs.createReadStream(path).pipe(res)
 	}
+});
+
+//an AJAX request path to increase the video view amount for a video id
+app.get("/video/incviews/:videoid", async (req, res) => {
+	//increase the video entry for the video with the id in the url
+	await client.query(`UPDATE videos SET views=views+1 WHERE id=$1`, [req.params.videoid]);
+
+	//send a success message to the client
+	res.send(true);
 });
 
 //delete a video
