@@ -12,7 +12,7 @@
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 			
-			<div class="channel">
+			<div class="channel" data-channelid="<%= creator.id %>">
 				<div class="channel-banner" style="background-image: url(<%= creator.channelbanner %>)">
 					<div id="channel-icon">
 						<img src="<%= creator.channelicon %>" width="80px" height="80px">
