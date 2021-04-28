@@ -135,6 +135,22 @@ middleware = {
 		}
 	},
 
+	//this is a function that eliminates duplicates from an object
+	deleteDuplicates: async function(arr) {
+		//get stringified versions of the objects inside
+		var stringobjs = arr.map((item) => {
+			return JSON.stringify(item);
+		});
+
+		//filter the array based on the array of stringified objects
+		arr = arr.filter((item, index) => {
+			return !stringobjs.includes(JSON.stringify(item), index+1);
+		});
+
+		//return the filtered array
+		return arr;
+	},
+
 	//this function gets the filename of an OBS stream file from a timestamp
 	getObsName: function(timestamp) {
 		var offset = new Date(timestamp).getTimezoneOffset()*60000;
@@ -242,6 +258,33 @@ middleware = {
 		}
 	},
 
+	//this is a function for getting the reccomendations for the videos according to the title and description of the video being viewed
+	getReccomendations: async function (video) {
+		//get a list of phrases to use in searching for results in the database
+		var phrases = middleware.getSearchTerms(video.title);
+		phrases = phrases.concat(middleware.getSearchTerms(video.username));
+
+		//get the results of searching for the videos based on the list of phrases in the db
+		var vids = await middleware.searchVideos(phrases);
+
+		//eliminate the video from the list if the video being viewed is in the list
+		vids = vids.filter((item) => {
+			return !(JSON.stringify(video) == JSON.stringify(item));
+		});
+
+		//return the videos
+		return vids;
+	},
+
+	//this is a function that gets random reccomendations from the database
+	getRandomReccomendations: async function (amount=5) {
+		//randomly select videos with a limited amount defined in the function (or defined by the user params)
+		var videos = await client.query(`SELECT * FROM videos WHERE deleted=${false} AND private=${false} ORDER BY random() LIMIT $1`, [amount]);
+
+		//return the videos as an array
+		return videos.rows;
+	},
+
 	//this is a function to get all of the reccomendation cookies from the user's current session
 	getReccomendationCookies: async function (req) {
 		//get all of the key-value pairs as an array of objects
@@ -259,6 +302,91 @@ middleware = {
 
 		//return the new reccomendation cookies
 		return newCookies;
+	},
+
+	//this is a function that gets reccomendations based on all of the search reccomendation cookies in the user's session
+	getCookieReccomendations: async function (cookies) {
+		//get the cookies themselves
+		var cookies = await middleware.getReccomendationCookies(req);
+
+		//make an array of reccomendations
+		var recs = [];
+
+		//filter for search cookies
+		var searchcookies = cookies.filter((item) => {
+			return Object.keys(item)[0].match(/^SR-/);
+		});
+
+		//get videos based on search cookies
+		for (var i=0; i < searchcookies.length; i++) {
+			//get the cookie value
+			var cookievalue = Object.values(searchcookies[i])[0];
+
+			//get phrases based on the original cookie value
+			var phrases = await middleware.getSearchTerms(cookievalue);
+
+			//loop through all of the phrases and select videos
+			for (var phrase=0; phrase < phrases.length; phrase++) {
+				var video = await client.query(`SELECT * FROM videos WHERE (UPPER(title) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1)) AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 1`, ["%" + phrases[phrase] + "%"]);
+				if (typeof video.rows[0] != 'undefined') {
+					recs.push(video.rows[0]);
+				}
+			}
+		}
+
+		//filter for video cookies
+		var videocookies = cookies.filter((item) => {
+			return Object.keys(item)[0].match(/^VR-/);
+		});
+
+		//get videos based on the title of a viewed video and associated channel
+		for (var i=0; i < videocookies.length; i++) {
+			//get the cookie value
+			var cookievalue = Object.values(videocookies[i])[0];
+			cookievalue = cookievalue.split("+");
+
+			//get phrases based on the video title
+			var titlephrases = await middleware.getSearchTerms(cookievalue[0]);
+
+			//loop through the title phrases and get videos
+			for (var phrase = 0; phrase < titlephrases.length; phrase++) {
+				var video = await client.query(`SELECT * FROM videos WHERE UPPER(title) LIKE UPPER($1) AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 1`, ["%" + titlephrases[phrase] + "%"]);
+				recs.push(video.rows[0]);
+			}
+
+			//get some videos based on the channel id associated with this viewed video
+			var channelvideos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 5`, [cookievalue[1]]);
+
+			//add the channel-based videos to the reccomendations array
+			channelvideos.rows.forEach((item) => {
+				recs.push(item);
+			});
+		}
+
+		//filter for channel cookies
+		var channelcookies = cookies.filter((item) => {
+			return Object.keys(item)[0].match(/^CR-/);
+		});
+
+		//get videos based on the viewed channels by the user
+		for (var i=0; i < channelcookies.length; i++) {
+			//get the cookie value
+			var cookievalue = Object.keys(channelcookies[i])[0];
+
+			//get videos based on the viewed channel id
+			var channelvideos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 5`, [cookievalue]);
+
+			//add all of the channel videos to the reccomendations array
+			channelvideos.rows.forEach((item) => {
+				recs.push(item);
+			});
+		}
+
+		//delete the duplicates in the array
+		recs = await middleware.deleteDuplicates(recs);
+
+		//return the completed recccomendations array
+		return recs;
 	},
 
 	//this is a function that puts together a list of phrases to use in our search algorithm
@@ -365,25 +493,6 @@ middleware = {
 		}
 
 		return results;
-	},
-
-	//this is a function for getting the reccomendations for the videos according to the title and description of the video being viewed
-	getReccomendations: async function (video) {
-		//get a list of phrases to use in searching for results in the database
-		var phrases = middleware.getSearchTerms(video.title);
-
-		//get the results of searching for the videos based on the list of phrases in the db
-		var vids = await middleware.searchVideos(phrases);
-
-		//eliminate the video from the list if the video being viewed is in the list
-		vids.forEach((item, index) => {
-			if (item.id == video.id) {
-				vids.splice(index, 1);
-			}
-		});
-
-		//return the videos
-		return vids;
 	},
 
 	//this is a function that gets all of the titles from a certain table based on an array of phrases

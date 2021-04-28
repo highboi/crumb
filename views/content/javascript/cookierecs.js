@@ -73,9 +73,9 @@ the second main thing to do is to store the ids of the videos that the user has 
 to get more of the types of videos that the user wants. the function below is executed when any video
 reaches past the 10 second mark and is considered "viewed" by the server
 */
-function storeViewedVideo(videoid) {
-	if (!checkDuplicates("VR-", videoid)) {
-		setCookie("VR-" + getRecCookieId(), videoid);
+function storeViewedVideo(dataset) {
+	if (!checkDuplicates("VR-", dataset.videotitle + "+" + dataset.videouserid)) {
+		setCookie("VR-" + getRecCookieId(), dataset.videotitle + "+" + dataset.videouserid);
 	}
 }
 
@@ -95,16 +95,18 @@ the code below is meant to trigger the above functions
 
 //check to see if the video element exists to check in the first place
 if (document.querySelector(".video-container #video")) {
+	//call the function to store this element as a reccomendation cookie (they clicked on it so it counts)
+	storeViewedVideo(event.srcElement.dataset);
+
 	//set an event handler for a change in the video duration as to know when to request that the server increase the view count
 	document.querySelector(".video-container #video").addEventListener("timeupdate", (event) => {
 		//if the current time of the video is more than or equal to 10 seconds, and if the element does
 		//not have the added attribute "viewed", then...
 		if (event.srcElement.currentTime >= 10 && typeof event.srcElement.viewed == 'undefined') {
-			//call the function to store this element as a reccomendation cookie
-			storeViewedVideo(event.srcElement.dataset.videoid);
-
 			//get the AJAX url to increase the view count
-			getAjaxData(`/video/incviews/${event.srcElement.dataset.videoid}`, (data) => {});
+			getAjaxData(`/video/incviews/${event.srcElement.dataset.videoid}`, (data) => {
+				console.log("Video has been viewed.");
+			});
 
 			//add an attribute signifying that the element was viewed to not continuously increase view count after 10 seconds
 			event.srcElement.viewed = true;

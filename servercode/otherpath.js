@@ -5,14 +5,18 @@ app.get('/', async (req, res) => {
 	//get the view object
 	var viewObj = await middleware.getViewObj(req);
 
-	//get all of the reccomendation cookies
-	var cookies = await middleware.getReccomendationCookies(req);
+	//get the reccomendation cookies
+	var reccookies = await middleware.getReccomendationCookies(req);
 
-	//select all of the videos from the database to be displayed
-	var videos = await client.query(`SELECT * FROM videos WHERE deleted=${false} AND private=${false} LIMIT 50`);
+	//get all of the cookies based on the reccomendations in the users cache
+	if (reccookies.length == 0) {
+		var videos = await middleware.getRandomReccomendations(30);
+	} else {
+		var videos = await middleware.getCookieReccomendations(reccookies);
+	}
 
 	//insert the video rows into the view object
-	viewObj.videos = videos.rows;
+	viewObj.videos = videos;
 
 	//render the view
 	res.render("index.ejs", viewObj);

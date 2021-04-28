@@ -9,6 +9,7 @@ STYLE SECTIONS OF THUMBNAILS
 .group-videos {
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: center;
 }
 
 .search-videos {
