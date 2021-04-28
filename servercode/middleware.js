@@ -374,6 +374,8 @@ FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
 		//check for the existence of reccomendation cookies
 		if (reccookies.length) {
 			var reccomendations = await middleware.getCookieReccomendations(reccookies);
+			var randomvids = await middleware.getRandomReccomendations(15);
+			reccomendations = reccomendations.concat(randomvids);
 		} else { //check for other edge cases
 			if (typeof video == 'undefined') {
 				var reccomendations = await middleware.getRandomReccomendations(30);
@@ -381,6 +383,9 @@ FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
 				var reccomendations = await middleware.getVideoReccomendations(video);
 			}
 		}
+
+		//delete any duplicate videos
+		reccomendations = await middleware.deleteDuplicates(reccomendations);
 
 		//return the complete reccomendations list
 		return reccomendations;
@@ -434,9 +439,6 @@ FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
 
 	//this is a function that gets reccomendations based on all of the search reccomendation cookies in the user's session
 	getCookieReccomendations: async function (cookies) {
-		//get the cookies themselves
-		var cookies = await middleware.getReccomendationCookies(req);
-
 		//make an array of reccomendations
 		var recs = [];
 
@@ -499,7 +501,7 @@ FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
 		//get videos based on the viewed channels by the user
 		for (var i=0; i < channelcookies.length; i++) {
 			//get the cookie value
-			var cookievalue = Object.keys(channelcookies[i])[0];
+			var cookievalue = Object.values(channelcookies[i])[0];
 
 			//get videos based on the viewed channel id
 			var channelvideos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 5`, [cookievalue]);
