@@ -29,18 +29,8 @@ app.get("/v/:videoid", async (req, res) => {
 
 	//check to see that the video is not deleted or private before getting information that is not needed or does not exist
 	if (!video.deleted && !video.private) {
-		//get the reccomendation cookies from the user
-		var reccookies = await middleware.getReccomendationCookies(req);
-
-		//if there are no reccomendation cookies yet, get reccomendations based on the video info
-		if (reccookies.length == 0) {
-			var reccomendations = await middleware.getReccomendations(video);
-		} else { //if there are reccomendation cookies, get reccomendations based on this info
-			var reccomendations = await middleware.getCookieReccomendations(req);
-			reccomendations = reccomendations.filter((item) => {
-				return !(JSON.stringify(video) == JSON.stringify(item));
-			});
-		}
+		//get the reccomendations for this video
+		var reccomendations = await middleware.getReccomendations(req, video);
 
 		//select the comments that belong to the video and order the comments by the amount of likes (most likes to least likes)
 		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1 ORDER BY likes DESC`, [req.params.videoid]);

@@ -43,7 +43,7 @@ app.get("/l/view/:streamid", async (req, res) => {
 			videocreator = videocreator.rows[0];
 
 			//get the video reccomendations for this live stream
-			var reccomendations = await middleware.getReccomendations(video);
+			var reccomendations = await middleware.getReccomendations(req, video);
 
 			//add elements to the view object
 			viewObj = Object.assign({}, viewObj, {stream: video, videocreator: videocreator, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, reccomendations: reccomendations});
@@ -61,7 +61,7 @@ app.get("/l/view/:streamid", async (req, res) => {
 		videocreator = videocreator.rows[0];
 
 		//get the video reccomendations for this live stream
-		var reccomendations = await middleware.getReccomendations(video);
+		var reccomendations = await middleware.getReccomendations(req, video);
 
 		//add elements to the view object
 		viewObj = Object.assign({}, viewObj, {stream: video, reccomendations: reccomendations, videocreator: videocreator});

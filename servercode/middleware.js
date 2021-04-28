@@ -15,6 +15,9 @@ const approx = require("approximate-number");
 const logger = require("./logger");
 
 middleware = {
+/*
+FUNCTIONS THAT CHECK USER AUTH:
+*/
 	//this is a function that redirects users to the login page if the user is not signed in
 	//this is used for pages and requests that require a login
 	checkSignedIn: function (req, res, next) {
@@ -37,6 +40,9 @@ middleware = {
 		}
 	},
 
+/*
+FUNCTIONS THAT GENERATE BASIC INFO NEEDED FOR REQUEST PROCESSING (view obj, ids, session info):
+*/
 	//this is a function to insert universal things into the view object such as flash messages
 	//and language translation
 	getViewObj: async function(req) {
@@ -135,6 +141,9 @@ middleware = {
 		}
 	},
 
+/*
+FUNCTIONS THAT ARE NEEDED, BUT DON'T FIT ANYWHERE:
+*/
 	//this is a function that eliminates duplicates from an object
 	deleteDuplicates: async function(arr) {
 		//get stringified versions of the objects inside
@@ -156,61 +165,6 @@ middleware = {
 		var offset = new Date(timestamp).getTimezoneOffset()*60000;
 		var newtimestamp = new Date(timestamp - offset).toISOString();
 		return newtimestamp.replace(/T/, "-").replace(/\..+/, "").replace(/:/g, "-");
-	},
-
-	//this is a function to delete video details
-	deleteVideoDetails: async function (userinfo, videoid) {
-		//get the video to be deleted
-		var video = await client.query(`SELECT thumbnail, video FROM videofiles WHERE id=$1 LIMIT 1`, [videoid]);
-		video = video.rows[0];
-		//get the paths of the files for the thumbnail and the video
-		var thumbnailpath = global.appRoot + "/storage" + video.thumbnail;
-		var videopath = global.appRoot + "/storage" + video.video;
-
-		var video_user_id = await client.query(`SELECT user_id FROM videos WHERE id=$1 LIMIT 1`, [videoid]);
-		video_user_id = video_user_id.rows[0].user_id;
-
-		//check to see if the user trying to delete the video actually owns the video
-		if (userinfo.id == video_user_id) {
-			//delete all of the comments for this video
-			await client.query(`DELETE FROM comments WHERE video_id=$1`, [videoid]);
-			//delete the video file entry and the comment file entries
-			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
-			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
-			//delete the video details in the database
-			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
-			//delete the live chat messages from the video
-			await client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
-			//update the amount of videos the user has
-			await client.query(`UPDATE users SET videocount=videocount-1 WHERE id=$1`, [userinfo.id]);
-			//delete the actual files for the video and thumbnail
-			fs.unlink(videopath, (err) => {
-				if (err) throw err;
-			});
-			fs.unlink(thumbnailpath, (err) => {
-				if (err) throw err;
-			});
-			//return true as the files and database entry were successfully deleted
-			return true;
-		} else { //if the video does not belong to the user, return false
-			return false;
-		}
-	},
-
-	//this is a function to delete playlist details
-	deletePlaylistDetails: async function (userinfo, playlistid) {
-		var playlist = await client.query(`SELECT user_id FROM playlists WHERE id=$1 LIMIT 1`, [playlistid]);
-		playlist = playlist.rows[0];
-
-		//if the playlist's user id matches the given user info, then delete the playlist video entries
-		//as well as the playlist itself and return true on success
-		if (playlist.user_id == userinfo.id) {
-			await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1`, [playlistid]);
-			await client.query(`DELETE FROM playlists WHERE id=$1`, [playlistid]);
-			return true;
-		} else { //if the playlist apparently does not belong to the user, then return false
-			return false;
-		}
 	},
 
 	//this is a function for saving a file on to the server
@@ -258,8 +212,182 @@ middleware = {
 		}
 	},
 
+	//this is a function to handle the likes on certain elements of the site
+	handleLikes: async function(req, element, liked, disliked, likedTable, dislikedTable) {
+		//get the user info from redis session store
+		var userinfo = await redisClient.getAsync(req.cookies.sessionid);
+		userinfo = JSON.parse(userinfo);
+
+		//get the user id and the element id
+		var userid = userinfo.id.toString();
+		var elementid = element.id.toString();
+
+		//get the id column name based on if the element has a video or not
+		if (typeof element.video != 'undefined') {
+			var idcolumn = "video_id";
+		} else {
+			var idcolumn = "comment_id";
+		}
+
+		//handle the liking and unliking of the element
+		if (liked.rows.length == 0) {
+			var likes = parseInt(element.likes, 10)
+			likes = likes + 1;
+			likes = likes.toString();
+			var querystring = `INSERT INTO ${likedTable} (user_id, ${idcolumn}) VALUES (\'${userid}\', \'${elementid}\')`;
+			await client.query(querystring);
+		} else if (liked.rows.length > 0) {
+			var likes = parseInt(element.likes, 10);
+			likes = likes - 1;
+			likes = likes.toString();
+			var querystring = `DELETE FROM ${likedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
+			await client.query(querystring);
+		}
+
+		//handle any dislikes that come up
+		if (disliked.rows.length == 0) {
+			var dislikes = element.dislikes.toString();
+		} else if (disliked.rows.length > 0) {
+			var dislikes = parseInt(element.dislikes, 10);
+			dislikes = dislikes - 1;
+			dislikes = dislikes.toString();
+			var querystring = `DELETE FROM ${dislikedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
+			await client.query(querystring);
+		}
+
+		return [likes, dislikes];
+	},
+
+	//this is a function to handle the dislikes on certain elements of the site
+	handleDislikes: async function (req, element, liked, disliked, likedTable, dislikedTable) {
+		//get the user info from redis session store
+		var userinfo = await redisClient.getAsync(req.cookies.sessionid);
+		userinfo = JSON.parse(userinfo);
+
+		//get the userid and element id
+		var userid = userinfo.id.toString();
+		var elementid = element.id.toString();
+
+		//get the id column name
+		if (typeof element.video != 'undefined') {
+			var idcolumn = "video_id";
+		} else {
+			var idcolumn = "comment_id";
+		}
+
+		//handle the disliking and the un-disliking of the element
+		if (disliked.rows.length == 0) {
+			var dislikes = parseInt(element.dislikes, 10);
+			dislikes = dislikes + 1;
+			dislikes = dislikes.toString();
+			var querystring = `INSERT INTO ${dislikedTable} (user_id, ${idcolumn}) VALUES (\'${userid}\', \'${elementid}\')`;
+			await client.query(querystring);
+		} else if (disliked.rows.length > 0) {
+			var dislikes = parseInt(element.dislikes, 10);
+			dislikes = dislikes - 1;
+			dislikes = dislikes.toString();
+			var querystring = `DELETE FROM ${dislikedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
+			await client.query(querystring);
+		}
+
+		//handle any likes that come up
+		if (liked.rows.length == 0) {
+			var likes = element.likes.toString();
+		} else if (liked.rows.length > 0) {
+			var likes = parseInt(element.likes, 10);
+			likes = likes - 1;
+			likes = likes.toString();
+			var querystring = `DELETE FROM ${likedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
+			await client.query(querystring);
+		}
+
+		return [likes, dislikes];
+	},
+
+/*
+FUNCTIONS FOR DELETING DATABASE DETAILS OF CERTAIN CONTENT:
+*/
+	//this is a function to delete video details
+	deleteVideoDetails: async function (userinfo, videoid) {
+		//get the video to be deleted
+		var video = await client.query(`SELECT thumbnail, video FROM videofiles WHERE id=$1 LIMIT 1`, [videoid]);
+		video = video.rows[0];
+		//get the paths of the files for the thumbnail and the video
+		var thumbnailpath = global.appRoot + "/storage" + video.thumbnail;
+		var videopath = global.appRoot + "/storage" + video.video;
+
+		var video_user_id = await client.query(`SELECT user_id FROM videos WHERE id=$1 LIMIT 1`, [videoid]);
+		video_user_id = video_user_id.rows[0].user_id;
+
+		//check to see if the user trying to delete the video actually owns the video
+		if (userinfo.id == video_user_id) {
+			//delete all of the comments for this video
+			await client.query(`DELETE FROM comments WHERE video_id=$1`, [videoid]);
+			//delete the video file entry and the comment file entries
+			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
+			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
+			//delete the video details in the database
+			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
+			//delete the live chat messages from the video
+			await client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
+			//update the amount of videos the user has
+			await client.query(`UPDATE users SET videocount=videocount-1 WHERE id=$1`, [userinfo.id]);
+			//delete the actual files for the video and thumbnail
+			fs.unlink(videopath, (err) => {
+				if (err) throw err;
+			});
+			fs.unlink(thumbnailpath, (err) => {
+				if (err) throw err;
+			});
+			//return true as the files and database entry were successfully deleted
+			return true;
+		} else { //if the video does not belong to the user, return false
+			return false;
+		}
+	},
+
+	//this is a function to delete playlist details
+	deletePlaylistDetails: async function (userinfo, playlistid) {
+		//get the playlist
+		var playlist = await client.query(`SELECT user_id FROM playlists WHERE id=$1 LIMIT 1`, [playlistid]);
+		playlist = playlist.rows[0];
+
+		//if the playlist's user id matches the given user info, then delete the playlist video entries
+		//as well as the playlist itself and return true on success
+		if (playlist.user_id == userinfo.id) {
+			await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1`, [playlistid]);
+			await client.query(`DELETE FROM playlists WHERE id=$1`, [playlistid]);
+			return true;
+		} else { //if the playlist apparently does not belong to the user, then return false
+			return false;
+		}
+	},
+
+/*
+FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
+*/
+	//this is a function for getting reccomendations based on all of the other functions below, checking for all edge cases
+	getReccomendations: async function (req, video=undefined) {
+		//get reccomendation cookies
+		var reccookies = await middleware.getReccomendationCookies(req);
+
+		//check for the existence of reccomendation cookies
+		if (reccookies.length) {
+			var reccomendations = await middleware.getCookieReccomendations(reccookies);
+		} else { //check for other edge cases
+			if (typeof video == 'undefined') {
+				var reccomendations = await middleware.getRandomReccomendations(30);
+			} else {
+				var reccomendations = await middleware.getVideoReccomendations(video);
+			}
+		}
+
+		//return the complete reccomendations list
+		return reccomendations;
+	},
+
 	//this is a function for getting the reccomendations for the videos according to the title and description of the video being viewed
-	getReccomendations: async function (video) {
+	getVideoReccomendations: async function (video) {
 		//get a list of phrases to use in searching for results in the database
 		var phrases = middleware.getSearchTerms(video.title);
 		phrases = phrases.concat(middleware.getSearchTerms(video.username));
@@ -389,6 +517,9 @@ middleware = {
 		return recs;
 	},
 
+/*
+FUNCTIONS THAT DEAL WITH SEARCHING FOR CONTENT FOR THE USER:
+*/
 	//this is a function that puts together a list of phrases to use in our search algorithm
 	getSearchTerms: function (searchterm) {
 		//break the search term into individual words
@@ -636,6 +767,9 @@ middleware = {
 		return result;
 	},
 
+/*
+FUNCTIONS THAT PERFORM LOGGING TASKS:
+*/
 	//this is a function that counts the amount of hits on the site
 	hitCounter: async function(req, res, next) {
 		//get the session info of the user
@@ -681,6 +815,9 @@ middleware = {
 		logger.log({level: level, message: message})
 	},
 
+/*
+FUNCTIONS THAT HANDLE THE SHUTDOWN PROCESS OF THE SERVER:
+*/
 	//this is a function that executes whenever the node process is killed (server shuts down)
 	shutDown: function() {
 		//delete all magnet links from all videos in the database (these are invalid now)
@@ -702,98 +839,6 @@ middleware = {
 		//if the node server is interrupted or terminated, execute the shutdown process
 		process.on("SIGINT", middleware.shutDown);
 		process.on("SIGTERM", middleware.shutDown);
-	},
-
-	//this is a function to handle the likes on certain elements of the site
-	handleLikes: async function(req, element, liked, disliked, likedTable, dislikedTable) {
-		//get the user info from redis session store
-		var userinfo = await redisClient.getAsync(req.cookies.sessionid);
-		userinfo = JSON.parse(userinfo);
-
-		//get the user id and the element id
-		var userid = userinfo.id.toString();
-		var elementid = element.id.toString();
-
-		//get the id column name based on if the element has a video or not
-		if (typeof element.video != 'undefined') {
-			var idcolumn = "video_id";
-		} else {
-			var idcolumn = "comment_id";
-		}
-
-		//handle the liking and unliking of the element
-		if (liked.rows.length == 0) {
-			var likes = parseInt(element.likes, 10)
-			likes = likes + 1;
-			likes = likes.toString();
-			var querystring = `INSERT INTO ${likedTable} (user_id, ${idcolumn}) VALUES (\'${userid}\', \'${elementid}\')`;
-			await client.query(querystring);
-		} else if (liked.rows.length > 0) {
-			var likes = parseInt(element.likes, 10);
-			likes = likes - 1;
-			likes = likes.toString();
-			var querystring = `DELETE FROM ${likedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
-			await client.query(querystring);
-		}
-
-		//handle any dislikes that come up
-		if (disliked.rows.length == 0) {
-			var dislikes = element.dislikes.toString();
-		} else if (disliked.rows.length > 0) {
-			var dislikes = parseInt(element.dislikes, 10);
-			dislikes = dislikes - 1;
-			dislikes = dislikes.toString();
-			var querystring = `DELETE FROM ${dislikedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
-			await client.query(querystring);
-		}
-
-		return [likes, dislikes];
-	},
-
-	//this is a function to handle the dislikes on certain elements of the site
-	handleDislikes: async function (req, element, liked, disliked, likedTable, dislikedTable) {
-		//get the user info from redis session store
-		var userinfo = await redisClient.getAsync(req.cookies.sessionid);
-		userinfo = JSON.parse(userinfo);
-
-		//get the userid and element id
-		var userid = userinfo.id.toString();
-		var elementid = element.id.toString();
-
-		//get the id column name
-		if (typeof element.video != 'undefined') {
-			var idcolumn = "video_id";
-		} else {
-			var idcolumn = "comment_id";
-		}
-
-		//handle the disliking and the un-disliking of the element
-		if (disliked.rows.length == 0) {
-			var dislikes = parseInt(element.dislikes, 10);
-			dislikes = dislikes + 1;
-			dislikes = dislikes.toString();
-			var querystring = `INSERT INTO ${dislikedTable} (user_id, ${idcolumn}) VALUES (\'${userid}\', \'${elementid}\')`;
-			await client.query(querystring);
-		} else if (disliked.rows.length > 0) {
-			var dislikes = parseInt(element.dislikes, 10);
-			dislikes = dislikes - 1;
-			dislikes = dislikes.toString();
-			var querystring = `DELETE FROM ${dislikedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
-			await client.query(querystring);
-		}
-
-		//handle any likes that come up
-		if (liked.rows.length == 0) {
-			var likes = element.likes.toString();
-		} else if (liked.rows.length > 0) {
-			var likes = parseInt(element.likes, 10);
-			likes = likes - 1;
-			likes = likes.toString();
-			var querystring = `DELETE FROM ${likedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
-			await client.query(querystring);
-		}
-
-		return [likes, dislikes];
 	}
 }
 

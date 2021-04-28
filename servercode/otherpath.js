@@ -5,15 +5,8 @@ app.get('/', async (req, res) => {
 	//get the view object
 	var viewObj = await middleware.getViewObj(req);
 
-	//get the reccomendation cookies
-	var reccookies = await middleware.getReccomendationCookies(req);
-
-	//get all of the cookies based on the reccomendations in the users cache
-	if (reccookies.length == 0) {
-		var videos = await middleware.getRandomReccomendations(30);
-	} else {
-		var videos = await middleware.getCookieReccomendations(reccookies);
-	}
+	//get videos for the index page
+	var videos = await middleware.getReccomendations(req);
 
 	//insert the video rows into the view object
 	viewObj.videos = videos;
