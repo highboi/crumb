@@ -6,7 +6,6 @@ const fs = require("fs");
 const client = require("./dbConfig");
 const redisClient = require("./redisConfig");
 const crypto = require("crypto");
-const {v4: uuidv4} = require("uuid");
 const readline = require("readline");
 const schedule = require("node-schedule");
 const approx = require("approximate-number");
@@ -81,32 +80,44 @@ FUNCTIONS THAT GENERATE BASIC INFO NEEDED FOR REQUEST PROCESSING (view obj, ids,
 		return viewObj;
 	},
 
-	//this is the function that generates a unique id for each video
-	//this function needs to be asynchronous as to allow for
-	//the value of a DB query to be stored in a variable
+	//this is a function that generates a new alphanumeric id
 	generateAlphanumId: async function () {
-		//get the supposed new id
-		var newid = uuidv4();
+		//alphanumeric character set
+		var chars = "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890";
 
-		console.log("Generated new ID: " + newid);
+		//a string to store the resulting id
+		var resultid = "";
 
-		//get the response from the database
-		var res = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [newid]);
+		//add 8 random alphanumeric characters to the result id variable
+		for (var i=0; i < 8; i++) {
+			resultid += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
 
-		//get comment ids
-		var commentres = await client.query(`SELECT * FROM comments WHERE id=$1 LIMIT 1`, [newid]);
+		/*
+		check this result alphanumeric id against all DB entries that use unique new ids
+		*/
+		//check against users
+		var user = await client.query(`SELECT id FROM users WHERE id=$1 LIMIT 1`, [resultid]);
+		user = user.rows.length;
 
-		//get the playlist ids
-		var playlistres = await client.query(`SELECT * FROM playlists WHERE id=$1 LIMIT 1`, [newid]);
+		//check against videos
+		var video = await client.query(`SELECT id FROM videos WHERE id=$1 LIMIT 1`, [resultid]);
+		video = video.rows.length;
 
-		//if the database returned more than 0 rows, this means that a video
-		//with the generated id exists, meaning that the function must be
-		//executed again in order to generate a truly unique id
-		if (res.rows.length > 0 || commentres.rows.length > 0 || playlistres.rows.length > 0) {
+		//check against comments
+		var comment = await client.query(`SELECT id FROM comments WHERE id=$1 LIMIT 1`, [resultid]);
+		comment = comment.rows.length;
+
+		//check against playlists
+		var playlist = await client.query(`SELECT id FROM playlists WHERE id=$1 LIMIT 1`, [resultid]);
+		playlist = playlist.rows.length;
+
+		//check for the existence of anything in the DB with this same id
+		if (user || video || comment || playlist) {
 			middleware.generateAlphanumId();
-		} else { //if a unique id has been found, return this id
-			console.log("Valid ID Found: " + newid.toString());
-			return newid;
+		} else {
+			console.log("VALID ID FOUND:", resultid);
+			return resultid;
 		}
 	},
 

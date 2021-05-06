@@ -12,7 +12,7 @@ chatSocket.onopen = (e) => {
 };
 
 //a function to create a chat message element
-function createMessage(msg) {
+function createLiveMessage(msg, user_id) {
 	//create all of the necessary elements
 	var divElement = document.createElement("div");
 	var iconLinkElement = document.createElement("a");
@@ -47,15 +47,16 @@ function createMessage(msg) {
 	return divElement;
 }
 
+//send a message typed by a user to the server
 function sendMessage() {
 	//get the message text
 	var message = document.querySelector("#message").value;
 
 	//create the array with values for the live chat message
-	var msg = [channelicon, username, message]
+	var msg = [channelicon, username, message];
 
 	//create the message div element
-	var divElement = createMessage(msg, user_id);
+	var divElement = createLiveMessage(msg, user_id);
 
 	//add the message to the chat box
 	chatbox.appendChild(divElement);
@@ -73,7 +74,7 @@ chatSocket.onmessage = (event) => {
 	var msg = event.data.split(",");
 
 	//create a div element for the live chat
-	var divElement = createMessage(msg);
+	var divElement = createLiveMessage(msg);
 
 	//add the live chat message to the chat box
 	chatbox.appendChild(divElement);
