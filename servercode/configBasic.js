@@ -3,11 +3,13 @@
 //modules to use
 const express = require("express");
 const session = require("express-session");
+const busboyBodyParser = require("busboy-body-parser");
 const cookieParser = require("cookie-parser");
 const flash = require("connect-flash");
 const WebSocket = require("ws");
 const NodeMediaServer = require("node-media-server");
 const fs = require("fs");
+const escape = require("escape-html");
 
 //generate the express app
 const app = express();
@@ -84,6 +86,8 @@ app.use(express.static('./views'));
 //declare a static directory for the file contents of the site
 app.use(express.static("./storage"));
 
+//use the busboy middleware to parse files and form data
+app.use(busboyBodyParser());
 
 //export the variables
 module.exports = {

@@ -6,6 +6,11 @@
 	<body>
 		<h1>EXAMPLE PAGE:</h1>
 
-		<p><%= JSON.stringify(result[0].exists) %></p>
+		<form action="/example" method="POST" enctype="multipart/form-data">
+			<textarea placeholder="Type something..." id="text" name="text"></textarea><br>
+			<label for="file">PICK A FILE:</label>
+			<input type="file" id="file" name="file"><br>
+			<input type="submit" value="Submit">
+		</form>
 	</body>
 </html>

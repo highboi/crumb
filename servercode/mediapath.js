@@ -2,7 +2,6 @@ const {app, client, middleware} = require("./configBasic");
 const fs = require("fs");
 const approx = require("approximate-number");
 const path = require("path");
-const formidable = require("formidable");
 
 /*
 GET PATHS FOR VIDEOS/MEDIA
@@ -312,58 +311,52 @@ POST PATHS FOR VIDEOS/MEDIA
 */
 
 //store the submitted video to the database
-app.post("/v/submit", (req, res) => {
-	//get the form
-	var form = new formidable.IncomingForm();
+app.post("/v/submit", async (req, res) => {
+	//get the user information
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//parse the form and store the files
-	form.parse(req, async (err, fields, files) => {
-		//get user from redis
-		var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+	//get the mime types of the two files
+	var videotype = req.files.video.mimetype;
+	var thumbtype = req.files.thumbnail.mimetype;
 
-		//get the video and thumbnail file types to be checked (file upload vuln)
-		var videotype = files.video.type;
-		var thumbtype = files.thumbnail.type;
+	//make arrays which contain the accepted types for image and video files
+	var acceptedvideo = ["video/mp4", "video/ogg", "video/webm"];
+	var acceptedthumbnail = ["image/png", "image/jpeg", "image/jpg"];
 
-		//make arrays of accepted file types
-		var acceptedvideo = ["video/mp4", "video/ogg", "video/webm"];
-		var acceptedthumbnail = ["image/png", "image/jpeg", "image/jpg"];
+	//if the video has an mp4, ogg, or webm extension and the thumbnail is a png, jpeg or jpg image, load the video
+	if ( (acceptedvideo.includes(videotype)) && (acceptedthumbnail.includes(thumbtype)) ) {
+		//store the video file submitted
+		var videopath = await middleware.saveFile(req.files.video, "/storage/videos/files/");
 
-		//if the video has an mp4, ogg, or webm extension and the thumbnail is a png, jpeg or jpg image, load the video
-		if ( (acceptedvideo.includes(videotype)) && (acceptedthumbnail.includes(thumbtype)) ) {
-			//store the video file submitted
-			var videopath = await middleware.saveFile(files.video, "/storage/videos/files/");
+		//store the thumbnail file submitted
+		var thumbnailpath = await middleware.saveFile(req.files.thumbnail, "/storage/videos/thumbnails/");
 
-			//store the thumbnail file submitted
-			var thumbnailpath = await middleware.saveFile(files.thumbnail, "/storage/videos/thumbnails/");
+		//store the video details for later reference
 
-			//store the video details for later reference
+		//generate a unique video id for each video (await the result of this function)
+		var videoid = await middleware.generateAlphanumId();
 
-			//generate a unique video id for each video (await the result of this function)
-			var videoid = await middleware.generateAlphanumId();
+		//the array to contain the values to insert into the db
+		var valuesArr = [videoid, req.body.title, req.body.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), " " + req.body.topics + " ", userinfo.username, userinfo.channelicon, false, req.body.private];
 
-			//the array to contain the values to insert into the db
-			var valuesArr = [videoid, fields.title, fields.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), " " + fields.topics + " ", userinfo.username, userinfo.channelicon, false, fields.private];
+		//load the video into the database
+		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, private) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesArr);
 
-			//load the video into the database
-			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, private) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesArr);
+		//insert the video file paths into the db
+		await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);
 
-			//insert the video file paths into the db
-			await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);
+		//change the video count on the user db entry
+		await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
 
-			//change the video count on the user db entry
-			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
-
-			//redirect the user to their video
-			res.redirect(`/v/${videoid}`); //redirect to the url
-		} else if (!(thumbtype in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
-			req.flash("message", "Unsupported file type for thumbnail, please use png, jpeg or jpg.");
-			res.redirect("/v/submit");
-		} else if (!(videotype in acceptedvideo)) { //if the video file types are not supported, then show errors
-			req.flash("Unsupported file type for video, please use mp4, ogg, or webm.");
-			res.redirect("/v/submit");
-		}
-	});
+		//redirect the user to their video
+		res.redirect(`/v/${videoid}`); //redirect to the url
+	} else if (!(thumbtype in acceptedthumbnail)){ //if the thumbnail file types are not supported, then show errors
+		req.flash("message", "Unsupported file type for thumbnail, please use png, jpeg or jpg.");
+		res.redirect("/v/submit");
+	} else if (!(videotype in acceptedvideo)) { //if the video file types are not supported, then show errors
+		req.flash("Unsupported file type for video, please use mp4, ogg, or webm.");
+		res.redirect("/v/submit");
+	}
 });
 
 //this is a post path to set the magnet link for a video if there are no peers/seeders for a file

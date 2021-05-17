@@ -7,7 +7,6 @@ const client = require("./dbConfig");
 const redisClient = require("./redisConfig");
 const crypto = require("crypto");
 const readline = require("readline");
-const schedule = require("node-schedule");
 const approx = require("approximate-number");
 
 //get the write stream to write to the log file
@@ -155,6 +154,28 @@ FUNCTIONS THAT GENERATE BASIC INFO NEEDED FOR REQUEST PROCESSING (view obj, ids,
 /*
 FUNCTIONS THAT ARE NEEDED, BUT DON'T FIT ANYWHERE:
 */
+	//this is a function that removes special characters from user input so that no XSS/SQLi/HTMLi happens
+	removeSpecialChars: async function (req, res, next) {
+		//get the values of the request body if there are any values being submitted
+		var bodyKeys = Object.keys(req.body);
+		var bodyValues = Object.values(req.body);
+
+		//a value to store the new request body value
+		var newBody = {};
+
+		//loop through the values for each item in the request body and clear any bad characters
+		bodyValues.forEach((item, index) => {
+			var safe = item.replace(/[^a-zA-Z 0-9@.,]+/g, "");
+
+			newBody[bodyKeys[index]] = safe;
+		});
+
+		req.body = newBody;
+
+		//go on to the next middleware function
+		next();
+	},
+
 	//this is a function that eliminates duplicates from an object
 	deleteDuplicates: async function(arr) {
 		//get stringified versions of the objects inside
@@ -178,19 +199,18 @@ FUNCTIONS THAT ARE NEEDED, BUT DON'T FIT ANYWHERE:
 		return newtimestamp.replace(/T/, "-").replace(/\..+/, "").replace(/:/g, "-");
 	},
 
-	//this is a function for saving a file on to the server
+	//this is a function for saving a file onto the server based on a file object
 	saveFile: function (file, path) {
-		var oldpath = file.path; //default path for the file to be saved
-		var newpath = global.appRoot + path + Date.now() + "-" + file.name; //new path to save the file on the server
-		fs.rename(oldpath, newpath, function(err) { //save the file to the server on the desired path
+		//get the complete filepath according to the root of the filesystem
+		var completepath = global.appRoot + path + Date.now() + "-" + file.name;
+
+		//write the file and save it to the path on the server
+		fs.writeFile(completepath, file.data, (err) => {
 			if (err) throw err;
 		});
-		//remove the dirname and the /storage folder from the string
-		//this is because the ejs views look inside the storage folder already
-		newpath = newpath.replace(global.appRoot, "");
-		newpath = newpath.replace("/storage", "");
-		//return the new file path to be stored in the database for reference
-		return newpath;
+
+		//return the path with the global root removed from it along with "/storage" for it to be accessible from the front-end
+		return completepath.replace(global.appRoot, "").replace("/storage", "");
 	},
 
 	//this is a function to increase/decrease likes/dislikes of videos in the database
@@ -833,13 +853,6 @@ FUNCTIONS THAT HANDLE THE SHUTDOWN PROCESS OF THE SERVER:
 */
 	//this is a function that executes whenever the node process is killed (server shuts down)
 	shutDown: function() {
-		//delete all magnet links from all videos in the database (these are invalid now)
-		client.query("UPDATE videos SET magnetlink = null").then((res) => {
-			console.log("DELETED MAGNET LINKS");
-		}).catch((err) => {
-			console.log(err);
-		});
-
 		//message that the server is shutting down
 		console.log("Shutting Down...");
 

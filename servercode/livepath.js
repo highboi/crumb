@@ -3,7 +3,6 @@ const fs = require("fs");
 const WebSocket = require("ws");
 const url = require("url");
 const cookie = require("cookie");
-const formidable = require("formidable");
 
 /*
 WEBSOCKET SERVER HANDLING
@@ -128,41 +127,36 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 	//get the user
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	//make a form handler in order to save the files and details into the db
-	var form = formidable.IncomingForm();
-
 	//generate a unique stream id
 	var streamid = await middleware.generateAlphanumId();
 
-	//parse the form and files such as the thumbnail
-	form.parse(req, async (err, fields, files) => {
-		//variable for storing the stream type
-		var streamtype = req.params.type;
-		//check for the stream type
-		if (req.params.type == "browser") {
-			//save the thumbnail of the live stream
-			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
+	//variable for storing the stream type
+	var streamtype = req.params.type;
 
-			//set all of the database details
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, fields.enableChat];
-			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enablechat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, valuesarr);
+	//check for the stream type
+	if (req.params.type == "browser") {
+		//save the thumbnail of the live stream
+		var thumbnailpath = await middleware.saveFile(req.files.liveThumbnail, "/storage/videos/thumbnails/");
 
-			//insert the file details into the videofiles table
-			await client.query(`INSERT INTO videofiles (id, thumbnail) VALUES ($1, $2)`, [streamid, thumbnailpath]);
-		} else if (req.params.type == "obs") {
-			//save the thumbnail and return the path to the thumbnail
-			var thumbnailpath = await middleware.saveFile(files.liveThumbnail, "/storage/videos/thumbnails/");
+		//set all of the database details
+		var valuesarr = [streamid, req.body.name, req.body.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), req.body.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, req.body.enableChat];
+		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enablechat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, valuesarr);
 
-			//save the details into the db excluding the video path
-			var valuesarr = [streamid, fields.name, fields.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), fields.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, fields.enableChat.toString()];
-			await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enablechat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, valuesarr);
+		//insert the file details into the videofiles table
+		await client.query(`INSERT INTO videofiles (id, thumbnail) VALUES ($1, $2)`, [streamid, thumbnailpath]);
+	} else if (req.params.type == "obs") {
+		//save the thumbnail and return the path to the thumbnail
+		var thumbnailpath = await middleware.saveFile(req.files.liveThumbnail, "/storage/videos/thumbnails/");
 
-			//insert the file details into the videofiles table
-			await client.query(`INSERT INTO videofiles (id, thumbnail) VALUES ($1, $2)`, [streamid, thumbnailpath]);
-		}
-		//render the view for the streamer based on the stream type
-		res.redirect(`/l/admin/${streamid}?streamtype=${streamtype}`);
-	});
+		//save the details into the db excluding the video path
+		var valuesarr = [streamid, req.body.name, req.body.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), req.body.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, req.body.enableChat.toString()];
+		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enablechat) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, valuesarr);
+
+		//insert the file details into the videofiles table
+		await client.query(`INSERT INTO videofiles (id, thumbnail) VALUES ($1, $2)`, [streamid, thumbnailpath]);
+	}
+	//render the view for the streamer based on the stream type
+	res.redirect(`/l/admin/${streamid}?streamtype=${streamtype}`);
 });
 
 /*

@@ -1,6 +1,5 @@
 const {app, client, middleware, redisClient} = require("./configBasic");
 const bcrypt = require("bcrypt");
-const formidable = require("formidable");
 
 /*
 GET FILE PATHS FOR USER AUTH
@@ -39,11 +38,6 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 
 		//delete the comments of this user
 		await client.query(`DELETE FROM comments WHERE user_id=$1`, [req.params.userid]);
-
-		//decrease the wordscores of the user and their topics on their channel
-		await middleware.decreaseWordScores([userinfo.username]);
-		await middleware.decreaseWordScores(userinfo.username.split(" "));
-		await middleware.decreaseWordScores(userinfo.topics.split(" "));
 
 		//delete the actual user
 		await client.query(`DELETE FROM users WHERE id=$1`, [req.params.userid]);
@@ -97,122 +91,118 @@ POST PATHS FOR USER AUTH
 */
 
 //handle the user registrations
-app.post('/register', (req, res) => {
-	var form = new formidable.IncomingForm();
+app.post('/register', async (req, res) => {
+	//check to see if the user does not already exist to not register identical accounts
+	var existinguser = await client.query(`SELECT username, email FROM users WHERE email=$1 OR username=$2 LIMIT 1`, [req.body.email, req.body.username]);
+	if (existinguser.rows.length > 0) {
+		if (existinguser.rows[0].email == req.body.email) { //if the email is the same, then alert the user
+			req.flash("message", "Email is Already Registered. Please Log In.");
+			return res.redirect("/login");
+		} else if (existinguser.rows[0].username == req.body.username) { //if the username already exists, then alert the user
+			req.flash("message", "Username Already Taken, Please Try Again.")
+			return res.redirect("/register");
+		}
+	}
 
-	form.parse(req, async (err, fields, files) => {
-		//check to see if the user does not already exist to not register identical accounts
-		var existinguser = await client.query(`SELECT username, email FROM users WHERE email=$1 OR username=$2 LIMIT 1`, [fields.email, fields.username]);
-		if (existinguser.rows.length > 0) {
-			if (existinguser.rows[0].email == fields.email) { //if the email is the same, then alert the user
-				req.flash("message", "Email is Already Registered. Please Log In.");
-				return res.redirect("/login");
-			} else if (existinguser.rows[0].username == field.username) { //if the username already exists, then alert the user
-				req.flash("message", "Username Already Taken, Please Try Again.")
-				return res.redirect("/register");
-			}
+	//store errors to be shown in the registration page (if needed)
+	var errors = [];
+
+	//make arrays of accepted file types
+	var acceptedimage = ["image/png", "image/jpeg", "image/jpg"];
+
+	//check to see that the filetypes submitted are valid
+	if (!acceptedimage.includes(req.files.channelicon.mimetype) || !acceptedimage.includes(req.files.channelbanner.mimetype)) {
+		errors.push("Invalid file types for channel icon or channel banner, use png, jpeg, or jpg files.");
+	}
+
+	if (errors.length > 0) {
+		//insert the errors into a flash message
+		req.flash("errors", errors);
+		//redirect to the registration page
+		res.redirect("/register");
+	} else {
+		//hash the password for secure storage in database
+		var hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+		//generate an alphanumeric id inside the async function here
+		var newuserid = await middleware.generateAlphanumId();
+
+		//get a stream key for obs streaming
+		var streamkey = await middleware.generateStreamKey();
+
+		//save the channel icon submitted in the form
+		if (req.files.channelicon.size > 0) { //if the file size is more than 0, then a file was submitted
+			var channeliconpath = middleware.saveFile(req.files.channelicon, "/storage/users/icons/");
+		} else { //if the channel icon file field was empty, use the default image
+			var channeliconpath = "/views/content/default.png";
 		}
 
-		//store errors to be shown in the registration page (if needed)
-		var errors = [];
-
-		//make arrays of accepted file types
-		var acceptedimage = ["image/png", "image/jpeg", "image/jpg"];
-
-		//check to see that the filetypes submitted are valid
-		if (!acceptedimage.includes(files.channelicon.type) || !acceptedimage.includes(files.channelbanner.type)) {
-			errors.push("Invalid file types for channel icon or channel banner, use png, jpeg, or jpg files.");
+		//save the channel banner submitted in the form
+		if (req.files.channelbanner.size > 0) { //if the file size is more than 0, then a file was submitted
+			var channelbannerpath = middleware.saveFile(req.files.channelbanner, "/storage/users/banners/");
+		} else { //if the name is blank, then the file was not submitted
+			var channelbannerpath = "/views/content/default.png";
 		}
 
-		if (errors.length > 0) {
-			//insert the errors into a flash message
-			req.flash("errors", errors);
-			//redirect to the registration page
-			res.redirect("/register");
-		} else {
-			//hash the password for secure storage in database
-			var hashedPassword = await bcrypt.hash(fields.password, 10);
+		//create an array of all of the important values
+		var valuesarr = [newuserid, req.body.username, req.body.email, hashedPassword, channeliconpath, channelbannerpath, req.body.channeldesc, " " + req.body.topics + " ", streamkey];
 
-			//generate an alphanumeric id inside the async function here
-			var newuserid = await middleware.generateAlphanumId();
-
-			//get a stream key for obs streaming
-			var streamkey = await middleware.generateStreamKey();
-
-			//save the channel icon submitted in the form
-			if (files.channelicon.size > 0) { //if the file size is more than 0, then a file was submitted
-				var channeliconpath = middleware.saveFile(files.channelicon, "/storage/users/icons/");
-			} else { //if the channel icon file field was empty, use the default image
-				var channeliconpath = "/views/content/default.png";
+		//map the values array with escaped single quotes for all of the string values for the SQL query
+		valuesarr = valuesarr.map((item) => {
+			if (typeof item == 'string') {
+				return "\'"+ item + "\'";
+			} else {
+				return item;
 			}
+		});
 
-			//save the channel banner submitted in the form
-			if (files.channelbanner.size > 0) { //if the file size is more than 0, then a file was submitted
-				var channelbannerpath = middleware.saveFile(files.channelbanner, "/storage/users/banners/");
-			} else { //if the name is blank, then the file was not submitted
-				var channelbannerpath = "/views/content/default.png";
+		//push the user into the database and get the important values as an object
+		var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES (${valuesarr}) RETURNING id, username, email, password, channelicon, channelbanner, streamkey, topics`);
+		newuser = newuser.rows[0];
+		console.log("Registered User.");
+
+		//add a "Watch Later" playlist into the database which the user cannot delete
+		var newplaylistid = await middleware.generateAlphanumId();
+		valuesarr = [newuserid, "Watch Later", newplaylistid, 0, false];
+		valuesarr = valuesarr.map((item) => {
+			if (typeof item == 'string') {
+				return "\'"+ item + "\'";
+			} else {
+				return item;
 			}
+		});
+		await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
 
-			//create an array of all of the important values
-			var valuesarr = [newuserid, fields.username, fields.email, hashedPassword, channeliconpath, channelbannerpath, fields.channeldesc, " " + fields.topics + " ", streamkey];
+		//add a "Liked Videos" playlist into the database which the user also cannot delete
+		var newplaylistid = await middleware.generateAlphanumId();
+		valuesarr = [newuserid, "Liked Videos", newplaylistid, 0, false];
+		valuesarr = valuesarr.map((item) => {
+			if (typeof item == 'string') {
+				return "\'"+ item + "\'";
+			} else {
+				return item;
+			}
+		});
+		await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
 
-			//map the values array with escaped single quotes for all of the string values for the SQL query
-			valuesarr = valuesarr.map((item) => {
-				if (typeof item == 'string') {
-					return "\'"+ item + "\'";
-				} else {
-					return item;
-				}
-			});
+		//generate a new session id
+		var newsessid = middleware.generateSessionId();
 
-			//push the user into the database and get the important values as an object
-			var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES (${valuesarr}) RETURNING id, username, email, password, channelicon, channelbanner, streamkey, topics`);
-			newuser = newuser.rows[0];
-			console.log("Registered User.");
+		//store the user info inside redis db
+		redisClient.set(newsessid, JSON.stringify(newuser));
 
-			//add a "Watch Later" playlist into the database which the user cannot delete
-			var newplaylistid = await middleware.generateAlphanumId();
-			valuesarr = [newuserid, "Watch Later", newplaylistid, 0, false];
-			valuesarr = valuesarr.map((item) => {
-				if (typeof item == 'string') {
-					return "\'"+ item + "\'";
-				} else {
-					return item;
-				}
-			});
-			await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
+		//store the session id in the browser of the user
+		res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
 
-			//add a "Liked Videos" playlist into the database which the user also cannot delete
-			var newplaylistid = await middleware.generateAlphanumId();
-			valuesarr = [newuserid, "Liked Videos", newplaylistid, 0, false];
-			valuesarr = valuesarr.map((item) => {
-				if (typeof item == 'string') {
-					return "\'"+ item + "\'";
-				} else {
-					return item;
-				}
-			});
-			await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
+		//store a cookie that stores a boolean value letting javascript know the session exists (javascript and httponly coexist)
+		res.cookie("hasSession", true, {httpOnly: false, expires: 0});
 
-			//generate a new session id
-			var newsessid = middleware.generateSessionId();
+		//flash message to let the user know they are registered
+		req.flash("message", "Registered!");
 
-			//store the user info inside redis db
-			redisClient.set(newsessid, JSON.stringify(newuser));
-
-			//store the session id in the browser of the user
-			res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
-
-			//store a cookie that stores a boolean value letting javascript know the session exists (javascript and httponly coexist)
-			res.cookie("hasSession", true, {httpOnly: false, expires: 0});
-
-			//flash message to let the user know they are registered
-			req.flash("message", "Registered!");
-
-			//redirect to the home page
-			res.redirect("/");
-		}
-	});
+		//redirect to the home page
+		res.redirect("/");
+	}
 });
 
 //have the user log in

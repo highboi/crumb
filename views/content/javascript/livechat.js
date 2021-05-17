@@ -74,7 +74,7 @@ chatSocket.onmessage = (event) => {
 	var msg = event.data.split(",");
 
 	//create a div element for the live chat
-	var divElement = createLiveMessage(msg);
+	var divElement = createLiveMessage(msg, );
 
 	//add the live chat message to the chat box
 	chatbox.appendChild(divElement);
