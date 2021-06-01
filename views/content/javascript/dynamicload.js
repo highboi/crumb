@@ -5,57 +5,62 @@
 //this is an array of the comment ids that have replies that have already been shown
 var replycommentids = {};
 
-//a function to get the FIRST replies for a certain comment, also works to toggle the display value of the replies div
-function getFirstReplies(commentid) {
-	//only get the first replies if the comment replies button have not been clicked yet
-	if (!Object.keys(replycommentids).includes(commentid)) {
-		//get the AJAX data from the comment replies url
-		getAjaxData(`/comment/replies/${commentid}`, (replies) => {
-			var repliesdiv = document.getElementById(`${commentid}repliesdiv`);
-
-			//make sure the replies exist before doing anything
-			if (typeof replies == 'undefined' || replies.length == 0) {
-				repliesdiv.style.display = 'none';
-
-				//insert an entry with the number 0 to easily identify comments with 0 replies
-				replycommentids[commentid] = 0;
-			} else {
-				//show the replies div element
-				showelement(`${commentid}repliesdiv`);
-
-				//handle the replies in another function
-				handleReplies(replies);
-
-				//add this comment id to the array and insert a number representative of the amount of AJAX requests previously made
-				replycommentids[commentid] = 1;
-			}
-		});
-	} else if (replycommentids[commentid] != 0) { //if this is a comment with existing replies
-		//toggle the display
+//a function to get the replies of a comment based on the comment id and the amount of times replies were retrieved according to the "replycommentids" object
+function getReplies(commentid, toggle=true, callback=undefined) {
+	//if the comment replies are to be toggled ONLY
+	if (toggle) {
 		showelement(`${commentid}repliesdiv`);
-	}
-}
+	} else { //if the comment is to have more replies requested from the server with AJAX
+		//if the comment with this id has not had replies retrieved for it yet
+		if (!Object.keys(replycommentids).includes(commentid)) {
+			//get the AJAX data from the comment replies url
+			getAjaxData(`/comment/replies/${commentid}`, (replies) => {
+				var repliesdiv = document.getElementById(`${commentid}repliesdiv`);
 
-//a function to make an ajax request for the replies of a certain comment
-function getMoreReplies(commentid) {
-	//check that the comment id exists in the array
-	if (Object.keys(replycommentids).includes(commentid)) {
-		//get the limit number to only get a portion of replies
-		var limitnum = replycommentids[commentid];
+				//make sure the replies exist before doing anything
+				if (typeof replies == 'undefined' || replies.length == 0) {
+					repliesdiv.style.display = 'none';
 
-		//get the AJAX data from the comment replies url with a specified limit (i.e 50 would mean getting comments 51-60 instead of getting the same comments)
-		getAjaxData(`/comment/replies/${commentid}/?limit=${limitnum*50}`, (replies) => {
-			//get the status of the handling of the replies
-			var result = handleReplies(replies);
+					//insert an entry with the number 0 to easily identify comments with 0 replies
+					replycommentids[commentid] = 0;
+				} else {
+					//show the replies div element
+					showelement(`${commentid}repliesdiv`);
 
-			//if there were no replies given by the ajax, then set the "more replies" button to be invisible
-			if (!result) {
-				document.getElementById(`${commentid}morerepliesbtn`).style.display = 'none';
-			}
-		});
+					//handle the replies in another function
+					handleReplies(replies);
 
-		//add 1 to the limit number to access more comments after this group
-		replycommentids[commentid] += 1;
+					//call the function to scroll to a comment if necessary
+					if (typeof callback != undefined) {
+						callback(replies);
+					}
+
+					//add this comment id to the array and insert a number representative of the amount of AJAX requests previously made
+					replycommentids[commentid] = 1;
+
+					//change the onclick function of the "replies" button to have the "toggle" parameter equal true for toggling only
+					var showrepliesbtn = document.querySelector(`#${commentid} #showreplies`);
+					showrepliesbtn.setAttribute("onclick", `getReplies('${commentid}', true);`);
+				}
+			});
+		} else if (replycommentids[commentid] > 0) { //if the comment with this id needs more replies from the server
+			//get the limit number to only get a portion of replies
+			var limitnum = replycommentids[commentid];
+
+			//get the AJAX data from the comment replies url with a specified limit (i.e 50 would mean getting comments 51-60 instead of getting the same comments)
+			getAjaxData(`/comment/replies/${commentid}/?limit=${limitnum*50}`, (replies) => {
+				//get the status of the handling of the replies
+				var result = handleReplies(replies);
+
+				//if there were no replies given by the ajax, then set the "more replies" button to be invisible
+				if (!result) {
+					document.getElementById(`${commentid}morerepliesbtn`).style.display = 'none';
+				}
+			});
+
+			//add 1 to the limit number to access more comments after this group
+			replycommentids[commentid] += 1;
+		}
 	}
 }
 
@@ -115,7 +120,7 @@ function getReplySegment(reply) {
 	//create the container for all of the like/dislike functionality
 	var commentlikesdiv = document.createElement("div");
 	commentlikesdiv.setAttribute("class", "commentlikes");
-	commentlikesdiv.setAttribute("id", reply.id);
+	commentlikesdiv.setAttribute("id", `${reply.id}likes`);
 
 	//create the like button
 	var likebtn = document.createElement("button");
@@ -150,7 +155,7 @@ function getReplySegment(reply) {
 	//make a reply button to reply to this comment
 	var replybtn = document.createElement("button");
 	replybtn.setAttribute("id", "replybtn");
-	replybtn.setAttribute("onclick", `showelement('${reply.id}replybox');`);
+	replybtn.setAttribute("onclick", `showElementDraggable('${reply.id}replybox');`);
 	replybtn.innerHTML = "Reply";
 
 	//add the button elements to the div
@@ -221,7 +226,13 @@ function getReplySegment(reply) {
 	cancelbtn.setAttribute("value", "Cancel");
 	replyformtag.appendChild(cancelbtn);
 
+	//create the draggable header for the draggable window
+	var dragheader = document.createElement("p");
+	dragheader.setAttribute("id", `${reply.id}replyboxdragheader`);
+	dragheader.innerHTML = `Reply to \"${reply.username}:${reply.id}\"`;
+
 	//add the reply form tag to the inside of the reply form div
+	replyformdiv.appendChild(dragheader);
 	replyformdiv.appendChild(replyformtag);
 
 	//add all of the elements into an array
@@ -233,6 +244,8 @@ function getReplySegment(reply) {
 		container.appendChild(item);
 	});
 	container.style.marginLeft = `${reply.depth_level*30}px`;
+	container.setAttribute("id", `${reply.id}`);
 
+	//return the whole container html element
 	return container;
 }

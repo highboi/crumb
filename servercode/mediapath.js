@@ -32,7 +32,7 @@ app.get("/v/:videoid", async (req, res) => {
 		var reccomendations = await middleware.getReccomendations(req, video);
 
 		//select the comments that belong to the video and order the comments by the amount of likes (most likes to least likes)
-		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1 ORDER BY likes DESC`, [req.params.videoid]);
+		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1 AND base_parent_id IS NULL ORDER BY likes DESC`, [req.params.videoid]);
 		comments = comments.rows;
 
 		//select all of the chat messages that were typed if this was a live stream
@@ -78,8 +78,18 @@ app.get("/v/:videoid", async (req, res) => {
 
 		//check to see if the video needs to scroll down to a comment that was just posted
 		if (req.query.scrollToComment == "true" && typeof req.query.commentid != 'undefined') {
+			//tell the EJS logic to scroll to a comment
 			viewObj.scrollToComment = true;
-			viewObj.commentid = req.query.commentid;
+
+			//get the comment id into the view object
+			viewObj.scrollCommentId = req.query.commentid;
+
+			//get the base parent id for this comment to scroll to
+			var comment = await client.query(`SELECT base_parent_id FROM comments WHERE id=$1 LIMIT 1`, [viewObj.scrollCommentId]);
+			var base_parent_id = comment.rows[0].base_parent_id;
+
+			//store the base parent id into the view object for processing
+			viewObj.scrollCommentBaseId = base_parent_id;
 		}
 	} else {
 		viewObj = Object.assign({}, viewObj, {video: video, videocreator: videocreator});

@@ -1,5 +1,8 @@
 <div class="replybox" id="<%= comment.id %>replybox">
+	<p id="<%= comment.id %>replyboxdragheader">Reply to &quot;<%= comment.username %>:<%= comment.id %>&quot;</p>
+
 	<% var replylink = commentlink + `?parent_id=${comment.id}` %>
+
 	<form action="<%= replylink %>" method="post" enctype='multipart/form-data'>
 		<textarea id="commenttext" name="commenttext" placeholder="Say Something!" maxlength="1000" rows="10" cols="50"></textarea><br>
 

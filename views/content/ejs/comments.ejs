@@ -33,13 +33,11 @@
 								<div id="<%= item.id %>replies"></div>
 
 								<div id="<%= item.id %>loading">
-									<img src="https://media.giphy.com/media/IwSG1QKOwDjQk/giphy.gif" width="150" height="150">
+									<img src="/content/icons/loading.gif" width="150" height="150">
 								</div>
 
-								<button class="morerepliesbtn" id="<%= item.id %>morerepliesbtn" onclick="getMoreReplies('<%= item.id %>');">Get more replies.</button>
+								<button class="morerepliesbtn" id="<%= item.id %>morerepliesbtn" onclick="getReplies('<%= item.id %>', false);">Get more replies.</button>
 							</div>
-
-							<% //include('./commentreplies.ejs', {parent: item, comments: comments, commentlink: commentlink}) %>
 						</div>
 						<hr>
 					<% } %>

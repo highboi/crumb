@@ -89,14 +89,9 @@
 				<%- include('content/ejs/scripts.ejs') %>
 
 				<script type="text/javascript">
-					<% if (typeof commentid != 'undefined') { %>
-						var commentid = <%- JSON.stringify(commentid) %>;
-						var commentElement = document.getElementById(commentid);
-						commentElement.scrollIntoView();
-						commentElement.style.backgroundColor = "#1a1a1a";
-						commentElement.style.borderStyle = "solid";
-						commentElement.style.borderWidth = "5px";
-						commentElement.style.borderColor = "#adff12";
+					<% if (typeof scrollCommentId != 'undefined' && typeof scrollCommentBaseId != 'undefined') { %>
+						var scrollCommentId = <%- JSON.stringify(scrollCommentId) %>;
+						var scrollCommentBaseId = <%- JSON.stringify(scrollCommentBaseId) %>;
 					<% } %>
 					<% if (typeof chatReplayMessages != 'undefined') { %>
 						var chatReplayMessages = <%- JSON.stringify(chatReplayMessages) %>;
@@ -120,6 +115,7 @@
 				<script src="/content/javascript/chatreplay.js"></script>
 				<script src="/content/javascript/sortcomments.js"></script>
 				<script src="/content/javascript/autoplay.js"></script>
+				<script src="/content/javascript/scrollToComment.js"></script>
 			<% } else { %>
 				<%- include('content/ejs/scripts.ejs') %>
 			<% } %>
