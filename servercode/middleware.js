@@ -415,6 +415,13 @@ FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
 			}
 		}
 
+		//filter the video object out if the function parameter is defined
+		if (typeof video != 'undefined') {
+			reccomendations = reccomendations.filter((item) => {
+				return !(JSON.stringify(item) == JSON.stringify(video));
+			});
+		}
+
 		//delete any duplicate videos
 		reccomendations = await middleware.deleteDuplicates(reccomendations);
 
@@ -433,6 +440,7 @@ FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
 
 		//eliminate the video from the list if the video being viewed is in the list
 		vids = vids.filter((item) => {
+			console.log("FILTERING");
 			return !(JSON.stringify(video) == JSON.stringify(item));
 		});
 
@@ -445,7 +453,7 @@ FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
 		//randomly select videos with a limited amount defined in the function (or defined by the user params)
 		var videos = await client.query(`SELECT * FROM videos WHERE deleted=${false} AND private=${false} ORDER BY random() LIMIT $1`, [amount]);
 
-		//return the videos as an array
+		//return the video results
 		return videos.rows;
 	},
 
