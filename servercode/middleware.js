@@ -12,10 +12,10 @@ const approx = require("approximate-number");
 //get the write stream to write to the log file
 const logger = require("./logger");
 
-middleware = {
 /*
-FUNCTIONS THAT CHECK USER AUTH:
+OBJECT STORING FUNCTIONS THAT AUTHENTICATE THE USER BETWEEN REQUESTS
 */
+var userauthFunctions = {
 	//this is a function that redirects users to the login page if the user is not signed in
 	//this is used for pages and requests that require a login
 	checkSignedIn: function (req, res, next) {
@@ -36,11 +36,13 @@ FUNCTIONS THAT CHECK USER AUTH:
 		} else {
 			next();
 		}
-	},
+	}
+};
 
 /*
-FUNCTIONS THAT GENERATE BASIC INFO NEEDED FOR REQUEST PROCESSING (view obj, ids, session info):
+OBJECT WHICH STORES FUNCTIONS THAT HANDLE REQUEST INFORMATION
 */
+var reqHandling = {
 	//this is a function to insert universal things into the view object such as flash messages
 	//and language translation
 	getViewObj: async function(req) {
@@ -149,11 +151,74 @@ FUNCTIONS THAT GENERATE BASIC INFO NEEDED FOR REQUEST PROCESSING (view obj, ids,
 			var userinfo = await redisClient.getAsync(sessionid);
 			return JSON.parse(userinfo);
 		}
-	},
+	}
+};
 
 /*
-FUNCTIONS THAT ARE NEEDED, BUT DON'T FIT ANYWHERE:
+OBJECT FOR STORING FUNCTIONS WHICH DELETE CONTENT
 */
+var deletionHandling = {
+	//this is a function to delete video details
+	deleteVideoDetails: async function (userinfo, videoid) {
+		//get the video to be deleted
+		var video = await client.query(`SELECT thumbnail, video FROM videofiles WHERE id=$1 LIMIT 1`, [videoid]);
+		video = video.rows[0];
+		//get the paths of the files for the thumbnail and the video
+		var thumbnailpath = global.appRoot + "/storage" + video.thumbnail;
+		var videopath = global.appRoot + "/storage" + video.video;
+
+		var video_user_id = await client.query(`SELECT user_id FROM videos WHERE id=$1 LIMIT 1`, [videoid]);
+		video_user_id = video_user_id.rows[0].user_id;
+
+		//check to see if the user trying to delete the video actually owns the video
+		if (userinfo.id == video_user_id) {
+			//delete all of the comments for this video
+			await client.query(`DELETE FROM comments WHERE video_id=$1`, [videoid]);
+			//delete the video file entry and the comment file entries
+			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
+			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
+			//delete the video details in the database
+			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
+			//delete the live chat messages from the video
+			await client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
+			//update the amount of videos the user has
+			await client.query(`UPDATE users SET videocount=videocount-1 WHERE id=$1`, [userinfo.id]);
+			//delete the actual files for the video and thumbnail
+			fs.unlink(videopath, (err) => {
+				if (err) throw err;
+			});
+			fs.unlink(thumbnailpath, (err) => {
+				if (err) throw err;
+			});
+			//return true as the files and database entry were successfully deleted
+			return true;
+		} else { //if the video does not belong to the user, return false
+			return false;
+		}
+	},
+
+	//this is a function to delete playlist details
+	deletePlaylistDetails: async function (userinfo, playlistid) {
+		//get the playlist
+		var playlist = await client.query(`SELECT user_id FROM playlists WHERE id=$1 LIMIT 1`, [playlistid]);
+		playlist = playlist.rows[0];
+
+		//if the playlist's user id matches the given user info, then delete the playlist video entries
+		//as well as the playlist itself and return true on success
+		if (playlist.user_id == userinfo.id) {
+			await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1`, [playlistid]);
+			await client.query(`DELETE FROM playlists WHERE id=$1`, [playlistid]);
+			return true;
+		} else { //if the playlist apparently does not belong to the user, then return false
+			return false;
+		}
+	}
+};
+
+/*
+OBJECT STORING MISCELLANEOUS FUNCTIONS
+*/
+var miscFunctions = {
 	//this is a function that removes special characters from user input so that no XSS/SQLi/HTMLi happens
 	removeSpecialChars: async function (req, res, next) {
 		//get the values of the request body if there are any values being submitted
@@ -333,234 +398,13 @@ FUNCTIONS THAT ARE NEEDED, BUT DON'T FIT ANYWHERE:
 		}
 
 		return [likes, dislikes];
-	},
+	}
+};
 
 /*
-FUNCTIONS FOR DELETING DATABASE DETAILS OF CERTAIN CONTENT:
+OBJECT STORING CONTENT-SEARCHING FUNCTIONS
 */
-	//this is a function to delete video details
-	deleteVideoDetails: async function (userinfo, videoid) {
-		//get the video to be deleted
-		var video = await client.query(`SELECT thumbnail, video FROM videofiles WHERE id=$1 LIMIT 1`, [videoid]);
-		video = video.rows[0];
-		//get the paths of the files for the thumbnail and the video
-		var thumbnailpath = global.appRoot + "/storage" + video.thumbnail;
-		var videopath = global.appRoot + "/storage" + video.video;
-
-		var video_user_id = await client.query(`SELECT user_id FROM videos WHERE id=$1 LIMIT 1`, [videoid]);
-		video_user_id = video_user_id.rows[0].user_id;
-
-		//check to see if the user trying to delete the video actually owns the video
-		if (userinfo.id == video_user_id) {
-			//delete all of the comments for this video
-			await client.query(`DELETE FROM comments WHERE video_id=$1`, [videoid]);
-			//delete the video file entry and the comment file entries
-			await client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
-			await client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
-			//delete the video details in the database
-			await client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
-			//delete the live chat messages from the video
-			await client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
-			//update the amount of videos the user has
-			await client.query(`UPDATE users SET videocount=videocount-1 WHERE id=$1`, [userinfo.id]);
-			//delete the actual files for the video and thumbnail
-			fs.unlink(videopath, (err) => {
-				if (err) throw err;
-			});
-			fs.unlink(thumbnailpath, (err) => {
-				if (err) throw err;
-			});
-			//return true as the files and database entry were successfully deleted
-			return true;
-		} else { //if the video does not belong to the user, return false
-			return false;
-		}
-	},
-
-	//this is a function to delete playlist details
-	deletePlaylistDetails: async function (userinfo, playlistid) {
-		//get the playlist
-		var playlist = await client.query(`SELECT user_id FROM playlists WHERE id=$1 LIMIT 1`, [playlistid]);
-		playlist = playlist.rows[0];
-
-		//if the playlist's user id matches the given user info, then delete the playlist video entries
-		//as well as the playlist itself and return true on success
-		if (playlist.user_id == userinfo.id) {
-			await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1`, [playlistid]);
-			await client.query(`DELETE FROM playlists WHERE id=$1`, [playlistid]);
-			return true;
-		} else { //if the playlist apparently does not belong to the user, then return false
-			return false;
-		}
-	},
-
-/*
-FUNCTIONS THAT DEAL WITH VIDEO RECCOMENDATIONS FOR THE USER:
-*/
-	//this is a function for getting reccomendations based on all of the other functions below, checking for all edge cases
-	getReccomendations: async function (req, video=undefined) {
-		//get reccomendation cookies
-		var reccookies = await middleware.getReccomendationCookies(req);
-
-		//check for the existence of reccomendation cookies
-		if (reccookies.length) {
-			var reccomendations = await middleware.getCookieReccomendations(reccookies);
-			var randomvids = await middleware.getRandomReccomendations(15);
-			reccomendations = reccomendations.concat(randomvids);
-		} else { //check for other edge cases
-			if (typeof video == 'undefined') {
-				var reccomendations = await middleware.getRandomReccomendations(30);
-			} else {
-				var reccomendations = await middleware.getVideoReccomendations(video);
-			}
-		}
-
-		//filter the video object out if the function parameter is defined
-		if (typeof video != 'undefined') {
-			reccomendations = reccomendations.filter((item) => {
-				return !(JSON.stringify(item) == JSON.stringify(video));
-			});
-		}
-
-		//delete any duplicate videos
-		reccomendations = await middleware.deleteDuplicates(reccomendations);
-
-		//return the complete reccomendations list
-		return reccomendations;
-	},
-
-	//this is a function for getting the reccomendations for the videos according to the title and description of the video being viewed
-	getVideoReccomendations: async function (video) {
-		//get a list of phrases to use in searching for results in the database
-		var phrases = middleware.getSearchTerms(video.title);
-		phrases = phrases.concat(middleware.getSearchTerms(video.username));
-
-		//get the results of searching for the videos based on the list of phrases in the db
-		var vids = await middleware.searchVideos(phrases);
-
-		//eliminate the video from the list if the video being viewed is in the list
-		vids = vids.filter((item) => {
-			console.log("FILTERING");
-			return !(JSON.stringify(video) == JSON.stringify(item));
-		});
-
-		//return the videos
-		return vids;
-	},
-
-	//this is a function that gets random reccomendations from the database
-	getRandomReccomendations: async function (amount=5) {
-		//randomly select videos with a limited amount defined in the function (or defined by the user params)
-		var videos = await client.query(`SELECT * FROM videos WHERE deleted=${false} AND private=${false} ORDER BY random() LIMIT $1`, [amount]);
-
-		//return the video results
-		return videos.rows;
-	},
-
-	//this is a function to get all of the reccomendation cookies from the user's current session
-	getReccomendationCookies: async function (req) {
-		//get all of the key-value pairs as an array of objects
-		var newCookies = Object.keys(req.cookies).map((item) => {
-			var obj = {};
-			obj[item] = req.cookies[item];
-			return obj;
-		});
-
-		//filter the new cookies based on the beginning prefix with regex
-		newCookies = newCookies.filter((item) => {
-			var cookiename = Object.keys(item)[0];
-			return cookiename.match(/^VR-|^SR-|^CR-/);
-		});
-
-		//return the new reccomendation cookies
-		return newCookies;
-	},
-
-	//this is a function that gets reccomendations based on all of the search reccomendation cookies in the user's session
-	getCookieReccomendations: async function (cookies) {
-		//make an array of reccomendations
-		var recs = [];
-
-		//filter for search cookies
-		var searchcookies = cookies.filter((item) => {
-			return Object.keys(item)[0].match(/^SR-/);
-		});
-
-		//get videos based on search cookies
-		for (var i=0; i < searchcookies.length; i++) {
-			//get the cookie value
-			var cookievalue = Object.values(searchcookies[i])[0];
-
-			//get phrases based on the original cookie value
-			var phrases = await middleware.getSearchTerms(cookievalue);
-
-			//loop through all of the phrases and select videos
-			for (var phrase=0; phrase < phrases.length; phrase++) {
-				var video = await client.query(`SELECT * FROM videos WHERE (UPPER(title) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1)) AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 1`, ["%" + phrases[phrase] + "%"]);
-				if (typeof video.rows[0] != 'undefined') {
-					recs.push(video.rows[0]);
-				}
-			}
-		}
-
-		//filter for video cookies
-		var videocookies = cookies.filter((item) => {
-			return Object.keys(item)[0].match(/^VR-/);
-		});
-
-		//get videos based on the title of a viewed video and associated channel
-		for (var i=0; i < videocookies.length; i++) {
-			//get the cookie value
-			var cookievalue = Object.values(videocookies[i])[0];
-			cookievalue = cookievalue.split("+");
-
-			//get phrases based on the video title
-			var titlephrases = await middleware.getSearchTerms(cookievalue[0]);
-
-			//loop through the title phrases and get videos
-			for (var phrase = 0; phrase < titlephrases.length; phrase++) {
-				var video = await client.query(`SELECT * FROM videos WHERE UPPER(title) LIKE UPPER($1) AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 1`, ["%" + titlephrases[phrase] + "%"]);
-				recs.push(video.rows[0]);
-			}
-
-			//get some videos based on the channel id associated with this viewed video
-			var channelvideos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 5`, [cookievalue[1]]);
-
-			//add the channel-based videos to the reccomendations array
-			channelvideos.rows.forEach((item) => {
-				recs.push(item);
-			});
-		}
-
-		//filter for channel cookies
-		var channelcookies = cookies.filter((item) => {
-			return Object.keys(item)[0].match(/^CR-/);
-		});
-
-		//get videos based on the viewed channels by the user
-		for (var i=0; i < channelcookies.length; i++) {
-			//get the cookie value
-			var cookievalue = Object.values(channelcookies[i])[0];
-
-			//get videos based on the viewed channel id
-			var channelvideos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 5`, [cookievalue]);
-
-			//add all of the channel videos to the reccomendations array
-			channelvideos.rows.forEach((item) => {
-				recs.push(item);
-			});
-		}
-
-		//delete the duplicates in the array
-		recs = await middleware.deleteDuplicates(recs);
-
-		//return the completed recccomendations array
-		return recs;
-	},
-
-/*
-FUNCTIONS THAT DEAL WITH SEARCHING FOR CONTENT FOR THE USER:
-*/
+var searchFunctions = {
 	//this is a function that puts together a list of phrases to use in our search algorithm
 	getSearchTerms: function (searchterm) {
 		//break the search term into individual words
@@ -806,11 +650,179 @@ FUNCTIONS THAT DEAL WITH SEARCHING FOR CONTENT FOR THE USER:
 
 		//return the array
 		return result;
-	},
+	}
+};
 
 /*
-FUNCTIONS THAT PERFORM LOGGING TASKS:
+OBJECT STORING RECCOMENDATION FUNCTIONS
 */
+var reccomendationFunctions = {
+	//this is a function for getting reccomendations based on all of the other functions below, checking for all edge cases
+	getReccomendations: async function (req, video=undefined) {
+		//get reccomendation cookies
+		var reccookies = await middleware.getReccomendationCookies(req);
+
+		//check for the existence of reccomendation cookies
+		if (reccookies.length) {
+			var reccomendations = await middleware.getCookieReccomendations(reccookies);
+			var randomvids = await middleware.getRandomReccomendations(15);
+			reccomendations = reccomendations.concat(randomvids);
+		} else { //check for other edge cases
+			if (typeof video == 'undefined') {
+				var reccomendations = await middleware.getRandomReccomendations(30);
+			} else {
+				var reccomendations = await middleware.getVideoReccomendations(video);
+			}
+		}
+
+		//filter the video object out if the function parameter is defined
+		if (typeof video != 'undefined') {
+			reccomendations = reccomendations.filter((item) => {
+				return !(JSON.stringify(item) == JSON.stringify(video));
+			});
+		}
+
+		//delete any duplicate videos
+		reccomendations = await middleware.deleteDuplicates(reccomendations);
+
+		//return the complete reccomendations list
+		return reccomendations;
+	},
+
+	//this is a function for getting the reccomendations for the videos according to the title and description of the video being viewed
+	getVideoReccomendations: async function (video) {
+		//get a list of phrases to use in searching for results in the database
+		var phrases = middleware.getSearchTerms(video.title);
+		phrases = phrases.concat(middleware.getSearchTerms(video.username));
+
+		//get the results of searching for the videos based on the list of phrases in the db
+		var vids = await middleware.searchVideos(phrases);
+
+		//eliminate the video from the list if the video being viewed is in the list
+		vids = vids.filter((item) => {
+			console.log("FILTERING");
+			return !(JSON.stringify(video) == JSON.stringify(item));
+		});
+
+		//return the videos
+		return vids;
+	},
+
+	//this is a function that gets random reccomendations from the database
+	getRandomReccomendations: async function (amount=5) {
+		//randomly select videos with a limited amount defined in the function (or defined by the user params)
+		var videos = await client.query(`SELECT * FROM videos WHERE deleted=${false} AND private=${false} ORDER BY random() LIMIT $1`, [amount]);
+
+		//return the video results
+		return videos.rows;
+	},
+
+	//this is a function to get all of the reccomendation cookies from the user's current session
+	getReccomendationCookies: async function (req) {
+		//get all of the key-value pairs as an array of objects
+		var newCookies = Object.keys(req.cookies).map((item) => {
+			var obj = {};
+			obj[item] = req.cookies[item];
+			return obj;
+		});
+
+		//filter the new cookies based on the beginning prefix with regex
+		newCookies = newCookies.filter((item) => {
+			var cookiename = Object.keys(item)[0];
+			return cookiename.match(/^VR-|^SR-|^CR-/);
+		});
+
+		//return the new reccomendation cookies
+		return newCookies;
+	},
+
+	//this is a function that gets reccomendations based on all of the search reccomendation cookies in the user's session
+	getCookieReccomendations: async function (cookies) {
+		//make an array of reccomendations
+		var recs = [];
+
+		//filter for search cookies
+		var searchcookies = cookies.filter((item) => {
+			return Object.keys(item)[0].match(/^SR-/);
+		});
+
+		//get videos based on search cookies
+		for (var i=0; i < searchcookies.length; i++) {
+			//get the cookie value
+			var cookievalue = Object.values(searchcookies[i])[0];
+
+			//get phrases based on the original cookie value
+			var phrases = await middleware.getSearchTerms(cookievalue);
+
+			//loop through all of the phrases and select videos
+			for (var phrase=0; phrase < phrases.length; phrase++) {
+				var video = await client.query(`SELECT * FROM videos WHERE (UPPER(title) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1)) AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 1`, ["%" + phrases[phrase] + "%"]);
+				if (typeof video.rows[0] != 'undefined') {
+					recs.push(video.rows[0]);
+				}
+			}
+		}
+
+		//filter for video cookies
+		var videocookies = cookies.filter((item) => {
+			return Object.keys(item)[0].match(/^VR-/);
+		});
+
+		//get videos based on the title of a viewed video and associated channel
+		for (var i=0; i < videocookies.length; i++) {
+			//get the cookie value
+			var cookievalue = Object.values(videocookies[i])[0];
+			cookievalue = cookievalue.split("+");
+
+			//get phrases based on the video title
+			var titlephrases = await middleware.getSearchTerms(cookievalue[0]);
+
+			//loop through the title phrases and get videos
+			for (var phrase = 0; phrase < titlephrases.length; phrase++) {
+				var video = await client.query(`SELECT * FROM videos WHERE UPPER(title) LIKE UPPER($1) AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 1`, ["%" + titlephrases[phrase] + "%"]);
+				recs.push(video.rows[0]);
+			}
+
+			//get some videos based on the channel id associated with this viewed video
+			var channelvideos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 5`, [cookievalue[1]]);
+
+			//add the channel-based videos to the reccomendations array
+			channelvideos.rows.forEach((item) => {
+				recs.push(item);
+			});
+		}
+
+		//filter for channel cookies
+		var channelcookies = cookies.filter((item) => {
+			return Object.keys(item)[0].match(/^CR-/);
+		});
+
+		//get videos based on the viewed channels by the user
+		for (var i=0; i < channelcookies.length; i++) {
+			//get the cookie value
+			var cookievalue = Object.values(channelcookies[i])[0];
+
+			//get videos based on the viewed channel id
+			var channelvideos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=${false} AND private=${false} ORDER BY random() LIMIT 5`, [cookievalue]);
+
+			//add all of the channel videos to the reccomendations array
+			channelvideos.rows.forEach((item) => {
+				recs.push(item);
+			});
+		}
+
+		//delete the duplicates in the array
+		recs = await middleware.deleteDuplicates(recs);
+
+		//return the completed recccomendations array
+		return recs;
+	}
+};
+
+/*
+OBJECT FOR STORING LOGGING FUNCTIONS
+*/
+var loggingFunctions = {
 	//this is a function that counts the amount of hits on the site
 	hitCounter: async function(req, res, next) {
 		//get the session info of the user
@@ -854,11 +866,13 @@ FUNCTIONS THAT PERFORM LOGGING TASKS:
 
 		//log the message to the file
 		logger.log({level: level, message: message})
-	},
+	}
+};
 
 /*
-FUNCTIONS THAT HANDLE THE SHUTDOWN PROCESS OF THE SERVER:
+OBJECT FOR STORING SHUTDOWN FUNCTIONS
 */
+var shutdownFunctions = {
 	//this is a function that executes whenever the node process is killed (server shuts down)
 	shutDown: function() {
 		//message that the server is shutting down
@@ -874,7 +888,10 @@ FUNCTIONS THAT HANDLE THE SHUTDOWN PROCESS OF THE SERVER:
 		process.on("SIGINT", middleware.shutDown);
 		process.on("SIGTERM", middleware.shutDown);
 	}
-}
+};
+
+//put all of the object above into one middleware object containing the collective middleware functions
+var middleware = Object.assign({}, userauthFunctions, reqHandling, deletionHandling, miscFunctions, searchFunctions, reccomendationFunctions, loggingFunctions, shutdownFunctions);
 
 //export the object with all of the middleware functions
 module.exports = middleware;
