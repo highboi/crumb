@@ -8,6 +8,7 @@ const redisClient = require("./redisConfig");
 const crypto = require("crypto");
 const readline = require("readline");
 const approx = require("approximate-number");
+const ffmpeg = require("ffmpeg");
 
 //get the write stream to write to the log file
 const logger = require("./logger");
@@ -262,20 +263,6 @@ var miscFunctions = {
 		var offset = new Date(timestamp).getTimezoneOffset()*60000;
 		var newtimestamp = new Date(timestamp - offset).toISOString();
 		return newtimestamp.replace(/T/, "-").replace(/\..+/, "").replace(/:/g, "-");
-	},
-
-	//this is a function for saving a file onto the server based on a file object
-	saveFile: function (file, path) {
-		//get the complete filepath according to the root of the filesystem
-		var completepath = global.appRoot + path + Date.now() + "-" + file.name;
-
-		//write the file and save it to the path on the server
-		fs.writeFile(completepath, file.data, (err) => {
-			if (err) throw err;
-		});
-
-		//return the path with the global root removed from it along with "/storage" for it to be accessible from the front-end
-		return completepath.replace(global.appRoot, "").replace("/storage", "");
 	},
 
 	//this is a function to increase/decrease likes/dislikes of videos in the database
@@ -890,8 +877,13 @@ var shutdownFunctions = {
 	}
 };
 
+/*
+OBJECT FOR STORING FUNCTIONS WHICH HANDLE THE MEDIA FILES ON THE SERVER
+*/
+var mediaHandling = require("./mediaHandling");
+
 //put all of the object above into one middleware object containing the collective middleware functions
-var middleware = Object.assign({}, userauthFunctions, reqHandling, deletionHandling, miscFunctions, searchFunctions, reccomendationFunctions, loggingFunctions, shutdownFunctions);
+var middleware = Object.assign({}, userauthFunctions, reqHandling, deletionHandling, miscFunctions, searchFunctions, reccomendationFunctions, loggingFunctions, shutdownFunctions, mediaHandling);
 
 //export the object with all of the middleware functions
 module.exports = middleware;
