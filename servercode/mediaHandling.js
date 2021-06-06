@@ -35,7 +35,10 @@ var mediaFunctions = {
 			video.setVideoSize(resString, true, false);
 
 			//create a new video file path to save the new resolution to
-			var newPath = videopath.replace(".mp4", `${resString}.mp4`);
+			var newPath = videopath.replace(".mp4", `(${resString}).mp4`);
+
+			//add quotes to the string to accomodate the parenthesis
+			newPath = "\'" + newPath + "\'";
 
 			//save the video file
 			video.save(newPath, (file, error) => {
@@ -91,7 +94,10 @@ var mediaFunctions = {
 			}
 
 			//create a new video file path to save the video to
-			var newPath = videopath.replace(/\..*/, `x${speed}${path.extname(videopath)}`);
+			var newPath = videopath.replace(/\..*/, `(x${speed})${path.extname(videopath)}`);
+
+			//add quotes to the strong to accomodate the parenthesis
+			newPath = "\'" + newPath + "\'";
 
 			//save the video with the new speed
 			video.save(newPath, (file, error) => {
@@ -158,6 +164,50 @@ var mediaFunctions = {
 		} else { //if the new number does not fall within the range specified, go through another iteration
 			return mediaFunctions.getFactors(newnum, changenum, numfloor, numceil, changenum**2, orignum);
 		}
+	},
+
+	//this is a function to get the metadata for a video file using ffmpeg
+	getVideoMetadata: async function (videopath) {
+		//start a new ffmpeg process with this video
+		var process = new ffmpeg(videopath);
+
+		//get the video object after the process is done getting the video information
+		var video = await process;
+
+		//return the video metadata
+		return video.metadata;
+	},
+
+	//this is a function to create default video resolutions and speeds for a video file we need
+	getVideoPermutations: async function (videopath) {
+		//create arrays for all of the default settings we want to make
+		var defaultSpeeds = [0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2];
+		var defaultWidths = [256, 426, 480, 640, 1280, 1920, 2560, 3840];
+		var defaultHeights = [144, 240, 360, 480, 720, 1080, 1440, 2160];
+
+		//get the metadata for the video
+		var metadata = await mediaFunctions.getVideoMetadata(videopath);
+
+		//get the current resolution
+		var currentRes = metadata.video.resolution;
+
+		//get the index of the pixel heights array which matches the current resolution
+		var currentIndex = defaultHeights.indexOf(currentRes.h);
+
+		//get the widths and heights to process by slicing the arrays for the pixel widths and heights
+		var widths = defaultWidths.slice(0, currentIndex);
+		var heights = defaultHeights.slice(0, currentIndex);
+
+		//loop through the widths and heights in order to get all permutations of the video with different resolutions
+		widths.forEach((width, index) => {
+			//call the function to get the new permutation with the new resolution
+			mediaFunctions.changeVideoResolution(videopath, width, heights[index]);
+		});
+
+		//loop through all of the default speeds to create permutations for the video at new speeds
+		defaultSpeeds.forEach((speed, index) => {
+			mediaFunctions.changeVideoSpeed(videopath, speed);
+		});
 	}
 };
 
