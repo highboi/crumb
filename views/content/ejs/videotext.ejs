@@ -76,6 +76,8 @@
 		<% } %>
 	</div>
 	<hr>
+
+	<%- include('./videosettings.ejs', {resolutions: resolutions}) %>
 </div>
 
 <% if (typeof user != 'undefined') { %>

@@ -4,6 +4,7 @@
 const fs = require("fs");
 const ffmpeg = require("ffmpeg");
 const path = require("path");
+const client = require("./dbConfig");
 
 //object to store the media handling functions
 var mediaFunctions = {
@@ -29,13 +30,13 @@ var mediaFunctions = {
 		//callback functions for the ffmpeg process
 		process.then((video) => {
 			//get the full desired resolution as a string
-			var resString = width.toString() + "x" + height.toString();
+			var resString = Math.floor(width).toString() + "x" + height.toString();
 
 			//convert the video to a different resolution
 			video.setVideoSize(resString, true, false);
 
 			//create a new video file path to save the new resolution to
-			var newPath = videopath.replace(".mp4", `(${resString}).mp4`);
+			var newPath = videopath.replace(/\..*/, `(${height.toString() + "p"})${path.extname(videopath)}`);
 
 			//add quotes to the string to accomodate the parenthesis
 			newPath = "\'" + newPath + "\'";
@@ -182,7 +183,7 @@ var mediaFunctions = {
 	getVideoPermutations: async function (videopath) {
 		//create arrays for all of the default settings we want to make
 		var defaultSpeeds = [0.25, 0.5, 0.75, 1.25, 1.5, 1.75, 2];
-		var defaultWidths = [256, 426, 480, 640, 1280, 1920, 2560, 3840];
+		//var defaultWidths = [256, 426, 480, 640, 1280, 1920, 2560, 3840];
 		var defaultHeights = [144, 240, 360, 480, 720, 1080, 1440, 2160];
 
 		//get the metadata for the video
@@ -194,19 +195,22 @@ var mediaFunctions = {
 		//get the index of the pixel heights array which matches the current resolution
 		var currentIndex = defaultHeights.indexOf(currentRes.h);
 
-		//get the widths and heights to process by slicing the arrays for the pixel widths and heights
-		var widths = defaultWidths.slice(0, currentIndex);
-		var heights = defaultHeights.slice(0, currentIndex);
+		//get the heights to process by slicing the arrays for the pixel heights
+		var heights = defaultHeights.slice(0, currentIndex+1);
+
+		//get the video path relative to the site root for database searching
+		var relativepath = videopath.split("/storage")[1];
+
+		//insert the possible heights into the database with the "videofiles" table entry
+		var returning = await client.query(`UPDATE videofiles SET resolution=$1 WHERE video=$2`, [JSON.stringify(heights), relativepath]);
 
 		//loop through the widths and heights in order to get all permutations of the video with different resolutions
-		widths.forEach((width, index) => {
-			//call the function to get the new permutation with the new resolution
-			mediaFunctions.changeVideoResolution(videopath, width, heights[index]);
-		});
+		heights.forEach((height, index) => {
+			//calculate the height based on the ratio of 16:9
+			var calculatedwidth = height * (16/9);
 
-		//loop through all of the default speeds to create permutations for the video at new speeds
-		defaultSpeeds.forEach((speed, index) => {
-			mediaFunctions.changeVideoSpeed(videopath, speed);
+			//call the function to get the new permutation with the new resolution
+			mediaFunctions.changeVideoResolution(videopath, calculatedwidth, height);
 		});
 	}
 };

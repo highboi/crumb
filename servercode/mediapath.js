@@ -28,6 +28,10 @@ app.get("/v/:videoid", async (req, res) => {
 
 	//check to see that the video is not deleted or private before getting information that is not needed or does not exist
 	if (!video.deleted && !video.private) {
+		//get the resolutions possible for this video
+		var resolutions = await client.query(`SELECT resolution FROM videofiles WHERE id=$1`, [req.params.videoid]);
+		resolutions = resolutions.rows[0].resolution;
+
 		//get the reccomendations for this video
 		var reccomendations = await middleware.getReccomendations(req, video);
 
@@ -63,7 +67,7 @@ app.get("/v/:videoid", async (req, res) => {
 			return Object.assign({}, item, chatMessageInfo[item.user_id]);
 		});
 
-		viewObj = Object.assign({}, viewObj, {video: video, reccomendations: reccomendations, videocreator: videocreator, approx: approx, comments: comments});
+		viewObj = Object.assign({}, viewObj, {video: video, reccomendations: reccomendations, videocreator: videocreator, approx: approx, comments: comments, resolutions: resolutions});
 
 		//check to see if there are any chat messages to replay
 		if (chatReplayMessages.length > 0) {
@@ -102,15 +106,27 @@ app.get("/v/:videoid", async (req, res) => {
 //get the video data from the file in chunks for efficiency of the network
 app.get("/video/:id", async (req, res) => {
 	//get the video file from the supposed video id (might be a comment id)
-	var path = await client.query(`SELECT video FROM videofiles WHERE id=$1 LIMIT 1`, [req.params.id]);
-	path = "./storage" + path.rows[0].video;
+	var videopath = await client.query(`SELECT video FROM videofiles WHERE id=$1 LIMIT 1`, [req.params.id]);
+	videopath = "./storage" + videopath.rows[0].video;
+
+	//get the query parameters just in case there are special needs for speed or resolution requirements
+	var resolution = req.query.res;
+
+	//change the filename in the video file path to match the file with the matching resolution
+	if (typeof resolution != 'undefined' && resolution != "original") {
+		//get the file extention
+		videoext = path.extname(videopath);
+
+		//replace the file extention with the defining name change followed by the file extention again
+		videopath = videopath.replace(videoext, `(${resolution}p)` + videoext);
+	}
 
 	//get the extension of the video for the content type of the response
-	var contentType = path.substring(path.lastIndexOf(".")+1);
-	contentType = `video/${contentType}`
+	var contentType = path.extname(videopath).slice(1);
+	contentType = `video/${contentType}`;
 
 	//get information about the file
-	const stat = fs.statSync(path);
+	const stat = fs.statSync(videopath);
 	//get the file size
 	const fileSize = stat.size;
 	//get the "range" in the http header if there is one, this defines the amount of bytes the
@@ -133,7 +149,7 @@ app.get("/video/:id", async (req, res) => {
 		//get the chunk size based off of the start and end bytes
 		const chunksize = (end-start)+1
 		//create a read stream for the file with the start and end defining the chunk to look at
-		const file = fs.createReadStream(path, {start, end});
+		const file = fs.createReadStream(videopath, {start, end});
 		//define an http head for the response
 		const head = {
 			'Content-Range': `bytes ${start}-${end}/${fileSize}`, //define a content range
@@ -354,6 +370,9 @@ app.post("/v/submit", async (req, res) => {
 
 		//insert the video file paths into the db
 		await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);
+
+		//create all permutations of the video file path
+		await middleware.getVideoPermutations(global.appRoot + "/storage" + videopath);
 
 		//change the video count on the user db entry
 		await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
