@@ -1,0 +1,1 @@
+"Added functionality to save and parse SRT files for subtitles in the backend. Added a column in the videos table to store paths to SRT files. Have implemented frontend JS for showing subtitles with back/forward tracking included. Also added setting which shows or hides captions for videos."

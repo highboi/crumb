@@ -68,7 +68,7 @@
 						<% } %>
 						<div class="autoplay">
 							<p>Autoplay:</p>
-							<label class="switch">
+							<label class="switch" id="autoplay">
 								<input class="switchinput" type="checkbox">
 								<span class="slider"></span>
 							</label>
@@ -108,6 +108,10 @@
 					<% } else if (typeof reccomendations != 'undefined') { %>
 						var nextvideolink = `/v/<%= reccomendations[0].id %>`;
 					<% } %>
+
+					<% if (typeof subtitles != 'undefined' && subtitles != null) { %>
+						var subtitles = <%- JSON.stringify(subtitles) %>;
+					<% } %>
 				</script>
 
 				<script src="/content/javascript/videotext.js"></script>
@@ -116,6 +120,8 @@
 				<script src="/content/javascript/sortcomments.js"></script>
 				<script src="/content/javascript/autoplay.js"></script>
 				<script src="/content/javascript/scrollToComment.js"></script>
+				<script src="/content/javascript/subtitles.js"></script>
+				<script src="/content/javascript/videosettings.js"></script>
 			<% } else { %>
 				<%- include('content/ejs/scripts.ejs') %>
 			<% } %>

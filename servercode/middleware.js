@@ -687,7 +687,6 @@ var reccomendationFunctions = {
 
 		//eliminate the video from the list if the video being viewed is in the list
 		vids = vids.filter((item) => {
-			console.log("FILTERING");
 			return !(JSON.stringify(video) == JSON.stringify(item));
 		});
 

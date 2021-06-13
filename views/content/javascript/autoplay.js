@@ -2,10 +2,10 @@
 //the end of it's time
 
 //set the value of the input to mirror the CSS styling of the autoplay switch
-document.querySelector(".switchinput").checked = getCookie("autoplay") == "true";
+document.querySelector("#autoplay .switchinput").checked = getCookie("autoplay") == "true";
 
 //handle the setting of a cookie value for the autoplay value
-document.querySelector(".switchinput").oninput = () => {
+document.querySelector("#autoplay .switchinput").oninput = () => {
 	if (document.querySelector(".switchinput").checked) {
 		setCookie("autoplay", "true");
 	} else {

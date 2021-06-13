@@ -59,6 +59,7 @@ if (typeof chatReplayMessages != 'undefined') {
 		//if the chat message in the front of the array has a timestamp less than the current time, add the message to the HTML
 		if (chatReplayMessages.length && chatReplayMessages[0].time <= videoelement.currentTime) {
 			console.log("adding chat elements");
+
 			//get all of the messages that need to be added
 			var messageDataAdded = chatReplayMessages.filter((item) => {
 				return (item.time <= videoelement.currentTime);
@@ -76,7 +77,9 @@ if (typeof chatReplayMessages != 'undefined') {
 				addedChatMessages.push(item);
 
 				//remove this message data from the data to be added, it has been added
-				var addedIndex = chatReplayMessages.indexOf(item);
+				var addedIndex = chatReplayMessages.findIndex((object) => {
+					return JSON.stringify(object) == JSON.stringify(item);
+				});
 				chatReplayMessages.splice(addedIndex, 1);
 			});
 		}
@@ -93,6 +96,9 @@ if (typeof chatReplayMessages != 'undefined') {
 				return (item.time >= videoelement.currentTime)
 			});
 
+			//reverse the order of the message data removed so that .forEach does not unshift things in reverse order
+			messageDataRemoved.reverse();
+
 			//get all of the chat HTML elements
 			var messageElements = Array.from(document.querySelectorAll(".chatMessage")).filter((item) => {
 				return (parseInt(item.dataset.time) >= videoelement.currentTime);
@@ -101,7 +107,9 @@ if (typeof chatReplayMessages != 'undefined') {
 			//loop through the message data of the removed messages and unshift them to the chatReplayMessages array
 			messageDataRemoved.forEach((item) => {
 				//remove this data from the "addedChatMessages" array
-				var removedIndex = addedChatMessages.indexOf(item);
+				var removedIndex = addedChatMessages.findIndex((object) => {
+					return JSON.stringify(object) == JSON.stringify(item);
+				});
 				addedChatMessages.splice(removedIndex, 1);
 
 				//append the message data to the beginning of the chatReplayMessages array

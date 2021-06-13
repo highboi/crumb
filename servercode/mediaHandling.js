@@ -5,6 +5,7 @@ const fs = require("fs");
 const ffmpeg = require("ffmpeg");
 const path = require("path");
 const client = require("./dbConfig");
+const {default: srtParser2} = require("srt-parser-2");
 
 //object to store the media handling functions
 var mediaFunctions = {
@@ -212,11 +213,23 @@ var mediaFunctions = {
 			//call the function to get the new permutation with the new resolution
 			mediaFunctions.changeVideoResolution(videopath, calculatedwidth, height);
 		});
+	},
+
+	//this is a function which reads the subtitles from an SRT file and returns an array
+	getSubtitles: function (filepath) {
+		//read the text from the SRT file and put it into a single string
+		var fileContents = fs.readFileSync(filepath).toString();
+
+		//create an SRT parser instance
+		var parser = new srtParser2();
+
+		//pass the file contents to the function and get an array of objects representing subtitles
+		var result = parser.fromSrt(fileContents);
+
+		//return the full subtitles
+		return result;
 	}
 };
-
-//this is the path to the test file to test these functions on
-var testpath = global.appRoot + "/storage/test/nyan.mp4";
 
 //export the object with the functions
 module.exports = mediaFunctions;

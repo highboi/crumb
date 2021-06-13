@@ -1,4 +1,8 @@
 <div class="videotext">
+	<%- include('./subtitles.ejs', {subtitles: subtitles}) %>
+
+	<%- include('./videosettings.ejs', {resolutions: resolutions}) %>
+
 	<h1 id="title"><%= video.title %></h1>
 	<% if (typeof video.topics != 'object') { %>
 		<hr>
@@ -76,8 +80,6 @@
 		<% } %>
 	</div>
 	<hr>
-
-	<%- include('./videosettings.ejs', {resolutions: resolutions}) %>
 </div>
 
 <% if (typeof user != 'undefined') { %>

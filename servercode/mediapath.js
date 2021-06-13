@@ -67,7 +67,15 @@ app.get("/v/:videoid", async (req, res) => {
 			return Object.assign({}, item, chatMessageInfo[item.user_id]);
 		});
 
-		viewObj = Object.assign({}, viewObj, {video: video, reccomendations: reccomendations, videocreator: videocreator, approx: approx, comments: comments, resolutions: resolutions});
+		//get the subtitles object according to the file of this video
+		if (video.subtitles != null) {
+			var subtitles = await middleware.getSubtitles(global.appRoot + "/storage" + video.subtitles);
+		} else {
+			var subtitles = video.subtitles;
+		}
+
+		//create the new view object with the new objects
+		viewObj = Object.assign({}, viewObj, {video: video, reccomendations: reccomendations, videocreator: videocreator, approx: approx, comments: comments, resolutions: resolutions, subtitles: subtitles});
 
 		//check to see if there are any chat messages to replay
 		if (chatReplayMessages.length > 0) {
@@ -357,16 +365,23 @@ app.post("/v/submit", async (req, res) => {
 		//store the thumbnail file submitted
 		var thumbnailpath = await middleware.saveFile(req.files.thumbnail, "/storage/videos/thumbnails/");
 
+		//if there is an SRT file submitted for subtitles, save this
+		if (typeof req.files.subtitles != 'undefined') {
+			var subtitlepath = await middleware.saveFile(req.files.subtitles, "/storage/videos/subtitles");
+		} else {
+			var subtitlepath = "";
+		}
+
 		//store the video details for later reference
 
 		//generate a unique video id for each video (await the result of this function)
 		var videoid = await middleware.generateAlphanumId();
 
 		//the array to contain the values to insert into the db
-		var valuesArr = [videoid, req.body.title, req.body.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), " " + req.body.topics + " ", userinfo.username, userinfo.channelicon, false, req.body.private];
+		var valuesArr = [videoid, req.body.title, req.body.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), " " + req.body.topics + " ", userinfo.username, userinfo.channelicon, false, req.body.private, subtitlepath];
 
 		//load the video into the database
-		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, private) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, valuesArr);
+		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, private, subtitles) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, valuesArr);
 
 		//insert the video file paths into the db
 		await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);
