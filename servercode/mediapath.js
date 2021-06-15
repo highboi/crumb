@@ -365,9 +365,12 @@ app.post("/v/submit", async (req, res) => {
 		//store the thumbnail file submitted
 		var thumbnailpath = await middleware.saveFile(req.files.thumbnail, "/storage/videos/thumbnails/");
 
-		//if there is an SRT file submitted for subtitles, save this
-		if (typeof req.files.subtitles != 'undefined') {
+		//if there is an SRT file submitted for subtitles and the file is indeed an SRT file (mimetype), save this
+		if (typeof req.files.subtitles != 'undefined' && req.files.subtitles.mimetype == "application/x-subrip") {
 			var subtitlepath = await middleware.saveFile(req.files.subtitles, "/storage/videos/subtitles");
+		} else if (req.files.subtitles.mimetype != 'application/x-subrip') {
+			req.flash("message", "Unsupported file type for subtitles, please use SRT formatted files.");
+			res.redirect("/v/submit");
 		} else {
 			var subtitlepath = "";
 		}

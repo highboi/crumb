@@ -5,5 +5,7 @@ app.get("/example", async (req, res) => {
 });
 
 app.post("/example", (req, res) => {
+	console.log(req.files);
+
 	res.redirect("/example");
 });
