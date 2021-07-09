@@ -10,7 +10,7 @@ app.get("/u/:userid", async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	//get the base view object
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//get the actual user that the channel belongs to
 	var creator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [req.params.userid]);
@@ -144,7 +144,7 @@ app.get("/subscribe/:channelid", middleware.checkSignedIn, async (req, res) => {
 //this is a get request for sections of videos on the site
 app.get("/s/:topic", async (req, res) => {
 	//get the view object
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//select all of the videos in the database with topics that include the topic in the link
 	var videos = await client.query(`SELECT * FROM videos WHERE topics LIKE $1`, ["% " + req.params.topic + " %"]);

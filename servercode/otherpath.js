@@ -3,7 +3,7 @@ const {app, client, middleware} = require("./configBasic");
 //get the index of the site working
 app.get('/', async (req, res) => {
 	//get the view object
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//get videos for the index page
 	var videos = await middleware.getReccomendations(req);
@@ -17,7 +17,7 @@ app.get('/', async (req, res) => {
 
 //the error path for error rendering
 app.get('/error', async (req, res) => {
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 	res.render("error.ejs", viewObj);
 });
 
@@ -50,7 +50,7 @@ app.get("/search", async (req, res) => {
 	search.playlists = playlists;
 
 	//get the view object and insert the search results
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 	viewObj.search = search;
 
 	res.render("searchresults.ejs", viewObj);

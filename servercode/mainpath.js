@@ -11,3 +11,5 @@ require("./mediapath");
 require("./livepath");
 //paths for an example ejs page for debugging
 require("./example");
+//paths for torrent stuff
+require("./torrentPath");

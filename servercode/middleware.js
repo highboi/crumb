@@ -46,7 +46,7 @@ OBJECT WHICH STORES FUNCTIONS THAT HANDLE REQUEST INFORMATION
 var reqHandling = {
 	//this is a function to insert universal things into the view object such as flash messages
 	//and language translation
-	getViewObj: async function(req) {
+	getViewObj: async function(req, res) {
 		//create the view object
 		var viewObj = {};
 
@@ -54,12 +54,18 @@ var reqHandling = {
 		if (typeof req.cookies.sessionid != 'undefined') {
 			//get user info
 			viewObj.user = await middleware.getUserSession(req.cookies.sessionid);
-			//insert subscribed channels
-			var subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [viewObj.user.id]);
-			viewObj.subscribedChannels = subscribedChannels.rows.map((obj) => {return obj.channel_id});
-			//insert the playlists of the users
-			var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [viewObj.user.id]);
-			viewObj.playlists = playlists.rows;
+
+			//make sure the user is registered in the session store first
+			if (typeof viewObj.user != 'undefined') {
+				//insert subscribed channels
+				var subscribedChannels = await client.query(`SELECT channel_id FROM subscribed WHERE user_id=$1`, [viewObj.user.id]);
+				viewObj.subscribedChannels = subscribedChannels.rows.map((obj) => {return obj.channel_id});
+				//insert the playlists of the users
+				var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [viewObj.user.id]);
+				viewObj.playlists = playlists.rows;
+			} else {
+				res.cookie('sessionid', '', {expires: new Date(0)});
+			}
 		} else {
 			viewObj.subscribedChannels = [];
 		}
@@ -150,7 +156,11 @@ var reqHandling = {
 	getUserSession: async function (sessionid) {
 		if (typeof sessionid != 'undefined') {
 			var userinfo = await redisClient.getAsync(sessionid);
-			return JSON.parse(userinfo);
+			if (userinfo != null) {
+				return JSON.parse(userinfo);
+			} else {
+				return undefined;
+			}
 		}
 	}
 };

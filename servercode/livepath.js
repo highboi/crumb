@@ -20,7 +20,7 @@ app.get("/l/view/:streamid", async (req, res) => {
 	var stream = global.webWssClients[req.params.streamid];
 
 	//make the view object
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//if there are no streams with the id in the url, then redirect to an error or the recorded stream or the OBS stream
 	if (typeof stream == 'undefined') {
@@ -72,14 +72,14 @@ app.get("/l/view/:streamid", async (req, res) => {
 
 //this is a get request to get basic info about a live stream
 app.get("/l/start", middleware.checkSignedIn, async (req, res) => {
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 	res.render("startstream.ejs", viewObj);
 });
 
 //this is a get request for the admin panel of a live stream
 app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 	//get the view object
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//get the stream info
 	var stream = await client.query(`SELECT * FROM videos WHERE id=$1 AND user_id=$2 LIMIT 1`, [req.params.streamid, viewObj.user.id]);

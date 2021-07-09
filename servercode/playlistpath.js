@@ -9,7 +9,7 @@ app.get("/p/:playlistid", async(req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	//get the view object
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//get the playlist object which contains the name of the playlist and the user who created it
 	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1 LIMIT 1`, [req.params.playlistid]);
@@ -47,7 +47,7 @@ app.get("/playlistvideo/view/:playlistid/:videoid", async (req, res) => {
 	}
 
 	//get the view object
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//get the video creator for the video inside the playlist
 	var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
@@ -176,7 +176,7 @@ app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, 
 //this is a get request for creating a new playlist
 app.get("/playlist/new", middleware.checkSignedIn, async (req, res) => {
 	//get the view object
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//insert the video id to insert into the playlist on creation
 	if (typeof req.query.videoid != 'undefined') {

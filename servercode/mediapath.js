@@ -9,14 +9,14 @@ GET PATHS FOR VIDEOS/MEDIA
 
 //get the form for submitting videos
 app.get("/v/submit", middleware.checkSignedIn, async (req, res) => {
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 	res.render("submitvideo.ejs", viewObj);
 });
 
 //views individual videos on the site
 app.get("/v/:videoid", async (req, res) => {
 	//set the object to be passed to the rendering function
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 
 	//select the video from the database
 	var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.videoid]);
@@ -178,7 +178,7 @@ app.get("/video/:id", async (req, res) => {
 		//write the head to the response as 200 since this is a complete response for the video contents
 		res.writeHead(200, head)
 		//pipe the complete contents of the file to the response with a read stream of the file
-		fs.createReadStream(path).pipe(res)
+		fs.createReadStream(videopath).pipe(res)
 	}
 });
 
@@ -256,7 +256,7 @@ app.get("/tv", async (req, res) => {
 		videocreator = videocreator.rows[0];
 
 		//get the view object
-		var viewObj = await middleware.getViewObj(req);
+		var viewObj = await middleware.getViewObj(req, res);
 
 		//insert the necessary elements into the view object
 		viewObj.video = video;

@@ -7,7 +7,7 @@ GET FILE PATHS FOR USER AUTH
 
 //get the registration page
 app.get('/register', middleware.checkNotSignedIn, async (req, res) => {
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 	res.render("register.ejs", viewObj);
 });
 
@@ -61,7 +61,7 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 
 //get the login page
 app.get('/login', middleware.checkNotSignedIn, async (req, res) => {
-	var viewObj = await middleware.getViewObj(req);
+	var viewObj = await middleware.getViewObj(req, res);
 	res.render("login.ejs", viewObj);
 });
 

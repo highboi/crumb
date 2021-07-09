@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="shortcut icon" href="/content/icons/favicon.ico" type="image/x-icon">
 		<link rel="stylesheet" href="/content/style/example.css">
 	</head>
 	<body>
 		<h1>EXAMPLE PAGE:</h1>
 
+		<h1>POST EXAMPLE:</h1>
 		<form action="/example" method="POST" enctype="multipart/form-data">
 			<textarea placeholder="Type something..." id="text" name="text"></textarea><br>
 			<label for="file">PICK A FILE:</label>
 			<input type="file" id="file" name="file"><br>
 			<input type="submit" value="Submit">
 		</form>
+
+		<h1>VIDEO TORRENT EXAMPLE:</h1>
+		<h2 id="status"></h2>
+		<pre id="output"></pre>
+
+		<video id="video" controls=""></video>
+
+		<script src="/content/javascript/promisify.js"></script>
+		<script src="/content/javascript/webtorrentOutput.js"></script>
 	</body>
 </html>
