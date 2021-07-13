@@ -93,9 +93,11 @@
 						var scrollCommentId = <%- JSON.stringify(scrollCommentId) %>;
 						var scrollCommentBaseId = <%- JSON.stringify(scrollCommentBaseId) %>;
 					<% } %>
+
 					<% if (typeof chatReplayMessages != 'undefined') { %>
 						var chatReplayMessages = <%- JSON.stringify(chatReplayMessages) %>;
 					<% } %>
+
 					<% if (typeof playlistvideos != 'undefined' && typeof playlist != 'undefined') { %>
 						<% var nextvideoid = playlistvideos.filter((item) => {
 							return item.id == video.id;
@@ -114,13 +116,32 @@
 					<% } %>
 				</script>
 
+
+				<!--handle the torrenting of videos on the client side-->
+				<script src="/content/javascript/webtorrentVideosOutput.js"></script>
+
+				<!--handle things such as the "read more" button in the video text section-->
 				<script src="/content/javascript/videotext.js"></script>
+
+				<!--handle the like/dislike of videos-->
 				<script src="/content/javascript/likedislike.js"></script>
+
+				<!--handle the live chat replay if there is one-->
 				<script src="/content/javascript/chatreplay.js"></script>
+
+				<!--handle the sorting of the comments in the html-->
 				<script src="/content/javascript/sortcomments.js"></script>
+
+				<!--handle the autoplaying of videos-->
 				<script src="/content/javascript/autoplay.js"></script>
+
+				<!--if there is a comment that a user just submitted, scroll to it and show the user-->
 				<script src="/content/javascript/scrollToComment.js"></script>
+
+				<!--handle the display of subtitles under the video-->
 				<script src="/content/javascript/subtitles.js"></script>
+
+				<!--handle the video settings such as subtitles, speed, and quality-->
 				<script src="/content/javascript/videosettings.js"></script>
 			<% } else { %>
 				<%- include('content/ejs/scripts.ejs') %>

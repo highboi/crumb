@@ -211,25 +211,6 @@ app.get("/v/delete/:videoid", middleware.checkSignedIn, async (req, res) => {
 	}
 });
 
-//this is a get path to set the magnet link for a video if there are no peers/seeders for a file
-app.get("/setmagnet/:id", async (req, res) => {
-	console.log("SETTING MAGNET:", req.query.magnet);
-
-	try {
-		//set the new magnetlink to the video in the database
-		await client.query(`UPDATE videos SET magnetlink=$1 WHERE id=$2`, [req.query.magnet, req.params.id]);
-
-		//send a response of "true" to let the client know that we have successfully updated the magnet link status
-		res.send("true");
-	} catch(e) {
-		//console log the error
-		console.log(e);
-
-		//send a response of "false" back to the client
-		res.send("false");
-	}
-});
-
 //this is a get path for the TV/Random video feature on the site
 app.get("/tv", async (req, res) => {
 	//create a view object

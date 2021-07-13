@@ -1,7 +1,3 @@
-/*
-NOTE: NEEDS 'videoid' VARIABLE DEFINED, A WORKING /setmagnet/ URL, AND THE WEBTORRENT FUNCTION LIBRARY TO TEST PROPERLY
-*/
-
 //get the webtorrent and util modules
 var WebTorrent = require("webtorrent");
 
@@ -14,46 +10,66 @@ async function mainTorrentHandler() {
 	console.log("WEBRTC supported, starting torrent process.");
 
 	//promisify the ajax function for getting data
-	var getAjaxAsync = promisify(getAjaxData);
+	var getAjaxAsync = promisify(getAjaxData, true);
+
+	//get the video id from the video element's dataset
+	var videoid = document.querySelector(".video-contents .video-container #video").dataset.videoid;
 
 	//get the magnet link status for this video
-	var magnetStatus = await getAjaxAsync(`/magnet/${videoid}`);
+	var magnetStatus = await getAjaxAsync(`/getmagnet/${videoid}`);
+
+	//log the magnet status
+	console.log(`MAGNET STATUS FOR ${videoid}:`, typeof magnetStatus, magnetStatus);
 
 	//do something according to the status of the magnet of this video
-	if (typeof magnetStatus == 'undefined') { //if there is no magnet for this video
+	if (!magnetStatus) { //if there is no magnet for this video
 		//create a request object for the url of this video
 		var videoRequest = new Request(`/video/${videoid}`);
 
 		//fetch the data/response from this url
-		var response = fetch(videoRequest);
+		var response = await fetch(videoRequest);
+
+		//get the array buffer from this response
+		var responseBuffer = await response.arrayBuffer();
 
 		//convert the array buffer in the response to a uint8array
-		var buffer = Uint8Array(response.arrayBuffer());
+		var buffer = new Uint8Array(responseBuffer);
 
 		//seed the data in the buffer (node Buffers and Uint8Arrays are the same)
-		var torrent = await seedData(buffer);
+		var torrent = await webtorrentLibrary.seedDataAsync(client, buffer);
 
 		//show the torrent in the console
 		console.log("TORRENT:", torrent);
 
 		//get the magnet URI and send it to the server for storage in redis
-		await getAjaxAsync(`/setmagnet/${encodeURIComponent(torrent.magnetURI)}`);
+		await getAjaxAsync(`/setmagnet/${videoid}/?magnetlink=${encodeURIComponent(torrent.magnetURI)}`);
 	} else { //if there is a magnet for this video
 		//download data from the magnet link in "magnetStatus"
-		var torrent = await downloadData(magnetStatus);
+		var torrent = await webtorrentLibrary.downloadDataAsync(client, magnetStatus);
 
 		//show the torrent in the console
 		console.log("TORRENT:", torrent);
 	}
 
-	//find the file in the torrent containing video data
-	var file = torrent.files.find((file) => {
-		//return the file that ends with either an mp4, webm, or ogg extention
-		return file.name.endsWith(".mp4") || file.name.endsWith(".webm") || file.name.endsWith(".ogg");
-	});
+	//get the torrent file
+	var file = torrent.files[0];
 
-	//render the file to the video object
-	file.renderTo("#video");
+	//make an async version of the blob URL function
+	file.getBlobURLAsync = promisify(file.getBlobURL);
+
+	//get the blob url for this video
+	var fileURL = await file.getBlobURLAsync();
+
+	console.log("TORRENT FILE URL:", fileURL);
+
+	//create a video source with the blob URL in use
+	var sourceElementBlob = document.createElement("source");
+
+	//set the source of this source element to the file url from the torrent
+	sourceElementBlob.setAttribute("src", fileURL);
+
+	//set the source element inside the video to be the blob source
+	document.querySelector(".video-contents .video-container #video").innerHTML = sourceElementBlob.outerHTML;
 
 }
 
@@ -64,3 +80,16 @@ if (WebTorrent.WEBRTC_SUPPORT) {
 } else {
 	console.log("WEBRTC not supported, using regular video requests.");
 }
+
+//set an event handler to close the webtorrent client before the window closes
+document.addEventListener("beforeunload", () => {
+	//destroy the client and catch errors
+	client.destroy((err) => {
+		if (err) {
+			console.error(err);
+		}
+	});
+
+	//return a custom message before the user exits
+	return "Webtorrent client for this page has been destroyed, exiting now.";
+});
