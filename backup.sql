@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 12.3 (Debian 12.3-1+b1)
--- Dumped by pg_dump version 12.3 (Debian 12.3-1+b1)
+-- Dumped from database version 12.5 (Ubuntu 12.5-0ubuntu0.20.04.1)
+-- Dumped by pg_dump version 12.5 (Ubuntu 12.5-0ubuntu0.20.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -36,23 +36,12 @@ CREATE TABLE public.comments (
     parent_id text,
     depth_level bigint,
     base_parent_id text,
-    reactionfile text
+    reactionfile text,
+    filetype text
 );
 
 
 ALTER TABLE public.comments OWNER TO merlin;
-
---
--- Name: commonwords; Type: TABLE; Schema: public; Owner: merlin
---
-
-CREATE TABLE public.commonwords (
-    word text,
-    score bigint
-);
-
-
-ALTER TABLE public.commonwords OWNER TO merlin;
 
 --
 -- Name: dislikedcomments; Type: TABLE; Schema: public; Owner: merlin
@@ -125,7 +114,8 @@ CREATE TABLE public.playlists (
     name character varying(500),
     id text,
     videocount bigint DEFAULT 0,
-    candelete boolean
+    candelete boolean,
+    private boolean DEFAULT false
 );
 
 
@@ -137,11 +127,27 @@ ALTER TABLE public.playlists OWNER TO merlin;
 
 CREATE TABLE public.playlistvideos (
     playlist_id text,
-    video_id text
+    video_id text,
+    videoorder bigint
 );
 
 
 ALTER TABLE public.playlistvideos OWNER TO merlin;
+
+--
+-- Name: reports; Type: TABLE; Schema: public; Owner: merlin
+--
+
+CREATE TABLE public.reports (
+    content_id text,
+    content_type text,
+    reason text,
+    reporter_id text,
+    "timestamp" bigint
+);
+
+
+ALTER TABLE public.reports OWNER TO merlin;
 
 --
 -- Name: shoutouts; Type: TABLE; Schema: public; Owner: merlin
@@ -194,11 +200,26 @@ CREATE TABLE public.users (
     description character varying(1000),
     topics text,
     streamkey text,
-    videos bigint DEFAULT 0
+    videocount bigint DEFAULT 0
 );
 
 
 ALTER TABLE public.users OWNER TO merlin;
+
+--
+-- Name: videofiles; Type: TABLE; Schema: public; Owner: merlin
+--
+
+CREATE TABLE public.videofiles (
+    id text,
+    thumbnail text,
+    video text,
+    parentid text,
+    resolution text
+);
+
+
+ALTER TABLE public.videofiles OWNER TO merlin;
 
 --
 -- Name: videos; Type: TABLE; Schema: public; Owner: merlin
@@ -220,7 +241,10 @@ CREATE TABLE public.videos (
     channelicon text,
     streaming boolean,
     enablechat boolean,
-    magnetlink text
+    streamtype text,
+    deleted boolean DEFAULT false,
+    private boolean DEFAULT false,
+    subtitles text
 );
 
 
@@ -251,36 +275,17 @@ ALTER SEQUENCE public.videos_views_seq OWNED BY public.videos.views;
 -- Data for Name: comments; Type: TABLE DATA; Schema: public; Owner: merlin
 --
 
-COPY public.comments (user_id, comment, video_id, username, posttime, id, likes, dislikes, parent_id, depth_level, base_parent_id, reactionfile) FROM stdin;
-\.
-
-
---
--- Data for Name: commonwords; Type: TABLE DATA; Schema: public; Owner: merlin
---
-
-COPY public.commonwords (word, score) FROM stdin;
-Wordscore	0
-OBS	0
-topics	0
-topic	1
-list	1
-crumb	0
-webdev	0
-nodejs	0
-jane	0
-this	11
-is	11
-a	11
-second	0
-channel	0
-torrent	0
-video	0
-nyan	1
-cat	1
-webtorrent	111111
-test	11111111
-sam	11111111
+COPY public.comments (user_id, comment, video_id, username, posttime, id, likes, dislikes, parent_id, depth_level, base_parent_id, reactionfile, filetype) FROM stdin;
+319d6fad-2946-405b-be30-1c1be4055e0b	another test image comment	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	example channel	2021-05-17T07:24:16.153Z	2yKTqCTg	0	0	\N	0	\N	/users/comments/1621236256197-worriedpepe.jpeg	img
+319d6fad-2946-405b-be30-1c1be4055e0b	TEST FOR SCROLLING	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	example channel	2021-05-30T03:01:19.241Z	x190Ptqi	0	0	c1e9ab0e-93bf-4560-b0d5-3bf815790fdd	1	c1e9ab0e-93bf-4560-b0d5-3bf815790fdd	\N	\N
+319d6fad-2946-405b-be30-1c1be4055e0b	can I add a comment?	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	example channel	2021-06-01T09:10:03.190Z	3QpwOhuY	0	0	\N	0	\N	\N	\N
+60235bb8-41f0-42c9-8bd7-f12f645f10a3	This is a reply.	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	jane	2021-02-25T07:53:34.801Z	41d36f21-c097-4b95-b72e-459c1abe9f0c	0	0	c1e9ab0e-93bf-4560-b0d5-3bf815790fdd	1	c1e9ab0e-93bf-4560-b0d5-3bf815790fdd	\N	\N
+60235bb8-41f0-42c9-8bd7-f12f645f10a3	This is an image comment.	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	jane	2021-02-25T07:54:23.772Z	34f0ee46-ac3b-4c8a-a9a6-395b38b2157d	0	0	\N	0	\N	/users/comments/1614239663785-textreme.jpeg	img
+60235bb8-41f0-42c9-8bd7-f12f645f10a3	This is a video comment.	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	jane	2021-02-25T07:54:38.214Z	9d12cc4d-2f19-46c9-9a3e-6a1d3ed42610	0	0	\N	0	\N	/users/comments/1614239678215-nyan.mp4	video
+60235bb8-41f0-42c9-8bd7-f12f645f10a3	This is a reply x2.	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	jane	2021-02-25T07:53:46.771Z	5bc8f455-9e4a-4825-8030-2e183d75280a	0	0	41d36f21-c097-4b95-b72e-459c1abe9f0c	2	c1e9ab0e-93bf-4560-b0d5-3bf815790fdd	\N	\N
+60235bb8-41f0-42c9-8bd7-f12f645f10a3	This is a comment.	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	jane	2021-02-25T07:53:21.787Z	c1e9ab0e-93bf-4560-b0d5-3bf815790fdd	0	0	\N	0	\N	\N	\N
+319d6fad-2946-405b-be30-1c1be4055e0b	this is another reply x3	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	example channel	2021-04-10T05:53:37.572Z	ebfe86fd-6d81-4080-b11c-662c354c883c	0	0	5bc8f455-9e4a-4825-8030-2e183d75280a	3	c1e9ab0e-93bf-4560-b0d5-3bf815790fdd	\N	\N
+319d6fad-2946-405b-be30-1c1be4055e0b	Yay another one	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	example channel	2021-04-10T05:54:00.043Z	5520fd4f-d036-41fc-b77a-444b29affc21	0	0	41d36f21-c097-4b95-b72e-459c1abe9f0c	2	c1e9ab0e-93bf-4560-b0d5-3bf815790fdd	\N	\N
 \.
 
 
@@ -307,6 +312,7 @@ COPY public.dislikedvideos (user_id, video_id) FROM stdin;
 
 COPY public.likedcomments (user_id, comment_id) FROM stdin;
 7d9b8296-9252-4651-b5d0-ea2d48ad2c22	80e1a3e6-bdde-45e9-ba83-3c56bc781c13
+319d6fad-2946-405b-be30-1c1be4055e0b	dfe6f258-1347-4cd3-8670-6a45d673418a
 \.
 
 
@@ -323,9 +329,26 @@ COPY public.likedvideos (user_id, video_id) FROM stdin;
 --
 
 COPY public.livechat (message, stream_id, user_id, "time") FROM stdin;
-hello there	b81ffe5b-3b1f-4c1a-94d8-56e5730c0ec8	6f1496fb4b3b289b333f0f	7
-hello there	e5c1bc14-6784-4979-95f4-04b6146e92f2	6f1496fb4b3b289b333f0f	14
-this is a cool live chat	2707432b-90f6-42ca-8bd8-97bf9096f832	6f1496fb4b3b289b333f0f	52
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	7
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	8
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	8
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	8
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	8
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	8
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	8
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	8
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	9
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	9
+hello	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	9
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
+hello there	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	16
 \.
 
 
@@ -333,9 +356,8 @@ this is a cool live chat	2707432b-90f6-42ca-8bd8-97bf9096f832	6f1496fb4b3b289b33
 -- Data for Name: playlists; Type: TABLE DATA; Schema: public; Owner: merlin
 --
 
-COPY public.playlists (user_id, name, id, videocount, candelete) FROM stdin;
-8e9dacef-06b8-488a-94ea-2adf4bcc1a1d	Watch Later	1316a5b7-e2bc-4ddb-aeae-9c82b41a951e	0	f
-60235bb8-41f0-42c9-8bd7-f12f645f10a3	Watch Later	2b8245db-dd2f-4e82-82af-7ab1c838b4cd	0	f
+COPY public.playlists (user_id, name, id, videocount, candelete, private) FROM stdin;
+319d6fad-2946-405b-be30-1c1be4055e0b	example playlist	d9d55174-1250-45ef-84d9-1426c478472b	3	t	f
 \.
 
 
@@ -343,7 +365,19 @@ COPY public.playlists (user_id, name, id, videocount, candelete) FROM stdin;
 -- Data for Name: playlistvideos; Type: TABLE DATA; Schema: public; Owner: merlin
 --
 
-COPY public.playlistvideos (playlist_id, video_id) FROM stdin;
+COPY public.playlistvideos (playlist_id, video_id, videoorder) FROM stdin;
+edca22d2-1d51-4d99-aa5d-f99f28bd8b6b	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	1
+d9d55174-1250-45ef-84d9-1426c478472b	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	1
+d9d55174-1250-45ef-84d9-1426c478472b	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	2
+d9d55174-1250-45ef-84d9-1426c478472b	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	3
+\.
+
+
+--
+-- Data for Name: reports; Type: TABLE DATA; Schema: public; Owner: merlin
+--
+
+COPY public.reports (content_id, content_type, reason, reporter_id, "timestamp") FROM stdin;
 \.
 
 
@@ -378,9 +412,31 @@ COPY public.subscribedtopics (topicname, user_id) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: merlin
 --
 
-COPY public.users (password, email, username, id, channelicon, channelbanner, subscribers, description, topics, streamkey, videos) FROM stdin;
-$2b$10$equ0TrTCwzA8TbqQXRPg1epYz5Xy4A0RPOid4sZOZvYhI4cFv7pZm	jane@gmail.com	jane	60235bb8-41f0-42c9-8bd7-f12f645f10a3	/users/icons/1609522478769-space.png	/users/banners/1609522478769-skyscrapers.jpg	0	A second channel on the site	this is a second channel	wxOGBvOZ3DXnwJ8j7cMxFSXVbFSBysG2bPAP1VQRvo0=	0
-$2b$10$wo4Hx.FPEvKydMybmPirYO1QSphfJk/Ermt4euUMVMQNP0QDrMke.	sam@gmail.com	sam	319d6fad-2946-405b-be30-1c1be4055e0b	/users/icons/1604712612118-bongoCat.png	/users/banners/1604712612118-bluecity.jpg	1	This is a test channel to test features on the site.	crumb webdev nodejs	XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=	11
+COPY public.users (password, email, username, id, channelicon, channelbanner, subscribers, description, topics, streamkey, videocount) FROM stdin;
+$2b$10$wo4Hx.FPEvKydMybmPirYO1QSphfJk/Ermt4euUMVMQNP0QDrMke.	sam@gmail.com	example channel	319d6fad-2946-405b-be30-1c1be4055e0b	/users/icons/1604712612118-bongoCat.png	/users/banners/1604712612118-bluecity.jpg	1	This is a test channel to test features on the site.	crumb webdev nodejs	XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=	4
+$2b$10$equ0TrTCwzA8TbqQXRPg1epYz5Xy4A0RPOid4sZOZvYhI4cFv7pZm	jane@gmail.com	jane	60235bb8-41f0-42c9-8bd7-f12f645f10a3	/users/icons/1609522478769-space.png	/users/banners/1609522478769-skyscrapers.jpg	0	A second channel on the site	this is a second channel	wxOGBvOZ3DXnwJ8j7cMxFSXVbFSBysG2bPAP1VQRvo0=	1
+\.
+
+
+--
+-- Data for Name: videofiles; Type: TABLE DATA; Schema: public; Owner: merlin
+--
+
+COPY public.videofiles (id, thumbnail, video, parentid, resolution) FROM stdin;
+db5ee5c6-4dc5-4711-bd72-a166c5e47f25	/videos/thumbnails/1614151941099-bongoCat.png	/videos/files/1614151941099-nyan.mp4	\N	\N
+bcec57c8-2eab-4acd-9f2e-24343d88c6fa	/videos/thumbnails/1614229350137-bluecity.jpg	/videos/files/1614229350415-Test WebSocket Stream.webm	\N	\N
+81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	/videos/thumbnails/1614229816950-beautiful_landscapes_in_the_world-wallpaper-1920x1080.jpg	/videos/nmsMedia/live/XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=/2021-02-24-23-10-18.mp4	\N	\N
+34f0ee46-ac3b-4c8a-a9a6-395b38b2157d	\N	/users/comments/1614239663785-textreme.jpeg	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	\N
+9d12cc4d-2f19-46c9-9a3e-6a1d3ed42610	\N	/users/comments/1614239678215-nyan.mp4	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	\N
+061e8b98-c896-478f-8969-2d6bb69d61a5	/videos/thumbnails/1616467261063-antarctica.png	\N	\N	\N
+cLtQABvZ	\N	/users/comments/1621236066275-worriedpepe.jpeg	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	\N
+2yKTqCTg	\N	/users/comments/1621236256197-worriedpepe.jpeg	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	\N
+73f606a5-69a4-4471-9d37-a4dc4eed488f	/videos/thumbnails/1614534795337-spiderverse.jpeg	/videos/files/1614534795337-nyan.mp4	\N	\N
+d6101b91-12f8-4c44-8595-1df400634b64	/videos/thumbnails/1616459815640-antarctica.png	\N	\N	\N
+a54cf7b7-a643-4475-86fd-cf62e9858140	/videos/thumbnails/1616048609795-city5.jpg	/videos/files/1616048609795-nyan.mp4	\N	\N
+d1b4c755-b587-4c13-b45e-b43e3ac2ccdc	/videos/thumbnails/1616048661535-city5.jpg	/videos/files/1616048661535-nyan.mp4	\N	\N
+1c0e5fa1-9c1f-48ad-9519-939d627493a6	/videos/thumbnails/1616048730363-city5.jpg	/videos/files/1616048730363-nyan.mp4	\N	\N
+HmmwavpR	/videos/thumbnails/1623391587603-the_bean.jpeg	/videos/files/1623391587603-nyan.mp4	\N	[144,240,360]
 \.
 
 
@@ -388,10 +444,13 @@ $2b$10$wo4Hx.FPEvKydMybmPirYO1QSphfJk/Ermt4euUMVMQNP0QDrMke.	sam@gmail.com	sam	3
 -- Data for Name: videos; Type: TABLE DATA; Schema: public; Owner: merlin
 --
 
-COPY public.videos (description, thumbnail, video, title, views, id, user_id, likes, dislikes, posttime, topics, username, channelicon, streaming, enablechat, magnetlink) FROM stdin;
-This is a stream from obs to test the insertion of wordscores.	/videos/thumbnails/1606883502921-cosmos.jpg	/videos/nmsMedia/live/XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=/2020-12-01-22-32-02.mp4	OBS topics test	126	23f8ea1f-a61a-4a96-bc38-9c3a01d89d50	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2020-12-01-22-31-42	this is a topic list	sam	/users/icons/1604712612118-bongoCat.png	t	t	magnet:?xt=urn:btih:105c7ff4f6ab3ece5e62ba9f7344c3e57d107ca1&dn=name&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com
-This is a video to test the wordscore system on the video details.	/videos/thumbnails/1606883371249-skyscrapers.jpg	/videos/files/1606883371249-nyan.mp4	Wordscore test	206	19674674-63ea-47af-8e75-ace6893c9162	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2020-12-01-22-29-31	this is a topic list	sam	/users/icons/1604712612118-bongoCat.png	t	\N	magnet:?xt=urn:btih:b4cd04f71282005db76691dcdd6473be0f9739df&dn=name&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com
-asdf	/videos/thumbnails/1604714996257-atlantis.jpg	/videos/files/1604714996459-undefined.webm	test web stream	20	72557625-4d5c-44f1-af01-4139b156e842	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2020-11-06-20-09-56	asdf	sam	/users/icons/1604712612118-bongoCat.png	f	\N	magnet:?xt=urn:btih:9e5b30fa8640e5e98a842f923f762bafc449c271&dn=name&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com
+COPY public.videos (description, thumbnail, video, title, views, id, user_id, likes, dislikes, posttime, topics, username, channelicon, streaming, enablechat, streamtype, deleted, private, subtitles) FROM stdin;
+This is a test of the websocket live streaming capabilities of the site.	/videos/thumbnails/1614229350137-bluecity.jpg	/videos/files/1614229350415-Test WebSocket Stream.webm	Test WebSocket Stream	152	bcec57c8-2eab-4acd-9f2e-24343d88c6fa	60235bb8-41f0-42c9-8bd7-f12f645f10a3	0	0	2021-02-25T05:02:30.137Z	web socket websocket stream test	jane	/users/icons/1609522478769-space.png	f	t	browser	f	f	\N
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	/videos/thumbnails/1614229816950-beautiful_landscapes_in_the_world-wallpaper-1920x1080.jpg	/videos/nmsMedia/live/XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=/2021-02-24-23-10-18.mp4	Test OBS Stream	135	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-02-25T05:10:16.950Z	test obs stream	example channel	/users/icons/1604712612118-bongoCat.png	f	t	obs	f	f	\N
+adsf	/server/deleteicon.png			0	fcTm0w9C	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-06-09T19:54:53.568Z	 asdf 		/server/deletechannelicon.png	f	\N	\N	t	f	\N
+This is an example video that is set to private in order to keep it hidden from other users.	/videos/thumbnails/1614534795337-spiderverse.jpeg	/videos/files/1614534795337-nyan.mp4	Example Private Video	2	73f606a5-69a4-4471-9d37-a4dc4eed488f	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-02-28T17:53:15.344Z	private video	example channel	/users/icons/1604712612118-bongoCat.png	f	\N	\N	f	t	\N
+This is a test video upload for the site.	/videos/thumbnails/1614151941099-bongoCat.png	/videos/files/1614151941099-nyan.mp4	Test Video Upload	399	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-02-24T07:32:21.102Z	nyan cat video example upload test	example channel	/users/icons/1604712612118-bongoCat.png	f	\N	\N	f	f	\N
+This is a test video to show the functionality of subtitles.	/videos/thumbnails/1623391587603-the_bean.jpeg	/videos/files/1623391587603-nyan.mp4	Subtitles Video Test	0	HmmwavpR	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-06-11T06:06:27.607Z	 subtitles 	example channel	/users/icons/1604712612118-bongoCat.png	f	\N	\N	f	f	/videos/subtitles1623391587603-example.srt
 \.
 
 
@@ -416,22 +475,6 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
-
-
---
--- Name: videos videos_thumbnail_key; Type: CONSTRAINT; Schema: public; Owner: merlin
---
-
-ALTER TABLE ONLY public.videos
-    ADD CONSTRAINT videos_thumbnail_key UNIQUE (thumbnail);
-
-
---
--- Name: videos videos_video_key; Type: CONSTRAINT; Schema: public; Owner: merlin
---
-
-ALTER TABLE ONLY public.videos
-    ADD CONSTRAINT videos_video_key UNIQUE (video);
 
 
 --
