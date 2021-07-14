@@ -31,7 +31,8 @@ function getReplies(commentid, toggle=true, callback=undefined) {
 					handleReplies(replies);
 
 					//call the function to scroll to a comment if necessary
-					if (typeof callback != undefined) {
+					if (typeof callback != 'undefined') {
+						console.log(callback);
 						callback(replies);
 					}
 
