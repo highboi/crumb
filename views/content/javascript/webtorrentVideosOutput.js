@@ -45803,6 +45803,8 @@ async function mainTorrentHandler() {
 	//log the magnet status
 	console.log(`MAGNET STATUS FOR ${videoid}:`, typeof magnetStatus, magnetStatus);
 
+	console.log("CLIENT RATIO:", client.ratio);
+
 	//do something according to the status of the magnet of this video
 	if (!magnetStatus) { //if there is no magnet for this video
 		//create a request object for the url of this video
@@ -45832,6 +45834,8 @@ async function mainTorrentHandler() {
 		//show the torrent in the console
 		console.log("TORRENT:", torrent);
 	}
+
+	window.torrent = torrent;
 
 	//get the torrent file
 	var file = torrent.files[0];
