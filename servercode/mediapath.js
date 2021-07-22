@@ -206,7 +206,7 @@ app.get("/v/delete/:videoid", middleware.checkSignedIn, async (req, res) => {
 		res.redirect("/");
 	} else {
 		//rerender the video page with a message that the video deletion didn't work
-		req.flash("message", "Error: Could not delete video.");
+		req.flash("message", "Error: Could not delete video, user information does not match.");
 		res.redirect(`/v/${req.params.videoid}`);
 	}
 });

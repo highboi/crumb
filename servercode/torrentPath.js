@@ -7,7 +7,7 @@ async function checkMagnetHealth(uri) {
 	var uri = decodeURIComponent(uri);
 
 	//make sure the pre-existing magnet link is a valid one with working peers/seeders by sending the magnet link to a checker
-	var magnetHealthResponse = await got(`https://checker.openwebtorrent.com/check?magnet=${encodeURIComponent(magnetlink)}`);
+	var magnetHealthResponse = await got(`https://checker.openwebtorrent.com/check?magnet=${encodeURIComponent(uri)}`);
 
 	//get the full magnet health data from the response body
 	var magnetHealth = JSON.parse(magnetHealthResponse.body);

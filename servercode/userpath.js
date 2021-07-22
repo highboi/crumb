@@ -30,11 +30,11 @@ app.get("/u/:userid", async (req, res) => {
 	//add the videos to the view object if the videos exist on the channel and if the section actually needs the videos to be sent with the view
 	switch(viewObj.section) {
 		case "home":
-			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1 ORDER BY views DESC LIMIT 10`, [req.params.userid]);
+			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=$2 ORDER BY views DESC LIMIT 10`, [req.params.userid, false]);
 			viewObj.videos = videos.rows;
 			break;
 		case "videos":
-			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1`, [req.params.userid]);
+			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=$2`, [req.params.userid, false]);
 			viewObj.videos = videos.rows;
 			break;
 		case "playlists":

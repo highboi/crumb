@@ -1,0 +1,17 @@
+# This is a document outlining the changes to make to the site design-wise
+
+Things to do:
+- Replace text buttons with images
+- Make a universal color scheme system in CSS so that colors don't get mixed
+- Come up with a color scheme to make the site look less bland than other "modern" and "minimalist" sites
+- Make playlist links have thumbnails and better overall styling
+- Make individual video thumbnails look individually identifiable from each other
+- Make extra buttons in the three dot menu on thumbnails float on top of everything else
+- Make the search bar more stylish and modern (less default html)
+- Add buttons on top of search results to skip to sections (channels, videos, playlists, etc)
+- Make a custom video player instead of the default HTML video player
+- Add a settings button to the custom video player to store all the settings and options such as playlist additions
+- Make the list of "topics" on the video hyperlinks to the topic urls. Explicitly define topics as different visually.
+- Differentiate different sections of views (comment section, video section) from each other visually using styling.
+- Add settings to customize the theme of the site using pre-sets and individual color options to add variety.
+- Use custom art made in inkscape and 3D graphics to make the site look good

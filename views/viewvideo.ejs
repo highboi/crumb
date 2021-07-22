@@ -37,7 +37,7 @@
 					</div>
 					<% if (!video.deleted && !video.private) { %>
 						<%- include('content/ejs/videotext.ejs') %>
-					<% } else if (!video.deleted) { %>
+					<% } else if (!video.deleted && typeof user != 'undefined' && user.id == video.user_id) { %>
 						<button onclick="redirectConfirm('Delete Video?', '/v/delete/<%= video.id %>')">Delete Video</button>
 					<% } %>
 				</div>
