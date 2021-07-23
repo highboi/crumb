@@ -17,6 +17,9 @@ const app = express();
 //make a server variable
 const server = require("http").createServer(app);
 
+//configure the server to be able to use environment variables
+require("dotenv").config();
+
 //make websocket servers pertaining to specific functions
 const liveWss = new WebSocket.Server({noServer: true}); //transfer of live video
 const chatWss = new WebSocket.Server({noServer: true}); //live chat
@@ -70,7 +73,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(session({
 		secret: process.env.SALT, ///the salt to encrypt the information in the session
 		resave: false, //do not resave session variables if nothing is changed
-		saveUninitialized: false //do not save uninitialized variables
+		saveUninitialized: false, //do not save uninitialized variables
+		expires: new Date(Date.now() + process.env.DAYS_EXPIRE * (24*60*60*1000)) //make all cookies expire in 7 days (in milliseconds)
 	})
 );
 
@@ -80,6 +84,9 @@ app.use(cookieParser());
 //allow the app to use flash messages
 app.use(flash());
 
+//make sure the app can parse json
+app.use(express.json());
+
 //declare a static directory for things like stylesheets and other content
 app.use(express.static('./views'));
 
@@ -88,6 +95,10 @@ app.use(express.static("./storage"));
 
 //use the busboy middleware to parse files and form data
 app.use(busboyBodyParser());
+
+//use the middleware function to check for a session id and set it if there
+//isn't one
+app.use(middleware.checkNotAssigned);
 
 //export the variables
 module.exports = {

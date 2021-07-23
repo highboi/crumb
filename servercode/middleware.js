@@ -37,6 +37,33 @@ var userauthFunctions = {
 		} else {
 			next();
 		}
+	},
+
+	//this is a function that checks to see if this user has been given a temporary session
+	//id in order to identify this user as a "visitor" to the site
+	checkNotAssigned: async function (req, res, next) {
+		//check for the existence of a session id and whether or not there are cookies
+		if (!Object.keys(req.cookies).length || ( Object.keys(req.cookies).length && !req.cookies.hasOwnProperty('tempsessionid') && !req.cookies.hasOwnProperty('sessionid') ) ) { //if the user does not have a session id
+			//generate a new session id
+			var newTempId = await middleware.generateSessionId();
+
+			//set this new session id as the temporary session id (id used until sign-in or registration)
+			res.cookie("tempsessionid", newTempId, {httpOnly: true, expires: 0});
+
+			//add this user to the redis store with blank info
+			redisClient.set(newTempId, "empty");
+
+			//get the amount of days we want to make the session last
+			var daysExpire = process.env.DAYS_EXPIRE * (24 * 60 * 60);
+
+			//set a timeout for this entry so that we don't keep sessions that don't exist
+			redisClient.sendCommandAsync("EXPIRE", [newTempId, daysExpire]);
+
+			//go to the next middleware function in the chain
+			next();
+		} else { //if the user has a session id
+			next();
+		}
 	}
 };
 
@@ -146,10 +173,27 @@ var reqHandling = {
 	},
 
 	//this is a function for generating a unique session id
-	generateSessionId: function () {
-	    var sha = crypto.createHash('sha256');
-	    sha.update(Math.random().toString());
-	    return sha.digest('hex');
+	generateSessionId: async function () {
+		//create a sha256 hash
+		var sha = crypto.createHash('sha256');
+
+		//add data to the hash in order to give it data to work with
+		sha.update(Math.random().toString());
+
+		//get the new id in hex format
+		var newid = sha.digest('hex');
+
+		//get any existing sessions with this id
+		var existingSession = await middleware.getUserSession(newid);
+
+		//check for the existence of an existing session with the new id
+		if (typeof existingSession == 'undefined') { //if the id is new
+			//return the id
+			return newid;
+		} else { //if the id is in use
+			//recursively call this same function to get an original session id
+			return await middleware.generateSessionId();
+		}
 	},
 
 	//this gets a user from the redis session store and returns the object for this user
@@ -891,8 +935,57 @@ OBJECT FOR STORING FUNCTIONS WHICH HANDLE THE MEDIA FILES ON THE SERVER
 */
 var mediaHandling = require("./mediaHandling");
 
+/*
+OBJECT FOR STORING FUNCTIONS FOR TORRENTS
+*/
+var torrentHandling = {
+	//function for checking the health of a magnet link
+	checkMagnetHealth: async (uri) => {
+		//decode the uri into the magnet link instead of url encoded stuff for proper checking
+		var uri = decodeURIComponent(uri);
+
+		//make sure the pre-existing magnet link is a valid one with working peers/seeders by sending the magnet link to a checker
+		var magnetHealthResponse = await got(`https://checker.openwebtorrent.com/check?magnet=${encodeURIComponent(uri)}`);
+
+		//get the full magnet health data from the response body
+		var magnetHealth = JSON.parse(magnetHealthResponse.body);
+
+		console.log(magnetHealth);
+
+		//get the peers/seeders amount and turn this into a logic statement to verify the health of the magnet link
+		var magnetIsHealthy = (magnetHealth.peers || magnetHealth.seeds);
+
+		//create a regex match for checking valid magnet links
+		var magnetmatch = new RegExp(/magnet:\?xt=urn:[a-z0-9]+:[a-z0-9]{32}/, "i");
+
+		//return the result of the magnet health and the magnet regex match
+		return (uri.match(magnetmatch) !== null && magnetIsHealthy);
+	}
+};
+
+/*
+OBJECT FOR STORING FUNCTIONS FOR ADVERTISEMENT/PAYMENT FUNTIONALITY
+*/
+var adHandling = {
+	/*
+	a function for getting the pricing of ads according to the amount of visitors/sessions
+	basically charging X dollars a month for each ad, with X being the daily visitors
+	divided by 10
+	*/
+	getAdPricing: async () => {
+		//get the amount of current sessions in the redis store
+		var dbsize = await redisClient.sendCommandAsync("DBSIZE", []);
+
+		//get the visitor count divided by 10 to get the charge for ads
+		var charge = dbsize / 10;
+
+		//return the ad pricing
+		return charge;
+	}
+};
+
 //put all of the object above into one middleware object containing the collective middleware functions
-var middleware = Object.assign({}, userauthFunctions, reqHandling, deletionHandling, miscFunctions, searchFunctions, reccomendationFunctions, loggingFunctions, shutdownFunctions, mediaHandling);
+var middleware = Object.assign({}, userauthFunctions, reqHandling, deletionHandling, miscFunctions, searchFunctions, reccomendationFunctions, loggingFunctions, shutdownFunctions, mediaHandling, torrentHandling, adHandling);
 
 //export the object with all of the middleware functions
 module.exports = middleware;

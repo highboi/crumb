@@ -181,10 +181,13 @@ app.post('/register', async (req, res) => {
 		await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
 
 		//generate a new session id
-		var newsessid = middleware.generateSessionId();
+		var newsessid = await middleware.generateSessionId();
 
 		//store the user info inside redis db
 		redisClient.set(newsessid, JSON.stringify(newuser));
+
+		//remove the temporary session id to be replaced with the new session
+		res.cookie('tempsessionid', '', {expires: new Date(0)});
 
 		//store the session id in the browser of the user
 		res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});
@@ -224,10 +227,13 @@ app.post("/login", async (req, res) => {
 		user.subscribedChannels = subscribedChannels.rows.map(({channel_id}) => channel_id);
 
 		//generate a new session id
-		var newsessid = middleware.generateSessionId();
+		var newsessid = await middleware.generateSessionId();
 
 		//store the user in redis
 		redisClient.set(newsessid, JSON.stringify(user));
+
+		//remove the temporary session id to be replaced with the new session
+		res.cookie('tempsessionid', '', {expires: new Date(0)});
 
 		//store the session id on the client side
 		res.cookie("sessionid", newsessid, {httpOnly: true, expires: 0});

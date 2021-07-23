@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Submit Advertisements"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<div id="adSubmission">
+				<h1>Submit an Advertisement:</h1>
+
+				<form action="/adpayment" method="POST" enctype='multipart/form-data' id="adSubmissionForm">
+					<label for="businessLink">Advertisement Link:</label>
+					<input type="text" id="businessLink" name="businessLink" required><br>
+
+					<label for="adImage">Advertisement Image/GIF:</label>
+					<input type="file" id="adImage" name="adImage" accept="image/*" required>
+
+					<hr>
+					<h4>Current Pricing: $<%= adPrice %>/month per advertisement according to daily visitors.</h4>
+					<hr>
+
+					<input type="submit" value="Submit Advertisement">
+				</form>
+			</div>
+
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
+	</body>
+</html>

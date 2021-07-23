@@ -13,3 +13,5 @@ require("./livepath");
 require("./example");
 //paths for torrent stuff
 require("./torrentPath");
+//paths for advertisements and payments for the site
+require("./paymentsPath");
