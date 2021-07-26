@@ -6,6 +6,7 @@ const ffmpeg = require("ffmpeg");
 const path = require("path");
 const client = require("./dbConfig");
 const {default: srtParser2} = require("srt-parser-2");
+const sizeOfImage = require("image-size");
 
 //object to store the media handling functions
 var mediaFunctions = {

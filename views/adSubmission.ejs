@@ -15,22 +15,51 @@
 			<div id="adSubmission">
 				<h1>Submit an Advertisement:</h1>
 
-				<form action="/adpayment" method="POST" enctype='multipart/form-data' id="adSubmissionForm">
-					<label for="businessLink">Advertisement Link:</label>
-					<input type="text" id="businessLink" name="businessLink" required><br>
+				<form action="" method="POST" enctype='multipart/form-data' id="adSubmissionForm">
+					<div id="adForm">
+						<label for="businessLink">Advertisement Link:</label>
+						<input type="url" id="businessLink" name="businessLink" required><br>
 
-					<label for="adImage">Advertisement Image/GIF:</label>
-					<input type="file" id="adImage" name="adImage" accept="image/*" required>
+						<label for="adImage">Advertisement Image/GIF:</label>
+						<input type="file" id="adImage" name="adImage" accept="image/*" required><br>
+
+						<label for="months">Months to Campaign:</label>
+						<input type="number" step="1" value="1" id="months" name="months"><br>
+
+						<label for="startDate">Start Date to Campaign:</label>
+						<input type="date" id="startDate" name="startDate">
+					</div>
 
 					<hr>
-					<h4>Current Pricing: $<%= adPrice %>/month per advertisement according to daily visitors.</h4>
+
+					<div id="cardForm">
+						<h4>Current Pricing: $<%= adPrice %>/month per advertisement according to daily visitors.</h4>
+
+						<label for="cardNumber">Card Number:</label>
+						<input type="text" id="cardNumber" name="cardNumber" minlength="16" maxlength="16"><br>
+
+						<label for="expMonth">Expiration Month:</label>
+						<input type="number" step="1" value="1" id="expMonth" name="expMonth" min="1" max="12"><br>
+
+						<label for="expYear">Expiration Year:</label>
+						<input type="text" id="expYear" name="expYear">
+					</div>
+
 					<hr>
 
-					<input type="submit" value="Submit Advertisement">
+					<button id="submitAdvert" type="button" onclick="advertSubmitted();">Submit Advertisement</button>
 				</form>
 			</div>
 
 			<%- include('content/ejs/scripts.ejs') %>
+
+			<script src="https://js.stripe.com/v3/"></script>
+
+			<script>
+				var stripePubKey = <%- JSON.stringify(stripePubKey) %>;
+			</script>
+
+			<script src="/content/javascript/stripeHandler.js"></script>
 		</main>
 	</body>
 </html>

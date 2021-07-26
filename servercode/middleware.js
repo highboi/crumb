@@ -149,7 +149,7 @@ var reqHandling = {
 
 		//check for the existence of anything in the DB with this same id
 		if (user || video || comment || playlist) {
-			middleware.generateAlphanumId();
+			return await middleware.generateAlphanumId();
 		} else {
 			console.log("VALID ID FOUND:", resultid);
 			return resultid;
@@ -162,12 +162,28 @@ var reqHandling = {
 		var newid = crypto.randomBytes(32).toString("base64");
 
 		//check to see if there are any existing users with the same stream key
-		var res = await client.query(`SELECT * FROM users WHERE streamkey=$1 LIMIT 1`, [newid]);
+		var res = await client.query(`SELECT id FROM users WHERE streamkey=$1 LIMIT 1`, [newid]);
 
-		if (res.rows.length > 0) {
-			middleware.generateStreamKey();
+		if (res.rows.length) {
+			return await middleware.generateStreamKey();
 		} else {
 			console.log("Valid Stream Key Found: " + newid.toString());
+			return newid;
+		}
+	},
+
+	//this is a function that generates ids for advertisements
+	generateAdvertId: async function () {
+		//generate random bytes (16 bytes instead of 32 used for stream keys) for the new id
+		var newid = crypto.randomBytes(16).toString("hex");
+
+		//check for ads with the same id as the newly generated one
+		var res = await client.query(`SELECT id FROM users WHERE id=$1 LIMIT 1`, [newid]);
+
+		if (res.rows.length) {
+			return await middleware.generateAdvertId();
+		} else {
+			console.log("Valid Advert ID Found:", newid);
 			return newid;
 		}
 	},

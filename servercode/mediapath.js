@@ -382,7 +382,7 @@ app.post("/v/submit", async (req, res) => {
 		req.flash("message", "Unsupported file type for thumbnail, please use png, jpeg or jpg.");
 		res.redirect("/v/submit");
 	} else if (!(videotype in acceptedvideo)) { //if the video file types are not supported, then show errors
-		req.flash("Unsupported file type for video, please use mp4, ogg, or webm.");
+		req.flash("message", "Unsupported file type for video, please use mp4, ogg, or webm.");
 		res.redirect("/v/submit");
 	}
 });

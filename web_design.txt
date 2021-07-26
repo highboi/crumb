@@ -15,3 +15,4 @@ Things to do:
 - Differentiate different sections of views (comment section, video section) from each other visually using styling.
 - Add settings to customize the theme of the site using pre-sets and individual color options to add variety.
 - Use custom art made in inkscape and 3D graphics to make the site look good
+- Use fonts from fontflipper and randomize the font for logos and the site in general
