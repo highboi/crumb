@@ -1,3 +1,5 @@
+.adverts {}
+
 #adSubmission {
 	text-align: center;
 	width: 50vw;
@@ -8,4 +10,9 @@
 	width: 30px;
 	height: 30px;
 	font-size: 20px;
+}
+
+#topBannerAd {
+	text-align: center;
+	margin: auto;
 }

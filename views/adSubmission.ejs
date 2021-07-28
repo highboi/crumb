@@ -20,8 +20,17 @@
 						<label for="businessLink">Advertisement Link:</label>
 						<input type="url" id="businessLink" name="businessLink" required><br>
 
+						<hr>
+
+						<h2>Accepted Image Resolutions:</h2>
+						<% adResolutions.forEach((item, index) => { %>
+							<p><%= item.width %>x<%= item.height %> for <%= item.type %> <%= item.position %>s</p>
+						<% }); %>
+
 						<label for="adImage">Advertisement Image/GIF:</label>
 						<input type="file" id="adImage" name="adImage" accept="image/*" required><br>
+
+						<hr>
 
 						<label for="months">Months to Campaign:</label>
 						<input type="number" step="1" value="1" id="months" name="months"><br>
@@ -50,6 +59,8 @@
 					<button id="submitAdvert" type="button" onclick="advertSubmitted();">Submit Advertisement</button>
 				</form>
 			</div>
+
+			<%- include('content/ejs/bottombody.ejs') %>
 
 			<%- include('content/ejs/scripts.ejs') %>
 

@@ -229,6 +229,15 @@ var mediaFunctions = {
 
 		//return the full subtitles
 		return result;
+	},
+
+	//a function for getting the resolution of an image based on the image data
+	getImgResolution: async function(img) {
+		//get the image dimensions based on the input buffer
+		var imgDimensions = sizeOfImage(img.data);
+
+		//return the image dimensions
+		return imgDimensions;
 	}
 };
 

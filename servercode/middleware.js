@@ -997,6 +997,48 @@ var adHandling = {
 
 		//return the ad pricing
 		return charge;
+	},
+
+	//a function for basically storing an ad resolutions array with the ad type and positioning
+	getAdResolutions: async () => {
+	        //make an array of the accepted dimensions for advertisements
+	        var acceptedDimensions = [
+			{width: 720, height: 90, type:"desktop", position: "banner"},
+			{width: 728, height: 90, type: "desktop", position: "banner"},
+			{width: 300, height: 250, type: "desktop", position: "square"},
+			{width: 160, height: 600, type: "desktop", position: "sidebanner"},
+			{width: 300, height: 50, type: "mobile", position: "banner"},
+			{width: 320, height: 50, type: "mobile", position: "banner"},
+			{width: 320, height: 100, type: "mobile", position: "banner"}
+		];
+
+		//return the accepted dimensions
+		return acceptedDimensions;
+	},
+
+	/*
+	a function for checking the resolution of an ad image against other resolutions
+	and returning the resolution and type (mobile vs desktop) of the ad image if the
+	ad is one of the accepted resolutions
+	*/
+	getAdResolution: async (adImgRes) => {
+	        //make an array of the accepted dimensions for advertisements
+	        var acceptedDimensions = await middleware.getAdResolutions();
+
+	        //loop through the accepted dimensions to set the type of advertisement in the ad resolution object
+	        for (var resolution of acceptedDimensions) {
+	                //if the resolution matches
+	                if (resolution.width == adImgRes.width && resolution.height == adImgRes.height) {
+	                        //set the advertisement resolution object to have the same type
+				adImgRes.type = resolution.type;
+
+				//set the advertisement resolution object to have the same positioning
+				adImgRes.position = resolution.position;
+	                }
+	        }
+
+		//return the advert image resolution along with the corresponding type
+		return adImgRes;
 	}
 };
 

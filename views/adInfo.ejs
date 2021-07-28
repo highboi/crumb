@@ -14,14 +14,17 @@
 
 			<% if (typeof advert != 'undefined') { %>
 				<h1>Advertisement Info for <%= advert.id %>:</h1>
-				<p>Months of Campaign: <%= advert.months %></p>
 				<p>Redirection URL: <%= advert.adlink %></p>
 				<p>Start Date of Campaign: <%= advert.startdate.split("T")[0]; %> at <%= advert.startdate.split("T")[1].split(".")[0]; %> on 24-hour clock.</p>
+				<p>Ending Date of Campaign: <%= advert.enddate.split("T")[0]; %> at <%= advert.enddate.split("T")[1].split(".")[0]; %> on 24-hour clock.</p>
+				<p>Months of Campaign: <%= advert.months %></p>
 				<p>Advert as seen by Users:</p>
 				<img src="<%= advert.adfile %>">
 			<% } else { %>
 				<h1>Advertisement does not exist.</h1>
 			<% } %>
+
+			<%- include('content/ejs/bottombody.ejs') %>
 
 			<%- include('content/ejs/scripts.ejs') %>
 		</main>

@@ -4,7 +4,7 @@ app.get("/example", async (req, res) => {
 	res.render("example.ejs");
 });
 
-app.post("/example", (req, res) => {
+app.post("/example", async (req, res) => {
 	console.log(req.files);
 
 	res.redirect("/example");

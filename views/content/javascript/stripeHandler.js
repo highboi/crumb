@@ -3,6 +3,18 @@
 //define a stripe handler
 var stripeHandler = Stripe(stripePubKey);
 
+//a function for getting the accepted dimensions for ads
+async function getAdDimensions() {
+	//get the url for the accepted dimensions
+	var adDimensions = await fetch("/addimensions");
+
+	//get the json from the response
+	adDimensions = await adDimensions.json();
+
+	//return the accepted dimensions
+	return adDimensions.acceptedDimensions;
+}
+
 //a function to check for the resolution of an image in the form
 async function checkImgResolution(img, resolutions) {
 	return new Promise((resolve, reject) => {
@@ -65,6 +77,9 @@ async function advertSubmitted() {
 
 	//check for an invalid start date
 	if (startDate < currentDate.getTime()) {
+		console.log("START DATE:", startDate);
+		console.log(currentDate.getTime());
+
 		alert("Invalid start date");
 		return;
 	}
@@ -83,14 +98,14 @@ async function advertSubmitted() {
 	}
 
 	//make an array of the accepted image resolutions
-	const acceptedDimensions = [{width: 720, height: 90}, {width: 300, height: 250}];
+	var acceptedDimensions = await getAdDimensions();
 
 	//check for the right image resolution
 	var imgResMatch = await checkImgResolution(document.querySelector("#adSubmissionForm #adImage").files[0], acceptedDimensions);
 
 	//alert the user if this image is not an accepted resolution
 	if (!imgResMatch) {
-		alert("Image is not one of the accepted resolutions. Choose 720x90 or 300x250.");
+		alert("Image is not one of the accepted resolutions.");
 		return;
 	}
 
@@ -156,8 +171,11 @@ async function advertSubmitted() {
 		//get the json from the response of the post request
 		var adResponseData = await adResponse.json();
 
+		//make the redirection url string
+		var redirectURL = `/adstats/${adResponseData.advertId}`;
+
 		//redirect the user to the adstats page
-		location.assign(`/adstats/${adResponseData}`);
+		window.location.href = redirectURL;
 	} else { //if there is no payment intent, then alert the user of the error
 		alert("Payment declined:\n\t" + result.error.code + " : " + result.error.message);
 	}
