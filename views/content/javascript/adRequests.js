@@ -40,8 +40,29 @@ function createAdElement(link, imgSrc) {
 		}).click();
 	};
 
+	//make an element to act as the close button
+	var closeBtn = document.createElement("span");
+
+	//set the class of this close button for styling
+	closeBtn.setAttribute("class", "closeBtnAds");
+
+	//set the text of the span element to have text
+	closeBtn.innerHTML = "x";
+
+	//set the onclick function to make the parent node invisible
+	closeBtn.addEventListener("click", (event) => {
+		console.log(event.target.parentNode.style);
+		event.target.parentNode.style.display = "none";
+	});
+
+	//make the containing div element
+	var containerDiv = document.createElement("div");
+
+	containerDiv.appendChild(adImg);
+	containerDiv.appendChild(closeBtn);
+
 	//return the ad element
-	return adImg;
+	return containerDiv;
 }
 
 //the main function for handling the display of ads

@@ -1,4 +1,8 @@
-.adverts {}
+.adverts {
+	text-align: center;
+	margin: auto;
+	background-color: #1f1f1f;
+}
 
 #adSubmission {
 	text-align: center;
@@ -12,7 +16,10 @@
 	font-size: 20px;
 }
 
-#topBannerAd {
-	text-align: center;
-	margin: auto;
+.closeBtnAds {
+	display: inline-block;
+	float: right;
+	color: black;
+	background-color: white;
+	border: solid gray;
 }

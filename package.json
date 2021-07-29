@@ -26,6 +26,7 @@
     "got": "^11.8.2",
     "image-size": "^1.0.0",
     "node-media-server": "^2.2.4",
+    "node-schedule": "^2.0.0",
     "path": "^0.12.7",
     "pg": "^8.2.1",
     "redis": "^3.1.2",

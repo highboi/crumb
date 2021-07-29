@@ -9,6 +9,8 @@ const crypto = require("crypto");
 const readline = require("readline");
 const approx = require("approximate-number");
 const ffmpeg = require("ffmpeg");
+const schedule = require("node-schedule");
+const got = require("got");
 
 //get the write stream to write to the log file
 const logger = require("./logger");
@@ -966,8 +968,6 @@ var torrentHandling = {
 		//get the full magnet health data from the response body
 		var magnetHealth = JSON.parse(magnetHealthResponse.body);
 
-		console.log(magnetHealth);
-
 		//get the peers/seeders amount and turn this into a logic statement to verify the health of the magnet link
 		var magnetIsHealthy = (magnetHealth.peers || magnetHealth.seeds);
 
@@ -1039,6 +1039,22 @@ var adHandling = {
 
 		//return the advert image resolution along with the corresponding type
 		return adImgRes;
+	},
+
+	//a function for scheduling the expiry and deletion of an advertisement
+	scheduleAdExpiry: async function (date, id) {
+		//use the date to schedule the expiry of advertisements
+		schedule.scheduleJob(date, async () => {
+			await client.query(`UPDATE adverts SET expired=$1 WHERE id=$2`, [true, id]);
+		});
+
+		//add one month to the date object
+		date.setMonth(date.getMonth()+1);
+
+		//schedule to delete advertisements one month after the expiry date
+		schedule.scheduleJob(date, async () => {
+			await client.query(`DELETE FROM adverts WHERE id=$1`, [id]);
+		});
 	}
 };
 

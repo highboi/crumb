@@ -14,12 +14,15 @@
 
 			<% if (typeof advert != 'undefined') { %>
 				<h1>Advertisement Info for <%= advert.id %>:</h1>
-				<p>Redirection URL: <%= advert.adlink %></p>
-				<p>Start Date of Campaign: <%= advert.startdate.split("T")[0]; %> at <%= advert.startdate.split("T")[1].split(".")[0]; %> on 24-hour clock.</p>
-				<p>Ending Date of Campaign: <%= advert.enddate.split("T")[0]; %> at <%= advert.enddate.split("T")[1].split(".")[0]; %> on 24-hour clock.</p>
-				<p>Months of Campaign: <%= advert.months %></p>
-				<p>Advert as seen by Users:</p>
-				<img src="<%= advert.adfile %>">
+				<% if (!advert.expired) { %>
+					<p>Redirection URL: <%= advert.adlink %></p>
+					<p>Start Date of Campaign: <%= advert.startdate.split("T")[0]; %> at <%= advert.startdate.split("T")[1].split(".")[0]; %> on 24-hour clock.</p>
+					<p>Months for Campaign: <%= advert.months %></p>
+					<p>Advertisement as seen by Users:</p>
+					<img src="<%= advert.adfile %>">
+				<% } else { %>
+					<p>Ad Campaign has expired, please begin a new one <a href="/advertise" target="_blank">here</a>.</p>
+				<% } %>
 			<% } else { %>
 				<h1>Advertisement does not exist.</h1>
 			<% } %>

@@ -105,12 +105,6 @@ app.post("/adsubmission", async (req, res) => {
 	//get the start date in an ISO timestamp format
 	adStartDate = adTimestamp.toISOString();
 
-	//add the amount of months to campaign to the ad timestamp
-	adTimestamp.setMonth(adTimestamp.getMonth()+parseInt(req.body.months));
-
-	//get the ending date as an iso string
-	var adEndingDate = adTimestamp.toISOString();
-
 	//get the resolution of the advertisement image
 	var adRes = await middleware.getImgResolution(req.files.adImage);
 
@@ -118,10 +112,16 @@ app.post("/adsubmission", async (req, res) => {
 	adRes = await middleware.getAdResolution(adRes);
 
 	//store all of the advertisement values in an array
-	var advertValues = [newAdId, req.body.businessLink, adFilePath, req.body.months, adStartDate, adEndingDate, adRes.type, adRes.position];
+	var advertValues = [newAdId, req.body.businessLink, adFilePath, req.body.months, adStartDate, adRes.type, adRes.position];
 
 	//store this advert in the db
-	var advert = await client.query(`INSERT INTO adverts (id, adlink, adfile, months, startdate, enddate, type, position) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`, advertValues);
+	var advert = await client.query(`INSERT INTO adverts (id, adlink, adfile, months, startdate, type, position) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`, advertValues);
+
+	//add the amount of months to campaign to the ad timestamp to get the ending date of the campaign
+	adTimestamp.setMonth(adTimestamp.getMonth()+parseInt(req.body.months));
+
+	//schedule for the expiry and deletion of the ad from the database
+	await middleware.scheduleAdExpiry(adTimestamp, newAdId);
 
 	//return the advertisement to the front end
 	res.send({advertId: advert.rows[0].id});
