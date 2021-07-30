@@ -21,6 +21,24 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: adverts; Type: TABLE; Schema: public; Owner: merlin
+--
+
+CREATE TABLE public.adverts (
+    id text,
+    adlink text,
+    adfile text,
+    months bigint,
+    startdate text,
+    type text,
+    "position" text,
+    expired boolean DEFAULT false
+);
+
+
+ALTER TABLE public.adverts OWNER TO merlin;
+
+--
 -- Name: comments; Type: TABLE; Schema: public; Owner: merlin
 --
 
@@ -191,7 +209,6 @@ ALTER TABLE public.subscribedtopics OWNER TO merlin;
 
 CREATE TABLE public.users (
     password text NOT NULL,
-    email text NOT NULL,
     username text NOT NULL,
     id text DEFAULT 0 NOT NULL,
     channelicon text,
@@ -269,6 +286,16 @@ ALTER TABLE public.videos_views_seq OWNER TO merlin;
 --
 
 ALTER SEQUENCE public.videos_views_seq OWNED BY public.videos.views;
+
+
+--
+-- Data for Name: adverts; Type: TABLE DATA; Schema: public; Owner: merlin
+--
+
+COPY public.adverts (id, adlink, adfile, months, startdate, type, "position", expired) FROM stdin;
+dea7947e4d47927f0f28ced0cf31c361	http://google.com	/adverts/1627541741781-example_banner_desktop.jpg	1	2021-08-31T05:00:00.000Z	desktop	banner	\N
+5417131863d47bb7ae8a40780382b2a0	http://duckduckgo.com	/adverts/1627542155824-example_banner_mobile.jpeg	1	2021-08-31T05:00:00.000Z	desktop	square	\N
+\.
 
 
 --
@@ -412,9 +439,9 @@ COPY public.subscribedtopics (topicname, user_id) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: merlin
 --
 
-COPY public.users (password, email, username, id, channelicon, channelbanner, subscribers, description, topics, streamkey, videocount) FROM stdin;
-$2b$10$wo4Hx.FPEvKydMybmPirYO1QSphfJk/Ermt4euUMVMQNP0QDrMke.	sam@gmail.com	example channel	319d6fad-2946-405b-be30-1c1be4055e0b	/users/icons/1604712612118-bongoCat.png	/users/banners/1604712612118-bluecity.jpg	1	This is a test channel to test features on the site.	crumb webdev nodejs	XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=	4
-$2b$10$equ0TrTCwzA8TbqQXRPg1epYz5Xy4A0RPOid4sZOZvYhI4cFv7pZm	jane@gmail.com	jane	60235bb8-41f0-42c9-8bd7-f12f645f10a3	/users/icons/1609522478769-space.png	/users/banners/1609522478769-skyscrapers.jpg	0	A second channel on the site	this is a second channel	wxOGBvOZ3DXnwJ8j7cMxFSXVbFSBysG2bPAP1VQRvo0=	1
+COPY public.users (password, username, id, channelicon, channelbanner, subscribers, description, topics, streamkey, videocount) FROM stdin;
+$2b$10$wo4Hx.FPEvKydMybmPirYO1QSphfJk/Ermt4euUMVMQNP0QDrMke.	example channel	319d6fad-2946-405b-be30-1c1be4055e0b	/users/icons/1604712612118-bongoCat.png	/users/banners/1604712612118-bluecity.jpg	1	This is a test channel to test features on the site.	crumb webdev nodejs	XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=	4
+$2b$10$equ0TrTCwzA8TbqQXRPg1epYz5Xy4A0RPOid4sZOZvYhI4cFv7pZm	jane	60235bb8-41f0-42c9-8bd7-f12f645f10a3	/users/icons/1609522478769-space.png	/users/banners/1609522478769-skyscrapers.jpg	0	A second channel on the site	this is a second channel	wxOGBvOZ3DXnwJ8j7cMxFSXVbFSBysG2bPAP1VQRvo0=	1
 \.
 
 
@@ -459,14 +486,6 @@ This is a test video to show the functionality of subtitles.	/videos/thumbnails/
 --
 
 SELECT pg_catalog.setval('public.videos_views_seq', 5, true);
-
-
---
--- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: merlin
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_email_key UNIQUE (email);
 
 
 --
