@@ -64,47 +64,13 @@ app.get("/playlistvideo/view/:playlistid/:videoid", async (req, res) => {
 	playlistvideos = playlistvideos.sort((a, b) => {return a.videoorder-b.videoorder});
 
 	//get the reccomendations for this video
-	var reccomendations = await middleware.getReccomendations(video);
+	var reccomendations = await middleware.getReccomendations(req, video);
 
-	//get all of the comments associated with the video
-	var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1`, [video.id]);
-	comments = comments.rows;
-
-	//select all of the chat messages that were typed if this was a live stream
-	var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE stream_id=$1`, [req.params.videoid]);
-
-	//check to see if the chat replay messages are undefined or not
-	if (typeof chatReplayMessages.rows != 'undefined' && chatReplayMessages.rows.length > 0) {
-		//get all of the user ids from the live chat and remove duplicates by putting them in a set
-		var chatUserIds = chatReplayMessages.rows.map((item) => {
-			return item.user_id;
-		});
-		chatUserIds = [...new Set(chatUserIds)];
-
-		//put the channel icons and usernames associated with the user ids above into an object
-		var chatMessageInfo = {};
-
-		//use the .map() method with async function to iterate over promises which are passed to Promise.all(),
-		//which can then be "awaited" on to finish/complete all promises being iterated before proceeding
-		await Promise.all(chatUserIds.map(async (item) => {
-			//get the channel icon and username if this user with this id
-			var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1 LIMIT 1`, [item]);
-			userChatInfo = userChatInfo.rows[0];
-
-			//insert the channel icon and username into the object with the key being the user id
-			chatMessageInfo[item] = userChatInfo;
-		}));
-
-		//map the chat replay messages to have both the original chat message object and the extra user info all in one object
-		chatReplayMessages = chatReplayMessages.rows.map((item) => {
-			return Object.assign({}, item, chatMessageInfo[item.user_id]);
-		});
-	} else {
-		chatReplayMessages = undefined;
-	}
+	//get other video information
+	var videoInfo = await middleware.getVideoInfo(video);
 
 	//add the necesary items to the view object
-	viewObj = Object.assign({}, viewObj, {playlist: playlist, video: video, videocreator: videocreator, playlistvideos: playlistvideos, reccomendations: reccomendations, comments: comments, chatReplayMessages: chatReplayMessages});
+	viewObj = Object.assign({}, viewObj, {playlist: playlist, video: video, playlistvideos: playlistvideos, reccomendations: reccomendations}, videoInfo);
 
 	//render the playlist video view
 	res.render("viewvideo.ejs", viewObj);

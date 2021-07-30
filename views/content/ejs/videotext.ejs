@@ -1,5 +1,7 @@
 <div class="videotext">
-	<%- include('./subtitles.ejs', {subtitles: subtitles}) %>
+	<% if (typeof subtitles != 'undefined') { %>
+		<%- include('./subtitles.ejs', {subtitles: subtitles}) %>
+	<% } %>
 
 	<%- include('./videosettings.ejs', {resolutions: resolutions}) %>
 

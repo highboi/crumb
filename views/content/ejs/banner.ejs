@@ -17,6 +17,30 @@
 			</div>
 		</form>
 	</div>
+	<div id="actionsmenu" class="dropdown">
+		<p>Do Things</p>
+		<div class="dropdown-content">
+			<% if (typeof user != 'undefined') { %>
+				<% var channellink = `/u/${user.id}`; %>
+				<button><a href="/">Home</a></button><br>
+				<button><a href="<%= channellink %>">My Channel</a></button><br>
+				<button><a href="<%= channellink %>/?section=playlists">My Playlists</a></button><br>
+				<button><a href="/v/submit">Submit a Video</a></button><br>
+				<button><a href="/playlist/new">Make a Playlist</a></button><br>
+				<button><a href="/l/start">Start a Live Stream</a></button><br>
+				<button><a href="/logout">Log Out</a></button>
+			<% } else { %>
+				<button><a href="/login">Login</a></button><br>
+				<button><a href="/register">Register</a></button>
+			<% } %>			
+		</div>
+	</div>
+	<div id="settingsmenu" class="dropdown">
+		<p>SETTINGS</p>
+		<div class="dropdown-content">
+			
+		</div>
+	</div>
 	<div id="usercorner">
 		<% if (typeof user != 'undefined') { %>
 			<button id="channelcorner" onclick="window.location.href = '/u/<%= user.id %>';"><img src="<%= user.channelicon %>"></button>

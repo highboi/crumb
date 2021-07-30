@@ -22,69 +22,20 @@ app.get("/v/:videoid", async (req, res) => {
 	var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.videoid]);
 	video = video.rows[0];
 
-	//get the video creator
-	var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
-	videocreator = videocreator.rows[0];
-
 	//check to see that the video is not deleted or private before getting information that is not needed or does not exist
 	if (!video.deleted && !video.private) {
-		//get the resolutions possible for this video
-		var resolutions = await client.query(`SELECT resolution FROM videofiles WHERE id=$1`, [req.params.videoid]);
-		resolutions = resolutions.rows[0].resolution;
+		//get video information
+		var videoInfo = await middleware.getVideoInfo(video);
 
 		//get the reccomendations for this video
 		var reccomendations = await middleware.getReccomendations(req, video);
 
-		//select the comments that belong to the video and order the comments by the amount of likes (most likes to least likes)
-		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1 AND base_parent_id IS NULL ORDER BY likes DESC`, [req.params.videoid]);
-		comments = comments.rows;
-
-		//select all of the chat messages that were typed if this was a live stream
-		var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE stream_id=$1`, [req.params.videoid]);
-
-		//get all of the user ids from the live chat and remove duplicates by putting them in a set
-		var chatUserIds = chatReplayMessages.rows.map((item) => {
-			return item.user_id;
-		});
-		chatUserIds = [...new Set(chatUserIds)];
-
-		//put the channel icons and usernames associated with the user ids above into an object
-		var chatMessageInfo = {};
-
-		//use the .map() method with async function to iterate over promises which are passed to Promise.all(),
-		//which can then be "awaited" on to finish/complete all promises being iterated before proceeding
-		await Promise.all(chatUserIds.map(async (item) => {
-			//get the channel icon and username if this user with this id
-			var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1 LIMIT 1`, [item]);
-			userChatInfo = userChatInfo.rows[0];
-
-			//insert the channel icon and username into the object with the key being the user id
-			chatMessageInfo[item] = userChatInfo;
-		}));
-
-		//map the chat replay messages to have both the original chat message object and the extra user info all in one object
-		chatReplayMessages = chatReplayMessages.rows.map((item) => {
-			return Object.assign({}, item, chatMessageInfo[item.user_id]);
-		});
-
-		//get the subtitles object according to the file of this video
-		if (video.subtitles != null) {
-			var subtitles = await middleware.getSubtitles(global.appRoot + "/storage" + video.subtitles);
-		} else {
-			var subtitles = video.subtitles;
-		}
-
 		//create the new view object with the new objects
-		viewObj = Object.assign({}, viewObj, {video: video, reccomendations: reccomendations, videocreator: videocreator, approx: approx, comments: comments, resolutions: resolutions, subtitles: subtitles});
-
-		//check to see if there are any chat messages to replay
-		if (chatReplayMessages.length > 0) {
-			viewObj.chatReplayMessages = chatReplayMessages;
-		}
+		viewObj = Object.assign({}, viewObj, {video: video, reccomendations: reccomendations, approx: approx}, videoInfo);
 
 		//render the video view based on whether or not the user is logged in and has a session variable
 		if (req.cookies.sessionid) {
-			var subscribed = await client.query(`SELECT EXISTS(SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2 LIMIT 1)`, [videocreator.id, viewObj.user.id]);
+			var subscribed = await client.query(`SELECT EXISTS(SELECT * FROM subscribed WHERE channel_id=$1 AND user_id=$2 LIMIT 1)`, [viewObj.videocreator.id, viewObj.user.id]);
 			viewObj.subscribed = subscribed.rows[0].exists;
 		}
 
@@ -104,6 +55,11 @@ app.get("/v/:videoid", async (req, res) => {
 			viewObj.scrollCommentBaseId = base_parent_id;
 		}
 	} else {
+		//get the video creator
+		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
+		videocreator = videocreator.rows[0];
+
+		//assign only the video and videocreator to the view object
 		viewObj = Object.assign({}, viewObj, {video: video, videocreator: videocreator});
 	}
 

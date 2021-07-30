@@ -1,0 +1,160 @@
+/*
+STYLING FOR MENU ITEMS SUCH AS BANNERS AND NAVBARS
+*/
+
+/*
+NAVBAR STYLING
+*/
+
+nav {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+nav .navbar {
+	background-color: #adff12;
+	width: 100px;
+	height: 100vh;
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	margin-left: 0px;
+	z-index: auto;
+}
+
+nav .navbar #navbar-icon {
+	background-color: #adff12;
+	width: 100px;
+	height: 100px;
+}
+
+nav .navbar #navbar-icon img {
+	width: 70px;
+	height: 70px;
+	margin: 15px;
+}
+
+nav .navbar #navbar-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0;
+	margin: 0;
+}
+
+
+/*
+THE SITE BANNER AT THE TOP OF EACH PAGE
+*/
+
+/* style the banner in general */
+nav .banner {
+	background-color: #adff12;
+	position: fixed;
+	top: 0px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	margin-left: 90px;
+	width: calc(100% - 100px);
+	z-index: auto;
+}
+
+/* style the banner icon to the left of the banner */
+nav .banner #banner-icon img {
+	width: 100px;
+	height: 80px;
+	border: solid #3f3f3f;
+	border-radius: 30%;
+	margin: 5px;
+}
+
+/* style the search bar in the center of the banner */
+nav .banner #searchbar {
+	margin: 0 auto;
+	/*transform: translateX(-25%);*/
+}
+
+nav .banner #searchbar form {
+	display: grid;
+	grid-template-areas:
+	"searchbtn searchquery searchquery"
+	"searchbtn searchrecs searchrecs";
+}
+
+nav .banner #searchbar #searchbtn {
+	grid-area: searchbtn;
+	margin-top: 50%;
+	transform: translateY(-50%);
+}
+
+nav .banner #searchbar #searchbtn button {
+	width: 45px;
+	height: 45px;
+	background-color: #7dff12;
+	border-color: black;
+	border-width: 5px;
+}
+
+nav .banner #searchbar #searchquerydiv {
+	grid-area: searchquery;
+}
+
+nav .banner #searchbar #searchquerydiv input {
+	height: 45px;
+	background-color: #3f3f3f;
+	color: #adff12;
+	outline: none;
+	border: 1px solid black;
+	box-shadow: none;
+}
+
+nav .banner #searchbar #searchrecs {
+	grid-area: searchrecs;
+	display: none;
+	position: absolute;
+	text-align: center;
+	background-color: #adff12;
+	color: #2f2f2f;
+	min-width: 80%;
+	z-index: 1;
+}
+
+nav .banner #searchbar #searchrecs a {
+	color: #2f2f2f;
+}
+
+/* style the channel link or sign-in link on the right side of the banner */
+nav .banner #usercorner {
+	margin-right: 30px;
+}
+
+nav .banner #usercorner #channelcorner {
+	width: 80px;
+	height: 80px;
+	background-color: #1f1f1f;
+	border: none;
+	border-radius: 50%;
+}
+
+nav .banner #usercorner #channelcorner:hover {
+	cursor: pointer;
+}
+
+nav .banner #usercorner #channelcorner img {
+	width: 60px;
+	height: 60px;
+	min-width: 50px;
+	min-height: 50px;
+	border-radius: 50%;
+}
+
+nav .banner #usercorner #signincorner {
+	width: 100px;
+	height: 60px;
+	border: solid #4f4f4f;
+	background-color: black;
+	font-size: 20px;
+}

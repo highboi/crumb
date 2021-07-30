@@ -6,15 +6,21 @@ GET PATHS FOR PAYMENTS ON THE SITE WITH STRIPE
 */
 
 //a get path for submitting advertisements on the site
-app.get("/advertise", async (req, res) => {
+app.get("/advertise", middleware.checkSignedIn, async (req, res) => {
 	//get the ad pricing
 	var charge = await middleware.getAdPricing();
 
 	//get the accepted ad resolutions
 	var adResolutions = await middleware.getAdResolutions();
 
+	//get the view object from the middleware
+	var viewObj = await middleware.getViewObj(req, res);
+
+	//merge some new parameters with the view object
+	viewObj = Object.assign({}, viewObj, {adPrice: charge, message: req.flash("message"), stripePubKey: process.env.PUBLIC_STRIPE_KEY, adResolutions: adResolutions});
+
 	//render the ad submission page
-	res.render("adSubmission.ejs", {adPrice: charge, message: req.flash("message"), stripePubKey: process.env.PUBLIC_STRIPE_KEY, adResolutions: adResolutions});
+	res.render("adSubmission.ejs", viewObj);
 });
 
 //a get path for the stats page of an advert

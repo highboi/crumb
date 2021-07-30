@@ -117,6 +117,65 @@ var reqHandling = {
 		return viewObj;
 	},
 
+	//a function for getting the relevant information about a video for the view object
+	getVideoInfo: async function (video) {
+		//get the creator of the video
+		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
+		videocreator = videocreator.rows[0];
+
+		//get the comments for this video
+		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1`, [video.id]);
+		comments = comments.rows;
+
+		//get the accepted resolutions for this video
+		var resolutions = await client.query(`SELECT resolution FROM videofiles WHERE id=$1 LIMIT 1`, [video.id]);
+		resolutions = resolutions.rows[0].resolution;
+
+		//get the subtitles object according to the file of this video
+		if (video.subtitles != null) {
+			var subtitles = await middleware.getSubtitles(global.appRoot + "/storage" + video.subtitles);
+		} else {
+			var subtitles = video.subtitles;
+		}
+
+		//select all of the chat messages that were typed if this was a live stream
+		var chatReplayMessages = await client.query(`SELECT * FROM livechat WHERE stream_id=$1`, [video.id]);
+
+		//check to see if the chat replay messages are undefined or not
+		if (typeof chatReplayMessages.rows != 'undefined' && chatReplayMessages.rows.length > 0) {
+			//get all of the user ids from the live chat and remove duplicates by putting them in a set
+			var chatUserIds = chatReplayMessages.rows.map((item) => {
+				return item.user_id;
+			});
+			chatUserIds = [...new Set(chatUserIds)];
+
+			//put the channel icons and usernames associated with the user ids above into an object
+			var chatMessageInfo = {};
+
+			//use the .map() method with async function to iterate over promises which are passed to Promise.all(),
+			//which can then be "awaited" on to finish/complete all promises being iterated before proceeding
+			await Promise.all(chatUserIds.map(async (item) => {
+				//get the channel icon and username if this user with this id
+				var userChatInfo = await client.query(`SELECT channelicon, username FROM users WHERE id=$1 LIMIT 1`, [item]);
+				userChatInfo = userChatInfo.rows[0];
+
+				//insert the channel icon and username into the object with the key being the user id
+				chatMessageInfo[item] = userChatInfo;
+			}));
+
+			//map the chat replay messages to have both the original chat message object and the extra user info all in one object
+			chatReplayMessages = chatReplayMessages.rows.map((item) => {
+				return Object.assign({}, item, chatMessageInfo[item.user_id]);
+			});
+		} else {
+			chatReplayMessages = undefined;
+		}
+
+		//create an object out of all of this information
+		var videoInfo = {videocreator: videocreator, comments: comments, resolutions: resolutions, subtitles: subtitles, chatReplayMessages: chatReplayMessages};
+		return videoInfo;
+	},
+
 	//this is a function that generates a new alphanumeric id
 	generateAlphanumId: async function () {
 		//alphanumeric character set
