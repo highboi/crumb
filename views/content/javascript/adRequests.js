@@ -9,22 +9,17 @@ async function getAds(amount, platform, position=undefined) {
 		var fetchurl = `/adverts/${platform}/?adLimit=${amount}&position=${position}`;
 	}
 
-	//make a fetch request for the adverts
+	//get the advertisements from the fetch url
 	var advertsResponse = await fetch(fetchurl);
-
-	//get the advertisements in json
 	var adverts = await advertsResponse.json();
 
-	//return the advertisements
 	return adverts;
 }
 
 //a function for making an ad element and adding the source link to it
 function createAdElement(link, imgSrc) {
-	//create an image element
 	var adImg = document.createElement("img");
 
-	//set the image source to the advertisement file
 	adImg.src = imgSrc;
 
 	//set the onclick function of the image to redirect to the advertisement url
@@ -40,52 +35,43 @@ function createAdElement(link, imgSrc) {
 		}).click();
 	};
 
-	//make an element to act as the close button
 	var closeBtn = document.createElement("span");
 
-	//set the class of this close button for styling
 	closeBtn.setAttribute("class", "closeBtnAds");
 
-	//set the text of the span element to have text
 	closeBtn.innerHTML = "x";
 
-	//set the onclick function to make the parent node invisible
+	//set the onclick function to make the parent node invisible (close the ad)
 	closeBtn.addEventListener("click", (event) => {
 		console.log(event.target.parentNode.style);
 		event.target.parentNode.style.display = "none";
 	});
 
-	//make the containing div element
+	//make the final ad element
 	var containerDiv = document.createElement("div");
-
 	containerDiv.appendChild(adImg);
 	containerDiv.appendChild(closeBtn);
 
-	//return the ad element
 	return containerDiv;
 }
 
 //the main function for handling the display of ads
 async function mainAdFunction() {
-	//check for mobile browsers
 	if (navigator.userAgent.toLowerCase().includes("mobile")) {
 		var platform = "mobile";
 	} else {
 		var platform = "desktop";
 	}
 
-	//get all of the container divs on the page for adverts
 	var adContainers = Array.from(document.querySelectorAll(".adverts"));
 
 	//a variable to store all of the advertisement positions and the amount of elements correspond to these
 	var adPositions = {};
 
-	//loop through the ad containers
 	for (var container of adContainers) {
-		//get the position of this container
 		var adPosition = container.dataset.position;
 
-		//increase or set the number of element corresponding with this type of ad
+		//increase or set the number of elements corresponding with this type of positioning
 		if (typeof adPositions[adPosition] == 'undefined') {
 			adPositions[adPosition] = 1;
 		} else {
@@ -96,7 +82,6 @@ async function mainAdFunction() {
 	//make an object to contain all of the different ad positions and their corresponding advertisements
 	var adverts = {};
 
-	//loop through the positions in the adPositions array
 	for (var type of Object.keys(adPositions)) {
 		//get ads based on the amount of ads needed for this particular position
 		var ads = await getAds(adPositions[type], platform, type);
@@ -105,20 +90,14 @@ async function mainAdFunction() {
 		adverts[type] = ads;
 	}
 
-	//loop through all of the advertisement containers
 	for (var container of adContainers) {
-		//get the positioning of the advertisement
 		var adPosition = container.dataset.position;
 
-		//get the first advertisement object in the array corresponding to the above position
 		var targetAd = adverts[adPosition][0];
 
-		//if this advertisement is not undefined
 		if (typeof targetAd != 'undefined') {
-			//create an ad element with the image and link in the advertisement object
-			var adElement = await createAdElement(targetAd.adlink, targetAd.adfile);
+			var adElement = await createAdElement(targetAd.businessdomain+targetAd.adlink, targetAd.adfile);
 
-			//append this advertisement element to it's container
 			container.append(adElement);
 
 			/*

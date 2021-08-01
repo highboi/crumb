@@ -69,6 +69,16 @@ async function advertSubmitted() {
 		}
 	}
 
+	//make sure the business link is a valid relative url instead of jibberish or a domain name
+	var businessLink = document.querySelector("#businessLink");
+
+	var relativeURLRegex = new RegExp("^(\/)[^ :]*");
+
+	if (!businessLink.value.match(relativeURLRegex)) {
+		alert("Invalid URL for advertisement, use relative URLs such as /example or /index.html (/ for the landing page).");
+		return;
+	}
+
 	//get the start date value
 	var startDate = document.querySelector("#adSubmissionForm #startDate").valueAsDate.getTime();
 
@@ -142,17 +152,13 @@ async function advertSubmitted() {
 	});
 
 	//check for the status of the payment
-	if (typeof result.paymentIntent != 'undefined') { //if there is a successful payment intent
-		//alert the user of a successful payment
+	if (typeof result.paymentIntent != 'undefined') {
 		alert("Payment Succeeded!");
 
-		//make a form data object for submitting the advertisement
 		var advertForm = new FormData();
 
-		//get all of the advert data fields
 		var advertInputs = Array.from(document.querySelectorAll("#adSubmissionForm #adForm input"));
 
-		//loop through all of the inputs from the ad submission form
 		for (var input of advertInputs) {
 			//check for files which need a different way of getting the data
 			if (input.type == "file") {
@@ -162,21 +168,19 @@ async function advertSubmitted() {
 			}
 		}
 
-		//send a post request to the ad submission url
-		var adResponse = await fetch("/adsubmission", {
+		var response = await fetch("/adsubmission", {
 			method: "POST",
 			body: advertForm
 		});
 
-		//get the json from the response of the post request
-		var adResponseData = await adResponse.json();
+		var jsonparsed = await response.json();
 
-		//make the redirection url string
-		var redirectURL = `/adstats/${adResponseData.advertId}`;
+		window.location.href = "/adstats";
 
-		//redirect the user to the adstats page
-		window.location.href = redirectURL;
-	} else { //if there is no payment intent, then alert the user of the error
+		return;
+	} else {
 		alert("Payment declined:\n\t" + result.error.code + " : " + result.error.message);
+
+		return;
 	}
 }

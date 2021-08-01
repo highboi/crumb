@@ -12,20 +12,31 @@
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
-			<% if (typeof advert != 'undefined') { %>
-				<h1>Advertisement Info for <%= advert.id %>:</h1>
-				<% if (!advert.expired) { %>
-					<p>Redirection URL: <%= advert.adlink %></p>
-					<p>Start Date of Campaign: <%= advert.startdate.split("T")[0]; %> at <%= advert.startdate.split("T")[1].split(".")[0]; %> on 24-hour clock.</p>
-					<p>Months for Campaign: <%= advert.months %></p>
-					<p>Advertisement as seen by Users:</p>
-					<img src="<%= advert.adfile %>">
-				<% } else { %>
-					<p>Ad Campaign has expired, please begin a new one <a href="/advertise" target="_blank">here</a>.</p>
+
+			<div id="adStats">
+				<% if (typeof adverts != 'undefined' && typeof adDomain != 'undefined') { %>
+					<h1>Advertisements for <%= adDomain %></h1>
+
+					<% adverts.forEach((advert, index) => { %>
+						<div class="adContainer">
+						<% if (!advert.expired) { %>
+							<h2>Advertisement with URL: <%= adDomain %><%= advert.adlink %></h2>
+							<p>Start Date of Campaign: <%= advert.startdate.split("T")[0]; %> at <%= advert.startdate.split("T")[1].split(".")[0]; %> on 24-hour clock.</p>
+							<p>Months for Campaign: <%= advert.months %></p>
+							<p>Advertisement as seen by Users:</p>
+							<img src="<%= advert.adfile %>">						
+						<% } else { %>
+							<h2>Advertisement with URL: <%= adDomain %><%= advert.adlink %></h2>
+							<p>Ad Campaign has expired, please begin a new one <a href="/advertise" target="_blank">here</a>.</p>
+						<% } %>
+						</div>
+					<% }); %>
+
+					<% if (!adverts.length) { %>
+						<h2>No advertisements exist for you yet, make some <a href="advertise"><u>here</u></a>.</h2>
+					<% } %>
 				<% } %>
-			<% } else { %>
-				<h1>Advertisement does not exist.</h1>
-			<% } %>
+			</div>
 
 			<%- include('content/ejs/bottombody.ejs') %>
 

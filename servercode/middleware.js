@@ -239,7 +239,7 @@ var reqHandling = {
 		var newid = crypto.randomBytes(16).toString("hex");
 
 		//check for ads with the same id as the newly generated one
-		var res = await client.query(`SELECT id FROM users WHERE id=$1 LIMIT 1`, [newid]);
+		var res = await client.query(`SELECT id FROM adverts WHERE id=$1 LIMIT 1`, [newid]);
 
 		if (res.rows.length) {
 			return await middleware.generateAdvertId();

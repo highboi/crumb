@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs') %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<div id="adRegistration">
+				<h1>Register your account for advertising:</h1>
+				<form action="/adregistration" method="POST">
+					<label for="businessDomain">Domain name of your business</label>
+					<input id="businessDomain" name="businessDomain" type="url" value="https://" required><br>
+
+					<label for="businessEmail">Email of your business:</label>
+					<input id="businessEmail" name="businessEmail" type="email" required><br>
+
+					<input type="submit" value="Register for Advertising">
+				</form>
+			</div>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
+	</body>
+</html>
