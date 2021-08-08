@@ -21,6 +21,20 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: advertisers; Type: TABLE; Schema: public; Owner: merlin
+--
+
+CREATE TABLE public.advertisers (
+    id text,
+    businessdomain text,
+    businessemail text,
+    customerid text
+);
+
+
+ALTER TABLE public.advertisers OWNER TO merlin;
+
+--
 -- Name: adverts; Type: TABLE; Schema: public; Owner: merlin
 --
 
@@ -28,11 +42,11 @@ CREATE TABLE public.adverts (
     id text,
     adlink text,
     adfile text,
-    months bigint,
-    startdate text,
     type text,
     "position" text,
-    expired boolean DEFAULT false
+    businessid text,
+    subscriptionid text,
+    impressions bigint DEFAULT 0
 );
 
 
@@ -289,12 +303,20 @@ ALTER SEQUENCE public.videos_views_seq OWNED BY public.videos.views;
 
 
 --
+-- Data for Name: advertisers; Type: TABLE DATA; Schema: public; Owner: merlin
+--
+
+COPY public.advertisers (id, businessdomain, businessemail, customerid) FROM stdin;
+319d6fad-2946-405b-be30-1c1be4055e0b	https://duckduckgo.com	sam@gmail.com	cus_JyEOhkUMHbjVhL
+\.
+
+
+--
 -- Data for Name: adverts; Type: TABLE DATA; Schema: public; Owner: merlin
 --
 
-COPY public.adverts (id, adlink, adfile, months, startdate, type, "position", expired) FROM stdin;
-dea7947e4d47927f0f28ced0cf31c361	http://google.com	/adverts/1627541741781-example_banner_desktop.jpg	1	2021-08-31T05:00:00.000Z	desktop	banner	\N
-5417131863d47bb7ae8a40780382b2a0	http://duckduckgo.com	/adverts/1627542155824-example_banner_mobile.jpeg	1	2021-08-31T05:00:00.000Z	desktop	square	\N
+COPY public.adverts (id, adlink, adfile, type, "position", businessid, subscriptionid, impressions) FROM stdin;
+94fa91f8ef22d43493d8d2a08e17e617	/	/adverts/1628409866804-example_banner_desktop.jpg	desktop	banner	319d6fad-2946-405b-be30-1c1be4055e0b	sub_K07E1hoPCKkQ5C	10
 \.
 
 
@@ -321,7 +343,6 @@ COPY public.comments (user_id, comment, video_id, username, posttime, id, likes,
 --
 
 COPY public.dislikedcomments (user_id, comment_id) FROM stdin;
-7d9b8296-9252-4651-b5d0-ea2d48ad2c22	70cfa20f-049a-4df2-90fe-4d31232b79eb
 \.
 
 
