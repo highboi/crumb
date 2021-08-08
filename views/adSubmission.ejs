@@ -30,33 +30,17 @@
 						<label for="adImage">Advertisement Image/GIF:</label>
 						<input type="file" id="adImage" name="adImage" accept="image/*" required><br>
 
-						<hr>
+					</div><hr>
 
-						<label for="months">Months to Campaign:</label>
-						<input type="number" step="1" value="1" id="months" name="months"><br>
-
-						<label for="startDate">Start Date to Campaign:</label>
-						<input type="date" id="startDate" name="startDate">
-					</div>
+					<label for="startDate">Start Date to Campaign:</label>
+					<input type="date" id="startDate" name="startDate"><br>
 
 					<hr>
 
-					<div id="cardForm">
-						<h4>Current Pricing: $<%= adPrice %>/month per advertisement according to daily visitors.</h4>
+					<h4>Pricing is $5 per 1000 impressions, charges will be applied monthly.</h4>
 
-						<label for="cardNumber">Card Number:</label>
-						<input type="text" id="cardNumber" name="cardNumber" minlength="16" maxlength="16"><br>
-
-						<label for="expMonth">Expiration Month:</label>
-						<input type="number" step="1" value="1" id="expMonth" name="expMonth" min="1" max="12"><br>
-
-						<label for="expYear">Expiration Year:</label>
-						<input type="text" id="expYear" name="expYear">
-					</div>
-
-					<hr>
-
-					<button id="submitAdvert" type="button" onclick="advertSubmitted();">Submit Advertisement</button>
+					<button id="submitAdvertSubscription" type="button" onclick="advertSubscriptionSubmitted()">Submit Advertisement & Start Monthly Subscription</button>
+					<div class="lds-hourglass" id="submitAdvertSubscriptionLoading"></div>
 				</form>
 			</div>
 
@@ -70,7 +54,7 @@
 				var stripePubKey = <%- JSON.stringify(stripePubKey) %>;
 			</script>
 
-			<script src="/content/javascript/stripeHandler.js"></script>
+			<script src="/content/javascript/adSubmission.js"></script>
 		</main>
 	</body>
 </html>

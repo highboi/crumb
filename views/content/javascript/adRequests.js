@@ -13,7 +13,7 @@ async function getAds(amount, platform, position=undefined) {
 	var advertsResponse = await fetch(fetchurl);
 	var adverts = await advertsResponse.json();
 
-	return adverts;
+	return adverts.adverts;
 }
 
 //a function for making an ad element and adding the source link to it

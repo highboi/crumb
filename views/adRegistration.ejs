@@ -21,13 +21,25 @@
 					<label for="businessEmail">Email of your business:</label>
 					<input id="businessEmail" name="businessEmail" type="email" required><br>
 
-					<input type="submit" value="Register for Advertising">
+					<div id="cardForm"></div>
+
+					<button id="submitAdvertiser" type="button">Register</button>
 				</form>
 			</div>
 
 			<%- include('content/ejs/bottombody.ejs') %>
 
 			<%- include('content/ejs/scripts.ejs') %>
+
+			<script src="https://js.stripe.com/v3/"></script>
+
+			<script>
+				var stripePubKey = <%- JSON.stringify(stripePubKey) %>;
+				var client_secret = <%- JSON.stringify(client_secret) %>;
+				var customerid = <%- JSON.stringify(customerid) %>;
+			</script>
+
+			<script src="/content/javascript/adRegistration.js"></script>
 		</main>
 	</body>
 </html>

@@ -9,8 +9,8 @@ const crypto = require("crypto");
 const readline = require("readline");
 const approx = require("approximate-number");
 const ffmpeg = require("ffmpeg");
-const schedule = require("node-schedule");
 const got = require("got");
+const stripe = require("stripe")(process.env.SECRET_STRIPE_KEY);
 
 //get the write stream to write to the log file
 const logger = require("./logger");
@@ -344,6 +344,33 @@ var deletionHandling = {
 		} else { //if the playlist apparently does not belong to the user, then return false
 			return false;
 		}
+	},
+
+	//this is a function to delete advertisement details
+	deleteAdvertDetails: async function (userinfo, advertid) {
+		//get the id of the subscription associated with this advertisement and the file path
+		var advert = await client.query(`SELECT subscriptionid, adfile FROM adverts WHERE id=$1 AND businessid=$2 LIMIT 1`, [advertid, userinfo.id]);
+
+		//check for the authenticity of this advertisement deletion
+		if (advert.rows.length) {
+			var subscriptionid = advert.rows[0].subscriptionid;
+			var adfile = global.appRoot + "/storage" + advert.rows[0].adfile;
+
+			//delete/cancel the subscription for this advertisement
+			var result = await stripe.subscriptions.del(subscriptionid);
+
+			//delete the file associated with the advertisement
+			fs.unlink(adfile, (err) => {
+				if (err) throw err;
+			});
+
+			//delete the advertisement itself from the database
+			await client.query(`DELETE FROM adverts WHERE id=$1`, [advertid]);
+
+			return true;
+		} else {
+			return false;
+		}
 	}
 };
 
@@ -398,31 +425,28 @@ var miscFunctions = {
 
 	//this is a function to increase/decrease likes/dislikes of videos in the database
 	changeLikes: async function (req, res, increase, changelikes) {
-		var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.videoid]);
-		if (changelikes == true) {
-			var likes = parseInt(video.rows[0].likes, 10);
-			//increase or decrease the amount of likes based on the increase parameter
+		if (changelikes) {
 			if (increase) {
-				var newcount = likes+=1;
+				var newcount = await client.query(`UPDATE videos SET likes=likes+1 WHERE id=$1 LIMIT 1 RETURNING likes`, [req.params.videoid]);
 			} else {
-				var newcount = likes-=1;
+				var newcount = await client.query(`UPDATE videos SET likes=likes-1 WHERE id=$1 LIMIT 1 RETURNING likes`, [req.params.videoid]);
 			}
-			//update the amount of likes on the video
-			await client.query(`UPDATE videos SET likes=$1 WHERE id=$2`, [newcount, req.params.videoid]);
+
+			newcount = newcount.rows[0].likes;
+
 			//return the updated amount of dislikes
-			return newcount.toString();
-		} else if (changelikes == false) {
-			var dislikes = parseInt(video.rows[0].dislikes, 10);
-			//increase or decrease the amount of dislikes based on the increase parameter
+			return newcount;
+		} else {
 			if (increase) {
-				var newcount = dislikes+=1;
+				var newcount = await client.query(`UPDATE videos SET dislikes=dislikes+1 WHERE id=$1 LIMIT 1 RETURNING dislikes`, [req.params.videoid]);
 			} else {
-				var newcount = dislikes-=1;
+				var newcount = await client.query(`UPDATE videos SET dislikes=dislikes-1 WHERE id=$1 LIMIT 1 RETURNING dislikes`, [req.params.videoid]);
 			}
-			//update the amount of dislikes on the video
-			await client.query(`UPDATE videos SET dislikes=$1 WHERE id=$2`, [newcount, req.params.videoid]);
+
+			newcount = newcount.rows[0].dislikes;
+
 			//return the value of the updated dislikes
-			return newcount.toString();
+			return newcount;
 		}
 	},
 
@@ -443,30 +467,31 @@ var miscFunctions = {
 			var idcolumn = "comment_id";
 		}
 
-		//handle the liking and unliking of the element
-		if (liked.rows.length == 0) {
-			var likes = parseInt(element.likes, 10)
-			likes = likes + 1;
-			likes = likes.toString();
-			var querystring = `INSERT INTO ${likedTable} (user_id, ${idcolumn}) VALUES (\'${userid}\', \'${elementid}\')`;
-			await client.query(querystring);
-		} else if (liked.rows.length > 0) {
+
+		//handle the addition and removal of likes on a piece of content
+		if (liked.rows.length) {
 			var likes = parseInt(element.likes, 10);
 			likes = likes - 1;
 			likes = likes.toString();
 			var querystring = `DELETE FROM ${likedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
 			await client.query(querystring);
+		} else {
+			var likes = parseInt(element.likes, 10)
+			likes = likes + 1;
+			likes = likes.toString();
+			var querystring = `INSERT INTO ${likedTable} (user_id, ${idcolumn}) VALUES (\'${userid}\', \'${elementid}\')`;
+			await client.query(querystring);
 		}
 
 		//handle any dislikes that come up
-		if (disliked.rows.length == 0) {
-			var dislikes = element.dislikes.toString();
-		} else if (disliked.rows.length > 0) {
+		if (disliked.rows.length) {
 			var dislikes = parseInt(element.dislikes, 10);
 			dislikes = dislikes - 1;
 			dislikes = dislikes.toString();
 			var querystring = `DELETE FROM ${dislikedTable} WHERE user_id=\'${userid}\' AND ${idcolumn}=\'${elementid}\'`;
 			await client.query(querystring);
+		} else {
+			var dislikes = element.dislikes.toString();
 		}
 
 		return [likes, dislikes];
@@ -1042,22 +1067,6 @@ var torrentHandling = {
 OBJECT FOR STORING FUNCTIONS FOR ADVERTISEMENT/PAYMENT FUNTIONALITY
 */
 var adHandling = {
-	/*
-	a function for getting the pricing of ads according to the amount of visitors/sessions
-	basically charging X dollars a month for each ad, with X being the daily visitors
-	divided by 10
-	*/
-	getAdPricing: async () => {
-		//get the amount of current sessions in the redis store
-		var dbsize = await redisClient.sendCommandAsync("DBSIZE", []);
-
-		//get the visitor count divided by 10 to get the charge for ads
-		var charge = dbsize / 10;
-
-		//return the ad pricing
-		return charge;
-	},
-
 	//a function for basically storing an ad resolutions array with the ad type and positioning
 	getAdResolutions: async () => {
 	        //make an array of the accepted dimensions for advertisements
@@ -1100,19 +1109,30 @@ var adHandling = {
 		return adImgRes;
 	},
 
-	//a function for scheduling the expiry and deletion of an advertisement
-	scheduleAdExpiry: async function (date, id) {
-		//use the date to schedule the expiry of advertisements
-		schedule.scheduleJob(date, async () => {
-			await client.query(`UPDATE adverts SET expired=$1 WHERE id=$2`, [true, id]);
+	/*
+	a function to update the subscription pricing of an advertisement campaign
+	*/
+	updateAdSubscription: async (subscriptionid, newPrice) => {
+		//get the subscription
+		var subscription = await stripe.subscriptions.retrieve(subscriptionid);
+
+		//get the product associated with this subscription
+		var productid = subscription.items.data[0].price.product;
+
+		//make a new price object for the new updated price
+		var price = await stripe.prices.create({
+			unit_amount: newPrice,
+			currency: 'usd',
+			recurring: {interval: 'month'},
+			product: productid
 		});
 
-		//add one month to the date object
-		date.setMonth(date.getMonth()+1);
+		//get the subscription item id
+		var subscriptionItemId = subscription.items.data[0].id;
 
-		//schedule to delete advertisements one month after the expiry date
-		schedule.scheduleJob(date, async () => {
-			await client.query(`DELETE FROM adverts WHERE id=$1`, [id]);
+		//update the price of the subscription item attached to the subscription
+		await stripe.subscriptionItems.update(subscriptionItemId, {
+			price: price.id
 		});
 	}
 };

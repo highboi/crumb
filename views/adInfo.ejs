@@ -19,16 +19,10 @@
 
 					<% adverts.forEach((advert, index) => { %>
 						<div class="adContainer">
-						<% if (!advert.expired) { %>
 							<h2>Advertisement with URL: <%= adDomain %><%= advert.adlink %></h2>
-							<p>Start Date of Campaign: <%= advert.startdate.split("T")[0]; %> at <%= advert.startdate.split("T")[1].split(".")[0]; %> on 24-hour clock.</p>
-							<p>Months for Campaign: <%= advert.months %></p>
 							<p>Advertisement as seen by Users:</p>
-							<img src="<%= advert.adfile %>">						
-						<% } else { %>
-							<h2>Advertisement with URL: <%= adDomain %><%= advert.adlink %></h2>
-							<p>Ad Campaign has expired, please begin a new one <a href="/advertise" target="_blank">here</a>.</p>
-						<% } %>
+							<img src="<%= advert.adfile %>"><br>
+							<button onclick="redirectConfirm('Delete advertisement subscription?', '/advertcancel/<%= advert.id %>')">Delete Advertisement?</button>
 						</div>
 					<% }); %>
 
