@@ -59,11 +59,12 @@ async function verifyAdForm(formid) {
 	}
 
 	//verify the validity of starting dates for advertisement campaigns
-	var startDate = document.querySelector(`#${formid} #startDate`).valueAsDate.getTime();
+	var startDate = new Date(document.querySelector(`#${formid} #startDate`).value.split("-"));
+	startDate = startDate.getTime();
 	var currentDate = Date.now();
 
 	if (currentDate > startDate) {
-		alert("Invalid starting date.");
+		alert(`Invalid starting date. Current: ${currentDate} Starting: ${startDate}`);
 		return false;
 	}
 
@@ -104,7 +105,8 @@ async function advertSubscriptionSubmitted() {
 	var advertForm = new FormData();
 
 	//get the start date as a unix timestamp
-	var startDate = (document.querySelector("#adSubmissionForm #startDate").valueAsDate.getTime() / 1000).toFixed(0);
+	var startDate = new Date(document.querySelector("#adSubmissionForm #startDate").value.split("-"));
+	startDate = (startDate.getTime() / 1000).toFixed(0);
 
 	advertForm.append("startDate", startDate);
 

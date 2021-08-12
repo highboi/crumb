@@ -33,7 +33,9 @@
 					</div><hr>
 
 					<label for="startDate">Start Date to Campaign:</label>
-					<input type="date" id="startDate" name="startDate"><br>
+					<% var date = new Date() %>
+					<% date.setDate(date.getDate()+1) %>
+					<input type="date" id="startDate" name="startDate" min="<%= date.toISOString().slice(0, 10) %>"><br>
 
 					<hr>
 

@@ -92,24 +92,43 @@ app.get("/adverts/:platform", async (req, res) => {
 		var adverts = await client.query(`SELECT adverts.*, advertisers.businessdomain FROM adverts INNER JOIN advertisers ON adverts.businessid = advertisers.id WHERE type=$1 AND position=$2 ORDER BY random() LIMIT $3`, [adPlatform, req.query.position, adLimit]);
 	}
 
+	//send the advertisements before doing anything else
+	res.send({adverts: adverts.rows});
+
+	/*
+	THE BELOW CODE WILL INCREASE THE UNIT AMOUNT FOR EACH AD IN THE BACKGROUND WITHOUT HAVING A SLOW URL
+	*/
+
 	//increase the impression count on each advertisement
 	for (var ad of adverts.rows) {
-		//get the impressions and the subscription id from this advertisement
 		var data = await client.query(`UPDATE adverts SET impressions=impressions+1 WHERE id=$1 RETURNING impressions, subscriptionid`, [ad.id]);
 		data = data.rows[0];
 
-		//get the new pricing of the subscription
-		var charge = Math.round((data.impressions/1000)*50);
-
-		//update the price of the subscription associated with the advertisement
-		await middleware.updateAdSubscription(data.subscriptionid, charge);
-
+		//get the subscription for this ad
 		var subscription = await stripe.subscriptions.retrieve(data.subscriptionid);
 
-		console.log(subscription.items.data[0]);
-	}
+		console.log(subscription.current_period_start);
 
-	res.send({adverts: adverts.rows});
+		//get the subscription item id of this subscription
+		var subscriptionItemId = subscription.items.data[0].id
+
+		/*
+		set the usage record at the start time of this current subscription period
+		to be set according to the amount of impressions calculated. we set the
+		usage record instead of creating a new one as to not create thousands
+		of unnecessary usage records
+		*/
+		var usageRecord = await stripe.subscriptionItems.createUsageRecord(
+			subscriptionItemId,
+			{
+				quantity: data.impressions,
+				timestamp: subscription.current_period_start,
+				action: "set"
+			}
+		);
+
+		console.log(usageRecord);
+	}
 });
 
 //get path for a one-time payment
@@ -184,17 +203,20 @@ app.post("/adsubmission", middleware.checkSignedIn, async (req, res) => {
 	});
 	paymentMethod = paymentMethod.data[0];
 
-	//create a product for the ad subscription
-	var product = await stripe.products.create({
-		name: "Ad Subscription"
-	});
+	//make a variable to calculate the total cost of one ad impression in pennies (50 pennies per 1000 impressions)
+	var impression_cost = 50/1000;
 
 	//create a price object to charge the user
 	var price = await stripe.prices.create({
-		unit_amount: 0,
+		unit_amount_decimal: impression_cost,
 		currency: "usd",
-		recurring: {interval: "month"},
-		product: product.id
+		recurring: {
+			interval: "month",
+			usage_type: "metered" //this makes the price metered based on reported usage
+		},
+		product_data: {
+			name: "Ad subscription"
+		}
 	});
 
 	//make the subscription for this advertisement

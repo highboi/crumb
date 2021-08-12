@@ -9,8 +9,9 @@ GLOBAL ACCESS OF TAGS
 body {
 	background-color: #3f3f3f;
 	color: #adff12;
-	font-family: Charcoal, monospace, sans-serif;
+	font-family: monospace,Menlo,DejaVu Sans Mono,Lucida Console;
 	font-smooth: never;
+	font-weight: 600;
 }
 
 a {

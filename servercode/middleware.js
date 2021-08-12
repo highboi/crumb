@@ -1107,33 +1107,6 @@ var adHandling = {
 
 		//return the advert image resolution along with the corresponding type
 		return adImgRes;
-	},
-
-	/*
-	a function to update the subscription pricing of an advertisement campaign
-	*/
-	updateAdSubscription: async (subscriptionid, newPrice) => {
-		//get the subscription
-		var subscription = await stripe.subscriptions.retrieve(subscriptionid);
-
-		//get the product associated with this subscription
-		var productid = subscription.items.data[0].price.product;
-
-		//make a new price object for the new updated price
-		var price = await stripe.prices.create({
-			unit_amount: newPrice,
-			currency: 'usd',
-			recurring: {interval: 'month'},
-			product: productid
-		});
-
-		//get the subscription item id
-		var subscriptionItemId = subscription.items.data[0].id;
-
-		//update the price of the subscription item attached to the subscription
-		await stripe.subscriptionItems.update(subscriptionItemId, {
-			price: price.id
-		});
 	}
 };
 
