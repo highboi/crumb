@@ -316,7 +316,7 @@ COPY public.advertisers (id, businessdomain, businessemail, customerid) FROM std
 --
 
 COPY public.adverts (id, adlink, adfile, type, "position", businessid, subscriptionid, impressions) FROM stdin;
-94fa91f8ef22d43493d8d2a08e17e617	/	/adverts/1628409866804-example_banner_desktop.jpg	desktop	banner	319d6fad-2946-405b-be30-1c1be4055e0b	sub_K07E1hoPCKkQ5C	10
+c44d4100e5171ddd5138a34e35558876	/	/adverts/1628748647017-example_banner_desktop.jpg	desktop	banner	319d6fad-2946-405b-be30-1c1be4055e0b	sub_K1aIriAB92KHgd	6
 \.
 
 
