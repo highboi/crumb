@@ -1,7 +1,4 @@
-//file for handling stripe payments on the site
-
-//define a stripe handler
-var stripeHandler = Stripe(stripePubKey);
+//file for handling the verification for the form inputs for ad submissions
 
 //a function for getting the accepted dimensions for ads
 async function getAdDimensions() {
@@ -11,32 +8,9 @@ async function getAdDimensions() {
 	return adDimensions.acceptedDimensions;
 }
 
-//a function to check for the resolution of an image in the form
-async function checkImgResolution(img, resolutions) {
-	return new Promise((resolve, reject) => {
-		var testImg = document.createElement("img");
-
-		var imgURL = URL.createObjectURL(img);
-
-		testImg.src = imgURL;
-
-		testImg.onload = () => {
-			for (var res of resolutions) {
-				if (res.width == testImg.naturalWidth && res.height == testImg.naturalHeight) {
-					resolve(true);
-				}
-			}
-
-			resolve(false);
-		}
-
-		testImg.onerror = reject;
-	});
-}
-
 //a function for verifying the ad submission for for bad inputs
 async function verifyAdForm(formid) {
-	if (!checkFormInputs(`${formid}`)) {
+	if (!checkFormInputs(formid)) {
 		return false;
 	}
 

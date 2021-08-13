@@ -1,4 +1,5 @@
-const {app, client, middleware, redisClient} = require("./configBasic");
+const {app, client, middleware} = require("./configBasic");
+const fs = require("fs");
 const stripe = require("stripe")(process.env.SECRET_STRIPE_KEY);
 
 /*
@@ -18,9 +19,34 @@ app.get("/advertise", middleware.checkSignedIn, async (req, res) => {
 
 	var adResolutions = await middleware.getAdResolutions();
 
-	viewObj = Object.assign({}, viewObj, {adPrice: 0.5, stripePubKey: process.env.PUBLIC_STRIPE_KEY, adResolutions: adResolutions, adDomain: advertiser.rows[0].businessdomain});
+	viewObj = Object.assign({}, viewObj, {adPrice: 0.5, adResolutions: adResolutions, adDomain: advertiser.rows[0].businessdomain});
 
 	res.render("adSubmission.ejs", viewObj);
+});
+
+//a get path for editing an advertisement
+app.get("/adEditor/:advertid", middleware.checkSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	var advertiser = await client.query(`SELECT businessdomain FROM advertisers WHERE id=$1 LIMIT 1`, [viewObj.user.id]);
+
+	if (!advertiser.rows.length) {
+		req.flash("message", "Register your account for advertising first.");
+		return res.redirect("/registeradvertiser");
+	}
+
+	var adData = await client.query(`SELECT * FROM adverts WHERE id=$1 AND businessid=$2 LIMIT 1`, [req.params.advertid, viewObj.user.id]);
+
+	if (!adData.rows.length) {
+		req.flash("message", "Not your advertisement to edit.");
+		return res.redirect("/");
+	}
+
+	var adResolutions = await middleware.getAdResolutions();
+
+	viewObj = Object.assign({}, viewObj, {advert: adData.rows[0], adDomain: advertiser.rows[0].businessdomain, adResolutions: adResolutions});
+
+	res.render("adEditor.ejs", viewObj);
 });
 
 //a get path for the advertiser registration on the site
@@ -107,8 +133,6 @@ app.get("/adverts/:platform", async (req, res) => {
 		//get the subscription for this ad
 		var subscription = await stripe.subscriptions.retrieve(data.subscriptionid);
 
-		console.log(subscription.current_period_start);
-
 		//get the subscription item id of this subscription
 		var subscriptionItemId = subscription.items.data[0].id
 
@@ -126,8 +150,6 @@ app.get("/adverts/:platform", async (req, res) => {
 				action: "set"
 			}
 		);
-
-		console.log(usageRecord);
 	}
 });
 
@@ -242,3 +264,37 @@ app.post("/adsubmission", middleware.checkSignedIn, async (req, res) => {
 
 	res.send({advertId: advert.rows[0].id});
 });
+
+
+//a post url for edits to advertisements
+app.post("/adedit", middleware.checkSignedIn, async (req, res) => {
+	var oldAdvert = await client.query(`SELECT adlink, adfile FROM adverts WHERE id=$1 LIMIT 1`, [req.body.advertid]);
+	oldAdvert = oldAdvert.rows[0];
+
+	//update the ad link if necessary
+	if (oldAdvert.adlink != req.body.businessLink) {
+		await client.query(`UPDATE adverts SET adlink=$1 WHERE id=$2`, [req.body.businessLink, req.body.advertid]);
+	}
+
+	//handle a new image if necessary
+	if (typeof req.files.adImage != 'undefined') {
+		//save the new image
+		var newFilePath = await middleware.saveFile(req.files.adImage, "/storage/adverts/");
+
+		//get the position and type of this advertisement
+		var adRes = await middleware.getImgResolution(req.files.adImage);
+		adRes = await middleware.getAdResolution(adRes);
+
+		//update the image link for this ad
+		await client.query(`UPDATE adverts SET adfile=$1, type=$2, position=$3 WHERE id=$4`, [newFilePath, adRes.type, adRes.position, req.body.advertid]);
+
+		//delete the old image
+		var oldPath = global.appRoot + "/storage" + oldAdvert.adfile;
+		fs.unlink(oldPath, (err) => {
+			if (err) throw err;
+		});
+	}
+
+	res.send({recieved: true});
+});
+

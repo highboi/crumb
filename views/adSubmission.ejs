@@ -39,7 +39,7 @@
 
 					<hr>
 
-					<h4>Pricing is $5 per 1000 impressions, charges will be applied monthly.</h4>
+					<h4>Pricing is $<%= adPrice %> per 1000 impressions, charges will be applied monthly.</h4>
 
 					<button id="submitAdvertSubscription" type="button" onclick="advertSubscriptionSubmitted()">Submit Advertisement & Start Monthly Subscription</button>
 					<div class="lds-hourglass" id="submitAdvertSubscriptionLoading"></div>
@@ -49,12 +49,6 @@
 			<%- include('content/ejs/bottombody.ejs') %>
 
 			<%- include('content/ejs/scripts.ejs') %>
-
-			<script src="https://js.stripe.com/v3/"></script>
-
-			<script>
-				var stripePubKey = <%- JSON.stringify(stripePubKey) %>;
-			</script>
 
 			<script src="/content/javascript/adSubmission.js"></script>
 		</main>

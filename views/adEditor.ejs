@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Edit Advertisement"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<div id="adEdit">
+				<h1>Edit information for advertisement <%= advert.id %>:</h1>
+
+				<form action="" method="POST" enctype='multipart/form-data' id="adEditForm">
+					<div id="adForm">
+						<input type="hidden" id="advertid" name="advertid" value="<%= advert.id %>">
+
+						<label for="businessLink">Relative Link for <%= adDomain %>:</label>
+						<input type="text" id="businessLink" name="businessLink" value="<%= advert.adlink %>" required><br>
+
+						<hr>
+
+						<h2>Current Image:</h2>
+						<img src="<%= advert.adfile %>">
+
+						<h2>Accepted Image Resolutions:</h2>
+						<% adResolutions.forEach((item, index) => { %>
+							<p><%= item.width %>x<%= item.height %> for <%= item.type %> <%= item.position %>s</p>
+						<% }); %>
+
+						<label for="adImage">Advertisement Image/GIF:</label>
+						<input type="file" id="adImage" name="adImage" accept="image/*"><br>
+					</div><hr>
+
+					<button id="submitAdvertEdit" type="button" onclick="advertEditSubmitted()">Submit Advertisement Edits</button>
+					<div class="lds-hourglass" id="submitAdvertEditLoading"></div>
+				</form>
+			</div>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<script src="/content/javascript/adEdits.js"></script>
+		</main>
+	</body>
+</html>

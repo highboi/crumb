@@ -8,6 +8,14 @@
 	text-align: center;
 	width: 50vw;
 	margin: auto;
+	background-color: #1f1f1f;
+}
+
+#adEdit {
+	text-align: center;
+	width: 50vw;
+	margin: auto;
+	background-color: #1f1f1f;
 }
 
 #adRegistration {
@@ -41,4 +49,13 @@ input[type="months"] {
 	margin: 30px;
 	padding: 10px;
 	text-align: center;
+}
+
+.adContainer button {
+	background-color: #1f1f1f;
+}
+
+#createAdBtn {
+	background-color: #1f1f1f;
+	margin: 0 auto;
 }
