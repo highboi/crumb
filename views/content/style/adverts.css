@@ -25,6 +25,13 @@
 	background-color: #1f1f1f;
 }
 
+#advertiserEdit {
+	text-align: center;
+	width: 50vw;
+	margin: auto;
+	background-color: #1f1f1f;
+}
+
 input[type="months"] {
 	width: 30px;
 	height: 30px;
@@ -42,6 +49,11 @@ input[type="months"] {
 #adStats {
 	text-align: center;
 	margin: 0 auto;
+}
+
+#adStats a {
+	background-color: #1f1f1f;
+	padding: 10px;
 }
 
 .adContainer {

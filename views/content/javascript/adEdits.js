@@ -9,7 +9,7 @@ async function getAdDimensions() {
 }
 
 //a function for checking bad inputs on the form
-async function verifyAdForm(formid) {
+async function verifyAdEditForm(formid) {
 	if (!checkFormInputs(formid)) {
 		return false;
 	}
@@ -40,29 +40,13 @@ async function verifyAdForm(formid) {
 
 //the function triggered on submission of ad edits
 async function advertEditSubmitted() {
-	//disable all of the form elements inside the ad submission form
-	var formElements = document.querySelector("#adEditForm").elements;
-
-	for (var element of formElements) {
-		element.disabled = true;
-	}
-
-	//make the submit button invisible and reveal the loading animation
-	document.querySelector("#submitAdvertEdit").style.display = "none";
-	document.querySelector(".lds-hourglass#submitAdvertEditLoading").style.display = "inline-block";
+	formLoadingState("adEditForm");
 
 	//verify the validity of the inputs of the ad form (correct link formatting, etc.)
-	var verifyResult = await verifyAdForm("adEditForm");
+	var verifyResult = await verifyAdEditForm("adEditForm");
 
 	if (!verifyResult) {
-		//re-enable the form for corrections to it
-		for (var element of formElements) {
-			element.disabled = false;
-		}
-
-		//make the submit button visible again and hide the loading animation from view
-		document.querySelector("#submitAdvertEdit").style.display = "initial";
-		document.querySelector(".lds-hourglass#submitAdvertEditLoading").style.display = "none";
+		formLoadingState("adEditForm", true);
 
 		return false;
 	}

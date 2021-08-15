@@ -17,6 +17,9 @@
 				<% if (typeof adverts != 'undefined' && typeof adDomain != 'undefined') { %>
 					<h1>Advertisements for <%= adDomain %></h1>
 
+					<a href="/advertise" target="_blank">Make a new advertisement</a><br><br>
+					<a href="/advertiserEditor/<%= user.id %>" target="_blank">Edit advertiser information</a>
+
 					<% adverts.forEach((advert, index) => { %>
 						<div class="adContainer">
 							<h2>Advertisement with URL: <%= adDomain %><%= advert.adlink %></h2>

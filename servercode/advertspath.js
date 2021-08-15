@@ -77,13 +77,41 @@ app.get("/registeradvertiser", middleware.checkSignedIn, async (req, res) => {
 	res.render("adRegistration.ejs", viewObj);
 });
 
+//a get path for the editing of advertiser information
+app.get("/advertiserEditor/:businessid", middleware.checkSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	//check to see that the user is editing their advertiser information
+	if (viewObj.user.id != req.params.businessid) {
+		req.flash("You cannot edit other advertiser's information.");
+		return res.redirect("/");
+	}
+
+	var advertiser = await client.query(`SELECT customerid, businessdomain, businessemail FROM advertisers WHERE id=$1 LIMIT 1`, [req.params.businessid]);
+
+	if (!advertiser.rows.length) {
+		req.flash("message", "This advertiser does not exist.");
+		return res.redirect("/");
+	}
+
+	advertiser = advertiser.rows[0];
+
+	var paymentMethod = await stripe.paymentMethods.list({
+		customer: advertiser.customerid,
+		type: "card"
+	});
+	paymentMethod = paymentMethod.data[0];
+
+	viewObj = Object.assign({}, viewObj, {customerid: advertiser.customerid, stripePubKey: process.env.PUBLIC_STRIPE_KEY, paymentMethod: paymentMethod, businessEmail: advertiser.businessemail, businessDomain: advertiser.businessdomain});
+
+	res.render("advertiserEditor.ejs", viewObj);
+});
+
 //a get path for the stats page of an advert
 app.get("/adstats", middleware.checkSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
 
-	var advertiser = await middleware.getUserSession(req.cookies.sessionid);
-
-	var advertiserDomain = await client.query(`SELECT businessdomain FROM advertisers WHERE id=$1 LIMIT 1`, [advertiser.id]);
+	var advertiserDomain = await client.query(`SELECT businessdomain FROM advertisers WHERE id=$1 LIMIT 1`, [viewObj.user.id]);
 	advertiserDomain = advertiserDomain.rows[0].businessdomain;
 
 	if (typeof advertiserDomain == 'undefined') {
@@ -91,7 +119,7 @@ app.get("/adstats", middleware.checkSignedIn, async (req, res) => {
 		res.redirect("/");
 	}
 
-	var adverts = await client.query(`SELECT * FROM adverts WHERE businessid=$1`, [advertiser.id]);
+	var adverts = await client.query(`SELECT * FROM adverts WHERE businessid=$1`, [viewObj.user.id]);
 
 	viewObj = Object.assign({}, viewObj, {adverts: adverts.rows, adDomain: advertiserDomain});
 
@@ -153,34 +181,6 @@ app.get("/adverts/:platform", async (req, res) => {
 	}
 });
 
-//get path for a one-time payment
-app.get("/adpayment", middleware.checkSignedIn, async (req, res) => {
-	var user = await middleware.getUserSession(req.cookies.sessionid);
-
-	var customerid = await client.query(`SELECT customerid FROM advertisers WHERE id=$1 LIMIT 1`, [user.id]);
-	customerid = customerid.rows[0].customerid;
-
-	//get the payment methods of this customer
-	var paymentMethods = await stripe.paymentMethods.list({
-		customer: customerid,
-		type: "card"
-	});
-
-	//get the payment method id
-	var paymentMethod = paymentMethods.data[0];
-
-	//create a payment intent
-	var paymentIntent = await stripe.paymentIntents.create({
-		amount: 500,
-		currency: 'usd',
-		payment_method_types: ["card"],
-		customer: customerid
-	});
-
-	//send the intent client secret and the payment method of the customer
-	res.send({client_secret: paymentIntent.client_secret, paymentMethod: paymentMethod});
-});
-
 //a get path for the cancellation of a subscription
 app.get("/advertcancel/:advertid", middleware.checkSignedIn, async (req, res) => {
 	var user = await middleware.getUserSession(req.cookies.sessionid);
@@ -224,6 +224,8 @@ app.post("/adsubmission", middleware.checkSignedIn, async (req, res) => {
 		type: "card"
 	});
 	paymentMethod = paymentMethod.data[0];
+
+	console.log("PAYMENT METHOD:", paymentMethod);
 
 	//make a variable to calculate the total cost of one ad impression in pennies (50 pennies per 1000 impressions)
 	var impression_cost = 50/1000;
@@ -298,3 +300,41 @@ app.post("/adedit", middleware.checkSignedIn, async (req, res) => {
 	res.send({recieved: true});
 });
 
+//a post url for edits to advertisers
+app.post("/advertiseredit", middleware.checkSignedIn, async (req, res) => {
+	var advertiser = await middleware.getUserSession(req.cookies.sessionid);
+
+	var oldBusiness = await client.query(`SELECT customerid, businessdomain, businessemail FROM advertisers WHERE id=$1 LIMIT 1`, [advertiser.id]);
+	oldBusiness = oldBusiness.rows[0];
+
+	//change the email details if different
+	if (oldBusiness.businessemail != req.body.businessEmail) {
+		await client.query(`UPDATE advertisers SET businessemail=$1 WHERE id=$2`, [req.body.businessEmail, advertiser.id]);
+	}
+
+	//change the domain details if different
+	if (oldBusiness.businessdomain != req.body.businessDomain) {
+		await client.query(`UPDATE advertisers SET businessdomain=$1 WHERE id=$2`, [req.body.businessDomain, advertiser.id]);
+	}
+
+	//add a new payment method if there is one
+	if (typeof req.body.paymentMethod != 'undefined') {
+		//get the current payment method of this customer
+		var paymentMethod = await stripe.paymentMethods.list({
+			customer: oldBusiness.customerid,
+			type: "card"
+		});
+		paymentMethod = paymentMethod.data[0];
+
+		//attach the new payment method to this customer
+		await stripe.paymentMethods.attach(
+			req.body.paymentMethod,
+			{customer: oldBusiness.customerid}
+		);
+
+		//detach the old payment method of the customer after making sure to attach the new card
+		await stripe.paymentMethods.detach(paymentMethod.id);
+	}
+
+	res.send({recieved: true});
+});

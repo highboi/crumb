@@ -3,7 +3,7 @@
 //a function for verifying the validity of a form's inputs
 async function checkFormInputs(formid) {
 	//get all of the required inputs from a form
-	var inputs = Array.from(document.querySelectorAll(`#${formid} input:required`));
+	var inputs = Array.from(document.forms[formid].elements);
 
 	for (var input of inputs) {
 		if (!input.value) {
@@ -43,3 +43,27 @@ async function checkImgResolution(img, resolutions) {
 	});
 }
 
+//a function to disable a form and begin the loading animation on the form
+function formLoadingState(formid, off=false) {
+	//disable all of the form elements inside the ad submission form
+	var formElements = document.querySelector(`#${formid}`).elements;
+
+	//check to see if we want to turn the loading state for this form off
+	if (off) {
+		for (var element of formElements) {
+			element.disabled = false;
+		}
+
+		//make the submit button invisible and reveal the loading animation
+		document.querySelector(`#${formid} .submitbtn`).style.display = "inline-block";
+		document.querySelector(`#${formid} .lds-hourglass`).style.display = "none";
+	} else {
+		for (var element of formElements) {
+			element.disabled = true;
+		}
+
+		//make the submit button invisible and reveal the loading animation
+		document.querySelector(`#${formid} .submitbtn`).style.display = "none";
+		document.querySelector(`#${formid} .lds-hourglass`).style.display = "inline-block";
+	}
+}

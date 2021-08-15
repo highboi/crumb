@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Edit Advertiser Information"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/navbar.ejs') %>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<div id="advertiserEdit">
+				<h1>Edit Information for Advertiser <%= user.id %>:</h1>
+
+				<form action="" method="POST" enctype='multipart/form-data' id="advertiserEditForm">
+					<div id="advertiserEditForm">
+						<label for="businessDomain">Domain URL:</label>
+						<input type="url" id="businessDomain" name="businessDomain" value="<%= businessDomain %>" required><br>
+
+						<label for="businessEmail">Business Email:</label>
+						<input type="email" id="businessEmail" name="businessEmail" value="<%= businessEmail %>" required><br>
+
+						<hr>
+
+						<h2>Current Card Info:</h2>
+						<p><%= paymentMethod.card.country %> Card ending with digits: <%= paymentMethod.card.last4 %></p>
+						<p>Expiration: <%= paymentMethod.card.exp_month %>/<%= paymentMethod.card.exp_year %></p>
+
+						<label for="cardCheck">Change this card?</label>
+						<input id="cardcheck" type="checkbox">
+
+						<div id="cardForm"></div>
+					</div><hr>
+
+					<button class="submitbtn" id="submitAdvertiserEdit" type="button" onclick="advertiserEditSubmitted()">Submit Advertisement Edits</button>
+					<div class="lds-hourglass" id="submitAdvertiserEditLoading"></div>
+				</form>
+			</div>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<script src="https://js.stripe.com/v3/"></script>
+
+			<script>
+				var stripePubKey = <%- JSON.stringify(stripePubKey) %>;
+				var customerid = <%- JSON.stringify(customerid) %>;
+			</script>
+
+			<script src="/content/javascript/advertiserEdits.js"></script>
+		</main>
+	</body>
+</html>

@@ -48,30 +48,13 @@ async function verifyAdForm(formid) {
 
 //define a function which is triggered once the user clicks the button for submitting a subscription for ads
 async function advertSubscriptionSubmitted() {
-	//disable all of the form elements inside the ad submission form
-	var formElements = document.querySelector("#adSubmissionForm").elements;
-
-	for (var element of formElements) {
-		element.disabled = true;
-	}
-
-	//make the submit button invisible and reveal the loading animation
-	document.querySelector("#submitAdvertSubscription").style.display = "none";
-	document.querySelector(".lds-hourglass#submitAdvertSubscriptionLoading").style.display = "inline-block";
+	formLoadingState("adSubmissionForm");
 
 	//verify the validity of the inputs of the ad form (correct link formatting, etc.)
 	var verifyResult = await verifyAdForm("adSubmissionForm");
 
 	if (!verifyResult) {
-		//re-enable the form for corrections to it
-		for (var element of formElements) {
-			element.disabled = false;
-		}
-
-		//make the submit button visible again and hide the loading animation from view
-		document.querySelector("#submitAdvertSubscription").style.display = "initial";
-		document.querySelector(".lds-hourglass#submitAdvertSubscriptionLoading").style.display = "none";
-
+		formLoadingState("adSubmissionForm", true);
 		return false;
 	}
 
