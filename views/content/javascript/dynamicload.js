@@ -14,8 +14,10 @@ function getReplies(commentid, toggle=true, callback=undefined) {
 		//if the comment with this id has not had replies retrieved for it yet
 		if (!Object.keys(replycommentids).includes(commentid)) {
 			//get the AJAX data from the comment replies url
-			getAjaxData(`/comment/replies/${commentid}`, (replies) => {
+			getAjaxData(`/comment/replies/${commentid}`, (repliesdata) => {
 				var repliesdiv = document.getElementById(`${commentid}repliesdiv`);
+
+				var replies = repliesdata.replies;
 
 				//make sure the replies exist before doing anything
 				if (typeof replies == 'undefined' || replies.length == 0) {
@@ -49,7 +51,9 @@ function getReplies(commentid, toggle=true, callback=undefined) {
 			var limitnum = replycommentids[commentid];
 
 			//get the AJAX data from the comment replies url with a specified limit (i.e 50 would mean getting comments 51-60 instead of getting the same comments)
-			getAjaxData(`/comment/replies/${commentid}/?limit=${limitnum*50}`, (replies) => {
+			getAjaxData(`/comment/replies/${commentid}/?limit=${limitnum*50}`, (repliesdata) => {
+				var replies = repliesdata.replies;
+
 				//get the status of the handling of the replies
 				var result = handleReplies(replies);
 

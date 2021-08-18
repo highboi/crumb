@@ -1,6 +1,5 @@
 //this file contains the basic configuration for the server
 
-//modules to use
 const express = require("express");
 const session = require("express-session");
 const busboyBodyParser = require("busboy-body-parser");
@@ -11,21 +10,15 @@ const NodeMediaServer = require("node-media-server");
 const fs = require("fs");
 const escape = require("escape-html");
 
-//generate the express app
 const app = express();
-
-//make a server variable
 const server = require("http").createServer(app);
 
-//configure the server to be able to use environment variables
 require("dotenv").config();
 
-//make websocket servers pertaining to specific functions
 const liveWss = new WebSocket.Server({noServer: true}); //transfer of live video
 const chatWss = new WebSocket.Server({noServer: true}); //live chat
 const obsWss = new WebSocket.Server({noServer: true}); //obs wss for ending obs streams
 
-//configure and run node-media-server for OBS streaming on top of in-browser streams
 const nmsConfig = {
 	rtmp: {
 		port: 1935,
@@ -54,53 +47,27 @@ const nmsConfig = {
 };
 const nms = new NodeMediaServer(nmsConfig);
 
-//get the redis clients
 const redisClient = require("./redisConfig");
-
-//get the database client to make queries
 const client = require("./dbConfig");
-
-//get access to custom middleware functions and functions to make the code better
 const middleware = require("./middleware");
 
-//set up the rendering engine for the views
 app.set("view engine", require("ejs").renderFile);
-
-//allow the server to parse requests with url encoded payloads
 app.use(express.urlencoded({ extended: false }));
-
-//set up the session for the server
 app.use(session({
-		secret: process.env.SALT, ///the salt to encrypt the information in the session
-		resave: false, //do not resave session variables if nothing is changed
-		saveUninitialized: false, //do not save uninitialized variables
-		expires: new Date(Date.now() + process.env.DAYS_EXPIRE * (24*60*60*1000)) //make all cookies expire in 7 days (in milliseconds)
+		secret: process.env.SALT,
+		resave: false,
+		saveUninitialized: false,
+		expires: new Date(Date.now() + process.env.DAYS_EXPIRE * (24*60*60*1000))
 	})
 );
-
-//use the cookie parser for sessions
 app.use(cookieParser());
-
-//allow the app to use flash messages
 app.use(flash());
-
-//make sure the app can parse json
 app.use(express.json());
-
-//declare a static directory for things like stylesheets and other content
 app.use(express.static('./views'));
-
-//declare a static directory for the file contents of the site
 app.use(express.static("./storage"));
-
-//use the busboy middleware to parse files and form data
 app.use(busboyBodyParser());
-
-//use the middleware function to check for a session id and set it if there
-//isn't one
 app.use(middleware.checkNotAssigned);
 
-//export the variables
 module.exports = {
 	app,
 	server,

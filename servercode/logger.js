@@ -1,9 +1,5 @@
-//this is a file for handling the logging of traffic on the web servers as well as the errors and actions performed
-
-//winston logger
 const winston = require("winston");
 
-//create the logger
 var logger = winston.createLogger({
 	level: 'info',
 	transports: [
@@ -13,5 +9,4 @@ var logger = winston.createLogger({
 	]
 });
 
-//export the logger
 module.exports = logger;

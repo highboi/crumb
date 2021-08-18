@@ -22,25 +22,23 @@
 		<div id="theComments">
 			<% if (typeof comments != 'undefined') { %>
 				<% comments.forEach((item, index) => { %>
-					<% if (!item.parent_id) { %>
-						<hr>
-						<div class="comment" id="<%= item.id %>" likes="<%= item.likes %>" dislikes="<%= item.dislikes %>" posttime="<%= item.posttime %>">
-							<%- include('./comment.ejs', {comment: item}) %>
+					<hr>
+					<div class="comment" id="<%= item.id %>" likes="<%= item.likes %>" dislikes="<%= item.dislikes %>" posttime="<%= item.posttime %>">
+						<%- include('./comment.ejs', {comment: item}) %>
 
-							<%- include('./commentreplyform.ejs', {comment: item, base_parent_id: item.id, commentlink: commentlink}) %>
+						<%- include('./commentreplyform.ejs', {comment: item, base_parent_id: item.id, commentlink: commentlink}) %>
 
-							<div class="replies" id="<%= item.id %>repliesdiv">
-								<div id="<%= item.id %>replies"></div>
+						<div class="replies" id="<%= item.id %>repliesdiv">
+							<div id="<%= item.id %>replies"></div>
 
-								<div id="<%= item.id %>loading">
-									<img src="/content/icons/loading.gif" width="150" height="150">
-								</div>
-
-								<button class="morerepliesbtn" id="<%= item.id %>morerepliesbtn" onclick="getReplies('<%= item.id %>', false);">Get more replies.</button>
+							<div id="<%= item.id %>loading">
+								<img src="/content/icons/loading.gif" width="150" height="150">
 							</div>
+
+							<button class="morerepliesbtn" id="<%= item.id %>morerepliesbtn" onclick="getReplies('<%= item.id %>', false);">Get more replies.</button>
 						</div>
-						<hr>
-					<% } %>
+					</div>
+					<hr>
 				<% }); %>
 			<% } %>
 		</div>

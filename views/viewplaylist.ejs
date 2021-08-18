@@ -31,7 +31,7 @@
 
 				<div class="playlist-videos">
 					<% if (typeof videos != 'undefined') { %>
-						<% if (videos.length > 0) { %>
+						<% if (videos.length) { %>
 							<% videos.forEach((item, index) => { %>
 								<%- include('content/ejs/playlistthumbnail.ejs', {video: item, playlist: playlist, user: user, creator: creator}) %>
 							<% }); %>

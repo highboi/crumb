@@ -12,7 +12,7 @@ chatSocket.onopen = (e) => {
 };
 
 //a function to create a chat message element
-function createLiveMessage(msg, user_id) {
+function createLiveMessage(msg) {
 	//create all of the necessary elements
 	var divElement = document.createElement("div");
 	var iconLinkElement = document.createElement("a");
@@ -22,12 +22,12 @@ function createLiveMessage(msg, user_id) {
 	var msgElement = document.createElement("p");
 
 	//set the attributes of the elements to the necessary values
-	iconElement.src = msg[0];
 	nameElement.innerHTML = msg[1];
-	msgElement.innerHTML = msg[2];
-	iconLinkElement.href = `/u/${user_id}`;
+	iconElement.src = msg[2];
+	msgElement.innerHTML = msg[3];
+	iconLinkElement.href = `/u/${msg[0]}`;
 	iconLinkElement.target = "_blank";
-	nameLinkElement.href = `/u/${user_id}`;
+	nameLinkElement.href = `/u/${msg[0]}`;
 	nameLinkElement.target = "_blank";
 
 	//add the icon and name elements to the inside of the two anchor tags to allow the user 
@@ -74,7 +74,7 @@ chatSocket.onmessage = (event) => {
 	var msg = event.data.split(",");
 
 	//create a div element for the live chat
-	var divElement = createLiveMessage(msg, );
+	var divElement = createLiveMessage(msg);
 
 	//add the live chat message to the chat box
 	chatbox.appendChild(divElement);
