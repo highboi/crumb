@@ -6,7 +6,6 @@
 	</head>
 	<body>
 		<nav>
-			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/ejs/banner.ejs') %>
 		</nav>
 
@@ -14,38 +13,44 @@
 			<%- include('content/ejs/body.ejs') %>
 
 			<div class="search-content">
-				<% if (search.channels.length > 0) { %>
-					<h1>Channels:</h1>
-					<hr>
-					<% search.channels.forEach((item, index) => { %>
-						<%- include('content/ejs/minichannel.ejs', {channel: item}) %>
-					<% }); %>
-				<% } %>
-
-				<% if (search.videos.length > 0) { %>
-					<h1>Videos:</h1>
-					<hr>
-					<div class="search-videos">
-						<% search.videos.forEach((item, index) => { %>
-							<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+				<div id="channel-results">
+					<% if (search.channels.length) { %>
+						<h1>Channels:</h1>
+						<hr>
+						<% search.channels.forEach((item, index) => { %>
+							<%- include('content/ejs/minichannel.ejs', {channel: item}) %>
 						<% }); %>
-					</div>
-				<% } %>
+					<% } %>
+				</div>
 
-				<% if (search.playlists.length > 0) { %>
-					<h1>Playlists:</h1>
-					<hr>
-					<% search.playlists.forEach((item, index) => { %>
-						<div class="playlist">
-							<% var playlistlink = `/playlistvideo/view/${item.id}/${item.firstvideoid}` %>
-							<a href="<%= playlistlink %>"><img src="<%= item.thumbnail %>" width="450" height="300"></a>
-							<h3><a href="<%= playlistlink %>"><%= item.name %></a></h3>
-							<p><%= item.videocount %></p>
+				<div id="video-results">
+					<% if (search.videos.length) { %>
+						<h1>Videos:</h1>
+						<hr>
+						<div class="search-videos">
+							<% search.videos.forEach((item, index) => { %>
+								<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+							<% }); %>
 						</div>
-					<% }); %>
-				<% } %>
+					<% } %>
+				</div>
 
-				<% if (search.videos.length == 0 && search.channels.length == 0 && search.playlists.length == 0) { %>
+				<div id="playlist-results">
+					<% if (search.playlists.length) { %>
+						<h1>Playlists:</h1>
+						<hr>
+						<% search.playlists.forEach((item, index) => { %>
+							<div class="playlist">
+								<% var playlistlink = `/playlistvideo/view/${item.id}/${item.firstvideoid}` %>
+								<a href="<%= playlistlink %>"><img src="<%= item.thumbnail %>" width="450" height="300"></a>
+								<h3><a href="<%= playlistlink %>"><%= item.name %></a></h3>
+								<p><%= item.videocount %></p>
+							</div>
+						<% }); %>
+					<% } %>
+				</div>
+
+				<% if (!search.videos.length && !search.channels.length && !search.playlists.length) { %>
 					<p>No Results Returned</p>
 				<% } %>
 			</div>

@@ -19,6 +19,7 @@ var cardElement = elements.create("card", {
 	}
 });
 
+//make sure the card check element is not checked (by default, the card information stays the same)
 document.getElementById("cardcheck").checked = false;
 
 //mount and dismount the card element based on whether or not the user wants to change the card info
@@ -32,16 +33,16 @@ document.getElementById("cardcheck").addEventListener("change", (event) => {
 
 //function triggered when the user submits the form
 async function advertiserEditSubmitted() {
+	//disable the form and show a loading animation
 	formLoadingState("advertiserEditForm");
 
+	//check the validity of form inputs
 	if (!checkFormInputs("advertiserEditForm")) {
 		formLoadingState("advertiserEditForm", true);
 		return false;
 	}
 
-	var businessDomain = document.querySelector("#advertiserEditForm #businessDomain").value;
-	var businessEmail = document.querySelector("#advertiserEditForm #businessEmail").value;
-
+	//make a FormData object to store form data
 	var advertFormData = new FormData();
 
 	//if the card data is entered, then make a new payment method out of the card information
@@ -52,24 +53,36 @@ async function advertiserEditSubmitted() {
 			card: cardElement
 		});
 
+		//alert the user of errors with making the payment method if there are any
 		if (error) {
 			alert(error.message);
 			formLoadingState("advertiserEditForm", true);
 			return false;
+		} else {
+			//append the new payment method to the form data
+			advertFormData.append("paymentMethod", paymentMethod.id);
 		}
-
-		advertFormData.append("paymentMethod", paymentMethod.id);
 	}
 
+	//get the changes to the business domain and the business email
+	var businessDomain = document.querySelector("#advertiserEditForm #businessDomain").value;
+	var businessEmail = document.querySelector("#advertiserEditForm #businessEmail").value;
 	advertFormData.append("businessDomain", businessDomain);
 	advertFormData.append("businessEmail", businessEmail);
 
+	//send the data to the server for changes
 	var response = await fetch("/advertiseredit", {
 		method: "POST",
 		body: advertFormData
 	});
-	var jsonparsed = await response.json();
 
-	alert("Changes applied!");
-	window.location.href = "/adstats";
+	//check the response status
+	if (response.ok) {
+		alert("Changes applied!");
+		window.location.href = "/adstats";
+		return true;
+	} else {
+		alert("There was an error with our server! Please try again.");
+		return false;
+	}
 }

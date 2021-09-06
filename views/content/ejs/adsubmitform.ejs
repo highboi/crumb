@@ -1,0 +1,35 @@
+<% if (typeof adDomain != "undefined" && typeof adResolutions != "undefined" && typeof adPrice != "undefined") { %>
+	<div id="adSubmission">
+		<h1>Submit an Advertisement:</h1>
+
+		<form action="" method="POST" enctype='multipart/form-data' id="adSubmissionForm">
+			<div id="adForm">
+				<label for="businessLink">Relative Link for <%= adDomain %>:</label>
+				<input type="text" id="businessLink" name="businessLink" value="/" required><br>
+
+				<hr>
+
+				<h2>Accepted Image Resolutions:</h2>
+				<% adResolutions.forEach((item, index) => { %>
+					<p><%= item.width %>x<%= item.height %> for <%= item.type %> <%= item.position %>s</p>
+				<% }); %>
+
+				<label for="adImage">Advertisement Image/GIF:</label>
+				<input type="file" id="adImage" name="adImage" accept="image/*" required><br>
+
+			</div><hr>
+
+			<label for="startDate">Start Date to Campaign:</label>
+			<% var date = new Date() %>
+			<% date.setDate(date.getDate()+1) %>
+			<input type="date" id="startDate" name="startDate" min="<%= date.toISOString().slice(0, 10) %>"><br>
+
+			<hr>
+
+			<h4>Pricing is $<%= adPrice %> per 1000 impressions, charges will be applied monthly.</h4>
+
+			<button class="submitbtn" id="submitAdvertSubscription" type="button" onclick="advertSubscriptionSubmitted()">Submit Advertisement & Start Monthly Subscription</button>
+			<div class="lds-hourglass"></div>
+		</form>
+	</div>
+<% } %>

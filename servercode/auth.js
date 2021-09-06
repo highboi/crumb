@@ -9,7 +9,7 @@ GET FILE PATHS FOR USER AUTH
 //get the registration page
 app.get('/register', middleware.checkNotSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
-	res.render("register.ejs", viewObj);
+	return res.render("register.ejs", viewObj);
 });
 
 //delete the user and all traces of the user such as videos
@@ -57,17 +57,17 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 		res.cookie('hasSession', false, {httpOnly: false, expires: 0});
 
 		req.flash("message", "Deleted Your Account!");
-		res.redirect("/");
+		return res.redirect("/");
 	} else {
 		req.flash("message", "Not Your Account!");
-		res.redirect("/");
+		return res.redirect("/error");
 	}
 });
 
 //get the login page
 app.get('/login', middleware.checkNotSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
-	res.render("login.ejs", viewObj);
+	return res.render("login.ejs", viewObj);
 });
 
 //log the user out of the session
@@ -83,7 +83,7 @@ app.get("/logout", middleware.checkSignedIn, (req, res) => {
 	console.log("[+] Logged out.");
 
 	req.flash("message", "Logged out!");
-	res.redirect("/");
+	return res.redirect("/");
 });
 
 
@@ -95,8 +95,9 @@ POST PATHS FOR USER AUTH
 app.post('/register', async (req, res) => {
 	var existinguser = await client.query(`SELECT username FROM users WHERE username=$1 LIMIT 1`, [req.body.username]);
 	if (existinguser.rows.length) {
-		req.flash("message", "Username Already Taken, Please Try Again.")
-		return res.redirect("/register");
+		req.flash("message", "Username Already Taken, Please Try Again.");
+		req.flash("redirecturl", "/register");
+		return res.redirect("/error");
 	}
 
 	var errors = [];
@@ -175,7 +176,7 @@ app.post('/register', async (req, res) => {
 		res.cookie("hasSession", true, {httpOnly: false, expires: 0});
 
 		req.flash("message", "Registered!");
-		res.redirect("/");
+		return res.redirect("/");
 	}
 });
 
@@ -207,9 +208,10 @@ app.post("/login", async (req, res) => {
 		console.log("Logged In!");
 
 		req.flash("message", "Logged In!");
-		res.redirect("/");
+		return res.redirect("/");
 	} else {
 		req.flash("message", "Password Incorrect.");
-		res.redirect("/login");
+		req.flash("redirecturl", "/login");
+		return res.redirect("/error");
 	}
 });

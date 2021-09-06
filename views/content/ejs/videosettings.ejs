@@ -1,3 +1,5 @@
+<!--EJS for displaying the settings for a video-->
+
 <div id="videosettings">
 	<label for="speedSettings">Speed:</label>
 	<select id="speedSettings">
@@ -22,10 +24,12 @@
 		<% } %>
 	</select>
 
-	<label for="captionSettings">Captions:</label>
-	<label class="switch" id="captionSettings">
-		<input class="switchinput" type="checkbox">
-		<span class="slider"></span>
-	</label>
+	<% if (typeof subtitles != "undefined") { %>
+		<label for="captionSettings">Captions:</label>
+		<label class="switch" id="captionSettings">
+			<input class="switchinput" type="checkbox">
+			<span class="slider"></span>
+		</label>
+	<% } %>
 
 </div>

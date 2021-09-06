@@ -2,27 +2,38 @@
 
 //this is a function to toggle the display value of an element
 function showelement(elementid) {
-	//get the element to toggle
+	//get the CSS display value of the element to toggle
 	var element = document.getElementById(elementid);
-
-	//get the computed display property
 	var display = window.getComputedStyle(element, null).getPropertyValue("display");
 
-	//if the display value is "none"
+	//change the display value of the element above depending on the display value
 	if (display == "none") {
-		//set the element display back to the initial default value
 		element.style.display = "block";
-	} else { //if the display value is anything else
-		//set the element's display value to "none"
+	} else {
 		element.style.display = "none";
 	}
 }
 
-//define a global object to store mouse coordinates for the movement of the draggable element
-var dragCoords = {xDiff: 0, yDiff: 0, oldX: 0, oldY: 0};
+//this is a function to toggle the display value of an element with a custom display value
+function showelementcustom(elementid, displayValue) {
+	//get the CSS display value of the element to toggle
+	var element = document.getElementById(elementid);
+	var display = window.getComputedStyle(element, null).getPropertyValue("display");
+
+	//change the display value of the element above depending on the display value
+	if (display == "none") {
+		element.style.display = displayValue;
+	} else {
+		element.style.display = "none";
+	}
+}
+
 
 //this is a function to toggle the display of an element to make it a draggable window object
 function showElementDraggable(elementid) {
+	//define an object to store mouse coordinates for the movement of the draggable element
+	var dragCoords = {xDiff: 0, yDiff: 0, oldX: 0, oldY: 0};
+
 	//get the element to make draggable
 	var element = document.getElementById(elementid);
 
@@ -46,50 +57,49 @@ function showElementDraggable(elementid) {
 	function dragMouseDown(event) {
 		//make sure we have the event with the right info
 		event = event || window.event;
-
-		//prevent the default behavior
 		event.preventDefault();
 
 		//set the mouse cursor position according to the current position
 		dragCoords.oldX = event.clientX;
 		dragCoords.oldY = event.clientY;
 
-		//make sure to remove any dragging behavior once the mouse is released
-		document.onmouseup = closeDragElement;
-
 		//make sure to move the element if the mouse is dragging
 		document.onmousemove = elementDrag;
+
+		//make sure to remove any dragging behavior once the mouse is released
+		document.onmouseup = closeDragElement;
 	}
 
 	//the function to drag the element by changing the offset values in the style attribute
 	function elementDrag(event) {
 		//make sure we have the event with the right info
 		event = event || window.event;
-
-		//prevent the default behavior
 		event.preventDefault();
 
-		//calculate the new cursor position
+		//calculate the difference between the old coordinates and the current coordinates
 		dragCoords.diffX = dragCoords.oldX - event.clientX;
 		dragCoords.diffY = dragCoords.oldY - event.clientY;
+
+		//get the current coordinates of the mouse
 		dragCoords.oldX = event.clientX;
 		dragCoords.oldY = event.clientY;
 
-		//check to see that the window does not go beyond the bounds of the window
+		/*
+		do collision detection between the mouse and the edge of the browser window
+		and set the left offset of the element according to the calculated difference
+		between the old and new mouse coordinates
+		*/
 		if ( !(event.clientX < 0 || event.clientX > window.innerWidth) ) {
-			//move the element on the x axis based on the calculations above
 			element.style.left = (element.offsetLeft - dragCoords.diffX) + "px";
 		}
-
 		if ( !(event.clientY < 0 || event.clientY > window.innerHeight) ) {
 			//move the element on the y axis based on the calculations above
 			element.style.top = (element.offsetTop - dragCoords.diffY) + "px";
 		}
 	}
 
-	//a function to reset the event call functions to stop mouse movement
+	//the function to eliminate dragging behavior of the element
 	function closeDragElement() {
-		//set the mouse event functions to "null" to prevent dragging behavior
 		document.onmouseup = null;
 		document.onmousemove = null;
 	}

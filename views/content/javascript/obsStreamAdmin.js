@@ -12,30 +12,45 @@ function urlExists(url) {
 	return http.status != 404;
 }
 
-//start the HLS live stream in order to load the source of the HLS media to the video element
+
+/*
+a function for starting the HLS live stream and load the
+source of the HLS media to the video element
+*/
 function hlsStart() {
+	//check for hls support
 	if (Hls.isSupported()) {
+		//attach a new HLS instance to the video element
 		var hls = new Hls();
 		hls.attachMedia(livestream);
+
+		//do something once the HLS instance is attached
 		hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+			//load the source URL for the hls media
 			console.log("Media Attached!");
 			console.log("Loading Source: ", streamURL);
 			hlsLoad(hls, streamURL);
+
+			//do something once the HLS manifest is parsed
 			hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+				//play the live stream automatically
 				console.log("Manifest Parsed!");
 				livestream.muted = true;
 				livestream.play();
 			});
 		});
 	} else {
+		//alert the user of the lack of HLS support
 		alert("HLS is not supported in your browser, you cannot live stream.");
 		window.location.href = "/";
 	}
 }
 
-//a recursive function that will load the source url if it exists
-//and calls the same function over and over if the url does not exist
-//so that it loads the source url whenever it is deemed to exist
+/*
+a recursive function that takes an HLS instance and a URL,
+checking if the URL is functioning before loading it as
+a source for the live stream
+*/
 function hlsLoad(hls, url) {
 	if (urlExists(url)) {
 		hls.loadSource(url);
@@ -54,13 +69,12 @@ obsSocket.onmessage = (event) => {
 	console.log("Message to OBS socket.");
 	console.log(event.data);
 
-	//start the hls stream OR stop the stream and redirect to the video url
-	//depending on the socket data sent
+	//check for the data sent over the socket
 	switch (event.data) {
-		case "started":
+		case "started": //start the live stream if ready
 			hlsStart();
 			break;
-		case "ended":
+		case "ended": //redirect to the finished stream if ready
 			window.location.href = `/v/${streamid}`;
 			break;
 	}

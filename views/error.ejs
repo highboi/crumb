@@ -2,12 +2,16 @@
 
 <html>
 	<head>
-		<title>Error - Crumb</title>
+		<%- include('content/ejs/head.ejs', {title: "Error"}) %>
 	</head>
 	<body>
 		<h1>ERROR:</h1>
 		<h2><%= message %></h2>
 
-		<a href="/">Go Home</a>
+		<% if (typeof redirecturl != 'undefined') { %>
+			<a href="<%= redirecturl %>">Return</a>
+		<% } else { %>
+			<a href="/">Go Home</a>
+		<% } %>
 	</body>
 </html>

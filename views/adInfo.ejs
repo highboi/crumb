@@ -6,33 +6,29 @@
 	</head>
 	<body>
 		<nav>
-			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/ejs/banner.ejs') %>
 		</nav>
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
-
 			<div id="adStats">
-				<% if (typeof adverts != 'undefined' && typeof adDomain != 'undefined') { %>
-					<h1>Advertisements for <%= adDomain %></h1>
+				<h1>Advertisements for <%= adDomain %></h1>
 
-					<a href="/advertise" target="_blank">Make a new advertisement</a><br><br>
-					<a href="/advertiserEditor/<%= user.id %>" target="_blank">Edit advertiser information</a>
+				<a href="/advertise" target="_blank">Make a new advertisement</a><br><br>
+				<a href="/advertiserEditor/<%= user.id %>" target="_blank">Edit advertiser information</a>
 
-					<% adverts.forEach((advert, index) => { %>
-						<div class="adContainer">
-							<h2>Advertisement with URL: <%= adDomain %><%= advert.adlink %></h2>
-							<p>Advertisement as seen by Users:</p>
-							<img src="<%= advert.adfile %>"><br>
-							<button onclick="window.location.href = '/adEditor/<%= advert.id %>'">Edit Advertisement Info</button>
-							<button onclick="redirectConfirm('Delete advertisement subscription?', '/advertcancel/<%= advert.id %>')">Delete Advertisement?</button>
-						</div>
-					<% }); %>
+				<% adverts.forEach((advert, index) => { %>
+					<div class="adContainer">
+						<h2>Advertisement with URL: <%= adDomain %><%= advert.adlink %></h2>
+						<p>Advertisement as seen by Users:</p>
+						<img src="<%= advert.adfile %>"><br>
+						<button onclick="window.location.href = '/adEditor/<%= advert.id %>'">Edit Advertisement Info</button>
+						<button onclick="redirectConfirm('Delete advertisement subscription?', '/advertcancel/<%= advert.id %>')">Delete Advertisement?</button>
+					</div>
+				<% }); %>
 
-					<% if (!adverts.length) { %>
-						<h2>No advertisements exist for you yet, make some <a href="advertise"><u>here</u></a>.</h2>
-					<% } %>
+				<% if (!adverts.length) { %>
+					<h2>No advertisements exist for you yet, make some <a href="advertise"><u>here</u></a>.</h2>
 				<% } %>
 			</div>
 

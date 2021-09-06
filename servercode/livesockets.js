@@ -104,7 +104,10 @@ liveWss.on("connection", async (ws, req) => {
 			await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, ['false', queryparams.streamid]);
 			await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [stream.user_id]);
 		} else if (queryparams.isClient == 'true') {
-			global.webWssClients[queryparams.streamid].splice(global.webWssClients[queryparams.streamid].indexOf(ws), 1);
+			var indexOfSocket = global.webWssClients.findIndex((item) => {
+				return JSON.stringify(item) == JSON.stringify(ws);
+			});
+			global.webWssClients[queryparams.streamid].splice(indexOfSocket, 1);
 		}
 	});
 });
@@ -127,41 +130,53 @@ obsWss.on("connection", async (ws, req) => {
 		if (queryparams.isStreamer == "true") {
 			delete global.obsWssClients[queryparams.streamid];
 		} else if (queryparams.isClient == "true") {
-			global.obsWssClients[queryparams.streamid].splice(global.obsWssClients[queryparams.streamid].indexOf(ws), 1);
+			var indexOfSocket = global.obsWssClients.findIndex((item) => {
+				return JSON.stringify(item) == JSON.stringify(ws);
+			});
+			global.obsWssClients[queryparams.streamid].splice(indexOfSocket, 1);
 		}
 	});
 });
 
 //this is a websocket connection handler for the chat server which handles the transmitting of chat data between clients of a live stream
 chatWss.on("connection", async (ws, req) => {
+	//get the user session and query parameters
 	var sessionid = cookie.parse(req.headers.cookie).sessionid;
-
 	var userinfo = await middleware.getUserSession(sessionid);
-
 	var queryparams = url.parse(req.url, true).query;
 
+	//check for the existence of a live chat entry
 	if (typeof global.chatWssClients[queryparams.streamid] == 'undefined') {
-		global.chatWssClients[queryparams.streamid] = [ws];
+		//add a live chat entry which contains the clients and a queue of messages
+		global.chatWssClients[queryparams.streamid] = {queue: [], clients: [ws]};
 	} else {
-		global.chatWssClients[queryparams.streamid].push(ws);
+		//add this user to the chat clients and send them the queued messages of the chat
+		global.chatWssClients[queryparams.streamid].clients.push(ws);
+		for (var message of global.chatWssClients[queryparams.streamid].queue.slice(-50)) {
+			ws.send(JSON.stringify(message));
+		}
 	}
 
 	ws.on("message", async (message) => {
-		var data = message.split(",");
+		var data = JSON.parse(message);
 
-		if (data[0] == "msg") {
-			var recipients = global.chatWssClients[queryparams.streamid].filter((socket) => {
-				return socket.readyState == WebSocket.OPEN;
+		//check to see if this is a live chat message
+		if (data.message) {
+			//get the other clients of this live chat
+			var recipients = global.chatWssClients[queryparams.streamid].clients.filter((socket) => {
+				return socket.readyState == WebSocket.OPEN && JSON.stringify(socket) != JSON.stringify(ws);
 			});
 
-			var chatmessage = userinfo.id + "," + userinfo.username + "," + userinfo.channelicon + "," + data[1]
+			//send the chat message information to other live chat clients and add the message to the queue
+			var chatmessage = {userid: userinfo.id, username: userinfo.username, channelicon: userinfo.channelicon, message: data.message};
+			global.chatWssClients[queryparams.streamid].queue.push(chatmessage);
 			recipients.forEach((item, index) => {
-				if (item != ws) {
-					item.send(chatmessage);
-				}
+				item.send(JSON.stringify(chatmessage));
 			});
 
-			var msgValues = [data[1], queryparams.streamid, userinfo.id, parseInt(data[2], 10)];
+
+			//push the live chat message into the database
+			var msgValues = [data.message, queryparams.streamid, userinfo.id, data.time];
 			msgValues = msgValues.map((item) => {
 				if (typeof item == "string") {
 					return "\'" + item + "\'";
@@ -169,7 +184,20 @@ chatWss.on("connection", async (ws, req) => {
 					return item;
 				}
 			});
-			await client.query(`INSERT INTO livechat (message, stream_id, user_id, time) VALUES (${msgValues})`);
+			client.query(`INSERT INTO livechat (message, stream_id, user_id, time) VALUES (${msgValues})`);
+		}
+	});
+
+	ws.on("close", async (message) => {
+		//remove the client from the live chat entry
+		var indexOfSocket = global.chatWssClients[queryparams.streamid].findIndex((item) => {
+			return JSON.stringify(item) == JSON.stringify(ws);
+		});
+		global.chatWssClients[queryparams.streamid].splice(indexOfSocket, 1);
+
+		//delete the entire live chat entry if the above removal left no people in the live chat
+		if (!global.chatWssClients[queryparams.streamid].clients.length) {
+			delete global.chatWssClients[queryparams.streamid];
 		}
 	});
 });

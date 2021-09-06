@@ -5,34 +5,28 @@ if (typeof scrollCommentId != 'undefined') {
 	//try to get the comment reply element
 	var commentElement = document.getElementById(scrollCommentId);
 
-	//if the comment element is not defined in the document body, then request comments for the base parent until it shows up
+	//check for the existence of the comment element to scroll to
 	if (commentElement == null) {
-		//get the replies for this comment
-		getRecursiveReplies(scrollCommentBaseId, scrollCommentId);
+		//get the replies to the base comment
+		var baseComment = document.getElementById(scrollCommentBaseId);
+		baseComment.querySelector("#showreplies").click();
+
+		//scroll to the comment reply element
+		recursiveScrollComment(scrollCommentBaseId, scrollCommentBaseId);
 	} else {
-		//scroll to the comment element
+		//scroll to the comment element directly
 		scrollToComment(scrollCommentId);
 	}
 }
 
-//a function to recursively get the replies of a comment until we can scroll to a reply
-function getRecursiveReplies(basecommentid, targetcommentid) {
-	//get the comment replies using AJAX and handle the replies returned in the callback function
-	getReplies(basecommentid, false, (replies) => {
-		//filter the replies for the target comment reply
-		var filteredreplies = replies.filter((item, index) => {
-			return item.id == targetcommentid;
-		});
-
-		//if the filtered replies array has a reply with the target id
-		if (filteredreplies.length > 0) {
-			console.log("comment reply found, scrolling to the reply");
-			scrollToComment(targetcommentid);
-		} else { //if the target comment id was not found
-			console.log("reply not found, calling function recursively");
-			getRecursiveReplies(basecommentid, targetcommentid);
-		}
-	});
+//a function to recursively get more replies from a comment until the comment reply is found
+function recursiveScrollComment(baseCommentId, commentid) {
+	if (document.getElementById(commentid) == null) {
+		document.getElementById(`${baseCommentId}morerepliesbtn`).click();
+		return recursiveScroll(baseCommentId, commentid);
+	} else {
+		return scrollToComment(commentid);
+	}
 }
 
 //a function for scrolling to a comment element with a certain comment id
@@ -48,13 +42,7 @@ function scrollToComment(commentid) {
 		return false;
 	} else {
 		//scroll the comment into the view of the user
-		commentElement.scrollIntoView(false);
-
-		//change some CSS attributes about the comment to help it stand out to the user
-		commentElement.style.backgroundColor = "#1a1a1a";
-		commentElement.style.borderStyle = "solid";
-		commentElement.style.borderWidth = "5px";
-		commentElement.style.borderColor = "#adff12";
+		commentElement.scrollIntoView();
 
 		console.log("THE COMMENT HAS BEEN SCROLLED TO");
 

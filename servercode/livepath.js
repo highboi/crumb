@@ -23,41 +23,45 @@ app.get("/l/view/:streamid", async (req, res) => {
 	var video = await client.query(`SELECT * FROM videos WHERE id=$1 LIMIT 1`, [req.params.streamid]);
 	video = video.rows[0];
 
+	if (typeof viewObj.user != "undefined" && viewObj.user.id == video.user_id) {
+		if (video.streaming) {
+			return res.redirect(`/l/admin/${req.params.streamid}/?streamtype=${video.streamtype}`);
+		}
+	}
+
 	if (typeof stream == 'undefined') {
 		if (typeof video == 'undefined') {
 			req.flash("message", `Stream with ID: '${req.params.streamid}' does not exist.`);
 			return res.redirect("/error");
 		} else if (!video.streaming) {
-			res.redirect(`/v/${req.params.streamid}`);
+			return res.redirect(`/v/${req.params.streamid}`);
 		} else {
+			var videoinfo = await middleware.getVideoInfo(video);
+
 			var streamkey = await client.query(`SELECT streamkey FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
 			streamkey = streamkey.rows[0].streamkey;
 
-			var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
-			videocreator = videocreator.rows[0];
-
 			var reccomendations = await middleware.getReccomendations(req, video);
 
-			viewObj = Object.assign({}, viewObj, {stream: video, videocreator: videocreator, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, reccomendations: reccomendations});
+			viewObj = Object.assign({}, viewObj, {stream: video, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, reccomendations: reccomendations}, videoinfo);
 
-			res.render("viewStreamObs.ejs", viewObj);
+			return res.render("viewStreamObs.ejs", viewObj);
 		}
 	} else {
-		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
-		videocreator = videocreator.rows[0];
+		var videoinfo = await middleware.getVideoInfo(video);
 
 		var reccomendations = await middleware.getReccomendations(req, video);
 
-		viewObj = Object.assign({}, viewObj, {stream: video, reccomendations: reccomendations, videocreator: videocreator});
+		viewObj = Object.assign({}, viewObj, {stream: video, reccomendations: reccomendations}, videoinfo);
 
-		res.render("viewStreamWeb.ejs", viewObj);
+		return res.render("viewStreamWeb.ejs", viewObj);
 	}
 });
 
 //this is a get request to get basic info about a live stream
 app.get("/l/start", middleware.checkSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
-	res.render("startstream.ejs", viewObj);
+	return res.render("startstream.ejs", viewObj);
 });
 
 //this is a get request for the admin panel of a live stream
@@ -75,11 +79,11 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 
 			viewObj = Object.assign({}, viewObj, {videocreator: viewObj.user, stream: stream, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://localhost/live", streamKey: streamkey});
 
-			res.render("obsAdminPanel.ejs", viewObj);
+			return res.render("obsAdminPanel.ejs", viewObj);
 		} else if (req.query.streamtype == "browser") {
 			viewObj = Object.assign({}, viewObj, {stream: stream, videocreator: viewObj.user});
 
-			res.render("webAdminPanel.ejs", viewObj);
+			return res.render("webAdminPanel.ejs", viewObj);
 		}
 	} else {
 		req.flash("message", "There is no stream in your roster yet, please start one.");
@@ -101,7 +105,7 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 	if (streamtype == "browser") {
 		var thumbnailpath = await middleware.saveFile(req.files.liveThumbnail, "/storage/videos/thumbnails/");
 
-		var valuesarr = [streamid, req.body.name, req.body.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), req.body.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, req.body.enableChat];
+		var valuesarr = [streamid, req.body.name, req.body.description, thumbnailpath, userinfo.id, 0, new Date().toISOString(), req.body.topics, userinfo.username, userinfo.channelicon, true, req.params.type, req.body.enableChat];
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == "string") {
 				return "\'" + item + "\'";
@@ -110,12 +114,14 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 			}
 		});
 
-		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enablechat) VALUES (${valuesarr})`);
+		console.log(`${valuesarr}`);
+
+		await client.query(`INSERT INTO videos (id, title, description, thumbnail, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enablechat) VALUES (${valuesarr})`);
 		await client.query(`INSERT INTO videofiles (id, thumbnail) VALUES ($1, $2)`, [streamid, thumbnailpath]);
 	} else if (streamtype == "obs") {
 		var thumbnailpath = await middleware.saveFile(req.files.liveThumbnail, "/storage/videos/thumbnails/");
 
-		var valuesarr = [streamid, req.body.name, req.body.description, thumbnailpath, undefined, userinfo.id, 0, new Date().toISOString(), req.body.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, req.body.enableChat.toString()];
+		var valuesarr = [streamid, req.body.name, req.body.description, thumbnailpath, userinfo.id, 0, new Date().toISOString(), req.body.topics, userinfo.username, userinfo.channelicon, 'true', req.params.type, req.body.enableChat.toString()];
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == "string") {
 				return "\'" + item + "\'";
@@ -124,11 +130,11 @@ app.post("/l/stream/:type", middleware.checkSignedIn, async (req, res) => {
 			}
 		});
 
-		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enablechat) VALUES (${valuesarr})`);
+		await client.query(`INSERT INTO videos (id, title, description, thumbnail, user_id, views, posttime, topics, username, channelicon, streaming, streamtype, enablechat) VALUES (${valuesarr})`);
 		await client.query(`INSERT INTO videofiles (id, thumbnail) VALUES ($1, $2)`, [streamid, thumbnailpath]);
 	}
 
-	res.redirect(`/l/admin/${streamid}?streamtype=${streamtype}`);
+	return res.redirect(`/l/admin/${streamid}?streamtype=${streamtype}`);
 });
 
 /*

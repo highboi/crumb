@@ -11,10 +11,8 @@ fs.readdir(dir, (error, list) => {
 		console.log(item);
 
 		fs.readFile(dir + "/" + item, 'utf-8', (err, data) => {
-			console.log(data);
-
 			if (typeof data == "string") {
-				data = data.replace("<%- include(\'content/html/banner.ejs\') %>", "<%- include(\'content/ejs/banner.ejs\') %>");
+				data = data.replace("<%- include(\'content/ejs/navbar.ejs\') %>", "");
 			}
 
 

@@ -8,30 +8,30 @@ GET PATHS FOR COMMENTS
 //a get path for getting the replies for a comment with AJAX
 app.get("/comment/replies/:commentid", async (req, res) => {
 	if (typeof req.query.limit == 'undefined') {
-		var replies = await client.query(`SELECT * FROM comments WHERE base_parent_id=$1 LIMIT 50`, [req.params.commentid]);
+		var replies = await client.query(`SELECT * FROM comments WHERE base_parent_id=$1 ORDER BY posttime LIMIT 50`, [req.params.commentid]);
 	} else {
-		var replies = await client.query(`SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT '1')) AS rownum, * FROM comments WHERE base_parent_id=$1) AS comments WHERE rownum>$2 LIMIT 50`, [req.params.commentid, req.query.limit]);
+		var replies = await client.query(`SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT '1')) AS rownum, * FROM comments WHERE base_parent_id=$1) AS comments WHERE rownum>$2 ORDER BY posttime LIMIT 50`, [req.params.commentid, req.query.limit]);
 	}
 
-	res.send({replies: replies.rows});
+	return res.send({replies: replies.rows});
 });
 
 //a get request for liking a comment on the site
 app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var data = await middleware.likeComment(userinfo, req.params.commentid);
+	var data = await middleware.likeComment(userinfo.id, req.params.commentid);
 
-	res.send(data);
+	return res.send(data);
 });
 
 //a get request for disliking a comment on the site
 app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var data = await middleware.dislikeComment(userinfo, req.params.commentid);
+	var data = await middleware.dislikeComment(userinfo.id, req.params.commentid);
 
-	res.send(data);
+	return res.send(data);
 });
 
 
@@ -51,7 +51,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 		valuesarr.push(req.query.parent_id);
 
 		var depth_level = await client.query(`SELECT depth_level FROM comments WHERE id=$1 LIMIT 1`, [req.query.parent_id]);
-		depth_level = depth_level.rows[0].depth_level+1;
+		depth_level = parseInt(depth_level.rows[0].depth_level, 10)+1;
 		valuesarr.push(depth_level);
 
 		valuesarr.push(req.body.base_parent_id);
@@ -79,7 +79,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, depth_level) VALUES (${valuesarr})`);
 	}
 
-	if (req.files.reactionfile.size) {
+	if (typeof req.files.reactionfile != "undefined") {
 		var acceptedvideo = ["video/mp4", "video/ogg", "video/webm"];
 		var acceptedimg = ["image/png", "image/jpeg", "image/jpg"];
 
@@ -99,9 +99,10 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 			await client.query(`UPDATE comments SET reactionfile=$1, filetype=$2 WHERE id=$3`, [filepath, filetype, commentid]);
 		} else {
 			req.flash("message", "Unsupported file type, please use mp4, ogg, webm, png, jpeg, or jpg files.");
-			res.redirect("/error");
+			req.flash("redirecturl", `/v/${req.params.videoid}`);
+			return res.redirect("/error");
 		}
 	}
 
-	res.redirect(`/v/${req.params.videoid}/?scrollToComment=true&commentid=${commentid}`);
+	return res.redirect(`/v/${req.params.videoid}/?scrollcommentid=${commentid}`);
 });

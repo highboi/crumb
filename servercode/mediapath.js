@@ -10,7 +10,7 @@ GET PATHS FOR VIDEOS/MEDIA
 //get the form for submitting videos
 app.get("/v/submit", middleware.checkSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
-	res.render("submitvideo.ejs", viewObj);
+	return res.render("submitvideo.ejs", viewObj);
 });
 
 //views individual videos on the site
@@ -32,15 +32,17 @@ app.get("/v/:videoid", async (req, res) => {
 			viewObj.subscribed = subscribed.rows[0].exists;
 		}
 
-		if (req.query.scrollToComment == "true" && typeof req.query.commentid != 'undefined') {
-			viewObj.scrollToComment = true;
-
-			viewObj.scrollCommentId = req.query.commentid;
+		if (typeof req.query.scrollcommentid != 'undefined') {
+			viewObj.scrollCommentId = req.query.scrollcommentid;
 
 			var comment = await client.query(`SELECT base_parent_id FROM comments WHERE id=$1 LIMIT 1`, [viewObj.scrollCommentId]);
-			var base_parent_id = comment.rows[0].base_parent_id;
 
-			viewObj.scrollCommentBaseId = base_parent_id;
+			if (comment.rows.length) {
+				var base_parent_id = comment.rows[0].base_parent_id;
+				viewObj.scrollCommentBaseId = base_parent_id;
+			} else {
+				delete viewObj.scrollCommentId;
+			}
 		}
 
 		await client.query(`UPDATE videos SET views=views+1 WHERE id=$1`, [video.id]);
@@ -51,7 +53,7 @@ app.get("/v/:videoid", async (req, res) => {
 		viewObj = Object.assign({}, viewObj, {video: video, videocreator: videocreator});
 	}
 
-	res.render("viewvideo.ejs", viewObj);
+	return res.render("viewvideo.ejs", viewObj);
 });
 
 //get the video data from the file in chunks for efficiency of the network
@@ -115,14 +117,15 @@ app.get("/video/:id", async (req, res) => {
 app.get("/v/delete/:videoid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var result = await middleware.deleteVideoDetails(userinfo, req.params.videoid);
+	var result = await middleware.deleteVideoDetails(userinfo.id, req.params.videoid);
 
 	if (result) {
 		req.flash("message", "Deleted Video Details.");
-		res.redirect("/");
+		return res.redirect("/");
 	} else {
 		req.flash("message", "Error: Could not delete video, user information does not match or video does not exist.");
-		res.redirect("/error");
+		req.flash("redirecturl", `/v/${req.params.videoid}`);
+		return res.redirect("/error");
 	}
 });
 
@@ -139,20 +142,16 @@ app.get("/tv", async (req, res) => {
 	}
 
 	if (typeof video != 'undefined') {
-		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
-		videocreator = videocreator.rows[0];
-
 		var viewObj = await middleware.getViewObj(req, res);
 
 		viewObj.video = video;
 		viewObj.types = types;
-		viewObj.videocreator = videocreator;
 
-		res.render("tv.ejs", viewObj);
+		return res.render("tv.ejs", viewObj);
 	} else {
 		req.flash("message", `No videos found for \"${req.query.type}\", here's a random video!`);
 
-		res.redirect("/tv");
+		return res.redirect("/tv");
 	}
 });
 
@@ -160,18 +159,18 @@ app.get("/tv", async (req, res) => {
 app.get("/v/like/:videoid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var data = await middleware.likeVideo(userinfo, req.params.videoid);
+	var data = await middleware.likeVideo(userinfo.id, req.params.videoid);
 
-	res.send(data);
+	return res.send(data);
 });
 
 //get request for the dislike button
 app.get("/v/dislike/:videoid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var data = await middleware.dislikeVideo(userinfo, req.params.videoid);
+	var data = await middleware.dislikeVideo(userinfo.id, req.params.videoid);
 
-	res.send(data);
+	return res.send(data);
 });
 
 /*
@@ -185,8 +184,8 @@ app.post("/v/submit", async (req, res) => {
 	var videotype = req.files.video.mimetype;
 	var thumbtype = req.files.thumbnail.mimetype;
 
-	var acceptedvideo = ["video/mp4", "video/ogg", "video/webm"];
-	var acceptedthumbnail = ["image/png", "image/jpeg", "image/jpg"];
+	var acceptedvideo = await middleware.getVideoTypes();
+	var acceptedthumbnail = await middleware.getImgTypes();
 
 	if (acceptedvideo.includes(videotype) && acceptedthumbnail.includes(thumbtype)) {
 		var videopath = await middleware.saveFile(req.files.video, "/storage/videos/files/");
@@ -197,7 +196,8 @@ app.post("/v/submit", async (req, res) => {
 				var subtitlepath = await middleware.saveFile(req.files.subtitles, "/storage/videos/subtitles/");
 			} else {
 				req.flash("message", "Unsupported file type for subtitles, please use SRT formatted files.");
-				return res.redirect("/v/submit");
+				req.flash("redirecturl", "/v/submit");
+				return res.redirect("/error");
 			}
 		} else {
 			var subtitlepath = "";
@@ -205,7 +205,7 @@ app.post("/v/submit", async (req, res) => {
 
 		var videoid = await middleware.generateAlphanumId();
 
-		var valuesarr = [videoid, req.body.title, req.body.description, thumbnailpath, videopath, userinfo.id, 0, new Date().toISOString(), " " + req.body.topics + " ", userinfo.username, userinfo.channelicon, false, req.body.private, subtitlepath];
+		var valuesarr = [videoid, req.body.title, req.body.description, thumbnailpath, videopath, userinfo.id, new Date().toISOString(), " " + req.body.topics + " ", userinfo.username, userinfo.channelicon, req.body.private, subtitlepath];
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == "string") {
 				return "\'" + item + "\'";
@@ -214,32 +214,21 @@ app.post("/v/submit", async (req, res) => {
 			}
 		});
 
-		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, views, posttime, topics, username, channelicon, streaming, private, subtitles) VALUES (${valuesarr})`);
+		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, posttime, topics, username, channelicon, private, subtitles) VALUES (${valuesarr})`);
 		await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);
 
 		await middleware.getVideoPermutations(global.appRoot + "/storage" + videopath);
 
 		await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
 
-		res.redirect(`/v/${videoid}`);
+		return res.redirect(`/v/${videoid}`);
 	} else if (!acceptedthumbnail.includes(thumbtype)){
 		req.flash("message", "Unsupported file type for thumbnail, please use png, jpeg or jpg.");
-		res.redirect("/v/submit");
+		req.flash("redirecturl", "/v/submit");
+		return res.redirect("/error");
 	} else if (!acceptedvideo.includes(videotype)) {
 		req.flash("message", "Unsupported file type for video, please use mp4, ogg, or webm.");
-		res.redirect("/v/submit");
-	}
-});
-
-//this is a post path to set the magnet link for a video if there are no peers/seeders for a file
-app.post("/setmagnet/:id", async (req, res) => {
-	try {
-		await client.query(`UPDATE videos SET magnetlink=$1 WHERE id=$2`, [req.body.magnet, req.params.id]);
-
-		res.send({succeeded: true});
-	} catch(e) {
-		console.log(e);
-
-		res.send({succeeded: false});
+		req.flash("redirecturl", "/v/submit");
+		return res.redirect("/error");
 	}
 });

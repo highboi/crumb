@@ -8,13 +8,16 @@ app.get('/', async (req, res) => {
 
 	viewObj.videos = videos;
 
-	res.render("index.ejs", viewObj);
+	return res.render("index.ejs", viewObj);
 });
 
 //the error path for error rendering
 app.get('/error', async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
-	res.render("error.ejs", viewObj);
+
+	viewObj.redirecturl = req.flash("redirecturl");
+
+	return res.render("error.ejs", viewObj);
 });
 
 //get request for searching for videos
@@ -32,7 +35,7 @@ app.get("/search", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
 	viewObj.search = search;
 
-	res.render("searchresults.ejs", viewObj);
+	return res.render("searchresults.ejs", viewObj);
 });
 
 //this is a get path for search reccomendations as the user types them into the search bar
@@ -60,5 +63,19 @@ app.get("/getsearchrecs", async (req, res) => {
 	});
 	results = [...new Set(results)];
 
-	res.send(results);
+	return res.send(results);
+});
+
+//a get path for returning the accepted image types on the server
+app.get("/imgtypes", async (req, res) => {
+	var imgTypes = await middleware.getImgTypes();
+
+	res.send({acceptedTypes: imgTypes});
+});
+
+//a get path for returning the accepted video types on the server
+app.get("vidtypes", async (req, res) => {
+	var vidTypes = await middleware.getVideoTypes();
+
+	res.send({acceptedTypes: vidTypes});
 });

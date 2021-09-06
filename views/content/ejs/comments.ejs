@@ -1,13 +1,8 @@
+<!--The display of the entire comments section of a video-->
+
 <% if (typeof video != 'undefined') { %>
 	<div class="comments">
 		<h2>Comments:</h2>
-		<p>Sort Comments:</p>
-		<select id="commentSort" onchange="sortComments(this);">
-			<option value="top" selected>Top</option>
-			<option value="bottom">Bottom</option>
-			<option value="oldest">Oldest</option>
-			<option value="newest">Newest</option>
-		</select>
 		<div id="commentform">
 			<% var commentlink = `/comment/${video.id}`; %>
 			<form action="<%= commentlink %>" method="post" enctype='multipart/form-data'>
@@ -19,6 +14,23 @@
 				<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
 			</form>
 		</div>
+
+		<% if (typeof comments != 'undefined' && comments.length) { %>
+			<hr>
+			<div id="commentsortform">
+				<p>Sort Comments:</p>
+				<form>
+					<select id="commentSort" onchange="sortComments(this);">
+						<option value="" selected disabled hidden>Comment Filter</option>
+						<option value="top">Top</option>
+						<option value="bottom">Bottom</option>
+						<option value="oldest">Oldest</option>
+						<option value="newest">Newest</option>
+					</select>
+				</form>
+			</div>
+		<% } %>
+
 		<div id="theComments">
 			<% if (typeof comments != 'undefined') { %>
 				<% comments.forEach((item, index) => { %>

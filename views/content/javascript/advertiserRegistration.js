@@ -3,6 +3,7 @@
 //define a stripe handler
 var stripeHandler = Stripe(stripePubKey);
 
+//define and mount a card element to gather card information
 var elements = stripeHandler.elements()
 var cardElement = elements.create("card", {
 	style: {
@@ -19,17 +20,18 @@ var cardElement = elements.create("card", {
 });
 cardElement.mount("#cardForm");
 
+//a function that submits an advertisers information
 async function submitAdvertiser() {
+	//disable the form and activate a loading animation
 	formLoadingState("adRegistration");
 
+	//check the validity of the form inputs
 	if (!checkFormInputs("adRegistration")) {
 		formLoadingState("adRegistration", true);
 		return false;
 	}
 
-	var businessDomain = document.querySelector("#adRegistration #businessDomain").value;
-	var businessEmail = document.querySelector("#adRegistration #businessEmail").value;
-
+	//confirm the setup of the card submitted by the user
 	var {setupIntent, error} = await stripeHandler.confirmCardSetup(
 		client_secret,
 		{
@@ -39,25 +41,38 @@ async function submitAdvertiser() {
 		}
 	);
 
+	//check for errors with the setup of the card
 	if (error) {
 		alert(error.message);
 		formLoadingState("adRegistration", true);
 		return false;
 	} else {
+		/*
+		Add necessary data to the FormData object
+		*/
 		var advertFormData = new FormData();
+
+		var businessDomain = document.querySelector("#adRegistration #businessDomain").value;
+		var businessEmail = document.querySelector("#adRegistration #businessEmail").value;
 
 		advertFormData.append("businessDomain", businessDomain);
 		advertFormData.append("businessEmail", businessEmail);
 		advertFormData.append("customerid", customerid);
 
+		//send the data to register this advertiser
 		var response = await fetch("/adRegistration", {
 			method: "POST",
 			body: advertFormData
 		});
 
-		alert("Setup Succeeded!");
-		window.location.href = "/advertise";
-
-		return true;
+		//check the response status
+		if (response.ok) {
+			alert("Setup Succeeded!");
+			window.location.href = "/advertise";
+			return true;
+		} else {
+			alert("There was an error with our server! Please try again.");
+			return false;
+		}
 	}
 }

@@ -21,7 +21,7 @@ app.get("/advertise", middleware.checkSignedIn, async (req, res) => {
 
 	viewObj = Object.assign({}, viewObj, {adPrice: 0.5, adResolutions: adResolutions, adDomain: advertiser.rows[0].businessdomain});
 
-	res.render("adSubmission.ejs", viewObj);
+	return res.render("adSubmission.ejs", viewObj);
 });
 
 //a get path for editing an advertisement
@@ -46,7 +46,7 @@ app.get("/adEditor/:advertid", middleware.checkSignedIn, async (req, res) => {
 
 	viewObj = Object.assign({}, viewObj, {advert: adData.rows[0], adDomain: advertiser.rows[0].businessdomain, adResolutions: adResolutions});
 
-	res.render("adEditor.ejs", viewObj);
+	return res.render("adEditor.ejs", viewObj);
 });
 
 //a get path for the advertiser registration on the site
@@ -71,7 +71,7 @@ app.get("/registeradvertiser", middleware.checkSignedIn, async (req, res) => {
 	viewObj.client_secret = intent.client_secret;
 	viewObj.customerid = customer.id;
 
-	res.render("adRegistration.ejs", viewObj);
+	return res.render("adRegistration.ejs", viewObj);
 });
 
 //a get path for the editing of advertiser information
@@ -100,7 +100,7 @@ app.get("/advertiserEditor/:businessid", middleware.checkSignedIn, async (req, r
 
 	viewObj = Object.assign({}, viewObj, {customerid: advertiser.customerid, stripePubKey: process.env.PUBLIC_STRIPE_KEY, paymentMethod: paymentMethod, businessEmail: advertiser.businessemail, businessDomain: advertiser.businessdomain});
 
-	res.render("advertiserEditor.ejs", viewObj);
+	return res.render("advertiserEditor.ejs", viewObj);
 });
 
 //a get path for the stats page of an advert
@@ -120,7 +120,7 @@ app.get("/adstats", middleware.checkSignedIn, async (req, res) => {
 
 	viewObj = Object.assign({}, viewObj, {adverts: adverts.rows, adDomain: advertiserDomain});
 
-	res.render("adInfo.ejs", viewObj);
+	return res.render("adInfo.ejs", viewObj);
 });
 
 //a get path for the accepted ad dimensions
@@ -131,15 +131,17 @@ app.get("/addimensions", async (req, res) => {
 });
 
 //a get path for advertisements on the site
-app.get("/adverts/:platform", async (req, res) => {
-	var adPlatform = req.params.platform;
-
-	var adLimit = req.query.adLimit;
+app.get("/adverts", async (req, res) => {
+	if (typeof req.query.adLimit == "undefined") {
+		var adLimit = 1;
+	} else {
+		var adLimit = req.query.adLimit;
+	}
 
 	if (typeof req.query.position == 'undefined') {
-		var adverts = await client.query(`SELECT adverts.*, advertisers.businessdomain FROM adverts INNER JOIN advertisers ON adverts.businessid = advertisers.id WHERE type=$1 ORDER BY random() LIMIT $2`, [adPlatform, adLimit]);
+		var adverts = await client.query(`SELECT adverts.*, advertisers.businessdomain FROM adverts INNER JOIN advertisers ON adverts.businessid = advertisers.id ORDER BY random() LIMIT $1`, [adLimit]);
 	} else {
-		var adverts = await client.query(`SELECT adverts.*, advertisers.businessdomain FROM adverts INNER JOIN advertisers ON adverts.businessid = advertisers.id WHERE type=$1 AND position=$2 ORDER BY random() LIMIT $3`, [adPlatform, req.query.position, adLimit]);
+		var adverts = await client.query(`SELECT adverts.*, advertisers.businessdomain FROM adverts INNER JOIN advertisers ON adverts.businessid = advertisers.id WHERE position=$1 ORDER BY random() LIMIT $2`, [req.query.position, adLimit]);
 	}
 
 	res.send({adverts: adverts.rows});
@@ -165,16 +167,16 @@ app.get("/adverts/:platform", async (req, res) => {
 
 //a get path for the cancellation of a subscription
 app.get("/advertcancel/:advertid", middleware.checkSignedIn, async (req, res) => {
-	var user = await middleware.getUserSession(req.cookies.sessionid);
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var result = await middleware.deleteAdvertDetails(user, req.params.advertid);
+	var result = await middleware.deleteAdvertDetails(userinfo.id, req.params.advertid);
 
 	if (result) {
 		req.flash("message", "Advertisement campaign cancelled/deleted.");
-		res.redirect("/adstats");
+		return res.redirect("/adstats");
 	} else {
 		req.flash("message", "This is not your advertisement.");
-		res.redirect("/");
+		return res.redirect("/");
 	}
 });
 
@@ -248,7 +250,7 @@ app.post("/adsubmission", middleware.checkSignedIn, async (req, res) => {
 	var adRes = await middleware.getImgResolution(req.files.adImage);
 	adRes = await middleware.getAdResolution(adRes);
 
-	var advertValues = [newAdId, advertiser.id, req.body.businessLink, adFilePath, adRes.type, adRes.position, subscription.id];
+	var advertValues = [newAdId, advertiser.id, req.body.businessLink, adFilePath, adRes.position, subscription.id];
 	advertValues = advertValues.map((item) => {
 		if (typeof item == "string") {
 			return "\'" + item + "\'"
@@ -257,7 +259,7 @@ app.post("/adsubmission", middleware.checkSignedIn, async (req, res) => {
 		}
 	});
 
-	var advert = await client.query(`INSERT INTO adverts (id, businessid, adlink, adfile, type, position, subscriptionid) VALUES (${advertValues}) RETURNING id`);
+	var advert = await client.query(`INSERT INTO adverts (id, businessid, adlink, adfile, position, subscriptionid) VALUES (${advertValues}) RETURNING id`);
 
 	res.send({advertId: advert.rows[0].id});
 });
@@ -286,7 +288,7 @@ app.post("/adedit", middleware.checkSignedIn, async (req, res) => {
 		var adRes = await middleware.getImgResolution(req.files.adImage);
 		adRes = await middleware.getAdResolution(adRes);
 
-		await client.query(`UPDATE adverts SET adfile=$1, type=$2, position=$3 WHERE id=$4`, [newFilePath, adRes.type, adRes.position, req.body.advertid]);
+		await client.query(`UPDATE adverts SET adfile=$1, position=$2 WHERE id=$3`, [newFilePath, adRes.position, req.body.advertid]);
 
 		var oldPath = global.appRoot + "/storage" + oldAdvert.adfile;
 		fs.unlink(oldPath, (err) => {

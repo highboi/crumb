@@ -1,0 +1,15 @@
+<div id="adRegistration">
+	<h1>Register your account for advertising:</h1>
+
+	<form action="/adregistration" method="POST">
+		<label for="businessDomain">Domain name of your business</label>
+		<input id="businessDomain" name="businessDomain" type="url" value="https://" required><br>
+
+		<label for="businessEmail">Email of your business:</label>
+		<input id="businessEmail" name="businessEmail" type="email" required><br>
+
+		<div id="cardForm"></div>
+
+		<button class="submitbtn" id="submitAdvertiser" type="button" onclick="submitAdvertiser()">Register</button>
+	</form>
+</div>

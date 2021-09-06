@@ -5,25 +5,13 @@
 	</head>
 	<body>
 		<nav>
-			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/ejs/banner.ejs') %>
 		</nav>
 
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
-			<div class="section-header">
-				<h1>/s/<%= sectionname %> Videos:</h1>
-				<button id="joinbutton" onclick="join('<%= sectionname %>', this)">Join</button>
-			</div>
-
-			<div class="home-videos">
-				<% if (typeof videos != 'undefined') { %>
-					<% videos.forEach((item, index) => { %>
-						<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
-					<% }); %>
-				<% } %>
-			</div>
+			<%- include('content/ejs/sectioncontent.ejs', {sectionname: sectionname, videos: videos}) %>
 
 			<%- include('content/ejs/bottombody.ejs') %>
 

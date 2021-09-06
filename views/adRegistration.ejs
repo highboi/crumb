@@ -6,38 +6,24 @@
 	</head>
 	<body>
 		<nav>
-			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/ejs/banner.ejs') %>
 		</nav>
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
-			<div id="adRegistration">
-				<h1>Register your account for advertising:</h1>
-				<form action="/adregistration" method="POST">
-					<label for="businessDomain">Domain name of your business</label>
-					<input id="businessDomain" name="businessDomain" type="url" value="https://" required><br>
-
-					<label for="businessEmail">Email of your business:</label>
-					<input id="businessEmail" name="businessEmail" type="email" required><br>
-
-					<div id="cardForm"></div>
-
-					<button class="submitbtn" id="submitAdvertiser" type="button" onclick="submitAdvertiser()">Register</button>
-				</form>
-			</div>
+			<%- include('content/ejs/adregisterform.ejs') %>
 
 			<%- include('content/ejs/bottombody.ejs') %>
 
 			<%- include('content/ejs/scripts.ejs') %>
-
-			<script src="https://js.stripe.com/v3/"></script>
 
 			<script>
 				var stripePubKey = <%- JSON.stringify(stripePubKey) %>;
 				var client_secret = <%- JSON.stringify(client_secret) %>;
 				var customerid = <%- JSON.stringify(customerid) %>;
 			</script>
+
+			<script src="https://js.stripe.com/v3/"></script>
 
 			<script src="/content/javascript/advertiserRegistration.js"></script>
 		</main>

@@ -6,15 +6,20 @@
 	</head>
 	<body>
 		<nav>
-			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/ejs/banner.ejs') %>
 		</nav>
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
+			<!--Main content goes here-->
+
 			<%- include('content/ejs/bottombody.ejs') %>
 
 			<%- include('content/ejs/scripts.ejs') %>
+
+			<!--Variables given by the EJS are defined in a script tag here-->
+
+			<!--External scripts are defined here-->
 		</main>
 	</body>
 </html>

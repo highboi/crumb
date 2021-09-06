@@ -1,0 +1,22 @@
+<div>
+	<h1>Create a Playlist</h1>
+
+	<form action="/playlist/create" method="post" class="authform">
+		<div>
+			<input id="name" name="name" type="text" placeholder="Name your playlist" autofocus>
+		</div><br>
+		<div>
+			<label for="private">Make playlist private?</label>
+			<select id="private" name="private">
+				<option value="false">No</option>
+				<option value="true">Yes</option>
+			</select>
+		</div><br>
+		<% if (typeof videoid != 'undefined') { %>
+			<input type="hidden" id="videoid" name="videoid" value="<%= videoid %>">
+		<% } %>
+		<div>
+			<input type="submit" value="Create">
+		</div>
+	</form>
+</div>

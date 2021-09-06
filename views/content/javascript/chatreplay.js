@@ -1,11 +1,4 @@
-//get the chat box where the chat replay will be happening
-var chatreplayelement = document.querySelector(".live-chat #chatBox");
-
-//get the video element
-var videoelement = document.querySelector(".video-container #video");
-
-//a global array to store the already added chat messages
-var addedChatMessages = [];
+//javascript to replay a live chat as a live stream plays
 
 //a function to create a chat message element
 function createMessage(msg, user_id) {
@@ -49,78 +42,80 @@ function createMessage(msg, user_id) {
 
 //check for the existence of chat replay messages
 if (typeof chatReplayMessages != 'undefined') {
-	//add a unique index to each object to see which objects are added or deleted
-	chatReplayMessages = chatReplayMessages.map((item, index) => {
-		return Object.assign({}, item, {index: index});
-	});
+	//get the chat box where the chat replay will be happening
+	var chatreplayelement = document.querySelector(".live-chat-replay #chatBox");
+
+	//a global array to store the already added chat messages
+	var addedChatMessages = [];
+
+	//get the video element
+	var videoChatReplayElement = document.querySelector(".video-container #video");
 
 	//event listener for ADDING new chat messages as time increases
-	videoelement.addEventListener("timeupdate", () => {
-		//if the chat message in the front of the array has a timestamp less than the current time, add the message to the HTML
-		if (chatReplayMessages.length && chatReplayMessages[0].time <= videoelement.currentTime) {
-			console.log("adding chat elements");
-
+	videoChatReplayElement.addEventListener("timeupdate", () => {
+		//check the first element of the chatReplayMessages to see if we need to add chat messages
+		if (chatReplayMessages.length && chatReplayMessages[0].time <= videoChatReplayElement.currentTime) {
 			//get all of the messages that need to be added
 			var messageDataAdded = chatReplayMessages.filter((item) => {
-				return (item.time <= videoelement.currentTime);
+				return (item.time <= videoChatReplayElement.currentTime);
 			});
 
-			//loop through the message data to add and do it all at once
-			messageDataAdded.forEach((item) => {
-				//create the new HTML element
-				var newElement = createMessage(item);
-
-				//add the HTML element to the chat replay element box
+			//add all chat messages that were typed at this time of the video
+			for (var message of messageDataAdded) {
+				//create and add the chat element to the chat replay element
+				var newElement = createMessage(message);
 				chatreplayelement.appendChild(newElement);
 
-				//add the chat messages to the "addedChatMessages" array
-				addedChatMessages.push(item);
-
-				//remove this message data from the data to be added, it has been added
+				//remove this message from the chatReplayMessages
 				var addedIndex = chatReplayMessages.findIndex((object) => {
-					return JSON.stringify(object) == JSON.stringify(item);
+					return JSON.stringify(object) == JSON.stringify(message);
 				});
 				chatReplayMessages.splice(addedIndex, 1);
-			});
+
+				//add this message to the already-added messages
+				addedChatMessages.push(message);
+			}
 		}
 	});
 
 	//event listener for REMOVING new chat messages as time decreases/user backtracks
-	videoelement.addEventListener("timeupdate", () => {
-		//if the last element in the added chat messages array has a timestamp that is more than the current time, remove the message from the HTML
-		if (addedChatMessages.length && addedChatMessages[addedChatMessages.length-1].time >= videoelement.currentTime) {
-			console.log("removing chat elements");
-
-			//filter for the chat message data that will be removed
+	videoChatReplayElement.addEventListener("timeupdate", () => {
+		//check the timestamps of the last element in the addedChatMessages to see if we need to remove chat messages that have been added
+		if (addedChatMessages.length && addedChatMessages[addedChatMessages.length-1].time >= videoChatReplayElement.currentTime) {
+			/*
+			get the chat messages to be removed from the addedChatMessages array,
+			reversing the order to make sure that we add the elements back into
+			the chatReplayMessages in the correct time order
+			*/
 			var messageDataRemoved = addedChatMessages.filter((item) => {
-				return (item.time >= videoelement.currentTime)
+				return (item.time >= videoChatReplayElement.currentTime);
 			});
-
-			//reverse the order of the message data removed so that .forEach does not unshift things in reverse order
 			messageDataRemoved.reverse();
 
-			//get all of the chat HTML elements
-			var messageElements = Array.from(document.querySelectorAll(".chatMessage")).filter((item) => {
-				return (parseInt(item.dataset.time) >= videoelement.currentTime);
-			});
-
-			//loop through the message data of the removed messages and unshift them to the chatReplayMessages array
-			messageDataRemoved.forEach((item) => {
-				//remove this data from the "addedChatMessages" array
+			/*
+			add the elements back to the chatReplayMessages array and remove them
+			from the addedChatMessages array
+			*/
+			for (var message of messageDataRemoved) {
+				//remove the message data from the "addedChatMessages" array
 				var removedIndex = addedChatMessages.findIndex((object) => {
-					return JSON.stringify(object) == JSON.stringify(item);
+					return JSON.stringify(object) == JSON.stringify(message);
 				});
 				addedChatMessages.splice(removedIndex, 1);
 
-				//append the message data to the beginning of the chatReplayMessages array
-				chatReplayMessages.unshift(item);
-			});
+				//add the message to the beginning of the chat replay messages
+				chatReplayMessages.unshift(message);
+			}
 
-			//loop through all of the HTML elements to be removed and remove them from the document
-			messageElements.forEach((item) => {
-				//remove this item using the .remove() function
-				item.remove();
+			/*
+			Remove the actual HTML elements from the document
+			*/
+			var messageElements = Array.from(document.querySelectorAll(".chatMessage")).filter((item) => {
+				return (parseInt(item.dataset.time) >= videoChatReplayElement.currentTime);
 			});
+			for (element of messageElements) {
+				element.remove();
+			}
 		}
 	});
 }

@@ -5,7 +5,6 @@
 	</head>
 	<body>
 		<nav>
-			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/ejs/banner.ejs') %>
 		</nav>
 
@@ -22,33 +21,16 @@
 				</div>
 
 				<div class="reccomendations">
-					<div class="live-chat">
-						<% if (stream.enablechat) { %>
-							<h3>Live Chat:</h3>
-						<% } else { %>
-							<h3>Chat disabled for this live stream.</h3>
-						<% } %>
+					<%- include('content/ejs/livechat.ejs', {stream: stream}) %>
 
-						<div id="chatBox"></div>
-
-						<% if (typeof user != 'undefined') { %>
-							<%- include('content/ejs/chatform.ejs') %>
-						<% } else { %>
-							<button><a href="/login">Login to Chat!</a></button>
-						<% } %>
-					</div>
-					<h2>&nbsp;Up Next</h2><hr>
-					<% if (typeof reccomendations != 'undefined') { %>
-						<% reccomendations.forEach((item, index) => { %>
-							<%- include('content/ejs/thumbnail.ejs', {video: item}) %><hr>
-						<% }); %>
-					<% } %>
+					<%- include('content/ejs/reccomendations.ejs', {reccomendations: reccomendations}) %>
 				</div>
 			</div>
 
 			<%- include('content/ejs/bottombody.ejs') %>
 
 			<%- include('content/ejs/scripts.ejs') %>
+
 			<script>
 				<% if (typeof user != 'undefined') { %>
 					var user_id = <%- JSON.stringify(user.id) %>;
@@ -61,8 +43,11 @@
 				var streamid = <%- JSON.stringify(stream.id) %>;
 				var isStreamer = false;
 			</script>
+
 			<script src="/content/javascript/livechat.js"></script>
+
 			<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 			<script src="/content/javascript/obsStreamViewer.js"></script>
 		</main>
 	</body>

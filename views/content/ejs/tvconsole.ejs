@@ -1,0 +1,15 @@
+<div class="tv-console">
+	<h1>TV!</h1>
+
+	<%- include('./videoplayer.ejs', {video: video}) %>
+
+	<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button>
+
+	<div class="tv-remote">
+		<% if (typeof types != 'undefined') { %>
+			<% types.forEach((item, index) => { %>
+				<button><a href="/tv/?type=<%= item %>"><%= item %></a></button>
+			<% }); %>
+		<% } %>
+	</div>
+</div>

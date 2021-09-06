@@ -8,11 +8,12 @@ if (typeof subtitles != 'undefined') {
 	//get the ending subtitle of the current subtitles array
 	var endSubtitle = subtitles[subtitles.length-1];
 
-	//get the start time and end time for a new subtitle we want to create
+	/*
+	make an empty subtitle which clears the captions right after
+	the ending caption, lasting 1 second
+	*/
 	var startTime = endSubtitle.endTime;
 	var endTime = getTimestampFromSeconds(getSecondsFromTimestamp(endSubtitle.endTime)+1);
-
-	//create a new empty subtitle to add to the subtitles
 	var emptySubtitle = {startTime: startTime, endTime: endTime, text: ""};
 
 	//add an empty subtitle to the subtitles array in order to make the subtitles go blank after the last subtitle has been shown
@@ -22,24 +23,21 @@ if (typeof subtitles != 'undefined') {
 	document.getElementById("video").addEventListener("timeupdate", (event) => {
 		//check to see if there are any subtitles left to add and if the subtitles are within the current time of the video
 		if (subtitles.length && getSecondsFromTimestamp(subtitles[0].startTime) <= event.target.currentTime) {
-			//get all of the subtitles that are to be added, and see if they are in the "past" in relation to the video time
+			//get all of the subtitles that are to be added
 			var subtitlesToBeAdded = subtitles.filter((item) => {
 				return getSecondsFromTimestamp(item.endTime) <= event.target.currentTime;
 			});
 
-			//add all of the subtitles that are in the original subtitles array, but in the past, to the shown subtitles array
-			subtitlesToBeAdded.forEach((item) => {
-				//add this subtitle to the shown subtitles
-				shownSubtitles.push(item);
+			//add the subtitles to be added to the shown subtitles
+			for (var subtitle of subtitlesToBeAdded) {
+				shownSubtitles.push(subtitle);
 
-				//get the index of the subtitle to be removed
+				//remove this subtitle from the original array
 				var removeIndex = subtitles.findIndex((object) => {
-					return JSON.stringify(object) == JSON.stringify(item);
+					return JSON.stringify(object) == JSON.stringify(subtitle);
 				});
-
-				//remove this subtitle from the original subtitles array
 				subtitles.splice(removeIndex, 1);
-			});
+			}
 
 			//update the subtitles with this function
 			updateSubtitles(subtitles[0], event.target.currentTime);
@@ -51,26 +49,24 @@ if (typeof subtitles != 'undefined') {
 		//check to see if there are "shown" subtitles and if the time in the last shown subtitle is beyond the current time of the video
 		if (shownSubtitles.length && getSecondsFromTimestamp(shownSubtitles[shownSubtitles.length-1].startTime) >= event.target.currentTime) {
 			//get all of the subtitles with end times that are after the current video time
-			var subtitlesAdded = shownSubtitles.filter((item) => {
+			var subtitlesToRemove = shownSubtitles.filter((item) => {
 				return getSecondsFromTimestamp(item.endTime) >= event.target.currentTime;
 			});
 
-			//reverse the order of the filtered subtitles array above so that .forEach() does not add things back to the "subtitles" array in reverse order
-			subtitlesAdded.reverse();
+			//reverse the order of the subtitles to remove as to not add them back to the subtitles array in the wrong order
+			subtitlesToRemove.reverse();
 
-			//move all of the subtitles that are past the current video time back into the original subtitles array
-			subtitlesAdded.forEach((item) => {
-				//get the index of the subtitle to be removed
+			//remove subtitles from the shown subtitles to the original subtitles to be shown again
+			for (var subtitle of subtitlesToRemove) {
+				//remove this subtitle from the shown subtitles
 				var removedIndex = subtitles.findIndex((object) => {
-					return JSON.stringify(object) == JSON.stringify(item);
+					return JSON.stringify(object) == JSON.stringify(subtitle);
 				});
-
-				//remove the subtitle from the shown subtitles array
 				shownSubtitles.splice(removedIndex, 1);
 
 				//add this subtitle back into the original subtitles array
-				subtitles.unshift(item);
-			});
+				subtitles.unshift(subtitle);
+			}
 		}
 	});
 
@@ -128,39 +124,29 @@ function getTimestampFromSeconds(secondsint) {
 }
 
 //a function to change the subtitles according to the given time
-function updateSubtitles(subtitle, time) {
-	//if the subtitle is undefined, this means that the array has ended and thus the subtitles should be blank
+function updateSubtitles(subtitle, currenttime) {
+	//set the subtitles to be blank if this subtitle is undefined
 	if (typeof subtitle == 'undefined') {
-		//make the subtitles empty
 		document.getElementById("subtitlesbox").innerHTML = "";
-
-		//end the function right here
 		return;
 	}
 
-	//put the start and end times into an array which can be iterated
-	var times = [subtitle.startTime, subtitle.endTime];
+	//get the starting and ending seconds from the timestamps (seconds into the video)
+	var startseconds = getSecondsFromTimestamp(subtitle.startTime);
+	var endseconds = getSecondsFromTimestamp(subtitle.endTime);
 
-	//go through the start and end times and assign them
-	times.forEach((item, index) => {
-		//set the item being processed from the "times" array to the amount of seconds it represents
-		times[index] = getSecondsFromTimestamp(item);
-	});
-
-	//check to see if the time provided is within the bounds of the start and end times
-	if (times[0] <= time && times[1] >= time) { //if the subtitle should be shown
+	//if the current time is within the range of the starting and ending seconds
+	if (startseconds <= currenttime && endseconds >= currenttime) {
 		//show the subtitle in the element for subtitles underneath the video
 		document.getElementById("subtitlesbox").innerHTML = subtitle.text;
 
-		//get the index of the current subtitle in the "subtitles" array
+		//remove this subtitle from the array as it has been shown
 		var index = subtitles.findIndex((item) => {
 			return JSON.stringify(item) == JSON.stringify(subtitle);
 		});
-
-		//remove the current subtitle from the "subtitles" array
 		subtitles.splice(index, 1);
 
-		//add the current subtitle to the "shownSubtitles" array
+		//add this subtitle to the shown subtitles
 		shownSubtitles.push(subtitle);
 	}
 }

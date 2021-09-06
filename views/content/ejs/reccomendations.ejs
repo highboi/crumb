@@ -1,0 +1,6 @@
+<h2>&nbsp;Up Next</h2><hr>
+<% if (typeof reccomendations != 'undefined') { %>
+	<% reccomendations.forEach((item, index) => { %>
+		<%- include('./thumbnail.ejs', {video: item}) %><hr>
+	<% }); %>
+<% } %>

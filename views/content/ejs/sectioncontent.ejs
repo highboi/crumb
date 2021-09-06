@@ -1,0 +1,12 @@
+<div class="section-header">
+	<h1>/s/<%= sectionname %> Videos:</h1>
+	<button id="joinbutton" onclick="join('<%= sectionname %>', this)">Join</button>
+</div>
+
+<div class="group-videos">
+	<% if (typeof videos != 'undefined') { %>
+		<% videos.forEach((item, index) => { %>
+			<%- include('./thumbnail.ejs', {video: item}) %>
+		<% }); %>
+	<% } %>
+</div>

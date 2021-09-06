@@ -1,0 +1,19 @@
+<% if (typeof stream != "undefined") { %>
+	<div class="live-chat">
+		<% if (stream.enablechat) { %>
+			<h3>Live Chat:</h3>
+		<% } else { %>
+			<h3>Chat disabled for this live stream.</h3>
+		<% } %>
+
+		<div id="chatBox"></div>
+
+		<% if (stream.enablechat) { %>
+			<% if (typeof user != 'undefined') { %>
+				<%- include('./chatform.ejs') %>
+			<% } else { %>
+				<button><a href="/login">Login to Chat!</a></button>
+			<% } %>
+		<% } %>
+	</div>
+<% } %>

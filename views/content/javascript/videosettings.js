@@ -1,33 +1,41 @@
 //a script to handle the changing of video settings such as speed and resolution
 
 //get the video element
-var videoelement = document.getElementById("video");
+var videoToChange = document.getElementById("video");
 
-//get the source tags inside the video element to add the query parameters for the speed and resolution
+//get the video source tags
 var videosources = document.querySelectorAll("#video source");
 
-//get the element for changing the speeds and the element for changing the resolution
+//get the speed and resolution setting elements
 var speedSettings = document.getElementById("speedSettings");
 var resolutionSettings = document.getElementById("resolutionSettings");
 
+/*
+SET THE SPEED AND RESOLUTION ACCORDING TO CURRENT VALUES
+*/
+
 //check to see that the resolution setting is not undefined in some way
 if (resolutionSettings.value != '') {
-	//set the resolution in the query params of the current video source url
+	//add a resolution query parameter to the source url
 	var sourceurl = changeQueryParam(videosources[0].src, "res", resolutionSettings.value);
 
-	//set the new video source url in the source tags of the video
-	videosources.forEach((item) => {
-		item.src = sourceurl;
-	});
+	//change the source element urls
+	for (var source of videosources) {
+		source.src = sourceurl;
+	}
 
-	//reload the video element according to the new parameters
-	videoelement.load();
+	//reload the video to implement source changes
+	videoToChange.load();
 }
 
 //set the video speed based on the current setting
-videoelement.playbackRate = speedSettings.value;
+videoToChange.playbackRate = speedSettings.value;
 
-//a function to change the value of a query parameter while returning the full source url
+
+/*
+a function to add a query parameter to a url and to
+return the modified url
+*/
 function changeQueryParam(url, param, value) {
 	//get the query params
 	var queryparams = url.split("?")[1];
@@ -57,45 +65,42 @@ function changeQueryParam(url, param, value) {
 	return url;
 }
 
-//add an event listener to handle changes to the speed settings for the video
-speedSettings.addEventListener("change", (event) => {
-	//get the speed value that the user has changed it to
-	var newspeed = event.target.value;
+/*
+LISTEN FOR CHANGES IN THE SPEED AND RESOLUTION SETTINGS
+*/
 
-	//set the speed to the video element
-	videoelement.playbackRate = newspeed;
+//handle changes to the speed setting on the video
+speedSettings.addEventListener("change", (event) => {
+	//set the playback rate according to the changed speed
+	var newspeed = event.target.value;
+	videoToChange.playbackRate = newspeed;
 });
 
-//add an event listener to handle changes to the resolution settings for the video
+//handle changes to the resolution setting on the video
 resolutionSettings.addEventListener("change", (event) => {
 	//get the new resolution that the user wants
 	var newresolution = event.target.value;
 
-	//get the source url being used by the video
+	//get a new source url with the modified resolution setting in the url
 	var sourceurl = videosources[0].src;
-
-	//set the query param for the resolution for the source url
 	sourceurl = changeQueryParam(sourceurl, "res", newresolution);
 
-	//set the source url for all the video sources
-	videosources.forEach((item) => {
-		item.src = sourceurl;
-	});
+	//change the source element urls
+	for (var source of videosources) {
+		source.src = sourceurl;
+	}
 
-	//get the current time of the video to set it after reloading the video element
-	var prevTime = videoelement.currentTime;
+	//get the time at which the resolution was changed
+	var prevTime = videoToChange.currentTime;
 
-	//get the current pause/play state of the video
-	var paused = videoelement.paused;
+	//reload the video to implement source changes
+	videoToChange.load();
 
-	//reload the video element to make it request the new source url
-	videoelement.load();
+	//set the current time of the video to the time the user was previously
+	videoToChange.currentTime = prevTime;
 
-	//set the current time of the video to the previous time
-	videoelement.currentTime = prevTime;
-
-	//try to autoplay the element
-	if (!paused) {
-		videoelement.play();
+	//try to autoplay the element if it is paused
+	if (!videoToChange.paused) {
+		videoToChange.play();
 	}
 });

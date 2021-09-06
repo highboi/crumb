@@ -1,0 +1,40 @@
+<div>
+	<h1>Register:</h1>
+
+	<form action="/register" method="POST" class="authform" id="registerform" enctype="multipart/form-data">
+		<div>
+			<input id="username" name="username" type="text" placeholder="Username" autofocus required>
+		</div>
+		<div>
+			<input class="passwordconf" id="password" name="password" type="password" placeholder="Password" required>
+		</div>
+		<div>
+			<input class="passwordconf" id="password2" name="password2" type="password" oninput="confirmPassword('passwordconf')" placeholder="Password Confirmation" style="display: inline;" required>
+			<p class="passwordconf" id="passwordconfalert" style="display: inline;"></p>
+		</div><br>
+		<div class="authfileinput">
+			<h4>Channel Icon (optional): </h4>
+			<input id="channelicon" name="channelicon" type="file" accept="image/*">
+		</div><br>
+		<div class="authfileinput">
+			<h4>Channel Banner Image (optional): </h4>
+			<input id="channelbanner" name="channelbanner" type="file" accept="image/*">
+		</div><br>
+		<div>
+			<label for="channeldesc"><h4>Channel Description (1000 characters):</h4></label><br>
+			<textarea id="channeldesc" name="channeldesc" rows="6" cols="40" maxlength="1000" placeholder="Channel Description Here" required></textarea>
+		</div><br>
+		<div>
+			<label for="topics"><h4>Topics of Channel</h4></label>
+			<input type="text" id="topics" name="topics" placeholder="topic1 topic2 etc" maxlength="300" required>
+		</div><br>
+
+		<button class="submitbtn" type="button" onclick="verifyAuthForm(document.getElementById('registerform'), 'passwordconf');">Register</button>
+		<div class="lds-hourglass"></div>
+		<br><br>
+
+		<div class="underlinelinks">
+			<a href="/login">Existing User?</a>
+		</div>
+	</form>
+</div>

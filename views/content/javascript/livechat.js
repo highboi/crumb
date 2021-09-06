@@ -4,9 +4,7 @@ var chatSocket = new WebSocket(`ws://localhost/chat/?isStreamer=${isStreamer}&st
 //get the chat box
 var chatbox = document.getElementById("chatBox");
 
-//a boolean variable to check if the initialization segment has been sent
-var initSent = false;
-
+//send a message to the console about a good connection
 chatSocket.onopen = (e) => {
 	console.log("Chat Socket Connected.");
 };
@@ -22,15 +20,15 @@ function createLiveMessage(msg) {
 	var msgElement = document.createElement("p");
 
 	//set the attributes of the elements to the necessary values
-	nameElement.innerHTML = msg[1];
-	iconElement.src = msg[2];
-	msgElement.innerHTML = msg[3];
-	iconLinkElement.href = `/u/${msg[0]}`;
+	nameElement.innerHTML = msg.username;
+	iconElement.src = msg.channelicon;
+	msgElement.innerHTML = msg.message;
+	iconLinkElement.href = `/u/${msg.userid}`;
 	iconLinkElement.target = "_blank";
-	nameLinkElement.href = `/u/${msg[0]}`;
+	nameLinkElement.href = `/u/${msg.userid}`;
 	nameLinkElement.target = "_blank";
 
-	//add the icon and name elements to the inside of the two anchor tags to allow the user 
+	//add the icon and name elements to the inside of the two anchor tags to allow the user
 	//to access a channel based on a chat message
 	iconLinkElement.appendChild(iconElement);
 	nameLinkElement.appendChild(nameElement);
@@ -49,40 +47,30 @@ function createLiveMessage(msg) {
 
 //send a message typed by a user to the server
 function sendMessage() {
-	//get the message text
-	var message = document.querySelector("#message").value;
+	//create the message object used to create the div
+	var message = document.querySelector("#chatForm #message").value;
+	var msg = {userid: user_id, username: username, channelicon: channelicon, message: message};
 
-	//create the array with values for the live chat message
-	var msg = [channelicon, username, message];
-
-	//create the message div element
-	var divElement = createLiveMessage(msg, user_id);
-
-	//add the message to the chat box
+	//create the message div element and add it to the live chat
+	var divElement = createLiveMessage(msg);
 	chatbox.appendChild(divElement);
 
-	//create the websocket payload
-	var payload = "msg," + message.toString() + "," + document.getElementById("video").currentTime.toString();
-
-	//send the message through a socket to the websocket server
-	chatSocket.send(payload);
+	//create the websocket payload to send to other clients viewing the live chat
+	var payload = {message: message, time: document.getElementById("video").currentTime};
+	chatSocket.send(JSON.stringify(payload));
 }
 
 //if we recieve a message, then add the message to the chat
 chatSocket.onmessage = (event) => {
-	//get the components of the message
-	var msg = event.data.split(",");
+	//get the message as an object
+	var msg = JSON.parse(event.data);
 
-	//create a div element for the live chat
+	//add the message data to the html
 	var divElement = createLiveMessage(msg);
-
-	//add the live chat message to the chat box
 	chatbox.appendChild(divElement);
 }
 
-
-//if the user presses enter while they have their keyboard focused on the chat form,
-//then click the submit button
+//check for the pressing of the enter button while the user is focused on the chat form
 document.querySelector("#chatForm #message").addEventListener("keyup", (event) => {
 	if (event.keyCode == 13) {
 		event.preventDefault();

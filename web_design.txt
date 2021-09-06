@@ -16,3 +16,7 @@ Things to do:
 - Add settings to customize the theme of the site using pre-sets and individual color options and fonts to add variety.
 - Use custom art made in inkscape and 3D graphics to make the site look good
 - Use fonts from fontflipper and randomize the font for logos and the site in general
+- Enable the selection of a custom mouse cursor
+- Use marquee tags to make scrollable text/images for fun
+- Display the ratio of likes to dislikes on content
+- Enable the ability to select a reason for the disliking of a video

@@ -55,7 +55,7 @@ app.get("/u/:userid", async (req, res) => {
 		});
 	}
 
-	res.render("viewchannel.ejs", viewObj);
+	return res.render("viewchannel.ejs", viewObj);
 });
 
 //get request for subscribing to a channel
@@ -69,12 +69,12 @@ app.get("/subscribe/:channelid", middleware.checkSignedIn, async (req, res) => {
 		await client.query(`DELETE FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [req.params.channelid, userinfo.id]);
 		await client.query(`UPDATE users SET subscribers=subscribers-1 WHERE id=$1`, [req.params.channelid]);
 
-		res.send("false");
+		return res.send("false");
 	} else {
 		await client.query(`INSERT INTO subscribed (channel_id, user_id) VALUES ($1, $2)`, [req.params.channelid, userinfo.id]);
 		await client.query(`UPDATE users SET subscribers=subscribers+1 WHERE id=$1`, [req.params.channelid]);
 
-		res.send("true");
+		return res.send("true");
 	}
 });
 
@@ -82,12 +82,12 @@ app.get("/subscribe/:channelid", middleware.checkSignedIn, async (req, res) => {
 app.get("/s/:topic", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
 
-	var videos = await client.query(`SELECT * FROM videos WHERE topics LIKE $1 LIMIT 50`, ["% " + req.params.topic + " %"]);
+	var videos = await client.query(`SELECT * FROM videos WHERE topics LIKE $1 LIMIT 50`, ["%" + req.params.topic + "%"]);
 	videos = videos.rows;
 
 	viewObj = Object.assign({}, viewObj, {videos: videos, sectionname: req.params.topic});
 
-	res.render("viewsection.ejs", viewObj);
+	return res.render("viewsection.ejs", viewObj);
 });
 
 //this is a get request to join a section of videos
@@ -99,10 +99,10 @@ app.get("/s/subscribe/:topic", middleware.checkSignedIn, async (req, res) => {
 
 	if (topicsubscribed) {
 		await client.query(`DELETE FROM subscribedtopics WHERE topicname=$1 AND user_id=$2`, [req.params.topic, userinfo.id]);
-		res.send("false");
+		return res.send("false");
 	} else {
 		await client.query(`INSERT INTO subscribedtopics (topicname, user_id) VALUES ($1, $2)`, [req.params.topic, userinfo.id]);
-		res.send("true");
+		return res.send("true");
 	}
 });
 
@@ -116,10 +116,11 @@ app.get("/shoutout/delete/:shoutoutid", middleware.checkSignedIn, async (req, re
 	if (shoutoutexists) {
 		await client.query(`DELETE FROM shoutouts WHERE shoutout_id=$1 AND user_id=$2`, [req.params.shoutoutid, userinfo.id]);
 		req.flash("message", "Deleted shoutout!");
-		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+		return res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
 	} else {
-		req.flash("message", "Shoutout does not exist for you.");
-		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+		req.flash("message", "Shoutout does not exist.");
+		req.flash("redirecturl", `/u/${userinfo.id}/?section=shoutouts`);
+		return res.redirect("/error");
 	}
 });
 
@@ -141,11 +142,21 @@ app.post("/shoutout/add", middleware.checkSignedIn, async (req, res) => {
 	shoutoutexists = shoutoutexists.rows[0].exists;
 
 	if (shoutoutexists) {
-		req.flash("message", "This shoutout already exists");
-		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+		req.flash("message", "This shoutout already exists.");
+		req.flash("redirecturl", `/u/${userinfo.id}/?section=shoutouts`);
+		return res.redirect("/error");
 	} else {
-		await client.query(`INSERT INTO shoutouts (user_id, shoutout_id) VALUES ($1, $2)`, [userinfo.id, channelid]);
-		res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+		var channelexists = await client.query(`SELECT EXISTS(SELECT * FROM users WHERE id=$1)`, [channelid]);
+		channelexists = channelexists.rows[0].exists;
+
+		if (channelexists) {
+			await client.query(`INSERT INTO shoutouts (user_id, shoutout_id) VALUES ($1, $2)`, [userinfo.id, channelid]);
+			return res.redirect(`/u/${userinfo.id}/?section=shoutouts`);
+		} else {
+			req.flash("message", `The channel with the id: ${channelid} does not exist.`);
+			req.flash("redirecturl", `/u/${userinfo.id}/?section=shoutouts`);
+			return res.redirect("/error");
+		}
 	}
 });
 
@@ -175,9 +186,9 @@ app.post("/report/video/:videoid", middleware.checkSignedIn, async (req, res) =>
 		await client.query(`INSERT INTO reports (reporter_id, content_id, content_type, reason, timestamp) VALUES (${valuesarr})`);
 
 		req.flash("message", "Video reported, the report will be reviewed.");
-		res.redirect(`/v/${req.params.videoid}`);
+		return res.redirect(`/v/${req.params.videoid}`);
 	} else {
 		req.flash("message", "Video does not exist.");
-		res.redirect("/");
+		return res.redirect("/error");
 	}
 });

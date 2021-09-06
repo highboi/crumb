@@ -1,0 +1,21 @@
+<div>
+	<h1>Login:</h1>
+
+	<form action="/login" method="POST" class="authform" id="loginform">
+		<p>Enter your Information to Log in.</p>
+		<div>
+			<input id="username" name="username" placeholder="Username" autofocus required>
+		</div>
+		<div>
+			<input id="password" name="password" type="password" placeholder="Password" required>
+		</div><br>
+
+		<button class="submitbtn" type="button" onclick="verifyAuthForm(document.getElementById('loginform'));">Login</button>
+		<div class="lds-hourglass"></div>
+		<br><br>
+
+		<div class="underlinelinks">
+			<a href="/register">Register?</a>
+		</div>
+	</form>
+</div>

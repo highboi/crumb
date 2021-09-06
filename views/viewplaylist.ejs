@@ -10,7 +10,6 @@
 	</head>
 	<body>
 		<nav>
-			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/ejs/banner.ejs') %>
 		</nav>
 
@@ -20,26 +19,7 @@
 			<% if (playlist.private && (typeof user == 'undefined' || user.id != playlist.user_id)) { %>
 				<h1>[This playlist has been set to private by the user]</h1>
 			<% } else { %>
-				<h1><%= playlist.name %></h1>
-				<% if (typeof user != 'undefined') { %>
-					<% if (creator.id == user.id && playlist.candelete) { %>
-						<% var deletelink = `/playlist/delete/${playlist.id}` %>
-						<button onclick="redirectConfirm('Delete Playlist?', '<%= deletelink %>')">Delete Playlist</button>
-					<% } %>
-				<% } %>
-				<hr>
-
-				<div class="playlist-videos">
-					<% if (typeof videos != 'undefined') { %>
-						<% if (videos.length) { %>
-							<% videos.forEach((item, index) => { %>
-								<%- include('content/ejs/playlistthumbnail.ejs', {video: item, playlist: playlist, user: user, creator: creator}) %>
-							<% }); %>
-						<% } else { %>
-							<h2>No videos yet!</h2>
-						<% } %>
-					<% } %>
-				</div>
+				<%- include('content/ejs/playlistcontent.ejs', {playlist: playlist, user: user, videos: videos, creator: creator}) %>
 			<% } %>
 
 			<%- include('content/ejs/bottombody.ejs') %>

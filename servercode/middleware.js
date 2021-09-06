@@ -22,7 +22,10 @@ var userauthFunctions = {
 	//this is a function that redirects users to the login page if the user is not signed in
 	//this is used for pages and requests that require a login
 	checkSignedIn: function (req, res, next) {
-		if (req.cookies.hasOwnProperty('sessionid')) {
+		//make sure the cookies object is not inherited from a null object prototype
+		var cookies = JSON.parse(JSON.stringify(req.cookies));
+
+		if (cookies.hasOwnProperty('sessionid')) {
 			next();
 		} else {
 			req.flash("message", "Please sign in.");
@@ -33,7 +36,10 @@ var userauthFunctions = {
 	//this is a function to redirect users to the index page if they are signed in already
 	//this is used for login pages and other forms that sign the user in
 	checkNotSignedIn: function (req, res, next) {
-		if (req.cookies.hasOwnProperty('sessionid')) {
+		//make sure the cookies object is not inherited from a null object prototype
+		var cookies = JSON.parse(JSON.stringify(req.cookies));
+
+		if (cookies.hasOwnProperty('sessionid')) {
 			req.flash("message", "Already Logged In!");
 			res.redirect("/");
 		} else {
@@ -44,8 +50,11 @@ var userauthFunctions = {
 	//this is a function that checks to see if this user has been given a temporary session
 	//id in order to identify this user as a "visitor" to the site
 	checkNotAssigned: async function (req, res, next) {
+		//make sure the cookies object is not inherited from a null object prototype
+		var cookies = JSON.parse(JSON.stringify(req.cookies));
+
 		//assign a session id if there is not a session id in the cookies of the user
-		if (!req.cookies.hasOwnProperty("tempsessionid") && !req.cookies.hasOwnProperty("sessionid")) {
+		if (!cookies.hasOwnProperty("tempsessionid") && !cookies.hasOwnProperty("sessionid")) {
 			var newTempId = await middleware.generateSessionId();
 
 			res.cookie("tempsessionid", newTempId, {httpOnly: true, expires: 0});
@@ -233,11 +242,22 @@ OBJECT FOR STORING FUNCTIONS WHICH DELETE CONTENT
 */
 var deletionHandling = {
 	//this is a function to delete video details
-	deleteVideoDetails: async function (userinfo, videoid) {
-		var video_user_id = await client.query(`SELECT user_id FROM videos WHERE id=$1 LIMIT 1`, [videoid]);
-		video_user_id = video_user_id.rows[0].user_id;
+	deleteVideoDetails: async function (userid, videoid) {
+		var video = await client.query(`SELECT id, thumbnail, video FROM videos WHERE id=$1 AND user_id=$2 LIMIT 1`, [videoid, userid]);
 
-		if (userinfo.id == video_user_id) {
+		if (video.rows.length) {
+			video = video.rows[0];
+
+			var thumbnailpath = global.appRoot + "/storage" + video.thumbnail;
+			var videopath = global.appRoot + "/storage" + video.video;
+
+			fs.unlink(videopath, (err) => {
+				if (err) throw err;
+			});
+			fs.unlink(thumbnailpath, (err) => {
+				if (err) throw err;
+			});
+
 			client.query(`UPDATE videos SET title=$1, thumbnail=$2, video=$3, views=$4, username=$5, channelicon=$6, deleted=$7 WHERE id=$8`, ["", "/server/deleteicon.png", "", 0, "", "/server/deletechannelicon.png", true, videoid]);
 
 			client.query(`DELETE FROM likedvideos WHERE video_id=$1`, [videoid]);
@@ -263,20 +283,7 @@ var deletionHandling = {
 
 			client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
 
-			client.query(`UPDATE users SET videocount=videocount-1 WHERE id=$1`, [userinfo.id]);
-
-			var video = await client.query(`SELECT thumbnail, video FROM videofiles WHERE id=$1 LIMIT 1`, [videoid]);
-			video = video.rows[0];
-
-			var thumbnailpath = global.appRoot + "/storage" + video.thumbnail;
-			var videopath = global.appRoot + "/storage" + video.video;
-
-			fs.unlink(videopath, (err) => {
-				if (err) throw err;
-			});
-			fs.unlink(thumbnailpath, (err) => {
-				if (err) throw err;
-			});
+			client.query(`UPDATE users SET videocount=videocount-1 WHERE id=$1`, [userid]);
 
 			return true;
 		} else {
@@ -285,11 +292,10 @@ var deletionHandling = {
 	},
 
 	//this is a function to delete playlist details
-	deletePlaylistDetails: async function (userinfo, playlistid) {
-		var playlist = await client.query(`SELECT user_id, candelete FROM playlists WHERE id=$1 LIMIT 1`, [playlistid]);
-		playlist = playlist.rows[0];
+	deletePlaylistDetails: async function (userid, playlistid) {
+		var playlist = await client.query(`SELECT candelete FROM playlists WHERE id=$1 AND user_id=$2 LIMIT 1`, [playlistid, userid]);
 
-		if (typeof playlist != "undefined" && playlist.user_id == userinfo.id && playlist.candelete) {
+		if (playlist.rows.length) {
 			client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1`, [playlistid]);
 			client.query(`DELETE FROM playlists WHERE id=$1`, [playlistid]);
 			return true;
@@ -299,8 +305,8 @@ var deletionHandling = {
 	},
 
 	//this is a function to delete advertisement details
-	deleteAdvertDetails: async function (userinfo, advertid) {
-		var advert = await client.query(`SELECT subscriptionid, adfile FROM adverts WHERE id=$1 AND businessid=$2 LIMIT 1`, [advertid, userinfo.id]);
+	deleteAdvertDetails: async function (userid, advertid) {
+		var advert = await client.query(`SELECT subscriptionid, adfile FROM adverts WHERE id=$1 AND businessid=$2 LIMIT 1`, [advertid, userid]);
 
 		if (advert.rows.length) {
 			var subscriptionid = advert.rows[0].subscriptionid;
@@ -357,21 +363,21 @@ var miscFunctions = {
 	},
 
 	//this is a function to like a video based on user info and a video id
-	likeVideo: async function (userinfo, videoid) {
-		var alreadyliked = await client.query(`SELECT * FROM likedvideos WHERE user_id=$1 AND video_id=$2 LIMIT 1`, [userinfo.id, videoid]);
+	likeVideo: async function (userid, videoid) {
+		var alreadyliked = await client.query(`SELECT * FROM likedvideos WHERE user_id=$1 AND video_id=$2 LIMIT 1`, [userid, videoid]);
 
 		if (alreadyliked.rows.length) {
-			client.query(`DELETE FROM likedvideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, videoid]);
+			client.query(`DELETE FROM likedvideos WHERE user_id=$1 AND video_id=$2`, [userid, videoid]);
 
 			var data = await client.query(`UPDATE videos SET likes=likes-1 WHERE id=$1 RETURNING likes, dislikes`, [videoid]);
 			data = data.rows[0];
 		} else {
-			var disliked = await client.query(`DELETE FROM dislikedvideos WHERE user_id=$1 AND video_id=$2 RETURNING 1`, [userinfo.id, videoid]);
+			var disliked = await client.query(`DELETE FROM dislikedvideos WHERE user_id=$1 AND video_id=$2 RETURNING 1`, [userid, videoid]);
 			if (disliked.rows.length) {
 				client.query(`UPDATE videos SET dislikes=dislikes-1 WHERE id=$1`, [videoid]);
 			}
 
-			client.query(`INSERT INTO likedvideos(user_id, video_id) VALUES ($1, $2)`, [userinfo.id, videoid]);
+			client.query(`INSERT INTO likedvideos(user_id, video_id) VALUES ($1, $2)`, [userid, videoid]);
 
 			var data = await client.query(`UPDATE videos SET likes=likes+1 WHERE id=$1 RETURNING likes, dislikes`, [videoid]);
 			data = data.rows[0];
@@ -381,21 +387,21 @@ var miscFunctions = {
 	},
 
 	//this is a function to dislike a video based on user info and a video id
-	dislikeVideo: async function (userinfo, videoid) {
-		var alreadydisliked = await client.query(`SELECT * FROM dislikedvideos WHERE user_id=$1 AND video_id=$2 LIMIT 1`, [userinfo.id, videoid]);
+	dislikeVideo: async function (userid, videoid) {
+		var alreadydisliked = await client.query(`SELECT * FROM dislikedvideos WHERE user_id=$1 AND video_id=$2 LIMIT 1`, [userid, videoid]);
 
 		if (alreadydisliked.rows.length) {
-			client.query(`DELETE FROM dislikedvideos WHERE user_id=$1 AND video_id=$2`, [userinfo.id, videoid]);
+			client.query(`DELETE FROM dislikedvideos WHERE user_id=$1 AND video_id=$2`, [userid, videoid]);
 
 			var data = await client.query(`UPDATE videos SET dislikes=dislikes-1 WHERE id=$1 RETURNING likes, dislikes`, [videoid]);
 			data = data.rows[0];
 		} else {
-			var liked = await client.query(`DELETE FROM likedvideos WHERE user_id=$1 AND video_id=$2 RETURNING 1`, [userinfo.id, videoid]);
+			var liked = await client.query(`DELETE FROM likedvideos WHERE user_id=$1 AND video_id=$2 RETURNING 1`, [userid, videoid]);
 			if (liked.rows.length) {
 				client.query(`UPDATE videos SET likes=likes-1 WHERE id=$1`, [videoid]);
 			}
 
-			client.query(`INSERT INTO dislikedvideos(user_id, video_id) VALUES ($1, $2)`, [userinfo.id, videoid]);
+			client.query(`INSERT INTO dislikedvideos(user_id, video_id) VALUES ($1, $2)`, [userid, videoid]);
 
 			var data = await client.query(`UPDATE videos SET dislikes=dislikes+1 WHERE id=$1 RETURNING likes, dislikes`, [videoid]);
 			data = data.rows[0];
@@ -405,21 +411,21 @@ var miscFunctions = {
 	},
 
 	//a function to like a comment
-	likeComment: async function (userinfo, commentid) {
-		var alreadyliked = await client.query(`SELECT * FROM likedcomments WHERE user_id=$1 AND comment_id=$2 LIMIT 1`, [userinfo.id, commentid]);
+	likeComment: async function (userid, commentid) {
+		var alreadyliked = await client.query(`SELECT * FROM likedcomments WHERE user_id=$1 AND comment_id=$2 LIMIT 1`, [userid, commentid]);
 
 		if (alreadyliked.rows.length) {
-			client.query(`DELETE FROM likedcomments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, commentid]);
+			client.query(`DELETE FROM likedcomments WHERE user_id=$1 AND comment_id=$2`, [userid, commentid]);
 
 			var data = await client.query(`UPDATE comments SET likes=likes-1 WHERE id=$1 RETURNING likes, dislikes`, [commentid]);
 			data = data.rows[0];
 		} else {
-			var disliked = await client.query(`DELETE FROM dislikedcomments WHERE user_id=$1 AND comment_id=$2 RETURNING 1`, [userinfo.id, commentid]);
+			var disliked = await client.query(`DELETE FROM dislikedcomments WHERE user_id=$1 AND comment_id=$2 RETURNING 1`, [userid, commentid]);
 			if (disliked.rows.length) {
 				client.query(`UPDATE comments SET dislikes=dislikes-1 WHERE id=$1`, [commentid]);
 			}
 
-			client.query(`INSERT INTO likedcomments(user_id, comment_id) VALUES ($1, $2)`, [userinfo.id, commentid]);
+			client.query(`INSERT INTO likedcomments(user_id, comment_id) VALUES ($1, $2)`, [userid, commentid]);
 
 			var data = await client.query(`UPDATE comments SET likes=likes+1 WHERE id=$1 RETURNING likes, dislikes`, [commentid]);
 			data = data.rows[0];
@@ -429,21 +435,21 @@ var miscFunctions = {
 	},
 
 	//a function to dislike a comment
-	dislikeComment: async function (userinfo, commentid) {
-		var alreadydisliked = await client.query(`SELECT * FROM dislikedcomments WHERE user_id=$1 AND comment_id=$2 LIMIT 1`, [userinfo.id, commentid]);
+	dislikeComment: async function (userid, commentid) {
+		var alreadydisliked = await client.query(`SELECT * FROM dislikedcomments WHERE user_id=$1 AND comment_id=$2 LIMIT 1`, [userid, commentid]);
 
 		if (alreadydisliked.rows.length) {
-			client.query(`DELETE FROM dislikedcomments WHERE user_id=$1 AND comment_id=$2`, [userinfo.id, commentid]);
+			client.query(`DELETE FROM dislikedcomments WHERE user_id=$1 AND comment_id=$2`, [userid, commentid]);
 
 			var data = await client.query(`UPDATE comments SET dislikes=dislikes-1 WHERE id=$1 RETURNING likes, dislikes`, [commentid]);
 			data = data.rows[0];
 		} else {
-			var liked = await client.query(`DELETE FROM likedcomments WHERE user_id=$1 AND comment_id=$2 RETURNING 1`, [userinfo.id, commentid]);
+			var liked = await client.query(`DELETE FROM likedcomments WHERE user_id=$1 AND comment_id=$2 RETURNING 1`, [userid, commentid]);
 			if (liked.rows.length) {
 				client.query(`UPDATE comments SET likes=likes-1 WHERE id=$1`, [commentid]);
 			}
 
-			client.query(`INSERT INTO dislikedcomments(user_id, comment_id) VALUES ($1, $2)`, [userinfo.id, commentid]);
+			client.query(`INSERT INTO dislikedcomments(user_id, comment_id) VALUES ($1, $2)`, [userid, commentid]);
 
 			var data = await client.query(`UPDATE comments SET dislikes=dislikes+1 WHERE id=$1 RETURNING likes, dislikes`, [commentid]);
 			data = data.rows[0];
@@ -490,7 +496,7 @@ var searchFunctions = {
 		var results = [];
 
 		for (var phrase of phrases) {
-			var result = await client.query(`SELECT * FROM videos WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["% " + phrase + " %"]);
+			var result = await client.query(`SELECT * FROM videos WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(description) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["%" + phrase + "%"]);
 
 			result.rows.forEach((item, index) => {
 				var isDuplicate = results.some((res) => {
@@ -511,7 +517,7 @@ var searchFunctions = {
 		var results = [];
 
 		for (var phrase of phrases) {
-			var result = await client.query(`SELECT * FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($2)`, ["%" + phrase +"%", "% " + phrase + " %"]);
+			var result = await client.query(`SELECT * FROM users WHERE UPPER(username) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($2)`, ["%" + phrase +"%", "%" + phrase + "%"]);
 
 			result.rows.forEach((item, index) => {
 				var isDuplicate = results.some((res) => {
@@ -539,14 +545,16 @@ var searchFunctions = {
 				var video = await client.query(`SELECT id, thumbnail FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1 LIMIT 1) LIMIT 1`, [item.id]);
 				video = video.rows[0];
 
-				item = Object.assign({}, item, {thumbnail: video.thumbnail, firstvideoid: video.id});
+				if (video) {
+					item = Object.assign({}, item, {thumbnail: video.thumbnail, firstvideoid: video.id});
 
-				var isDuplicate = results.some((res) => {
-					return JSON.stringify(res) == JSON.stringify(item);
-				});
+					var isDuplicate = results.some((res) => {
+						return JSON.stringify(res) == JSON.stringify(item);
+					});
 
-				if (!isDuplicate) {
-					results.push(item);
+					if (!isDuplicate) {
+						results.push(item);
+					}
 				}
 			}
 		}
@@ -888,13 +896,11 @@ var adHandling = {
 	//a function for basically storing an ad resolutions array with the ad type and positioning
 	getAdResolutions: async () => {
 	        var acceptedDimensions = [
-			{width: 720, height: 90, type:"desktop", position: "banner"},
-			{width: 728, height: 90, type: "desktop", position: "banner"},
-			{width: 300, height: 250, type: "desktop", position: "square"},
-			{width: 160, height: 600, type: "desktop", position: "sidebanner"},
-			{width: 300, height: 50, type: "mobile", position: "banner"},
-			{width: 320, height: 50, type: "mobile", position: "banner"},
-			{width: 320, height: 100, type: "mobile", position: "banner"}
+			{width: 720, height: 90, position: "banner"},
+			{width: 728, height: 90, position: "banner"},
+			{width: 300, height: 250, position: "square"},
+			{width: 160, height: 600, position: "sidebanner"},
+			{width: 88, height: 31, position: "square"}
 		];
 
 		return acceptedDimensions;
@@ -902,8 +908,8 @@ var adHandling = {
 
 	/*
 	a function for checking the resolution of an ad image against other resolutions
-	and returning the resolution and type (mobile vs desktop) of the ad image if the
-	ad is one of the accepted resolutions
+	and returning the resolution of the ad image if the ad is one of the accepted
+	resolutions
 	*/
 	getAdResolution: async (adImgRes) => {
 	        var acceptedDimensions = await middleware.getAdResolutions();

@@ -13,9 +13,9 @@ app.get("/getmagnet/:contentid", async (req, res) => {
 	var magnetHealth = await middleware.checkMagnetHealth(magnetlink);
 
 	if (magnetlink != null && magnetHealth) {
-		res.send(magnetlink);
+		return res.send(magnetlink);
 	} else {
-		res.send(false);
+		return res.send(false);
 	}
 });
 
@@ -31,11 +31,11 @@ app.get("/setmagnet/:contentid", async (req, res) => {
 
 		if (magnetlink == null) {
 			redisClient.set(contentid, req.query.magnetlink);
-			res.send(true);
+			return res.send(true);
 		} else {
-			res.send(false);
+			return res.send(false);
 		}
 	} else {
-		res.send(false);
+		return res.send(false);
 	}
 });

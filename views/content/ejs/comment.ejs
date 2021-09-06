@@ -1,3 +1,5 @@
+<!--The EJS to display an individual comment on the site-->
+
 <h3>&nbsp<%= comment.username %></h3>
 <p>&nbsp;&nbsp<%= comment.comment %></p>
 <% if (typeof comment.reactionfile != 'undefined') { %>
@@ -8,7 +10,7 @@
 	<% } %>
 <% } %>
 
-<div class="commentlikes" id="<%= comment.id %>">
+<div class="commentlikes" id="<%= comment.id %>likesection">
 	&nbsp;
 	<button id="commentLike" onclick="likeComment('<%= comment.id %>')"><img src="/content/icons/like.ico"></button>
 	<p id="<%= comment.id %>likes"><%= comment.likes %></p>

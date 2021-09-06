@@ -26,7 +26,7 @@ app.get("/p/:playlistid", async(req, res) => {
 		viewObj = Object.assign({}, viewObj, {playlist: playlist});
 	}
 
-	res.render("viewplaylist.ejs", viewObj);
+	return res.render("viewplaylist.ejs", viewObj);
 });
 
 //this is a get request to display videos as a part of a playlist instead of standalone content
@@ -36,7 +36,7 @@ app.get("/playlistvideo/view/:playlistid/:videoid", async (req, res) => {
 
 	if (typeof video == 'undefined') {
 		req.flash("message", "Video does not exist in playlist.");
-		return res.redirect("/");
+		return res.redirect("/error");
 	}
 
 	var viewObj = await middleware.getViewObj(req, res);
@@ -54,7 +54,7 @@ app.get("/playlistvideo/view/:playlistid/:videoid", async (req, res) => {
 
 	viewObj = Object.assign({}, viewObj, {playlist: playlist, video: video, playlistvideos: playlistvideos, reccomendations: reccomendations}, videoInfo);
 
-	res.render("viewvideo.ejs", viewObj);
+	return res.render("viewvideo.ejs", viewObj);
 });
 
 //this is a get path for adding videos to playlists on the site
@@ -106,10 +106,10 @@ app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, 
 		await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
 		await client.query(`UPDATE playlists SET videocount=videocount-1 WHERE id=$1`, [req.params.playlistid]);
 		req.flash("message", "Video Deleted from Playlist!");
-		res.redirect(`/p/${req.params.playlistid}`);
+		return res.redirect(`/p/${req.params.playlistid}`);
 	} else {
 		req.flash("message", "Playlist does not exist, does not belong to you, or the video is not in the playlist");
-		res.redirect("/error");
+		return res.redirect("/error");
 	}
 });
 
@@ -121,14 +121,14 @@ app.get("/playlist/new", middleware.checkSignedIn, async (req, res) => {
 		viewObj.videoid = req.query.videoid;
 	}
 
-	res.render("createplaylist.ejs", viewObj);
+	return res.render("createplaylist.ejs", viewObj);
 });
 
 //this is a get request for deleting a playlist
 app.get("/playlist/delete/:playlistid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var result = await middleware.deletePlaylistDetails(userinfo, req.params.playlistid);
+	var result = await middleware.deletePlaylistDetails(userinfo.id, req.params.playlistid);
 
 	if (result) {
 		req.flash("message", "Playlist Deleted!");
@@ -149,15 +149,13 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 
 	var newid = await middleware.generateAlphanumId();
 
-	var exists = await client.query(`SELECT EXISTS(SELECT * FROM playlists WHERE user_id=$1 AND name=$2 LIMIT 1)`, [userinfo.id, req.body.name]);
-	exists = exists.rows[0].exists;
+	var exists = await client.query(`SELECT id FROM playlists WHERE user_id=$1 AND name=$2 LIMIT 1`, [userinfo.id, req.body.name]);
 
-	if (exists) {
+	if (exists.rows.length) {
 		req.flash("message", "Playlist with the same name already exists.");
-
-		res.redirect("/error");
+		return res.redirect(`/p/${exists.rows[0].id}`);
 	} else {
-		var valuesarr = [newid, req.body.name, userinfo.id, true, req.body.private];
+		var valuesarr = [newid, req.body.name, userinfo.id, req.body.private];
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == "string") {
 				return "\'" + item + "\'";
@@ -166,7 +164,9 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 			}
 		});
 
-		await client.query(`INSERT INTO playlists (id, name, user_id, candelete, private) VALUES (${valuesarr})`);
+		console.log(`${valuesarr}`);
+
+		await client.query(`INSERT INTO playlists (id, name, user_id, private) VALUES (${valuesarr})`);
 
 		if (typeof req.body.videoid != 'undefined') {
 			await client.query(`INSERT INTO playlistvideos (playlist_id, video_id, videoorder) VALUES ($1, $2, $3)`, [newid, req.body.videoid, 1]);
@@ -174,7 +174,7 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 			await client.query(`UPDATE playlists SET videocount=videocount+1 WHERE id=$1`, [newid]);
 		}
 
-		res.redirect(`/p/${newid}`);
+		return res.redirect(`/p/${newid}`);
 	}
 });
 

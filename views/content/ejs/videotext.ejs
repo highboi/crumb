@@ -1,9 +1,12 @@
+<!--EJS to display miscellaneous information about a video such as the title, description, and settings-->
+
 <div class="videotext">
 	<% if (typeof subtitles != 'undefined') { %>
 		<%- include('./subtitles.ejs', {subtitles: subtitles}) %>
+		<%- include('./videosettings.ejs', {resolutions: resolutions, subtitles: subtitles}) %>
+	<% } else { %>
+		<%- include('./videosettings.ejs', {resolutions: resolutions}) %>
 	<% } %>
-
-	<%- include('./videosettings.ejs', {resolutions: resolutions}) %>
 
 	<h1 id="title"><%= video.title %></h1>
 	<% if (typeof video.topics != 'object') { %>
@@ -53,13 +56,13 @@
 				<% } else { %>
 					<button id="subscribebutton" onclick="subscribe('<%= videocreator.id %>', this)">Subscribe</button>
 				<% } %>
-				<p><%= videocreator.subscribers %></p>
+				<p id="<%= videocreator.id %>subscribercount"><%= videocreator.subscribers %></p>
 			</div>
 			<div class="likesection">
 				<button class="likebuttons" onclick="likeVideo('<%= video.id %>')"><img src="/content/icons/like.ico"></button>
-				<p id="likes"><%= video.likes %></p>
+				<p id="<%= video.id %>likes"><%= video.likes %></p>
 				<button class="likebuttons" onclick="dislikeVideo('<%= video.id %>')"><img src="/content/icons/dislike.ico"></button>
-				<p id="dislikes"><%= video.dislikes %></p>
+				<p id="<%= video.id %>dislikes"><%= video.dislikes %></p>
 			</div>
 		</div>
 	</div>

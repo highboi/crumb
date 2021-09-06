@@ -1,0 +1,14 @@
+<div class="playlist-content">
+	<a href="/p/<%= playlist.id %>" target="__blank"><h1><%= playlist.name %></h1></a>
+	<div class="playlist-scroll">
+		<% playlistvideos.forEach((item, index) => { %>
+			<% if (item.id == video.id) { %>
+				<div class="current-video">
+					<%- include('./playlistentry.ejs', {playlist: playlist, video: item}) %>
+				</div>
+			<% } else { %>
+				<%- include('./playlistentry.ejs', {playlist: playlist, video: item}) %>
+			<% } %>
+		<% }) %>
+	</div>
+</div><hr>

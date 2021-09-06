@@ -1,41 +1,48 @@
-//get the amount of likes and dislikes from the video
-var likeCount = document.getElementById("likes");
-var dislikeCount = document.getElementById("dislikes");
-
-//variables to store the comment likes and dislikes for specific ids
-var commentLikes;
-var commentDislikes;
-
 //change the element likes and dislikes on the html and in the server
-function changeElementLikes(link, likeElement, dislikeElement) {
-	getAjaxData(link, (response) => {
-		likeElement.innerHTML = response[0];
-		dislikeElement.innerHTML = response[1];
-	});
+async function changeElementLikes(link, likeElement, dislikeElement) {
+	var response = await fetch(link);
+	var data = await response.json();
+
+	likeElement.innerHTML = data[0];
+	dislikeElement.innerHTML = data[1];
+
+	return data;
 }
 
 //like a video
-function likeVideo(videoid) {
-	changeElementLikes(`/v/like/${videoid}`, likeCount, dislikeCount);
+async function likeVideo(videoid) {
+	var videoLikes = document.getElementById(`${videoid}likes`);
+	var videoDislikes = document.getElementById(`${videoid}dislikes`);
+
+	changeElementLikes(`/v/like/${videoid}`, videoLikes, videoDislikes);
 }
 
 //dislike a video
-function dislikeVideo(videoid) {
-	changeElementLikes(`/v/dislike/${videoid}`, likeCount, dislikeCount);
+async function dislikeVideo(videoid) {
+	var videoLikes = document.getElementById(`${videoid}likes`);
+	var videoDislikes = document.getElementById(`${videoid}dislikes`);
+
+	changeElementLikes(`/v/dislike/${videoid}`, videoLikes, videoDislikes);
 }
 
 //like a comment
-function likeComment(commentid) {
-	commentLikes = document.getElementById(commentid+"likes");
-	commentDislikes = document.getElementById(commentid+"dislikes");
+async function likeComment(commentid) {
+	var commentLikes = document.getElementById(`${commentid}likes`);
+	var commentDislikes = document.getElementById(`${commentid}dislikes`);
 
-	changeElementLikes(`/comment/like/${commentid}`, commentLikes, commentDislikes);
+	var data = await changeElementLikes(`/comment/like/${commentid}`, commentLikes, commentDislikes);
+
+	document.getElementById(commentid).setAttribute("likes", data[0]);
+	document.getElementById(commentid).setAttribute("dislikes", data[1]);
 }
 
 //dislike a comment
-function dislikeComment(commentid) {
-	commentLikes = document.getElementById(commentid+"likes");
-	commentDislikes = document.getElementById(commentid+"dislikes");
+async function dislikeComment(commentid) {
+	var commentLikes = document.getElementById(`${commentid}likes`);
+	var commentDislikes = document.getElementById(`${commentid}dislikes`);
 
-	changeElementLikes(`/comment/dislike/${commentid}`, commentLikes, commentDislikes);
+	var data = await changeElementLikes(`/comment/dislike/${commentid}`, commentLikes, commentDislikes);
+
+	document.getElementById(commentid).setAttribute("likes", data[0]);
+	document.getElementById(commentid).setAttribute("dislikes", data[1]);
 }

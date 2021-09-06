@@ -1,28 +1,23 @@
-//make a websocket connection and get the livestream video tag
-var socket = new WebSocket(`ws://localhost/live/?streamid=${streamid}&isClient=true&isStreamer=false`);
-var livestream = document.getElementById("video");
+//get a socket connection to the server and the livestream element to handle
+var streamSocket = new WebSocket(`ws://localhost/live/?streamid=${streamid}&isClient=true&isStreamer=false`);
+var livestream = document.querySelector(".video-container #video");
 
-//make a mediasource, sourcebuffer, and set the stream source
+//make a mediasource, source buffer, and set the stream source
 var mediaSource = new MediaSource();
 var sourceBuffer;
-var streamSrc = URL.createObjectURL(mediaSource);
-livestream.src = streamSrc;
+
+//set the livestream source to the media source
+livestream.src = URL.createObjectURL(mediaSource);
 
 //a boolean to see if the time has been set on the video
 var timeSet = false;
 
-//an interval variable to store the time update interval
-var updateInterval;
-
-//execute a function whenever the mediasource is open
-mediaSource.addEventListener("sourceopen", opened);
-
-//make a source buffer
-function opened() {
+//add a source buffer to the media source once the media source is open
+mediaSource.addEventListener("sourceopen", () => {
+	//make the media source a webm source buffer
 	sourceBuffer = mediaSource.addSourceBuffer("video/webm; codecs=\"opus, vp8\"");
-
 	console.log("Source Opened");
-}
+});
 
 //set the time of the live stream to the latest seekable time
 function setTime() {
@@ -37,29 +32,28 @@ function setTime() {
 	}
 }
 
-socket.onopen = (e) => {
+//alert the developer of an open socket connection
+streamSocket.onopen = (e) => {
 	console.log("Connection Established");
 };
 
 //handle incoming video data
-socket.onmessage = async (event) => {
-	//developer info
-	console.log("Message from server:");
-	console.log(typeof event.data);
-	console.log(event.data);
-
+streamSocket.onmessage = async (event) => {
+	//execute the setTime function to repeatedly update the current time on the video
 	if (timeSet == false && sourceBuffer.buffered.length != 0) {
 		setTime();
 		timeSet = true;
 	}
 
+	//check to see if the data is a video chunk or a message
 	if (typeof event.data == 'object') {
+		//add this chunk of video data to the source buffer of the video as an array buffer
 		var data = await event.data.arrayBuffer();
-
 		if (typeof sourceBuffer != 'undefined' && mediaSource.readyState == "open") {
 			sourceBuffer.appendBuffer(data);
 		}
 	} else if (typeof event.data == 'string') {
+		//end the live stream if the server says so and redirect to the recorded stream
 		if (event.data == "ended") {
 			mediaSource.endOfStream();
 			window.location.pathname = `/v/${streamid}`;

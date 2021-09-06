@@ -1,3 +1,5 @@
+<!--The link to a video that belongs to a playlist on the site-->
+
 <% if (typeof video != 'undefined' && typeof playlist != 'undefined') { %>
 	<div class="video-thumbnail" id="<%= video.id %>thumbnail">
 		<% if (video.streaming) { %>
@@ -32,7 +34,7 @@
 					<% if (typeof user != 'undefined') { %>
 						<% if (creator.id == user.id) { %>
 							<% var deletelink = `/playlistvideo/delete/${playlist.id}/${video.id}` %>
-							<button onclick="redirectConfirm('Delete video from playlist?', '<%= deletelink %>')">Delete Video</button>
+							<button onclick="redirectConfirm('Delete video from playlist?', '<%= deletelink %>')">Delete Video from Playlist</button>
 						<% } %>
 					<% } %>
 					<object id="<%= video.id %>playlistform">

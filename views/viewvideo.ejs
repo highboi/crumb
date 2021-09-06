@@ -5,12 +5,11 @@
 	</head>
 	<body>
 		<nav>
-			<%- include('content/ejs/navbar.ejs') %>
 			<%- include('content/ejs/banner.ejs') %>
 		</nav>
 
 		<main>
-			<%- include('content/ejs/body.ejs') %>
+			<%- include('content/ejs/body.ejs', {noadvert: true}) %>
 
 			<div class="container">
 				<div class="video-contents">
@@ -35,6 +34,7 @@
 							</video>
 						<% } %>
 					</div>
+
 					<% if (!video.deleted && !video.private) { %>
 						<%- include('content/ejs/videotext.ejs') %>
 					<% } else if (!video.deleted && typeof user != 'undefined' && user.id == video.user_id) { %>
@@ -45,26 +45,14 @@
 				<% if (!video.deleted && !video.private) { %>
 					<div class="reccomendations">
 						<% if (typeof chatReplayMessages != 'undefined') { %>
-							<div class="live-chat">
+							<div class="live-chat-replay">
 								<h3>Chat Replay:</h3>
 								<div id="chatBox"></div>
 							</div>
 						<% } %>
-						<% if (typeof playlist != 'undefined' && typeof playlistvideos != 'undefined') { %>
-							<div class="playlist-content">
-								<a href="/p/<%= playlist.id %>" target="__blank"><h1><%= playlist.name %></h1></a>
-								<div class="playlist-scroll">
-									<% playlistvideos.forEach((item, index) => { %>
-										<% if (item.id == video.id) { %>
-											<div class="current-video">
-												<%- include('content/ejs/playlistentry.ejs', {playlist: playlist, video: item}) %>
-											</div>
-										<% } else { %>
-											<%- include('content/ejs/playlistentry.ejs', {playlist: playlist, video: item}) %>
-										<% } %>
-									<% }) %>
-								</div>
-							</div><hr>
+
+						<% if (typeof playlist != "undefined" && typeof playlistvideos != "undefined") { %>
+							<%- include('content/ejs/playlistsidebar.ejs', {playlist: playlist, playlistvideos: playlistvideos}) %>
 						<% } %>
 
 						<div class="adverts" data-position="square"></div>
@@ -77,12 +65,7 @@
 							</label>
 						</div>
 
-						<h2>&nbspUp Next</h2><hr>
-						<% if (typeof reccomendations != 'undefined') { %>
-							<% reccomendations.forEach((item, index) => { %>
-								<%- include('content/ejs/thumbnail.ejs', {video: item}) %><hr>
-							<% }); %>
-						<% } %>
+						<%- include('content/ejs/reccomendations.ejs', {reccomendations: reccomendations}) %>
 					</div>
 
 					<%- include('content/ejs/comments.ejs', {video: video, comments: comments}) %>
@@ -91,9 +74,9 @@
 
 			<%- include('content/ejs/bottombody.ejs') %>
 
-			<% if (!video.deleted && !video.private) { %>
-				<%- include('content/ejs/scripts.ejs') %>
+			<%- include('content/ejs/scripts.ejs') %>
 
+			<% if (!video.deleted && !video.private) { %>
 				<script type="text/javascript">
 					<% if (typeof scrollCommentId != 'undefined' && typeof scrollCommentBaseId != 'undefined') { %>
 						var scrollCommentId = <%- JSON.stringify(scrollCommentId) %>;
@@ -149,8 +132,6 @@
 
 				<!--handle the video settings such as subtitles, speed, and quality-->
 				<script src="/content/javascript/videosettings.js"></script>
-			<% } else { %>
-				<%- include('content/ejs/scripts.ejs') %>
 			<% } %>
 		</main>
 	</body>

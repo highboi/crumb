@@ -1,69 +1,71 @@
-//this is a script which handles dynamic loading for comments and other large data sets
-//that cannot be loaded into EJS without lots of time (reduces loading time while increasing
-//the efficiency, nothing is loaded that is not seen/needed by the user)
+//script which handles the dynamic loading of large pieces of data
 
-//this is an array of the comment ids that have replies that have already been shown
+/*
+an object containing key-value pairs of comment ids and the amount of
+times replies have been added/requested
+*/
 var replycommentids = {};
 
-//a function to get the replies of a comment based on the comment id and the amount of times replies were retrieved according to the "replycommentids" object
-function getReplies(commentid, toggle=true, callback=undefined) {
-	//if the comment replies are to be toggled ONLY
+//get the replies of a comment
+async function getReplies(commentid, toggle=true) {
+	//check to see if we need to toggle the replies or request more replies
 	if (toggle) {
 		showelement(`${commentid}repliesdiv`);
-	} else { //if the comment is to have more replies requested from the server with AJAX
-		//if the comment with this id has not had replies retrieved for it yet
+	} else {
+		//check to see if a comment has been processed for replies or not
 		if (!Object.keys(replycommentids).includes(commentid)) {
-			//get the AJAX data from the comment replies url
-			getAjaxData(`/comment/replies/${commentid}`, (repliesdata) => {
-				var repliesdiv = document.getElementById(`${commentid}repliesdiv`);
+			//get the replies data from the server
+			var response = await fetch(`/comment/replies/${commentid}`);
+			var data = await response.json();
+			var replies = data.replies;
 
-				var replies = repliesdata.replies;
+			//get the status of showing the replies to the user
+			var result = handleReplies(replies);
 
-				//make sure the replies exist before doing anything
-				if (typeof replies == 'undefined' || replies.length == 0) {
-					repliesdiv.style.display = 'none';
+			//check to see if the replies were successfully shown
+			if (result) {
+				//show the replies html
+				showelement(`${commentid}repliesdiv`);
 
-					//insert an entry with the number 0 to easily identify comments with 0 replies
-					replycommentids[commentid] = 0;
-				} else {
-					//show the replies div element
-					showelement(`${commentid}repliesdiv`);
+				/*
+				make a key-value pair in the replycommentids object which
+				shows that the replies have been requested once
+				*/
+				replycommentids[commentid] = 1;
 
-					//handle the replies in another function
-					handleReplies(replies);
-
-					//call the function to scroll to a comment if necessary
-					if (typeof callback != 'undefined') {
-						console.log(callback);
-						callback(replies);
-					}
-
-					//add this comment id to the array and insert a number representative of the amount of AJAX requests previously made
-					replycommentids[commentid] = 1;
-
-					//change the onclick function of the "replies" button to have the "toggle" parameter equal true for toggling only
-					var showrepliesbtn = document.querySelector(`#${commentid} #showreplies`);
-					showrepliesbtn.setAttribute("onclick", `getReplies('${commentid}', true);`);
-				}
-			});
-		} else if (replycommentids[commentid] > 0) { //if the comment with this id needs more replies from the server
-			//get the limit number to only get a portion of replies
+				//set the onclick function for the "replies" button to toggle only
+				var showrepliesbtn = document.getElementById(commentid).querySelector("#showreplies");
+				showrepliesbtn.setAttribute("onclick", `getReplies('${commentid}', true);`);
+			} else {
+				/*
+				make a key-value pair in the replycommentids object which
+				shows no replies belong to this comment with a 0
+				*/
+				replycommentids[commentid] = 0;
+			}
+		} else if (replycommentids[commentid]) {
+			//get the amount of times replies have been requested for this comment
 			var limitnum = replycommentids[commentid];
 
-			//get the AJAX data from the comment replies url with a specified limit (i.e 50 would mean getting comments 51-60 instead of getting the same comments)
-			getAjaxData(`/comment/replies/${commentid}/?limit=${limitnum*50}`, (repliesdata) => {
-				var replies = repliesdata.replies;
+			/*
+			get the replies data from the server according to a number which
+			only requests replies that are past the Xth reply (request comments
+			in increments of 50 in this example, get replies past the 50th, 100th,
+			150th comment and so on)
+			*/
+			var response = await fetch(`/comment/replies/${commentid}/?limit=${limitnum*50}`);
+			var data = await response.json();
+			var replies = data.replies;
 
-				//get the status of the handling of the replies
-				var result = handleReplies(replies);
+			//get the status of showing the replies to the user
+			var result = handleReplies(replies);
 
-				//if there were no replies given by the ajax, then set the "more replies" button to be invisible
-				if (!result) {
-					document.getElementById(`${commentid}morerepliesbtn`).style.display = 'none';
-				}
-			});
+			//if there are no more replies, set the "more replies" button to be invisible
+			if (!result) {
+				document.getElementById(`${commentid}morerepliesbtn`).style.display = 'none';
+			}
 
-			//add 1 to the limit number to access more comments after this group
+			//increase the recorded amount of times replies have been requested from the server
 			replycommentids[commentid] += 1;
 		}
 	}
@@ -79,18 +81,17 @@ function handleReplies(replies) {
 	//get the comment replies div
 	var commentreplies = document.getElementById(`${replies[0].base_parent_id}replies`);
 
-	//if the comment replies are not null, then do shit
+	//add replies to the comment replies div
 	if (commentreplies != null) {
-		//construct the html for each reply sequentially
-		replies.forEach((item, index) => {
-			commentreplies.appendChild(getReplySegment(item));
-		});
+		for (var reply of replies) {
+			commentreplies.appendChild(getReplySegment(reply));
+		}
 
-		//stop the loading animation for the comments
 		document.getElementById(`${replies[0].base_parent_id}loading`).style.display = 'none';
 
-		//return a success
 		return true;
+	} else {
+		return false;
 	}
 }
 
@@ -125,7 +126,7 @@ function getReplySegment(reply) {
 	//create the container for all of the like/dislike functionality
 	var commentlikesdiv = document.createElement("div");
 	commentlikesdiv.setAttribute("class", "commentlikes");
-	commentlikesdiv.setAttribute("id", `${reply.id}likes`);
+	commentlikesdiv.setAttribute("id", `${reply.id}likesection`);
 
 	//create the like button
 	var likebtn = document.createElement("button");
@@ -154,7 +155,7 @@ function getReplySegment(reply) {
 
 	//create the p tag containing the number of likes
 	var dislikes = document.createElement("p");
-	dislikes.setAttribute("id", `${reply.id}likes`);
+	dislikes.setAttribute("id", `${reply.id}dislikes`);
 	dislikes.innerHTML = reply.dislikes.toString();
 
 	//make a reply button to reply to this comment
