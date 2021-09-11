@@ -42,8 +42,13 @@ async function advertiserEditSubmitted() {
 		return false;
 	}
 
-	//make a FormData object to store form data
-	var advertFormData = new FormData();
+	//re-enable form elements for submission
+	for (var element of document.getElementById("advertiserEditForm").elements) {
+		element.disabled = false;
+	}
+
+	//make a FormData object which stores the data in the advertiser edit form
+	var advertFormData = new FormData(document.getElementById("advertiserEditForm"));
 
 	//if the card data is entered, then make a new payment method out of the card information
 	if (document.getElementById("cardcheck").checked) {
@@ -63,12 +68,6 @@ async function advertiserEditSubmitted() {
 			advertFormData.append("paymentMethod", paymentMethod.id);
 		}
 	}
-
-	//get the changes to the business domain and the business email
-	var businessDomain = document.querySelector("#advertiserEditForm #businessDomain").value;
-	var businessEmail = document.querySelector("#advertiserEditForm #businessEmail").value;
-	advertFormData.append("businessDomain", businessDomain);
-	advertFormData.append("businessEmail", businessEmail);
 
 	//send the data to the server for changes
 	var response = await fetch("/advertiseredit", {

@@ -241,7 +241,7 @@ app.post("/adsubmission", middleware.checkSignedIn, async (req, res) => {
 			{price: price.id}
 		],
 		default_payment_method: paymentMethod.id,
-		billing_cycle_anchor: req.body.startDate
+		billing_cycle_anchor: (Date.parse(req.body.startDate) / 1000).toFixed(0)
 	});
 
 	var newAdId = await middleware.generateAdvertId();

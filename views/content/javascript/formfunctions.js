@@ -80,6 +80,7 @@ function formLoadingState(formid, off=false) {
 		//re-enable all form elements
 		for (var element of formElements) {
 			element.disabled = false;
+			element.style.display = "";
 		}
 
 		//make the submit button invisible and reveal the loading animation
@@ -89,6 +90,7 @@ function formLoadingState(formid, off=false) {
 		//disable all form elements
 		for (var element of formElements) {
 			element.disabled = true;
+			element.style.display = "none";
 		}
 
 		//make the submit button invisible and reveal the loading animation
@@ -115,30 +117,4 @@ function confirmPassword(classname) {
 		alertTag.style.color = "#adff12";
 		return true;
 	}
-}
-
-//this is a function to validate login/registration forms
-async function verifyAuthForm(form, passwordconf=undefined) {
-	formLoadingState(form.id);
-
-	if (!checkFormInputs(form.id)) {
-		formLoadingState(form.id, true);
-		return false;
-	}
-
-	if (form.querySelector("#password").value.length < 6) {
-		alert("Password needs to be 6 or more characters long");
-		formLoadingState(form.id, true);
-		return false;
-	}
-
-	if (typeof passwordconf != "undefined" && !confirmPassword(passwordconf)) {
-		alert("Passwords do not match.");
-		formLoadingState(form.id, true);
-		return false;
-	}
-
-	formLoadingState(form.id, true);
-	document.querySelector(`#${form.id} .submitbtn`).setAttribute("type", "submit");
-	return true;
 }

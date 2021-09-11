@@ -59,28 +59,15 @@ async function advertSubscriptionSubmitted() {
 		return false;
 	}
 
-	//make a FormData object to submit the advertisement
-	var advertForm = new FormData();
-
-	//turn the start date into a unix timestamp
-	var startDate = new Date(document.querySelector("#adSubmissionForm #startDate").value.split("-"));
-	startDate = (startDate.getTime() / 1000).toFixed(0);
-	advertForm.append("startDate", startDate);
-
-	//add all form inputs to the FormData object
-	var advertInputs = Array.from(document.querySelectorAll("#adSubmissionForm #adForm input"));
-	for (var input of advertInputs) {
-		if (input.type == "file") {
-			advertForm.append(input.name, input.files[0]);
-		} else {
-			advertForm.append(input.name, input.value);
-		}
+	//re-enable form elements for submission
+	for (var element of document.getElementById("adSubmissionForm").elements) {
+		element.disabled = false;
 	}
 
 	//send the data to be stored
 	var response = await fetch("/adsubmission", {
 		method: "POST",
-		body: advertForm
+		body: new FormData(document.getElementById("adSubmissionForm"))
 	});
 
 	//check the response status

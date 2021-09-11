@@ -19,7 +19,7 @@ async function verifyAdEditForm(formid) {
 	var adImage = document.querySelector(`#${formid} #adImage`);
 	if (adImage.files.length) {
 		//get the image file to check
-		var imgFile = document.querySelector(`#${formid} #adImage`).files[0];
+		var imgFile = adImage.files[0];
 
 		//check for accepted dimensions
 		var acceptedDimensions = await getAdDimensions();
@@ -52,21 +52,15 @@ async function advertEditSubmitted() {
 		return false;
 	}
 
-	//add all form data to a FormData object
-	var editForm = new FormData();
-	var advertInputs = Array.from(document.querySelectorAll("#adEditForm #adForm input"));
-	for (var input of advertInputs) {
-		if (input.type == 'file') {
-			editForm.append(input.name, input.files[0]);
-		} else {
-			editForm.append(input.name, input.value);
-		}
+	//re-enable form elements for submission
+	for (var element of document.getElementById("adEditForm").elements) {
+		element.disabled = false;
 	}
 
 	//send the data from the form to the server
 	var response = await fetch("/adedit", {
 		method: "POST",
-		body: editForm
+		body: new FormData(document.getElementById("adEditForm"));
 	});
 
 	//check the response status

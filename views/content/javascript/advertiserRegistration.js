@@ -47,16 +47,15 @@ async function submitAdvertiser() {
 		formLoadingState("adRegistration", true);
 		return false;
 	} else {
+		//re-enable form elements for submission
+		for (var element of document.getElementById("adRegistrationForm")) {
+			element.disabled = false;
+		}
+
 		/*
 		Add necessary data to the FormData object
 		*/
-		var advertFormData = new FormData();
-
-		var businessDomain = document.querySelector("#adRegistration #businessDomain").value;
-		var businessEmail = document.querySelector("#adRegistration #businessEmail").value;
-
-		advertFormData.append("businessDomain", businessDomain);
-		advertFormData.append("businessEmail", businessEmail);
+		var advertFormData = new FormData(document.getElementById("adRegistrationForm"));
 		advertFormData.append("customerid", customerid);
 
 		//send the data to register this advertiser
