@@ -190,10 +190,10 @@ chatWss.on("connection", async (ws, req) => {
 
 	ws.on("close", async (message) => {
 		//remove the client from the live chat entry
-		var indexOfSocket = global.chatWssClients[queryparams.streamid].findIndex((item) => {
+		var indexOfSocket = global.chatWssClients[queryparams.streamid].clients.findIndex((item) => {
 			return JSON.stringify(item) == JSON.stringify(ws);
 		});
-		global.chatWssClients[queryparams.streamid].splice(indexOfSocket, 1);
+		global.chatWssClients[queryparams.streamid].clients.splice(indexOfSocket, 1);
 
 		//delete the entire live chat entry if the above removal left no people in the live chat
 		if (!global.chatWssClients[queryparams.streamid].clients.length) {

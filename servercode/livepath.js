@@ -59,8 +59,10 @@ app.get("/l/view/:streamid", async (req, res) => {
 });
 
 //this is a get request to get basic info about a live stream
-app.get("/l/start", middleware.checkSignedIn, async (req, res) => {
+app.get("/l/start/:streamtype", middleware.checkSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
+	viewObj.streamtype = req.params.streamtype;
+
 	return res.render("startstream.ejs", viewObj);
 });
 

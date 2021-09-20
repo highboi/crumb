@@ -115,7 +115,7 @@ var reqHandling = {
 		var resolutions = await client.query(`SELECT resolution FROM videofiles WHERE id=$1 LIMIT 1`, [video.id]);
 		videoInfo.resolutions = resolutions.rows[0].resolution;
 
-		if (video.subtitles != null) {
+		if (video.subtitles != "" && video.subtitles != null) {
 			videoInfo.subtitles = await middleware.getSubtitles(global.appRoot + "/storage" + video.subtitles);
 		} else {
 			videoInfo.subtitles = video.subtitles;

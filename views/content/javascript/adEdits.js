@@ -60,7 +60,7 @@ async function advertEditSubmitted() {
 	//send the data from the form to the server
 	var response = await fetch("/adedit", {
 		method: "POST",
-		body: new FormData(document.getElementById("adEditForm"));
+		body: new FormData(document.getElementById("adEditForm"))
 	});
 
 	//check the response status

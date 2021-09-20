@@ -1,16 +1,16 @@
 <!--The form for submitting a live stream on the site-->
 
 <% if (typeof posturl != 'undefined') { %>
-	<form action="<%= posturl %>" method="POST" enctype="multipart/form-data">
+	<form action="<%= posturl %>" method="POST" enctype="multipart/form-data" id="streamSubmitForm">
 		<div>
 			<label for="name">Name your Livestream:</label>
-			<input id="name" name="name" type="text" required>
+			<input id="name" name="name" type="text" maxlength="100" required>
 		</div>
 		<div>
 			<label for="enableChat">Enable/Disable Chat:</label>
 			<select id="enableChat" name="enableChat">
-				<option value="true">Yes</option>
-				<option value="false">No</option>
+				<option value="true">Enable</option>
+				<option value="false">Disable</option>
 			</select>
 		</div>
 		<div>
@@ -28,8 +28,8 @@
 		<div>
 			<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000" required></textarea>
 		</div>
-		<div>
-			<input type="submit" value="Start Streaming">
-		</div>
+
+		<button class="submitbtn" id="submitStream" type="button" onclick="submitStreamForm();" >Start Streaming</button>
+		<div class="lds-hourglass"></div>
 	</form>
 <% } %>

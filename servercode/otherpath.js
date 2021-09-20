@@ -74,7 +74,7 @@ app.get("/imgtypes", async (req, res) => {
 });
 
 //a get path for returning the accepted video types on the server
-app.get("vidtypes", async (req, res) => {
+app.get("/vidtypes", async (req, res) => {
 	var vidTypes = await middleware.getVideoTypes();
 
 	res.send({acceptedTypes: vidTypes});

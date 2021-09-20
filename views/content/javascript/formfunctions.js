@@ -77,20 +77,24 @@ function formLoadingState(formid, off=false) {
 
 	//check to see if we want to turn the loading state for this form off or on
 	if (off) {
+		//make the form visible again
+		document.getElementById(formid).style.display = "";
+
 		//re-enable all form elements
 		for (var element of formElements) {
 			element.disabled = false;
-			element.style.display = "";
 		}
 
 		//make the submit button invisible and reveal the loading animation
 		document.querySelector(`#${formid} .submitbtn`).style.display = "inline-block";
 		document.querySelector(`#${formid} .lds-hourglass`).style.display = "none";
 	} else {
+		//make the form disappear
+		document.getElementById(formid).style.display = "none";
+
 		//disable all form elements
 		for (var element of formElements) {
 			element.disabled = true;
-			element.style.display = "none";
 		}
 
 		//make the submit button invisible and reveal the loading animation

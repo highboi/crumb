@@ -9,7 +9,7 @@ Things to do:
 - Make extra buttons in the three dot menu on thumbnails float on top of everything else
 - Make the search bar more stylish and modern (less default html)
 - Add buttons on top of search results to skip to sections (channels, videos, playlists, etc)
-- Make a custom video player instead of the default HTML video player
+- Make a custom video player instead of the default HTML video player which has a cool design like a panel of buttons on a spaceship or something similar
 - Add a settings button to the custom video player to store all the settings and options such as playlist additions
 - Make the list of "topics" on the video hyperlinks to the topic urls. Explicitly define topics as different visually.
 - Differentiate different sections of views (comment section, video section) from each other visually using styling.
@@ -19,4 +19,7 @@ Things to do:
 - Enable the selection of a custom mouse cursor
 - Use marquee tags to make scrollable text/images for fun
 - Display the ratio of likes to dislikes on content
-- Enable the ability to select a reason for the disliking of a video
+- Enable the ability to select a reason for the disliking of a video (clickbait, bad content, disabled comments, etc.)
+- Implement 4chan-like greentext capabilities
+- Implement a pixel-art editor to make avatars instead of an image upload for the icon
+- Highlight links to other places
