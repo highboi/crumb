@@ -5,13 +5,14 @@
 		<h2>Comments:</h2>
 		<div id="commentform">
 			<% var commentlink = `/comment/${video.id}`; %>
-			<form action="<%= commentlink %>" method="post" enctype='multipart/form-data'>
-				<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="1000" rows="10" cols="50"></textarea><br><br>
+			<form action="<%= commentlink %>" method="post" enctype='multipart/form-data' id="mainCommentForm">
+				<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="500" rows="10" cols="50" required></textarea><br><br>
 
 				<label for="reactionfile">Reaction Image/Video:</label><br>
 				<input type="file" id="reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
 
-				<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
+				<button class="submitbtn" type="button" onclick="commentSubmitted('mainCommentForm');">Post Comment</button>
+				<div class="lds-hourglass"></div>
 			</form>
 		</div>
 

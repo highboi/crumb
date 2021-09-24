@@ -68,14 +68,34 @@ app.get("/getsearchrecs", async (req, res) => {
 
 //a get path for returning the accepted image types on the server
 app.get("/imgtypes", async (req, res) => {
-	var imgTypes = await middleware.getImgTypes();
+	var acceptedtypes = ["png", "jpeg", "jpg", "gif"];
+	acceptedtypes = acceptedtypes.map((item) => {
+		return "image/" + item;
+	});
 
-	res.send({acceptedTypes: imgTypes});
+	res.send({acceptedTypes: acceptedtypes});
 });
 
 //a get path for returning the accepted video types on the server
 app.get("/vidtypes", async (req, res) => {
-	var vidTypes = await middleware.getVideoTypes();
+	var acceptedtypes = ["webm", "ogg", "mp4"];
+	acceptedtypes = acceptedtypes.map((item) => {
+		return "video/" + item;
+	});
 
-	res.send({acceptedTypes: vidTypes});
+	res.send({acceptedTypes: acceptedtypes});
+});
+
+//a get path for returning the accepted file signatures for images
+app.get("/imgheaders", async (req, res) => {
+	var acceptedheaders = ["89504e47", "47494638", "ffd8ffdb", "ffd8ffe0", "ffd8ffee", "ffd8ffe1"];
+
+	res.send({acceptedHeaders: acceptedheaders});
+});
+
+//a get path for returning the accepted file signatures for videos
+app.get("/vidheaders", async (req, res) => {
+	var acceptedheaders = ["66747970", "1a45dFa3", "4f676753"];
+
+	res.send({acceptedHeaders: acceptedheaders});
 });

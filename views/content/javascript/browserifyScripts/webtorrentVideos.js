@@ -9,14 +9,12 @@ async function mainTorrentHandler() {
 	//log a message to confirm the starting of the torrenting process in the browser
 	console.log("WEBRTC supported, starting torrent process.");
 
-	//promisify the ajax function for getting data
-	var getAjaxAsync = promisify(getAjaxData, true);
-
 	//get the video id from the video element's dataset
 	var videoid = document.querySelector(".video-contents .video-container #video").dataset.videoid;
 
 	//get the magnet link status for this video
-	var magnetStatus = await getAjaxAsync(`/getmagnet/${videoid}`);
+	var response = await fetch(`/getmagnet/${videoid}`);
+	var magnetStatus = await response.json();
 
 	//log the magnet status
 	console.log(`MAGNET STATUS FOR ${videoid}:`, typeof magnetStatus, magnetStatus);
@@ -42,7 +40,7 @@ async function mainTorrentHandler() {
 		console.log("TORRENT:", torrent);
 
 		//get the magnet URI and send it to the server for storage in redis
-		await getAjaxAsync(`/setmagnet/${videoid}/?magnetlink=${encodeURIComponent(torrent.magnetURI)}`);
+		await fetch(`/setmagnet/${videoid}/?magnetlink=${encodeURIComponent(torrent.magnetURI)}`);
 	} else { //if there is a magnet for this video
 		//download data from the magnet link in "magnetStatus"
 		var torrent = await webtorrentLibrary.downloadDataAsync(client, magnetStatus);

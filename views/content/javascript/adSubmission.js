@@ -34,6 +34,12 @@ async function verifyAdSubmissionForm(formid) {
 		return false;
 	}
 
+	//check file signatures
+	var fileVerify = await verifyFileSignatures(formid);
+	if (!fileVerify) {
+		return false;
+	}
+
 	//verify the validity of starting dates for advertisement campaigns
 	var startDate = new Date(document.querySelector(`#${formid} #startDate`).value.split("-"));
 	startDate = startDate.getTime();

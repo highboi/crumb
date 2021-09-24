@@ -33,6 +33,12 @@ async function verifyRegistration(formid) {
 		}
 	}
 
+	//check file signatures
+	var fileVerify = await verifyFileSignatures(formid);
+	if (!fileVerify) {
+		return false;
+	}
+
 	return true;
 }
 

@@ -32,6 +32,12 @@ async function verifyVideoForm(formid) {
 		return false;
 	}
 
+	//check for invalid file signatures on the form
+	var fileVerify = await verifyFileSignatures(formid);
+	if (!fileVerify) {
+		return false;
+	}
+
 	//everything checks out
 	return true;
 }
@@ -44,6 +50,7 @@ async function videoSubmitted() {
 	//verify the form inputs
 	var verifyResult = await verifyVideoForm("videoSubmissionForm");
 	if (!verifyResult) {
+		formLoadingState("videoSubmissionForm", true);
 		return false;
 	}
 

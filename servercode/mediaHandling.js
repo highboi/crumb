@@ -110,26 +110,6 @@ var mediaFunctions = {
 		var imgDimensions = sizeOfImage(img.data);
 
 		return imgDimensions;
-	},
-
-	//a function for getting the accepted image types on this server
-	getImgTypes: async function() {
-		var acceptedtypes = ["png", "jpeg", "jpg", "gif"];
-		acceptedtypes = acceptedtypes.map((item) => {
-			return "image/" + item;
-		});
-
-		return acceptedtypes;
-	},
-
-	//a function for getting the accepted video types on this server
-	getVideoTypes: async function() {
-		var acceptedtypes = ["webm", "ogg", "mp4"];
-		acceptedtypes = acceptedtypes.map((item) => {
-			return "video/" + item;
-		});
-
-		return acceptedtypes;
 	}
 };
 

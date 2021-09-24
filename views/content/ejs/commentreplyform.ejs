@@ -5,16 +5,17 @@
 
 	<% var replylink = commentlink + `?parent_id=${comment.id}` %>
 
-	<form action="<%= replylink %>" method="post" enctype='multipart/form-data'>
-		<textarea id="commenttext" name="commenttext" placeholder="Say Something!" maxlength="1000" rows="10" cols="50"></textarea><br>
+	<form action="<%= replylink %>" method="post" enctype='multipart/form-data' id="<%= comment.id %>replyform">
+		<textarea id="commenttext" name="commenttext" placeholder="Say Something!" maxlength="500" rows="10" cols="50" required></textarea><br>
 
 		<label for="reactionfile">Reaction Image/Video:</label><br>
 		<input type="file" id="reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
 
 		<input type="hidden" id="base_parent_id" name="base_parent_id" value="<%= base_parent_id %>">
 
-		<button id="commentbtn" type="submit" value="Submit">Post Comment</button>
-		<input type="button" onclick="showelement('<%= comment.id %>replybox')" value="Cancel">
+		<button class="submitbtn" type="button" onclick="commentSubmitted('<%= comment.id %>replyform');">Post Comment</button>
+		<button type="button" onclick="showelement('<%= comment.id %>replybox');">Cancel</button>
+		<div class="lds-hourglass"></div>
 	</form>
 </div>
 

@@ -8,12 +8,28 @@ async function getImgTypes() {
 	return imgTypes.acceptedTypes;
 }
 
+//a function for getting the accepted image file signatures
+async function getImgHeaders() {
+	var imgHeaders = await fetch("/imgheaders");
+	imgHeaders = await imgHeaders.json();
+
+	return imgHeaders.acceptedHeaders;
+}
+
 //a function for getting the accepted MIME types for video files
 async function getVidTypes() {
 	var vidTypes = await fetch("/vidtypes");
 	vidTypes = await vidTypes.json();
 
 	return vidTypes.acceptedTypes;
+}
+
+//a function for getting the accepted video file signatures
+async function getVidHeaders() {
+	var vidHeaders = await fetch("/vidheaders");
+	vidHeaders = await vidHeaders.json();
+
+	return vidHeaders.acceptedHeaders;
 }
 
 //a function for getting the accepted dimensions for ads
@@ -121,4 +137,83 @@ function confirmPassword(classname) {
 		alertTag.style.color = "#adff12";
 		return true;
 	}
+}
+
+//this is a function to get the file signature information about a file
+async function getFileSignature(file) {
+	//get the file as an array buffer
+	var arrayBufferFile = await file.arrayBuffer();
+
+	//get the first four bytes as the header of the file
+	var headerArr = (new Uint8Array(arrayBufferFile)).subarray(0, 4);
+
+	//an empty string to store the file header
+	var header = "";
+
+	//construct the file header from the bytes in the header array
+	for (var byte of headerArr) {
+		header += byte.toString(16);
+	}
+
+	//return the file header as a string
+	return header;
+}
+
+//a function for verifying the file signatures of file inputs in a form
+async function verifyFileSignatures(formid) {
+	//get all file input elements from this form
+	var fileInputs = Array.from(document.getElementById(formid).querySelectorAll("input[type='file']"));
+
+	//get the accepted file signatures outside of the for loop for efficiency
+	var imgHeaders = await getImgHeaders();
+	var vidHeaders = await getVidHeaders();
+
+	//check all file inputs
+	for (var input of fileInputs) {
+		//check that the input has files in the first place
+		if (input.files.length) {
+			//check for what the file input should accept
+			switch (input.accept.replaceAll(" ", "")) {
+				case "video/*":
+					//get the current file signature of this input element
+					var fileSignature = await getFileSignature(input.files[0]);
+
+					//if the file signature is not a valid one, alert the user and return false
+					if (!vidHeaders.includes(fileSignature)) {
+						alert(`File input "${input.id}" has a faulty file signature, use a valid file.`);
+						return false;
+					}
+
+					break;
+				case "image/*":
+					//get the current file signature of this input element
+					var fileSignature = await getFileSignature(input.files[0]);
+
+					//if the file signature is not a valid one, alert the user and return false
+					if (!imgHeaders.includes(fileSignature)) {
+						alert(`File input "${input.id}" has a faulty file signature, use a valid file.`);
+						return false;
+					}
+
+					break;
+				case "image/*,video/*":
+				case "video/*,image/*":
+					//get both the image and video signatures that are accepted
+					var acceptedSignatures = imgHeaders.concat(vidHeaders);
+
+					//get the file signature of this file input
+					var fileSignature = await getFileSignature(input.files[0]);
+
+					//alert the user of an invalid file signature
+					if (!acceptedSignatures.includes(fileSignature)) {
+						alert(`File input "${input.id}" has a faulty file signature, use a valid file.`);
+						return false;
+					}
+
+					break;
+			}
+		}
+	}
+
+	return true;
 }
