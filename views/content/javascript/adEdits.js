@@ -43,6 +43,12 @@ async function verifyAdEditForm(formid) {
 		return false;
 	}
 
+	//check file sizes
+	var fileSizeCheck = await checkFileSizes(formid, 4000000);
+	if (!fileSizeCheck) {
+		return false;
+	}
+
 	return true;
 }
 

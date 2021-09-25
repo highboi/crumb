@@ -38,6 +38,18 @@ async function verifyVideoForm(formid) {
 		return false;
 	}
 
+	//check the subtitle file signature
+	var subFileVerify = await verifyFileSignature("subtitles", "310a3030");
+	if (!subFileVerify) {
+		return false;
+	}
+
+	//check the thumbnail file size
+	var thumbSizeCheck = await checkFileSize("thumbnail", 4000000);
+	if (!thumbSizeCheck) {
+		return false;
+	}
+
 	//everything checks out
 	return true;
 }

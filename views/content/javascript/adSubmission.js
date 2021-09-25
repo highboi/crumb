@@ -40,6 +40,12 @@ async function verifyAdSubmissionForm(formid) {
 		return false;
 	}
 
+	//check file sizes
+	var fileSizeCheck = await checkFileSizes(formid, 4000000);
+	if (!fileSizeCheck) {
+		return false;
+	}
+
 	//verify the validity of starting dates for advertisement campaigns
 	var startDate = new Date(document.querySelector(`#${formid} #startDate`).value.split("-"));
 	startDate = startDate.getTime();

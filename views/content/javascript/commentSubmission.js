@@ -13,6 +13,12 @@ async function verifyCommentForm(formid) {
 		return false;
 	}
 
+	//check the file sizes on the form
+	var fileSizeCheck = await checkFileSizes(formid, 4000000); //4MB limit
+	if (!fileSizeCheck) {
+		return false;
+	}
+
 	return true;
 }
 

@@ -93,8 +93,11 @@ function formLoadingState(formid, off=false) {
 
 	//check to see if we want to turn the loading state for this form off or on
 	if (off) {
-		//make the form visible again
-		document.getElementById(formid).style.display = "";
+		//make all of the form elements except for the loading animation visible
+		var formChildren = document.getElementById(formid).querySelectorAll(":not(.lds-hourglass)");
+		for (var element of formChildren) {
+			element.style.display = "";
+		}
 
 		//re-enable all form elements
 		for (var element of formElements) {
@@ -105,8 +108,11 @@ function formLoadingState(formid, off=false) {
 		document.querySelector(`#${formid} .submitbtn`).style.display = "inline-block";
 		document.querySelector(`#${formid} .lds-hourglass`).style.display = "none";
 	} else {
-		//make the form disappear
-		document.getElementById(formid).style.display = "none";
+		//make all of the form elements except for the loading animation invisible
+		var formChildren = document.getElementById(formid).querySelectorAll(":not(.lds-hourglass)");
+		for (var element of formChildren) {
+			element.style.display = "none";
+		}
 
 		//disable all form elements
 		for (var element of formElements) {
@@ -157,6 +163,27 @@ async function getFileSignature(file) {
 
 	//return the file header as a string
 	return header;
+}
+
+//a function for verifying a single file signature
+async function verifyFileSignature(inputid, signatures) {
+	//get the file input
+	var input = document.getElementById(inputid);
+
+	//check for existing files
+	if (input.files.length) {
+		//get the file signature
+		var fileSignature = await getFileSignature(input.files[0]);
+
+		//check the file signature
+		if (!signatures.includes(fileSignature)) {
+			//alert the user of the error
+			alert(`File input "${inputid}" has a faulty file signature, please use a valid file.`);
+			return false;
+		}
+	}
+
+	return true;
 }
 
 //a function for verifying the file signatures of file inputs in a form
@@ -211,6 +238,45 @@ async function verifyFileSignatures(formid) {
 					}
 
 					break;
+			}
+		}
+	}
+
+	return true;
+}
+
+//a function for checking the size of a single file input
+async function checkFileSize(inputid, size) {
+	//get the file input
+	var input = document.getElementById(inputid);
+
+	//check for existing files
+	if (input.files.length) {
+		//check the file size
+		if (input.files[0].size > size) {
+			//alert the user of the error
+			alert(`File input "${inputid}" is too large. The maximum file size for this input is ${size/1000000}MB.`);
+			return false;
+		}
+	}
+
+	return true;
+}
+
+//a function for checking file sizes
+async function checkFileSizes(formid, size) {
+	//get all the file inputs from the form to check
+	var fileInputs = Array.from(document.getElementById(formid).querySelectorAll("input[type='file']"));
+
+	//check all file inputs
+	for (var input of fileInputs) {
+		//check to see that there are files to check
+		if (input.files.length) {
+			//check to see if the size of the file is larger than the specified size
+			if (input.files[0].size > size) {
+				//alert the user of the error
+				alert(`File input "${input.id}" is too large. The maximum file size is ${size/1000000}MB.`);
+				return false;
 			}
 		}
 	}
