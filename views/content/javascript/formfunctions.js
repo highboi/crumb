@@ -105,7 +105,8 @@ function formLoadingState(formid, off=false) {
 		}
 
 		//make the submit button invisible and reveal the loading animation
-		document.querySelector(`#${formid} .submitbtn`).style.display = "inline-block";
+		document.querySelector(`#${formid} .submitbtn`).style.display = "";
+		document.querySelector(`#${formid} .percentage`).style.display = "none";
 		document.querySelector(`#${formid} .lds-hourglass`).style.display = "none";
 	} else {
 		//make all of the form elements except for the loading animation invisible
@@ -121,6 +122,7 @@ function formLoadingState(formid, off=false) {
 
 		//make the submit button invisible and reveal the loading animation
 		document.querySelector(`#${formid} .submitbtn`).style.display = "none";
+		document.querySelector(`#${formid} .percentage`).style.display = "";
 		document.querySelector(`#${formid} .lds-hourglass`).style.display = "inline-block";
 	}
 }

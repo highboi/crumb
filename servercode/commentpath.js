@@ -64,6 +64,8 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 			}
 		});
 
+		console.log(valuesarr);
+
 		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, parent_id, depth_level, base_parent_id) VALUES (${valuesarr})`);
 	} else {
 		valuesarr.push(0);

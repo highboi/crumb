@@ -42,6 +42,31 @@ async function commentSubmitted(formid) {
 	//get the post url from the form element itself
 	var posturl = document.getElementById(formid).action;
 
+	var response = await makeRequest("POST", posturl, new FormData(document.getElementById(formid)), (event) => {
+		var percentage = (event.loaded/event.total)*100;
+		document.querySelector(`#${formid} .percentage`).innerText = `${percentage}%`;
+	});
+
+	//check for proper redirection
+	if (response.url != window.location.href) {
+		//replace the previous entry in browser session with redirect url
+		history.replaceState(null, "", response.url);
+
+		//get the response html
+		var body = response.text;
+
+		//write the html to the document
+		document.open();
+		document.write(body);
+		document.close();
+
+		return true;
+	} else {
+		alert("There was an error with our server! Please try again");
+		return false;
+	}
+
+	/*
 	//post the comment
 	var response = await fetch(posturl, {
 		method: "POST",
@@ -66,4 +91,5 @@ async function commentSubmitted(formid) {
 		alert("There was an error with our server! Please try again");
 		return false;
 	}
+	*/
 }

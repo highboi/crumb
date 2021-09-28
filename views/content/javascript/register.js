@@ -64,10 +64,34 @@ async function registrationSubmitted() {
 		element.disabled = false;
 	}
 
+	var response = await makeRequest("POST", "/register", new FormData(document.getElementById("registerform")), (event) => {
+		var percentage = (event.loaded/event.total)*100;
+		document.querySelector("#registerform .percentage").innerText = `${percentage}%`;
+	});
+
+	//redirect the user
+	if (response.url != window.location.href) {
+		//replace the current entry in the session history with the redirect url
+		history.replaceState(null, "", response.url);
+
+		//get the redirect response html
+		var body = response.text;
+
+		//render the response html to the document
+		document.open();
+		document.write(body);
+		document.close();
+
+		return true;
+	} else {
+		alert("There was an error with our server! Please try again.");
+		return false;
+	}
+
+	/*
 	//post the registration form using fetch and redirect
 	var response = await fetch("/register", {
 		method: "POST",
-		redirect: "follow",
 		body: new FormData(document.getElementById("registerform")),
 		credentials: "include"
 	});
@@ -84,7 +108,13 @@ async function registrationSubmitted() {
 		document.open();
 		document.write(body);
 		document.close();
+
+		return true;
+	} else {
+		alert("There was an error with our server! Please try again.");
+		return false;
 	}
+	*/
 
 	return true;
 }

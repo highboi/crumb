@@ -95,7 +95,7 @@ app.get("/imgheaders", async (req, res) => {
 
 //a get path for returning the accepted file signatures for videos
 app.get("/vidheaders", async (req, res) => {
-	var acceptedheaders = ["66747970", "1a45dFa3", "4f676753"];
+	var acceptedheaders = ["00000018", "00000020", "1a45dFa3", "4f676753"];
 
 	res.send({acceptedHeaders: acceptedheaders});
 });

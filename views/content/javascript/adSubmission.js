@@ -76,14 +76,16 @@ async function advertSubscriptionSubmitted() {
 		element.disabled = false;
 	}
 
-	//send the data to be stored
-	var response = await fetch("/adsubmission", {
-		method: "POST",
-		body: new FormData(document.getElementById("adSubmissionForm"))
+	//send the data to be stored and handle the upload progress
+	var response = await makeRequest("POST", "/adsubmission", new FormData(document.getElementById("adSubmissionForm")), (event) => {
+		//calculate the percentage of the upload completed and display it
+		var percentage = (event.loaded / event.completed) * 100;
+		document.querySelector("#adSubmissionForm .percentage").innerText = `${percentage}%`;
 	});
 
+
 	//check the response status
-	if (response.ok) {
+	if (response.status >= 200 && response.status < 300) {
 		alert("Subscription succeeded!");
 		window.location.href = "/adstats";
 		return true;

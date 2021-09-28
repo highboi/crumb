@@ -51,12 +51,35 @@ async function submitStreamForm() {
 		element.disabled = false;
 	}
 
-	//make an anchor element based on the submit forms "action" attribute to extract the relative path
-	var anchor = document.createElement("a");
-	anchor.href = document.getElementById("streamSubmitForm").action;
+	//get the post url from the form
+	var posturl = document.getElementById("streamSubmitForm").action;
 
+	var response = await makeRequest("POST", posturl, new FormData(document.getElementById("streamSubmitForm")), (event) => {
+		var percentage = (event.loaded / event.total)*100;
+		document.querySelector("#streamSubmitForm .percentage").innerText = `${percentage}%`;
+	});
+
+	//check for proper redirection
+	if (response.url != window.location.href) {
+		//replace the previous entry in session history with the new url
+		history.replaceState(null, "", response.url);
+
+		//get the html from the response
+		var body = response.text;
+
+		//write the new html to the document
+		document.open();
+		document.write(body);
+		document.close();
+	} else {
+		//alert the user of the error with the server
+		alert("There was an error with our server! Please try again.");
+		return false;
+	}
+
+	/*
 	//submit the form to the fetch url
-	var response = await fetch(anchor.pathname, {
+	var response = await fetch(posturl, {
 		method: "POST",
 		body: new FormData(document.getElementById("streamSubmitForm"))
 	});
@@ -78,4 +101,5 @@ async function submitStreamForm() {
 		alert("There was an error with our server! Please try again.");
 		return false;
 	}
+	*/
 }

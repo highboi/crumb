@@ -69,14 +69,15 @@ async function advertEditSubmitted() {
 		element.disabled = false;
 	}
 
-	//send the data from the form to the server
-	var response = await fetch("/adedit", {
-		method: "POST",
-		body: new FormData(document.getElementById("adEditForm"))
+	//send the data to be stored and handle the upload progress
+	var response = await makeRequest("POST", "/adedit", new FormData(document.getElementById("adEditForm")), (event) => {
+		//calculate the percentage of the upload completed and display it
+		var percentage = (event.loaded / event.total)*100;
+		document.querySelector("#adEditForm .percentage").innerText = `${percentage}%`;
 	});
 
 	//check the response status
-	if (response.ok) {
+	if (response.status >= 200 && response.status < 300) {
 		alert("Changes applied!");
 		window.location.href = "/adstats";
 		return true;

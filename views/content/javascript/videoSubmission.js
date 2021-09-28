@@ -71,6 +71,31 @@ async function videoSubmitted() {
 		element.disabled = false;
 	}
 
+	var response = await makeRequest("POST", "/v/submit", new FormData(document.getElementById("videoSubmissionForm")), (event) => {
+		var percentage = (event.loaded/event.total)*100;
+		document.querySelector("#videoSubmissionForm .percentage").innerText = `${percentage}%`;
+	});
+
+	//check for a redirection
+	if (response.url != window.location.href) {
+		//replace the current entry in the session history with the redirect url
+		history.replaceState(null, "", response.url);
+
+		//get the response html
+		var body = response.text;
+
+		//load the response html in the body
+		document.open();
+		document.write(body);
+		document.close();
+
+		return true;
+	} else {
+		alert("There was an error with our server! Please try again.");
+		return false;
+	}
+
+	/*
 	//submit the video
 	var response = await fetch("/v/submit", {
 		method: "POST",
@@ -95,4 +120,5 @@ async function videoSubmitted() {
 		alert("There was an error with our server! Please try again.");
 		return false;
 	}
+	*/
 }
