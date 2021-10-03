@@ -69,12 +69,12 @@ app.get("/subscribe/:channelid", middleware.checkSignedIn, async (req, res) => {
 		await client.query(`DELETE FROM subscribed WHERE channel_id=$1 AND user_id=$2`, [req.params.channelid, userinfo.id]);
 		await client.query(`UPDATE users SET subscribers=subscribers-1 WHERE id=$1`, [req.params.channelid]);
 
-		return res.send("false");
+		return res.send({subscribed: false});
 	} else {
 		await client.query(`INSERT INTO subscribed (channel_id, user_id) VALUES ($1, $2)`, [req.params.channelid, userinfo.id]);
 		await client.query(`UPDATE users SET subscribers=subscribers+1 WHERE id=$1`, [req.params.channelid]);
 
-		return res.send("true");
+		return res.send({subscribed: true});
 	}
 });
 
@@ -99,10 +99,10 @@ app.get("/s/subscribe/:topic", middleware.checkSignedIn, async (req, res) => {
 
 	if (topicsubscribed) {
 		await client.query(`DELETE FROM subscribedtopics WHERE topicname=$1 AND user_id=$2`, [req.params.topic, userinfo.id]);
-		return res.send("false");
+		return res.send({joined: false});
 	} else {
 		await client.query(`INSERT INTO subscribedtopics (topicname, user_id) VALUES ($1, $2)`, [req.params.topic, userinfo.id]);
-		return res.send("true");
+		return res.send({joined: true});
 	}
 });
 

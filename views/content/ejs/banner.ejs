@@ -2,14 +2,14 @@
 
 <div class="banner">
 	<div id="banner-icon">
-		<a href="/" target="_parent">
-		<img src="/content/icons/favicon.ico">
+		<a href="/" target="_parent" title="Go Home">
+			<img src="/content/icons/astro.png">
 		</a>
 	</div>
 	<div id="searchbar">
 		<form action="/search" method="get" target="_parent">
 			<div id="searchbtn">
-				<button type="submit" value="Submit"><img src="/content/icons/search.ico"></button>
+				<button type="submit" value="Submit"><img src="/content/icons/search.png"></button>
 			</div>
 			<div id="searchquerydiv">
 				<input type="text" id="searchquery" name="searchquery" onkeyup="keyupSearch()" required>
@@ -19,36 +19,34 @@
 			</div>
 		</form>
 	</div>
-	<div id="actionsmenu" class="dropdown">
-		<h4>DO STUFF!</h4>
+	<div id="actionsmenu" class="dropdown" title="Do Stuff!">
+		<img src="/content/icons/rocket_icon.png"><br>
 		<div class="dropdown-content">
 			<% if (typeof user != 'undefined') { %>
 				<% var channellink = `/u/${user.id}`; %>
-				<button><a href="/">Home</a></button><br>
-				<button><a href="<%= channellink %>">My Channel</a></button><br>
-				<button><a href="<%= channellink %>/?section=playlists">My Playlists</a></button><br>
-				<button><a href="/v/submit">Submit a Video</a></button><br>
-				<button><a href="/playlist/new">Make a Playlist</a></button><br>
-				<button><a href="/l/start/obs">Start a Live Stream (OBS)</a></button><br>
-				<button><a href="/l/start/web">Start a Webcam Stream</a></button><br>
-				<button><a href="/logout">Log Out</a></button>
+				<a href="<%= channellink %>" title="Your Channel!"><img src="/content/icons/house.png"></a><br>
+				<a href="/v/submit" title="Submit a Video!"><img src="/content/icons/video.png"></a><br>
+				<a href="/playlist/new" title="Make a Playlist!"><img src="/content/icons/playlist.png"></a><br>
+				<a href="/l/start/web" title="Do a Webcam Stream!"><img src="/content/icons/webcam.png"></a><br>
+				<a href="/l/start/obs" title="Do an OBS Stream!"><img src="/content/icons/obs.png"></a><br>
+				<a href="/logout" title="Log Out?"><img src="/content/icons/exit.png"></a>
 			<% } else { %>
-				<button><a href="/login">Login</a></button><br>
-				<button><a href="/register">Register</a></button>
-			<% } %>			
+				<a href="/register" title="Register"><img src="/content/icons/register.png"></a>
+				<a href="/login" title="Login"><img src="/content/icons/login.png"></a><br>
+			<% } %>
 		</div>
 	</div>
-	<div id="settingsmenu" class="dropdown">
-		<h4>SETTINGS</h4>
+	<div id="settingsmenu" class="dropdown" title="Settings">
+		<img src="/content/icons/gear.png"><br>
 		<div class="dropdown-content">
 			
 		</div>
 	</div>
 	<div id="usercorner">
 		<% if (typeof user != 'undefined') { %>
-			<button id="channelcorner" onclick="window.location.href = '/u/<%= user.id %>';"><img src="<%= user.channelicon %>"></button>
+			<a id="channelcorner" title="Go to channel!" href="/u/<%= user.id %>"><img src="<%= user.channelicon %>"></a>
 		<% } else { %>
-			<button id="signincorner" onclick="window.location.href = '/login';">Sign In</button>
+			<a id="signincorner" title="Sign In" href="/login"><img src="/content/icons/login.png"></a>
 		<% } %>
 	</div>
 </div>

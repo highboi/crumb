@@ -74,7 +74,7 @@ STYLING FOR FORMS
 MAIN TAG STYLING
 */
 main {
-	margin-top: 120px;
+	margin-top: 130px;
 }
 
 /*
@@ -88,13 +88,17 @@ STYLING FOR DROPDOWN MENUS
 	margin-right: 30px;
 }
 
+.dropdown:hover {
+	cursor: pointer;
+}
+
 .dropdown-content {
 	display: none;
 	position: absolute;
 	text-align: center;
 	background-color: #1f1f1f;
 	z-index: 2;
-	width: 100%
+	width: 100%;
 	overflow: auto;
 }
 

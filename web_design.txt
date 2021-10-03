@@ -1,10 +1,9 @@
 # This is a document outlining the changes to make to the site design-wise
 
 Things to do:
-- Replace text buttons with images
+- Replace text buttons with images wherever it is necessary
 - Make a universal color scheme system in CSS so that colors don't get mixed
 - Come up with a color scheme to make the site look less bland than other "modern" and "minimalist" sites
-- Make playlist links have thumbnails and better overall styling
 - Make individual video thumbnails look individually identifiable from each other
 - Make extra buttons in the three dot menu on thumbnails float on top of everything else
 - Make the search bar more stylish and modern (less default html)
@@ -22,4 +21,4 @@ Things to do:
 - Enable the ability to select a reason for the disliking of a video (clickbait, bad content, disabled comments, etc.)
 - Implement 4chan-like greentext capabilities
 - Implement a pixel-art editor to make avatars instead of an image upload for the icon
-- Highlight links to other places
+- Highlight links to other places in comments

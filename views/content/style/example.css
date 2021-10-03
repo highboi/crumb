@@ -2,18 +2,6 @@ body {
 	background-color: grey;
 }
 
-#navbar {
-	width: 80px;
-	height: 100vh;
-	position: fixed;
-}
-
-#navbar #navbar-content {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	height: 100vh;
-	width: 80px;
-	padding: 0;
-	margin: 0;
+#video {
+	background-color: black;
 }

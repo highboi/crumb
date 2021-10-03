@@ -3,48 +3,6 @@ STYLING FOR MENU ITEMS SUCH AS BANNERS AND NAVBARS
 */
 
 /*
-NAVBAR STYLING
-*/
-
-nav {
-	position: sticky;
-	top: 0;
-	z-index: 1;
-}
-
-nav .navbar {
-	background-color: #adff12;
-	width: 100px;
-	height: 100vh;
-	position: fixed;
-	top: 0px;
-	left: 0px;
-	margin-left: 0px;
-	z-index: auto;
-}
-
-nav .navbar #navbar-icon {
-	background-color: #adff12;
-	width: 100px;
-	height: 100px;
-}
-
-nav .navbar #navbar-icon img {
-	width: 70px;
-	height: 70px;
-	margin: 15px;
-}
-
-nav .navbar #navbar-content {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 0;
-	margin: 0;
-}
-
-
-/*
 THE SITE BANNER AT THE TOP OF EACH PAGE
 */
 
@@ -58,58 +16,70 @@ nav .banner {
 	justify-content: space-between;
 	align-items: center;
 	width: 100%;
-	/*width: calc(100% - 100px);*/
-	z-index: auto;
+	height: 100px;
+	z-index: 10;
 }
 
 /* style the banner icon to the left of the banner */
 nav .banner #banner-icon img {
-	width: 100px;
-	height: 80px;
-	border: solid #3f3f3f;
-	border-radius: 30%;
-	margin: 5px;
+	width: 85px;
+	height: 85px;
+	margin: 20px;
+	border-radius: 10%;
+	border: solid black;
 }
 
 /* style the search bar in the center of the banner */
-nav .banner #searchbar {
-	margin: 0 auto;
-	/*transform: translateX(-25%);*/
-}
-
 nav .banner #searchbar form {
 	display: grid;
 	grid-template-areas:
-	"searchbtn searchquery searchquery"
-	"searchbtn searchrecs searchrecs";
+		"searchquery searchbtn"
+		"searchrecs searchrecs";
+}
+
+nav .banner #searchbar {
+	margin: 0 auto;
+	transform: translateX(25%);
 }
 
 nav .banner #searchbar #searchbtn {
 	grid-area: searchbtn;
-	margin-top: 50%;
-	transform: translateY(-50%);
+	float: right;
+}
+
+nav .banner #searchbar #searchbtn button img {
+	width: 70px;
+	height: 70px;
+	border-radius: 10%;
+	border: solid black;
+	border-width: 5px;
 }
 
 nav .banner #searchbar #searchbtn button {
-	width: 45px;
-	height: 45px;
-	background-color: #7dff12;
-	border-color: black;
-	border-width: 5px;
+	border: none;
+	background: none;
+}
+
+nav .banner #searchbar #searchbtn button:hover {
+	cursor: pointer;
 }
 
 nav .banner #searchbar #searchquerydiv {
 	grid-area: searchquery;
+	float: left;
 }
 
 nav .banner #searchbar #searchquerydiv input {
-	height: 45px;
+	margin-top: 15px;
+	height: 50px;
 	background-color: #3f3f3f;
 	color: #adff12;
 	outline: none;
-	border: 1px solid black;
+	border: solid black;
+	border-width: 1px;
 	box-shadow: none;
-	width: 300px;
+	width: 400px;
+	font-size: 18px;
 }
 
 nav .banner #searchbar #searchrecs {
@@ -119,8 +89,8 @@ nav .banner #searchbar #searchrecs {
 	text-align: center;
 	background-color: #adff12;
 	color: #2f2f2f;
-	min-width: 300px;
-	max-width: 300px;
+	min-width: 400px;
+	max-width: 400px;
 	z-index: 1;
 }
 
@@ -134,9 +104,7 @@ nav .banner #usercorner {
 }
 
 nav .banner #usercorner #channelcorner {
-	width: 80px;
-	height: 80px;
-	background-color: #1f1f1f;
+	background: none;
 	border: none;
 	border-radius: 50%;
 }
@@ -150,13 +118,40 @@ nav .banner #usercorner #channelcorner img {
 	height: 60px;
 	min-width: 50px;
 	min-height: 50px;
-	border-radius: 50%;
+	border-radius: 10%;
+	border: solid black;
+	border-width: 5px;
 }
 
 nav .banner #usercorner #signincorner {
-	width: 100px;
+	background: none;
+	border: none;
+}
+
+nav .banner #usercorner #signincorner img {
+	width: 60px;
 	height: 60px;
-	border: solid #4f4f4f;
-	background-color: black;
-	font-size: 20px;
+	min-width: 50px;
+	min-height: 50px;
+	border-radius: 10%;
+	border: solid black;
+	border-width: 5px;
+}
+
+nav .banner #usercorner #signincorner:hover {
+	cursor: pointer;
+}
+
+nav .banner #actionsmenu {
+	width: 70px;
+	height: 70px;
+	border-radius: 10%;
+	border: solid black;
+}
+
+nav .banner #settingsmenu {
+	width: 70px;
+	height: 70px;
+	border-radius: 10%;
+	border: solid black;
 }
