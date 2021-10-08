@@ -7,9 +7,19 @@
 	<body>
 		<h1>EXAMPLE PAGE:</h1>
 
-		<video id="video" width="700" height="450" controls="">
-			<source src="http://localhost/content/nyan.mp4" type="video/mp4">
-		</video>
+		<div id="video-container">
+			<video id="video" width="700" height="450">
+				<source src="http://localhost/content/nyan.mp4" type="video/mp4">
+			</video>
+			<div id="video-player">
+				<img src="/content/icons/play.png" id="playbtn">
+				<input type="range" class="range" id="progress" min="0" max="100" value="0">
+				<img src="/content/icons/light_bulb.png" id="soundicon">
+				<input type="range" class="range" id="volume" min="0" max="100" value="100">
+				<p id="timedisplay"></p>
+				<img src="/content/icons/fullscreen.png" id="fullscreen">
+			</div>
+		</div>
 
 		<!--
 		<h1>POST FORM EXAMPLE:</h1>
@@ -20,7 +30,7 @@
 		</form>
 		-->
 
-		<script src="/content/javascript/example.js"></script>
+		<script src="/content/javascript/videocontrols.js"></script>
 
 		<!--
 		<h1>VIDEO TORRENT EXAMPLE:</h1>

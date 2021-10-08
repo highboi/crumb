@@ -4,6 +4,7 @@ VIDEO AND RECCOMENDATIONS
 
 .player-container {
 	display: flex;
+	width: 1300px;
 }
 
 /*
@@ -14,10 +15,13 @@ VIDEO BEING VIEWED
 	position: relative;
 	width: 50%;
 	height: auto;
+	background-color: rgb(32, 32, 32);
 }
 
 .player-container .video-container #video {
 	object-fit: cover;
+	width: 100%;
+	height: auto;
 }
 
 .player-container .video-container:fullscreen #video {

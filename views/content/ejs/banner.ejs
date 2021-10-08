@@ -20,16 +20,16 @@
 		</form>
 	</div>
 	<div id="actionsmenu" class="dropdown" title="Do Stuff!">
-		<img src="/content/icons/rocket_icon.png"><br>
+		<img src="/content/icons/astro_rocket.png"><br>
 		<div class="dropdown-content">
 			<% if (typeof user != 'undefined') { %>
 				<% var channellink = `/u/${user.id}`; %>
-				<a href="<%= channellink %>" title="Your Channel!"><img src="/content/icons/house.png"></a><br>
-				<a href="/v/submit" title="Submit a Video!"><img src="/content/icons/video.png"></a><br>
-				<a href="/playlist/new" title="Make a Playlist!"><img src="/content/icons/playlist.png"></a><br>
-				<a href="/l/start/web" title="Do a Webcam Stream!"><img src="/content/icons/webcam.png"></a><br>
-				<a href="/l/start/obs" title="Do an OBS Stream!"><img src="/content/icons/obs.png"></a><br>
-				<a href="/logout" title="Log Out?"><img src="/content/icons/exit.png"></a>
+				<a href="<%= channellink %>" title="Your Channel!"><img src="/content/icons/house_dark.png"></a><br>
+				<a href="/v/submit" title="Submit a Video!"><img src="/content/icons/video_dark.png"></a><br>
+				<a href="/playlist/new" title="Make a Playlist!"><img src="/content/icons/playlist_dark.png"></a><br>
+				<a href="/l/start/web" title="Do a Webcam Stream!"><img src="/content/icons/webcam_dark.png"></a><br>
+				<a href="/l/start/obs" title="Do an OBS Stream!"><img src="/content/icons/obs_dark.png"></a><br>
+				<a href="/logout" title="Log Out?"><img src="/content/icons/exit_dark.png"></a>
 			<% } else { %>
 				<a href="/register" title="Register"><img src="/content/icons/register.png"></a>
 				<a href="/login" title="Login"><img src="/content/icons/login.png"></a><br>
