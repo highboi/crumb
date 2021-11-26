@@ -11,15 +11,24 @@ async function subscribe(channelid, subscribebtn) {
 
 		//get the amount of subscribers
 		var subscribercount = document.getElementById(`${channelid}subscribercount`);
-		var subscriberint = parseInt(subscribercount.innerHTML, 10);
 
-		//set the styling of the subscribe button and subscriber count based on the server response
+		//check to see if there is a subscriber count to change in the first place
+		if (typeof subscribercount != 'undefined' && subscribercount != null) {
+			var subscriberint = parseInt(subscribercount.innerHTML, 10);
+
+			//set the styling of the subscribe button and subscriber count based on the server response
+			if (subscribed) {
+				subscribercount.innerHTML = subscriberint+1;
+			} else {
+				subscribercount.innerHTML = subscriberint-1;
+			}
+		}
+
+		//change the label on the subscribe button
 		if (subscribed) {
 			subscribebtn.innerHTML = "Subscribed";
-			subscribercount.innerHTML = subscriberint+1;
 		} else {
 			subscribebtn.innerHTML = "Subscribe";
-			subscribercount.innerHTML = subscriberint-1;
 		}
 	}
 }

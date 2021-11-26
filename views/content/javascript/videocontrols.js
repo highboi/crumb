@@ -37,7 +37,7 @@ function setupPlayer(video) {
 	var videotime = new Date(player.videoelement.duration*1000);
 	var videoSeconds = ("0" + videotime.getSeconds()).slice(-2);
 	var videoMinutes = ("0" + videotime.getMinutes()).slice(-2);
-	player.timedisplay.innerText = `00:00 / ${videoMinutes}:${videoSeconds}`;
+	player.timedisplay.innerText = `00:00/${videoMinutes}:${videoSeconds}`;
 
 	//set the background color of the sound icon/bulb according to the volume
 	var colorval = player.volume.valueAsNumber*(255/100);
@@ -106,7 +106,7 @@ function addFunctionality(player) {
 		var completedString = `${completedMinutes}:${completedSeconds}`;
 		var totalString  = `${totalMinutes}:${totalSeconds}`;
 
-		player.timedisplay.innerText = `${completedString} / ${totalString}`;
+		player.timedisplay.innerText = `${completedString}/${totalString}`;
 	});
 
 	//check the progress bar

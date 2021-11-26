@@ -34,6 +34,29 @@ app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res
 	return res.send(data);
 });
 
+//a get request for deleting a comment on the site
+app.get("/comment/delete/:commentid", middleware.checkSignedIn, async (req, res) => {
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	var comment = await client.query(`SELECT base_parent_id, user_id, video_id FROM comments WHERE id=$1 LIMIT 1`, [req.params.commentid]);
+	comment = comment.rows[0];
+
+	if (comment.user_id == userinfo.id) {
+		await client.query("DELETE FROM comments WHERE id=$1", [req.params.commentid]);
+
+		if (typeof comment.base_parent_id != 'undefined' && comment.base_parent_id != null) {
+			await client.query(`UPDATE comments SET replies=replies-1 WHERE id=$1`, [base_parent_id]);
+		}
+
+		req.flash("message", "Comment deleted successfully.");
+		return res.redirect(`/v/${comment.video_id}`);
+	} else {
+		req.flash("message", "This is not your comment to delete.");
+		req.flash("redirecturl", "/");
+		return res.redirect("/error");
+	}
+});
+
 
 /*
 POST PATHS FOR COMMENTS
@@ -47,8 +70,12 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 
 	var valuesarr = [commentid, userinfo.username, userinfo.id, req.body.commenttext, req.params.videoid, new Date().toISOString(), 0, 0];
 
+	//check to see if this comment belongs to a parent comment
 	if (typeof req.query.parent_id != 'undefined') {
 		valuesarr.push(req.query.parent_id);
+
+		//increase the amount of replies attached to the comment
+		await client.query(`UPDATE comments SET replies=replies+1`);
 
 		var depth_level = await client.query(`SELECT depth_level FROM comments WHERE id=$1 LIMIT 1`, [req.query.parent_id]);
 		depth_level = parseInt(depth_level.rows[0].depth_level, 10)+1;

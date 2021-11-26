@@ -21,7 +21,6 @@
 					<p>RTMP Server: <%= rtmpServer %></p>
 					<p>Stream Key: <%= streamKey %></p>
 					<p>Stream ID: <%= stream.id %></p>
-					<a href="http://localhost/l/view/<%= stream.id %>">Link to viewer end of stream.</a>
 				</div>
 				<%- include('content/ejs/livechat.ejs', {stream: stream, user: user}) %>
 			</div>

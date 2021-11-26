@@ -99,8 +99,9 @@ function handleReplies(replies) {
 function getReplySegment(reply) {
 	//create the svg element that indicates the depth level of replies
 	var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-	svg.setAttributeNS(null, "width", "500");
+	svg.setAttributeNS(null, "width", `${reply.depth_level*30}`);
 	svg.setAttributeNS(null, "height", "20");
+	svg.style.marginRight = "20px";
 
 	//loop through the depth level in the reply and add the necessary svg circles
 	for (var i=1; i < parseInt(reply.depth_level) + 1; i++) {
@@ -135,7 +136,7 @@ function getReplySegment(reply) {
 
 	//create the like image inside the button element
 	var likeimg = document.createElement("img");
-	likeimg.setAttribute("src", "/content/icons/like.ico");
+	likeimg.setAttribute("src", "/content/icons/rocket_up.png");
 	likebtn.appendChild(likeimg);
 
 	//create the p tag containing the number of likes
@@ -150,7 +151,7 @@ function getReplySegment(reply) {
 
 	//create the dislike image inside the button element
 	var dislikeimg = document.createElement("img");
-	dislikeimg.setAttribute("src", "/content/icons/dislike.ico");
+	dislikeimg.setAttribute("src", "/content/icons/rocket_down.png");
 	dislikebtn.appendChild(dislikeimg);
 
 	//create the p tag containing the number of likes
@@ -244,13 +245,18 @@ function getReplySegment(reply) {
 	//add all of the elements into an array
 	var elements = [svg, username, comment, commentlikesdiv, replyformdiv];
 
-	//the final container for all of this
+	//the container for the comment information
+	var commentcontainer = document.createElement("div");
+	for (var element of elements.slice(1)) {
+		commentcontainer.appendChild(element);
+	}
+
+	//the final container for all comment content
 	var container = document.createElement("div");
-	elements.forEach((item, index) => {
-		container.appendChild(item);
-	});
-	container.style.marginLeft = `${reply.depth_level*30}px`;
+	container.appendChild(svg);
+	container.appendChild(commentcontainer);
 	container.setAttribute("id", `${reply.id}`);
+	container.setAttribute("class", "commentreply");
 
 	//return the whole container html element
 	return container;

@@ -12,10 +12,10 @@
 
 <div class="commentlikes" id="<%= comment.id %>likesection">
 	&nbsp;
-	<button id="commentLike" onclick="likeComment('<%= comment.id %>')"><img src="/content/icons/like.ico"></button>
+	<img class="commentlikebuttons" id="commentLike" onclick="likeComment('<%= comment.id %>')" src="/content/icons/rocket_up.png">
 	<p id="<%= comment.id %>likes"><%= comment.likes %></p>
-	<button id="commentDislike" onclick="dislikeComment('<%= comment.id %>')"><img src="/content/icons/dislike.ico"></button>
+	<img class="commentlikebuttons" id="commentDislike" onclick="dislikeComment('<%= comment.id %>')" src="/content/icons/rocket_down.png">
 	<p id="<%= comment.id %>dislikes"><%= comment.dislikes %></p>
 	<button id="replybtn" onclick="showElementDraggable('<%= comment.id %>replybox')">Reply</button>
-	<button id="showreplies" onclick="getReplies('<%= comment.id %>', false)">Replies</button>
+	<button id="showreplies" onclick="getReplies('<%= comment.id %>', false)">View <%= comment.replies %> Replies</button>
 </div>

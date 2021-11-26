@@ -181,54 +181,38 @@ POST PATHS FOR VIDEOS/MEDIA
 app.post("/v/submit", async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var videotype = req.files.video.mimetype;
-	var thumbtype = req.files.thumbnail.mimetype;
+	var videopath = await middleware.saveFile(req.files.video, "/storage/videos/files/");
+	var thumbnailpath = await middleware.saveFile(req.files.thumbnail, "/storage/videos/thumbnails/");
 
-	var acceptedvideo = await middleware.getVideoTypes();
-	var acceptedthumbnail = await middleware.getImgTypes();
-
-	if (acceptedvideo.includes(videotype) && acceptedthumbnail.includes(thumbtype)) {
-		var videopath = await middleware.saveFile(req.files.video, "/storage/videos/files/");
-		var thumbnailpath = await middleware.saveFile(req.files.thumbnail, "/storage/videos/thumbnails/");
-
-		if (typeof req.files.subtitles != 'undefined') {
-			if (req.files.subtitles.mimetype == "application/x-subrip") {
-				var subtitlepath = await middleware.saveFile(req.files.subtitles, "/storage/videos/subtitles/");
-			} else {
-				req.flash("message", "Unsupported file type for subtitles, please use SRT formatted files.");
-				req.flash("redirecturl", "/v/submit");
-				return res.redirect("/error");
-			}
+	if (typeof req.files.subtitles != 'undefined') {
+		if (req.files.subtitles.mimetype == "application/x-subrip") {
+			var subtitlepath = await middleware.saveFile(req.files.subtitles, "/storage/videos/subtitles/");
 		} else {
-			var subtitlepath = "";
+			req.flash("message", "Unsupported file type for subtitles, please use SRT formatted files.");
+			req.flash("redirecturl", "/v/submit");
+			return res.redirect("/error");
 		}
-
-		var videoid = await middleware.generateAlphanumId();
-
-		var valuesarr = [videoid, req.body.title, req.body.description, thumbnailpath, videopath, userinfo.id, new Date().toISOString(), " " + req.body.topics + " ", userinfo.username, userinfo.channelicon, req.body.private, subtitlepath];
-		valuesarr = valuesarr.map((item) => {
-			if (typeof item == "string") {
-				return "\'" + item + "\'";
-			} else {
-				return item;
-			}
-		});
-
-		await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, posttime, topics, username, channelicon, private, subtitles) VALUES (${valuesarr})`);
-		await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);
-
-		await middleware.getVideoPermutations(global.appRoot + "/storage" + videopath);
-
-		await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
-
-		return res.redirect(`/v/${videoid}`);
-	} else if (!acceptedthumbnail.includes(thumbtype)){
-		req.flash("message", "Unsupported file type for thumbnail, please use png, jpeg or jpg.");
-		req.flash("redirecturl", "/v/submit");
-		return res.redirect("/error");
-	} else if (!acceptedvideo.includes(videotype)) {
-		req.flash("message", "Unsupported file type for video, please use mp4, ogg, or webm.");
-		req.flash("redirecturl", "/v/submit");
-		return res.redirect("/error");
+	} else {
+		var subtitlepath = "";
 	}
+
+	var videoid = await middleware.generateAlphanumId();
+
+	var valuesarr = [videoid, req.body.title, req.body.description, thumbnailpath, videopath, userinfo.id, new Date().toISOString(), " " + req.body.topics + " ", userinfo.username, userinfo.channelicon, req.body.private, subtitlepath];
+	valuesarr = valuesarr.map((item) => {
+		if (typeof item == "string") {
+			return "\'" + item + "\'";
+		} else {
+			return item;
+		}
+	});
+
+	await client.query(`INSERT INTO videos (id, title, description, thumbnail, video, user_id, posttime, topics, username, channelicon, private, subtitles) VALUES (${valuesarr})`);
+	await client.query(`INSERT INTO videofiles (id, thumbnail, video) VALUES ($1, $2, $3)`, [videoid, thumbnailpath, videopath]);
+
+	await middleware.getVideoPermutations(global.appRoot + "/storage" + videopath);
+
+	await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
+
+	return res.redirect(`/v/${videoid}`);
 });

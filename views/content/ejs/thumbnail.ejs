@@ -24,22 +24,24 @@
 				<a href="<%= channellink %>">
 					<p><%= video.username %></p>
 				</a>
-				<svg width="10" height="40" id="extras" onclick='showelement(&quot;<%= video.id %>extralinks&quot;)'>
-					<circle cx="5" cy="5" r="5" fill="#adff12"/>
-					<circle cx="5" cy="20" r="5" fill="#adff12"/>
-					<circle cx="5" cy="35" r="5" fill="#adff12"/>
-				</svg>
-				<div class="extralinks" id="<%= video.id %>extralinks">
-					<button onclick="showelement('<%= video.id %>playlistform')">Add To Playlist</button>
-					<button onclick="notInterested('<%= video.id %>')">Not Interested</button>
-					<object id="<%= video.id %>playlistform">
-						<h3><a href="/playlist/new/?videoid=<%= video.id %>">Create Playlist</a></h3><br>
-						<% if (typeof playlists != 'undefined') { %>
-							<% playlists.forEach((plist, index) => { %>
-								<h3><a href="/playlistvideo/add/<%= plist.id %>/<%= video.id %>"><%= plist.name %></a></h3><br>
-							<% }); %>
-						<% } %>
-					</object>
+				<div>
+					<svg width="10" height="40" id="extras" onclick="showelement('<%= video.id %>extralinks'); console.log(document.activeElement);">
+						<circle cx="5" cy="5" r="5" fill="#adff12"/>
+						<circle cx="5" cy="20" r="5" fill="#adff12"/>
+						<circle cx="5" cy="35" r="5" fill="#adff12"/>
+					</svg>
+					<div class="extralinks" id="<%= video.id %>extralinks">
+						<button onclick="showelement('<%= video.id %>playlistform')">Add To Playlist</button><br>
+						<object id="<%= video.id %>playlistform">
+							<h3><a href="/playlist/new/?videoid=<%= video.id %>">Create Playlist</a></h3><br>
+							<% if (typeof playlists != 'undefined') { %>
+								<% playlists.forEach((plist, index) => { %>
+									<h3><a href="/playlistvideo/add/<%= plist.id %>/<%= video.id %>"><%= plist.name %></a></h3><br>
+								<% }); %>
+							<% } %>
+						</object>
+						<button onclick="notInterested('<%= video.id %>')">Not Interested</button>
+					</div>
 				</div>
 			</div>
 		</div>

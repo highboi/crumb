@@ -37,7 +37,7 @@ function keyupSearch() {
 	timer = setTimeout(getSearchRec, 500);
 }
 
-//get the actual ajax data for the search reccomendations
+//get the actual data for the search reccomendations
 async function getSearchRec() {
 	//check to see if the searchbar value is nothing
 	if (searchqueryinput.value) {

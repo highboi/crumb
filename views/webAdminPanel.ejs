@@ -19,7 +19,6 @@
 					</div>
 					<h1><%= stream.name %></h1>
 					<button onclick="stopStream()">End Web Stream</button>
-					<p><a href="http://localhost/l/view/<%= stream.id %>">Link to viewer end of stream.</a></p>
 				</div>
 
 				<%- include('content/ejs/livechat.ejs', {stream: stream}) %>

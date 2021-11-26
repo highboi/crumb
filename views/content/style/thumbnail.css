@@ -51,10 +51,23 @@ INDIVIDUAL THUMBNAILS
 
 .video-thumbnail .links .channel-links .extralinks {
 	display: none;
+	position: absolute;
+	background-color: #adff12;
+	padding: 10px;
+	border: solid black 5px;
+}
+
+.video-thumbnail .links .channel-links .extralinks button {
+	margin: 5px;
+	border: solid black 3px;
 }
 
 .video-thumbnail .links .channel-links .extralinks object {
 	display: none;
+}
+
+.video-thumbnail .links .channel-links .extralinks object * {
+	color: #1f1f1f;
 }
 
 .not-interested-undo {

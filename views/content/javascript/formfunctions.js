@@ -153,15 +153,21 @@ async function getFileSignature(file) {
 	var arrayBufferFile = await file.arrayBuffer();
 
 	//get the first four bytes as the header of the file
-	var headerArr = (new Uint8Array(arrayBufferFile)).subarray(0, 4);
+	var headerArr = (new Uint8Array(arrayBufferFile));
+
+	console.log(headerArr);
+
+	headerArr = headerArr.subarray(0, 4);
 
 	//an empty string to store the file header
 	var header = "";
 
 	//construct the file header from the bytes in the header array
 	for (var byte of headerArr) {
-		header += byte.toString(16);
+		header += ("0" + byte.toString(16)).slice(-2);
 	}
+
+	console.log(file, header);
 
 	//return the file header as a string
 	return header;

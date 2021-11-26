@@ -30,6 +30,15 @@ COMMENTS SECTION
 	vertical-align: text-top;
 }
 
+.container .comments #theComments .commentlikes .commentlikebuttons {
+	width: 2.5rem;
+	height: 2.5rem;
+	color: #3f3f3f;
+	background-color: #adff12;
+	border: 2px solid #adff12;
+	vertical-align: text-top;
+}
+
 .container .comments #theComments .commentlikes #replybtn {
 	width: 5rem;
 	height: 2.5rem;
@@ -80,4 +89,10 @@ COMMENTS SECTION
 	border-width: 5px;
 	padding: 5px;
 	margin-top: 35px;
+}
+
+.container .comments #theComments .replies .commentreply {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }

@@ -59,9 +59,9 @@
 				<p id="<%= videocreator.id %>subscribercount"><%= videocreator.subscribers %></p>
 			</div>
 			<div class="likesection">
-				<button class="likebuttons" onclick="likeVideo('<%= video.id %>')"><img src="/content/icons/like.ico"></button>
+				<img class="likebuttons" onclick="likeVideo('<%= video.id %>')" src="/content/icons/rocket_up.png">
 				<p id="<%= video.id %>likes"><%= video.likes %></p>
-				<button class="likebuttons" onclick="dislikeVideo('<%= video.id %>')"><img src="/content/icons/dislike.ico"></button>
+				<img class="likebuttons" onclick="dislikeVideo('<%= video.id %>')" src="/content/icons/rocket_down.png">
 				<p id="<%= video.id %>dislikes"><%= video.dislikes %></p>
 			</div>
 		</div>
