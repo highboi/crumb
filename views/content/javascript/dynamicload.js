@@ -129,30 +129,24 @@ function getReplySegment(reply) {
 	commentlikesdiv.setAttribute("class", "commentlikes");
 	commentlikesdiv.setAttribute("id", `${reply.id}likesection`);
 
-	//create the like button
-	var likebtn = document.createElement("button");
+	//create the like button image
+	var likebtn = document.createElement("img");
 	likebtn.setAttribute("id", "commentLike");
+	likebtn.setAttribute("class", "commentlikebuttons");
+	likebtn.setAttribute("src", "/content/icons/rocket_up.png");
 	likebtn.setAttribute("onclick", `likeComment(\'${reply.id}\')`);
-
-	//create the like image inside the button element
-	var likeimg = document.createElement("img");
-	likeimg.setAttribute("src", "/content/icons/rocket_up.png");
-	likebtn.appendChild(likeimg);
 
 	//create the p tag containing the number of likes
 	var likes = document.createElement("p");
 	likes.setAttribute("id", `${reply.id}likes`);
 	likes.innerHTML = reply.likes.toString();
 
-	//create the dislike button
-	var dislikebtn = document.createElement("button");
+	//create the dislike button image
+	var dislikebtn = document.createElement("img");
 	dislikebtn.setAttribute("id", "commentDislike");
+	dislikebtn.setAttribute("class", "commentlikebuttons");
+	dislikebtn.setAttribute("src", "/content/icons/rocket_down.png");
 	dislikebtn.setAttribute("onclick", `dislikeComment(\'${reply.id}\')`);
-
-	//create the dislike image inside the button element
-	var dislikeimg = document.createElement("img");
-	dislikeimg.setAttribute("src", "/content/icons/rocket_down.png");
-	dislikebtn.appendChild(dislikeimg);
 
 	//create the p tag containing the number of likes
 	var dislikes = document.createElement("p");

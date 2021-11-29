@@ -89,7 +89,7 @@ async function checkImgResolution(img, resolutions) {
 //a function to disable a form and begin the loading animation on the form
 function formLoadingState(formid, off=false) {
 	//get all of the form elements
-	var formElements = document.querySelector(`#${formid}`).elements;
+	var formElements = document.querySelector(`[id='${formid}']`).elements;
 
 	//check to see if we want to turn the loading state for this form off or on
 	if (off) {
@@ -105,9 +105,9 @@ function formLoadingState(formid, off=false) {
 		}
 
 		//make the submit button invisible and reveal the loading animation
-		document.querySelector(`#${formid} .submitbtn`).style.display = "";
-		document.querySelector(`#${formid} .percentage`).style.display = "none";
-		document.querySelector(`#${formid} .lds-hourglass`).style.display = "none";
+		document.querySelector(`[id='${formid}'] .submitbtn`).style.display = "";
+		document.querySelector(`[id='${formid}'] .percentage`).style.display = "none";
+		document.querySelector(`[id='${formid}'] .lds-hourglass`).style.display = "none";
 	} else {
 		//make all of the form elements except for the loading animation invisible
 		var formChildren = document.getElementById(formid).querySelectorAll(":not(.lds-hourglass)");
@@ -121,9 +121,9 @@ function formLoadingState(formid, off=false) {
 		}
 
 		//make the submit button invisible and reveal the loading animation
-		document.querySelector(`#${formid} .submitbtn`).style.display = "none";
-		document.querySelector(`#${formid} .percentage`).style.display = "";
-		document.querySelector(`#${formid} .lds-hourglass`).style.display = "inline-block";
+		document.querySelector(`[id='${formid}'] .submitbtn`).style.display = "none";
+		document.querySelector(`[id='${formid}'] .percentage`).style.display = "";
+		document.querySelector(`[id='${formid}'] .lds-hourglass`).style.display = "inline-block";
 	}
 }
 
