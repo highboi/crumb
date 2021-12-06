@@ -67,6 +67,8 @@ COMMENTS SECTION
 	height: 2.5rem;
 	background-color: #adff12;
 	color: #3f3f3f;
+	border: solid black;
+	border-width: 5px;
 }
 
 .container .comments #theComments .replybox input[type="button"] {
