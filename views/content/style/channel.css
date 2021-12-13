@@ -72,13 +72,29 @@ STYLING CHANNEL PAGES
 STYLE THE MINI CHANNELS
 */
 
-.minichannel * {
-	display: inline-block;
-	vertical-align: top;
+.minichannel {
+	display: flex;
+	align-items: center;
 }
+
+
+.minichannel * {
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
 
 .minichannel #channel-icon {
 	width: 70px;
 	height: 70px;
 	border-radius: 50px;
+}
+
+.minichannel #subscribebutton {
+	width: 8rem;
+	height: 2.5rem;
+	font-size: 20px;
+	color: #adff12;
+	border: 2px solid #adff12;
+	background-color: #2f2f2f;
 }

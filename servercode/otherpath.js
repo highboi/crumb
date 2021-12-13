@@ -4,6 +4,8 @@ const {app, client, middleware} = require("./configBasic");
 app.get('/', async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
 
+	console.log("VIEW OBJECT:", viewObj);
+
 	var videos = await middleware.getReccomendations(req);
 
 	viewObj.videos = videos;

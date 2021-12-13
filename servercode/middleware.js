@@ -181,7 +181,7 @@ var reqHandling = {
 
 	//this is a function that generates stream keys for OBS streaming
 	generateStreamKey: async function () {
-		var newid = crypto.randomBytes(32).toString("base64").replaceAll("/", "");
+		var newid = crypto.randomBytes(32).toString("base64").replace(/\//g, "");
 
 		var res = await client.query(`SELECT id FROM users WHERE streamkey=$1 LIMIT 1`, [newid]);
 

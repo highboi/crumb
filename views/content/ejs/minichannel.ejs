@@ -12,8 +12,12 @@
 			<h1 id="channel-link"><%= channel.username %></h1>
 		</a>
 
-		<% if (subscribedChannels.includes(channel.id)) { %>
-			<button id="subscribebutton" onclick="subscribe('<%= channel.id %>', this)">Subscribed</button>
+		<% if (typeof subscribedChannels != 'undefined') { %>
+			<% if (subscribedChannels.includes(channel.id)) { %>
+				<button id="subscribebutton" onclick="subscribe('<%= channel.id %>', this)">Subscribed</button>
+			<% } else { %>
+				<button id="subscribebutton" onclick="subscribe('<%= channel.id %>', this)">Subscribe</button>
+			<% } %>
 		<% } else { %>
 			<button id="subscribebutton" onclick="subscribe('<%= channel.id %>', this)">Subscribe</button>
 		<% } %>
