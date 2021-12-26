@@ -96,15 +96,16 @@ app.get("/playlistvideo/add/:playlistid/:videoid", middleware.checkSignedIn, asy
 app.get("/playlistvideo/delete/:playlistid/:videoid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var playlistexists = await client.query(`SELECT EXISTS(SELECT id FROM playlists WHERE id=$1 AND user_id=$2 LIMIT 1)`, [req.params.playlistid, userinfo.id]);
-	playlistexists = playlistexists.rows[0].exists;
+	var playlist = await client.query(`SELECT id FROM playlists WHERE id=$1 AND user_id=$2 LIMIT 1`, [req.params.playlistid, userinfo.id]);
+	playlist = playlist.rows[0];
 
-	var playlistvideoexists = await client.query(`SELECT EXISTS(SELECT videoorder FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2 LIMIT 1)`, [req.params.playlistid, req.params.videoid]);
-	playlistvideoexists = playlistvideoexists.rows[0].exists;
+	var playlistvideo = await client.query(`SELECT videoorder FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2 LIMIT 1`, [req.params.playlistid, req.params.videoid]);
+	playlistvideo = playlistvideo.rows[0];
 
-	if (playlistvideoexists && playlistexists) {
+	if (playlistvideo && playlist) {
 		await client.query(`DELETE FROM playlistvideos WHERE playlist_id=$1 AND video_id=$2`, [req.params.playlistid, req.params.videoid]);
 		await client.query(`UPDATE playlists SET videocount=videocount-1 WHERE id=$1`, [req.params.playlistid]);
+		await client.query(`UPDATE playlistvideos SET videoorder=videoorder-1 WHERE playlist_id=$1 AND videoorder>$2`, [req.params.playlistid, playlistvideo.videoorder]);
 		req.flash("message", "Video Deleted from Playlist!");
 		return res.redirect(`/p/${req.params.playlistid}`);
 	} else {
