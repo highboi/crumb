@@ -14,7 +14,7 @@ async function verifyCommentForm(formid) {
 	}
 
 	//check the file sizes on the form
-	var fileSizeCheck = await checkFileSizes(formid, 4000000); //4MB limit
+	var fileSizeCheck = await checkFileSizes(formid, 10000000); //10MB limit
 	if (!fileSizeCheck) {
 		return false;
 	}

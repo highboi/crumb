@@ -182,6 +182,8 @@ nms.on("postPublish", async (id, streamPath, args) => {
 nms.on("donePublish", async (id, streamPath, args) => {
 	var session = nms.getSession(id);
 
+	console.log(session);
+
 	var filename = middleware.getObsName(session.startTimestamp);
 
 	var streamkey = streamPath.replace("/live/", "");

@@ -13,7 +13,9 @@ app.get("/comment/replies/:commentid", async (req, res) => {
 		var replies = await client.query(`SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT '1')) AS rownum, * FROM comments WHERE base_parent_id=$1) AS comments WHERE rownum>$2 ORDER BY posttime LIMIT 50`, [req.params.commentid, req.query.limit]);
 	}
 
-	return res.send({replies: replies.rows});
+	return res.render("./content/ejs/commentreplies.ejs", {replies: replies.rows, parentid: req.params.commentid});
+
+	//return res.send({replies: replies.rows});
 });
 
 //a get request for liking a comment on the site

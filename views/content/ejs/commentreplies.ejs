@@ -1,25 +1,36 @@
-<div class="replies" id="<%= parent.id %>replies">
-	<% var replies = comments.filter((obj) => obj.base_parent_id == parent.id); %>
-	<% var base_parent_id = parent.id; %>
+<div class="replies" id="<%= parentid %>replies">
+	<% var replies = replies.filter((obj) => obj.base_parent_id == parentid); %>
+	<% var base_parent_id = parentid; %>
 	<% replies.forEach((reply, index) => { %>
-		<div class="commentreply">
-			<svg height="20" width="500">
+		<div class="commentreply" id="<%= reply.id %>">
+			<svg height="20" width="100">
 				<% for (var i=1; i < parseInt(reply.depth_level) + 1; i++) { %>
 					<circle cx="<%= i*20 %>" cy="10" r="5" fill="#adff12"/>
 				<% } %>
 			</svg>
 			<div>
-				<h3>&nbsp;&nbsp;<%= reply.username %></h3>
-				<p>&nbsp;&nbsp;&nbsp;<%= reply.comment %></p>
-				<div class="commentlikes" id="<%= reply.id %>">
-					&nbsp;&nbsp;
-					<button id="commentLike" onclick="likeComment('<%= reply.id %>')"><img src="/content/icons/like.ico"></button>
+				<h3>&nbsp;<%= reply.username %></h3>
+				<p>&nbsp;&nbsp;<%= reply.comment %></p>
+
+				<% if (typeof reply.reactionfile != 'undefined') { %>
+					<% if (reply.filetype == 'img') { %>
+						&nbsp;&nbsp;<img src=<%= reply.reactionfile %> width="250">
+					<% } else if (reply.filetype == 'video') { %>
+						<%- include('./videoplayer.ejs', {videoid: reply.id}) %>
+					<% } %>
+				<% } %>
+
+				<div class="commentlikes" id="<%= reply.id %>likesection">
+					&nbsp;
+					<img class="commentlikebuttons" id="commentLike" onclick="likeComment('<%= reply.id %>')" src="/content/icons/rocket_up.png">
 					<p id="<%= reply.id %>likes"><%= reply.likes %></p>
-					<button id="commentDislike" onclick="dislikeComment('<%= reply.id %>')"><img src="/content/icons/dislike.ico"></button>
+					<img class="commentlikebuttons" id="commentDislike" onclick="dislikeComment('<%= reply.id %>')" src="/content/icons/rocket_down.png">
 					<p id="<%= reply.id %>dislikes"><%= reply.dislikes %></p>
-					<button id="replybtn" onclick="showelement('<%= reply.id %>replybox')">Reply</button>
+					<button id="replybtn" onclick="showElementDraggable('<%= reply.id %>replybox')">Reply</button>
+					<button id="showreplies" onclick="getReplies('<%= reply.id %>', false)">View <%= reply.replies %> Replies</button>
 				</div>
-				<%- include('./commentreplyform.ejs', {comment: reply, commentlink: commentlink, base_parent_id: base_parent_id}); %>
+
+				<%- include('./commentreplyform.ejs', {comment: reply, commentlink: `/comment/${reply.video_id}`, base_parent_id: base_parent_id}); %>
 			</div>
 		</div>
 	<% }); %>

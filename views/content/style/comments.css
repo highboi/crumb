@@ -69,12 +69,7 @@ COMMENTS SECTION
 	color: #3f3f3f;
 	border: solid black;
 	border-width: 5px;
-}
-
-.container .comments #theComments .replybox input[type="button"] {
-	width: 5rem;
-	height: 2.5rem;
-	background-color: #adff12;
+	margin: 10px;
 }
 
 .container .comments #theComments .replies {

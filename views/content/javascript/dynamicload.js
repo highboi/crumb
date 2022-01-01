@@ -8,6 +8,62 @@ var replycommentids = {};
 
 //get the replies of a comment
 async function getReplies(commentid, toggle=true) {
+	//check to see if only toggling is needed
+	if (toggle) {
+		showelement(`${commentid}repliesdiv`);
+	} else {
+		if (!Object.keys(replycommentids).includes(commentid)) {
+			//get replies html from the server
+			var response = await fetch(`/comment/replies/${commentid}`);
+			var data = await response.text();
+
+			//parse the response data as html text
+			var parser = new DOMParser();
+			var replies = parser.parseFromString(data, "text/html");
+			replies = replies.body.getElementsByTagName("div")[0].innerHTML;
+
+			//add the replies html to the replies div
+			document.getElementById(`${commentid}replies`).innerHTML += replies;
+
+			//show the replies html
+			showelement(`${commentid}repliesdiv`);
+
+			/*
+			make a key-value pair in the replycommentids object which
+			shows that the replies have been requested once
+			*/
+			replycommentids[commentid] = 1;
+
+			//set the onclick function for the "replies" button to toggle only
+			var showrepliesbtn = document.getElementById(commentid).querySelector("#showreplies");
+			showrepliesbtn.setAttribute("onclick", `getReplies('${commentid}', true);`);
+		} else if (replycommentids[commentid]) {
+			//get the amount of times replies have been requested for this comment
+			var limitnum = replycommentids[commentid];
+
+			//get the next set of replies html
+			var response = await fetch(`/comment/replies/${commentid}?limit=${limitnum*50}`);
+			var data = await response.text();
+
+			//parse the response data as html text
+			var parser = new DOMParser();
+			var replies = parser.parseFromString(data, "text/html");
+			replies = replies.body.getElementsByTagName("div")[0].innerHTML;
+
+			//add the replies html to the replies div
+			document.getElementById(`${commentid}replies`).innerHTML += replies;
+
+			//if there are no more replies, set the "more replies" button to be invisible
+			if (replies === "") {
+				document.getElementById(`${commentid}morerepliesbtn`).style.display = 'none';
+			}
+
+			//increase the recorded amount of times replies have been requested from the server
+			replycommentids[commentid] += 1;
+		}
+	}
+
+	/*
 	//check to see if we need to toggle the replies or request more replies
 	if (toggle) {
 		showelement(`${commentid}repliesdiv`);
@@ -30,7 +86,7 @@ async function getReplies(commentid, toggle=true) {
 				/*
 				make a key-value pair in the replycommentids object which
 				shows that the replies have been requested once
-				*/
+				/
 				replycommentids[commentid] = 1;
 
 				//set the onclick function for the "replies" button to toggle only
@@ -40,7 +96,7 @@ async function getReplies(commentid, toggle=true) {
 				/*
 				make a key-value pair in the replycommentids object which
 				shows no replies belong to this comment with a 0
-				*/
+				/
 				replycommentids[commentid] = 0;
 			}
 		} else if (replycommentids[commentid]) {
@@ -52,7 +108,7 @@ async function getReplies(commentid, toggle=true) {
 			only requests replies that are past the Xth reply (request comments
 			in increments of 50 in this example, get replies past the 50th, 100th,
 			150th comment and so on)
-			*/
+			/
 			var response = await fetch(`/comment/replies/${commentid}/?limit=${limitnum*50}`);
 			var data = await response.json();
 			var replies = data.replies;
@@ -69,7 +125,9 @@ async function getReplies(commentid, toggle=true) {
 			replycommentids[commentid] += 1;
 		}
 	}
+	*/
 }
+
 
 //the callback function for handling the reply data from ajax
 function handleReplies(replies) {
@@ -124,6 +182,10 @@ function getReplySegment(reply) {
 	var comment = document.createElement("p");
 	comment.innerHTML = reply.comment;
 
+	/*
+	CREATE THE COMMENT LIKES DIV
+	*/
+
 	//create the container for all of the like/dislike functionality
 	var commentlikesdiv = document.createElement("div");
 	commentlikesdiv.setAttribute("class", "commentlikes");
@@ -165,6 +227,10 @@ function getReplySegment(reply) {
 	commentlikesdiv.appendChild(dislikebtn);
 	commentlikesdiv.appendChild(dislikes);
 	commentlikesdiv.appendChild(replybtn);
+
+	/*
+	MAKE THE COMMENT REPLY FORM
+	*/
 
 	//make the div container for the reply form
 	var replyformdiv = document.createElement("div");
@@ -217,14 +283,14 @@ function getReplySegment(reply) {
 	submitbtn.setAttribute("id", "commentbtn");
 	submitbtn.setAttribute("type", "submit");
 	submitbtn.setAttribute("value", "Submit");
-	submitbtn.innerHTML = "Post Comment";
+	submitbtn.innerHTML = "Reply";
 	replyformtag.appendChild(submitbtn);
 
 	//make a cancel button for the reply form
-	var cancelbtn = document.createElement("input");
+	var cancelbtn = document.createElement("button");
 	cancelbtn.setAttribute("type", "button");
 	cancelbtn.setAttribute("onclick", `showelement('${reply.id}replybox');`);
-	cancelbtn.setAttribute("value", "Cancel");
+	cancelbtn.innerHTML = "Cancel";
 	replyformtag.appendChild(cancelbtn);
 
 	//create the draggable header for the draggable window
@@ -235,6 +301,29 @@ function getReplySegment(reply) {
 	//add the reply form tag to the inside of the reply form div
 	replyformdiv.appendChild(dragheader);
 	replyformdiv.appendChild(replyformtag);
+
+	//create tags for showing a loading animation during comment uploads
+	var percentage = document.createElement("h1");
+	percentage.setAttribute("class", "percentage");
+	var hourglass = document.createElement("div");
+	hourglass.setAttribute("class", "lds-hourglass");
+
+	//add loading animation elements to the reply form div
+	replyformdiv.appendChild(percentage);
+	replyformdiv.appendChild(hourglass);
+
+	//add a file if there is one
+	if (reply.reactionfile != "") {
+		console.log("COMMENT HAS A FILE:", reply.reactionfile);
+		switch(reply.filetype) {
+			case "img":
+				break;
+			case "video":
+				break;
+			default:
+				break;
+		}
+	}
 
 	//add all of the elements into an array
 	var elements = [svg, username, comment, commentlikesdiv, replyformdiv];
@@ -255,3 +344,4 @@ function getReplySegment(reply) {
 	//return the whole container html element
 	return container;
 }
+
