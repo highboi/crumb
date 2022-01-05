@@ -75,6 +75,7 @@ document.querySelector("#chatForm #message").addEventListener("keyup", (event) =
 	if (event.keyCode == 13) {
 		event.preventDefault();
 		document.querySelector("#submitBtnChat").click();
+		document.querySelector("#chatForm #message").value = "";
 	}
 });
 
