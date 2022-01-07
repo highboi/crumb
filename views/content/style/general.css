@@ -143,3 +143,10 @@ STYLING FOR LOADING ANIMATIONS ON THE SITE
 		transform: rotate(1800deg);
 	}
 }
+
+
+#register, #login, #video-submit, #playlist-submit, #stream-submit {
+	text-align: center;
+	width: 50vw;
+	margin: auto;
+}

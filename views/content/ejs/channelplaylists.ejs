@@ -3,11 +3,7 @@
 		<h3><a href="/playlist/new">Create New Playlist</a></h3>
 	</div>
 	<% playlists.forEach((item, index) => { %>
-		<div>
-			<% var playlistlink = `/p/${item.id}` %>
-			<h1><a href="<%= playlistlink %>"><%= item.name %></a></h1>
-			<p><%= item.videocount %> Videos</p>
-		</div>
+		<%- include('./playlistthumbnail.ejs', {playlist: item}) %>
 	<% }); %>
 <% } else { %>
 	<h3><a href="/playlist/new">Create New Playlist</a></h3>

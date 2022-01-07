@@ -40,12 +40,7 @@
 						<h1>Playlists:</h1>
 						<hr>
 						<% search.playlists.forEach((item, index) => { %>
-							<div class="playlist">
-								<% var playlistlink = `/playlistvideo/view/${item.id}/${item.firstvideoid}` %>
-								<a href="<%= playlistlink %>"><img src="<%= item.thumbnail %>" width="450" height="300"></a>
-								<h3><a href="<%= playlistlink %>"><%= item.name %></a></h3>
-								<p><%= item.videocount %></p>
-							</div>
+							<%- include('content/ejs/playlistthumbnail.ejs', {playlist: item}) %>
 						<% }); %>
 					<% } %>
 				</div>

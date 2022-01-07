@@ -46,11 +46,6 @@ STYLING CHANNEL PAGES
 	float: right;
 }
 
-.channel .channel-content :not(#playlists){
-	display: flex;
-	flex-wrap: wrap;
-}
-
 .channel .channel-content #playlists {
 	display: block;
 }

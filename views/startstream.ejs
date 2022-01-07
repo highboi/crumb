@@ -11,17 +11,15 @@
 		<main>
 			<%- include('content/ejs/body.ejs') %>
 
-			<% if (streamtype == "obs") { %>
-				<div>
+			<div id="stream-submit">
+				<% if (streamtype == "obs") { %>
 					<h1>OBS Stream:</h1>
 					<%- include('content/ejs/streamform.ejs', {posturl: "/l/stream/obs"}) %>
-				</div>
-			<% } else if (streamtype == "web") { %>
-				<div>
+				<% } else if (streamtype == "web") { %>
 					<h1>Webcam Stream:</h1>
 					<%- include('content/ejs/streamform.ejs', {posturl: "/l/stream/browser"}) %>
-				</div>
-			<% } %>
+				<% } %>
+			</div>
 
 			<%- include('content/ejs/bottombody.ejs') %>
 

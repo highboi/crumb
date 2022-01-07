@@ -1,19 +1,9 @@
 <% if (typeof videos != 'undefined') { %>
-	<% videos.forEach((item, index) => { %>
-		<div class="video">
-			<% var videolink = `/v/${item.id}` %>
-			<div class="thumbnail">
-				<a href="<%= videolink %>">
-					<img src="<%= item.thumbnail %>" alt="thumbnail" width="450" height="300">
-				</a>
-			</div>
-			<div class="links">
-				<a href="<%= videolink %>">
-					<h3 style="text-transform: capitalize;"><strong><%= item.title %></strong></h3>
-				</a>
-			</div>
-		</div>
-	<% }); %>
+	<div class="group-videos">
+		<% videos.forEach((item, index) => { %>
+			<%- include('./thumbnail.ejs', {video: item}) %>
+		<% }); %>
+	</div>
 <% } else { %>
 	<p>No Videos Yet!</p>
 <% } %>

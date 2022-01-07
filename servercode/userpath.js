@@ -31,7 +31,22 @@ app.get("/u/:userid", async (req, res) => {
 			break;
 		case "playlists":
 			var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [req.params.userid]);
-			viewObj.playlists = playlists.rows;
+			playlists = playlists.rows;
+
+			var plists = [];
+
+			for (var playlist of playlists) {
+				var video = await client.query(`SELECT id, thumbnail FROM videos WHERE id IN (SELECT video_id FROM playlistvideos WHERE playlist_id=$1 LIMIT 1) LIMIT 1`, [playlist.id]);
+				video = video.rows[0];
+
+				if (video) {
+					playlist = Object.assign({}, playlist, {thumbnail: video.thumbnail, firstvideoid: video.id});
+
+					plists.push(playlist);
+				}
+			}
+
+			viewObj.playlists = plists;
 			break;
 		case "shoutouts":
 			var shoutouts = await client.query(`SELECT shoutout_id FROM shoutouts WHERE user_id=$1`, [req.params.userid]);
