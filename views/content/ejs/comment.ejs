@@ -4,7 +4,7 @@
 <p>&nbsp;&nbsp<%= comment.comment %></p>
 <% if (typeof comment.reactionfile != 'undefined') { %>
 	<% if (comment.filetype == 'img') { %>
-		&nbsp;&nbsp;<img src=<%= comment.reactionfile %> width="80" height="80">
+		&nbsp;&nbsp;<img src=<%= comment.reactionfile %> width="250">
 	<% } else if (comment.filetype == 'video') { %>
 		<%- include('./videoplayer.ejs', {videoid: comment.id}) %>
 	<% } %>
