@@ -67,6 +67,14 @@ app.use(express.static('./views'));
 app.use(express.static("./storage"));
 app.use(busboyBodyParser());
 app.use(middleware.checkNotAssigned);
+//escape single quotes for psql to process, adding another single quote escapes it
+app.use((req, res, next) => {
+	for (var field in req.body) {
+		req.body[field] = req.body[field].replace(/'/g, "\'\'");
+	}
+
+	next();
+});
 
 module.exports = {
 	app,
