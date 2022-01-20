@@ -18,6 +18,8 @@
 
 			<% if (playlist.private && (typeof user == 'undefined' || user.id != playlist.user_id)) { %>
 				<h1>[This playlist has been set to private by the user]</h1>
+			<% } else if (typeof user == 'undefined') { %>
+				<%- include('content/ejs/playlistcontent.ejs', {playlist: playlist, videos: videos, creator: creator}) %>
 			<% } else { %>
 				<%- include('content/ejs/playlistcontent.ejs', {playlist: playlist, user: user, videos: videos, creator: creator}) %>
 			<% } %>

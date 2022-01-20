@@ -13,7 +13,7 @@
 		<% if (typeof videos != 'undefined') { %>
 			<% if (videos.length) { %>
 				<% videos.forEach((item, index) => { %>
-					<%- include('./playlistthumbnail.ejs', {video: item, playlist: playlist, user: user, creator: creator}) %>
+					<%- include('./playlistvideothumbnail.ejs', {video: item, playlist: playlist}) %>
 				<% }); %>
 			<% } else { %>
 				<h2>No videos yet!</h2>
