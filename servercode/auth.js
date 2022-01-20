@@ -143,28 +143,6 @@ app.post('/register', async (req, res) => {
 		newuser = newuser.rows[0];
 		console.log("Registered User.");
 
-		var newplaylistid = await middleware.generateAlphanumId();
-		valuesarr = [newuserid, "Watch Later", newplaylistid, 0, false];
-		valuesarr = valuesarr.map((item) => {
-			if (typeof item == 'string') {
-				return "\'"+ item + "\'";
-			} else {
-				return item;
-			}
-		});
-		await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
-
-		var newplaylistid = await middleware.generateAlphanumId();
-		valuesarr = [newuserid, "Liked Videos", newplaylistid, 0, false];
-		valuesarr = valuesarr.map((item) => {
-			if (typeof item == 'string') {
-				return "\'"+ item + "\'";
-			} else {
-				return item;
-			}
-		});
-		await client.query(`INSERT INTO playlists (user_id, name, id, videocount, candelete) VALUES (${valuesarr})`);
-
 		var newsessid = await middleware.generateSessionId();
 
 		redisClient.set(newsessid, JSON.stringify(newuser));
