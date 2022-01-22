@@ -6,8 +6,7 @@
 	<% if (comment.filetype == 'img') { %>
 		&nbsp;&nbsp;<img src=<%= comment.reactionfile %> width="250">
 	<% } else if (comment.filetype == 'video') { %>
-		balls
-		<%- include('./videoplayer.ejs', {videoid: comment.id}) %>
+		<%- include('./videoplayer.ejs', {video: {thumbnail: "", id: comment.id}}) %>
 	<% } %>
 <% } %>
 

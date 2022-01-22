@@ -28,8 +28,6 @@ app.get('/u/delete/:userid', middleware.checkSignedIn, async (req, res) => {
 		for await (const playlist of playlistids) {
 			await middleware.deletePlaylistDetails(userinfo.id, playlist.id);
 		}
-		//delete playlists which cannot be deleted with the deletePlaylistDetails function
-		await client.query(`DELETE FROM playlists WHERE user_id=$1`, [req.params.userid]);
 
 		await client.query(`DELETE FROM likedcomments WHERE comment_id IN (SELECT id FROM comments WHERE user_id=$1)`, [req.params.userid]);
 		await client.query(`DELETE FROM dislikedcomments WHERE comment_id IN (SELECT id FROM comments WHERE user_id=$1)`, [req.params.userid]);

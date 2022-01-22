@@ -2,14 +2,26 @@
 VIDEO AND VIDEO CONTROLLER SETUP
 */
 
-//get all of the videos in the document
-var videos = Array.from(document.querySelectorAll(".video-container #video"));
+//a function to set up videos on the page with functionality
+function setupVideos() {
+	//get all of the videos in the document
+	var videos = Array.from(document.querySelectorAll(".video-container #video"));
 
-//loop through the videos to add video controls
-for (var video of videos) {
-	//wait for the video metadata to load before setting up the video player
-	video.addEventListener("loadedmetadata", setupPlayer(video));
+	//loop through the videos to add video controls
+	for (var video of videos) {
+		//check to see if the video is set up already
+		if (!video.setup) {
+			//wait for the video metadata to load before setting up the video player
+			video.addEventListener("loadedmetadata", setupPlayer(video));
+
+			//set a boolean value on the video to be true
+			video.setup = true;
+		}
+	}
 }
+
+//set up the videos on the page
+setupVideos();
 
 //a function to set up the video player
 function setupPlayer(video) {

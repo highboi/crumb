@@ -37,6 +37,9 @@ async function getReplies(commentid, toggle=true) {
 			//show the replies html
 			showelement(`${commentid}repliesdiv`);
 
+			//set up video players in the replies (if any)
+			setupVideos();
+
 			/*
 			make a key-value pair in the replycommentids object which
 			shows that the replies have been requested once
