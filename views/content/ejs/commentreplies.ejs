@@ -16,7 +16,7 @@
 					<% if (reply.filetype == 'img') { %>
 						&nbsp;&nbsp;<img src=<%= reply.reactionfile %> width="250">
 					<% } else if (reply.filetype == 'video') { %>
-						&nbsp;&nbsp;<%- include('./videoplayer.ejs', {video: {thumbnail: "", id: reply.id}}) %>
+						&nbsp;&nbsp;<%- include("./videoplayer.ejs", {video: {thumbnail: "", id: reply.id}}) %>
 					<% } %>
 				<% } %>
 
