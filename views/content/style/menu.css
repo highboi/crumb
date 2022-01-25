@@ -11,6 +11,7 @@ nav .banner {
 	background-color: #adff12;
 	position: fixed;
 	top: 0px;
+	left: 0px;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;

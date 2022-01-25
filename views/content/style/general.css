@@ -13,6 +13,7 @@ body {
 	font-smooth: never;
 	font-weight: 600;
 	text-shadow: -0.06em 0 0.5px rgba(255, 200, 100, 0.9);
+	overflow: auto;
 }
 
 a {
@@ -144,9 +145,21 @@ STYLING FOR LOADING ANIMATIONS ON THE SITE
 	}
 }
 
-
+/*
+STYLING FOR SUBMISSION FORMS ON THE SITE
+*/
 #register, #login, #video-submit, #playlist-submit, #stream-submit {
 	text-align: center;
 	width: 50vw;
 	margin: auto;
+}
+
+/*
+IMPLEMENT BROWSER WIDTH CUTOFF FOR THE SITE BANNER
+*/
+@media only screen and (max-width: 1100px) {
+	nav .banner {
+		width: 1100px;
+		position: absolute;
+	}
 }

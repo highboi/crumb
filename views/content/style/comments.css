@@ -76,7 +76,7 @@ COMMENTS SECTION
 	display: none;
 	background-color: #1f1f1f;
 	padding: 15px;
-	width: 85vw;
+	width: 100%;
 }
 
 .container .comments #theComments .morerepliesbtn {

@@ -1,4 +1,3 @@
-@import url("/content/style/general.css");
 @import url("/content/style/menu.css");
 @import url("/content/style/channel.css");
 @import url("/content/style/thumbnail.css");
@@ -11,3 +10,4 @@
 @import url("/content/style/autoplay.css");
 @import url("/content/style/adverts.css");
 @import url("/content/style/videocontrols.css");
+@import url("/content/style/general.css");
