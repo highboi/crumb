@@ -5,7 +5,7 @@
 		<% if (video.streaming) { %>
 			<% var videolink = `/l/view/${video.id}`; %>
 		<% } else { %>
-			<% var videolink = `/v/${video.id}`; %>
+			<% var videolink = `/playlistvideo/view/${playlist.id}/${video.id}`; %>
 		<% } %>
 		<% var channellink = `/u/${video.user_id}`; %>
 		<div class="thumbnail">
