@@ -21,8 +21,9 @@ STYLE SECTIONS OF THUMBNAILS
 INDIVIDUAL THUMBNAILS
 */
 .video-thumbnail {
-	padding-right: 0.5vw;
-	padding-left: 0.5vw;
+	padding: 0.5vw;
+	margin: 0.5vw;
+	background-color: #1f1f1f;
 }
 
 .video-thumbnail .thumbnail img {

@@ -76,8 +76,7 @@ nav .banner #searchbar #searchquerydiv input {
 	background-color: #3f3f3f;
 	color: #adff12;
 	outline: none;
-	border: solid black;
-	border-width: 1px;
+	border: solid #3f3f3f;
 	box-shadow: none;
 	width: 400px;
 	font-size: 18px;
