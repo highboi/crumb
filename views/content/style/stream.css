@@ -10,8 +10,8 @@ STYLING FOR THE CHAT BOX IN LIVE STREAMS
 	overflow-y: scroll;
 	width: 580px;
 	height: 450px;
-	color: #adff12;
-	background-color: #2f2f2f;
+	color: var(--green);
+	background-color: var(--medium-grey);
 	border: solid black;
 	border-width: 5px;
 }
@@ -20,8 +20,8 @@ STYLING FOR THE CHAT BOX IN LIVE STREAMS
 	overflow-y: scroll;
 	width: 580px;
 	height: 450px;
-	color: #adff12;
-	background-color: #2f2f2f;
+	color: var(--green);
+	background-color: var(--medium-grey);
 	border: solid black;
 	border-width: 5px;
 }

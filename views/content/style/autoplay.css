@@ -32,7 +32,7 @@ A CSS DOCUMENT TO GIVE FUNCTIONALITY TO SWITCHES
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background-color: #7f7f7f;
+	background-color: var(--light-grey);
 	transition: 0.4s;
 	border-radius: 34px;
 }

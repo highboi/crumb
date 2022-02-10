@@ -35,7 +35,7 @@ HANDLE PLAYLIST CONTENT ON THE SIDE OF PLAYLIST VIDEOS
 */
 .playlist-content {
 	width: 100%;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 	border: solid black;
 	border-width: 5px;
 }
@@ -48,7 +48,7 @@ HANDLE PLAYLIST CONTENT ON THE SIDE OF PLAYLIST VIDEOS
 }
 
 .playlist-scroll .current-video {
-	background-color: #2f2f2f;
+	background-color: var(--medium-grey);
 }
 
 /*

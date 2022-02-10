@@ -8,7 +8,7 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 
 /* style the banner in general */
 nav .banner {
-	background-color: #adff12;
+	background-color: var(--green);
 	position: fixed;
 	top: 0px;
 	left: 0px;
@@ -27,7 +27,8 @@ nav .banner #banner-icon img {
 	height: 85px;
 	margin: 20px;
 	border-radius: 10%;
-	border: solid black;
+	border: solid var(--dark-grey);
+	border-width: 3px;
 }
 
 /* style the search bar in the center of the banner */
@@ -52,7 +53,7 @@ nav .banner #searchbar #searchbtn button img {
 	width: 70px;
 	height: 70px;
 	border-radius: 10%;
-	border: solid black;
+	border: solid var(--grey);
 	border-width: 5px;
 }
 
@@ -73,10 +74,10 @@ nav .banner #searchbar #searchquerydiv {
 nav .banner #searchbar #searchquerydiv input {
 	margin-top: 15px;
 	height: 50px;
-	background-color: #3f3f3f;
-	color: #adff12;
+	background-color: var(--grey);
+	color: var(--green);
 	outline: none;
-	border: solid #3f3f3f;
+	border: solid var(--grey);
 	box-shadow: none;
 	width: 400px;
 	font-size: 18px;
@@ -87,15 +88,15 @@ nav .banner #searchbar #searchrecs {
 	display: none;
 	position: absolute;
 	text-align: center;
-	background-color: #adff12;
-	color: #2f2f2f;
+	background-color: var(--green);
+	color: var(--medium-grey);
 	min-width: 400px;
 	max-width: 400px;
 	z-index: 1;
 }
 
 nav .banner #searchbar #searchrecs a {
-	color: #2f2f2f;
+	color: var(--medium-grey);
 }
 
 /* style the channel link or sign-in link on the right side of the banner */
@@ -146,7 +147,7 @@ nav .banner #actionsmenu {
 	width: 70px;
 	height: 70px;
 	border-radius: 10%;
-	border: solid black;
+	border: solid var(--dark-grey);
 }
 
 nav .banner #settingsmenu {

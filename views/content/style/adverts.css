@@ -1,35 +1,35 @@
 .adverts {
 	text-align: center;
 	margin: 30px;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 }
 
 #adSubmission {
 	text-align: center;
 	width: 50vw;
 	margin: auto;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 }
 
 #adEdit {
 	text-align: center;
 	width: 50vw;
 	margin: auto;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 }
 
 #adRegistration {
 	text-align: center;
 	width: 50vw;
 	margin: auto;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 }
 
 #advertiserEdit {
 	text-align: center;
 	width: 50vw;
 	margin: auto;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 }
 
 input[type="months"] {
@@ -52,22 +52,22 @@ input[type="months"] {
 }
 
 #adStats a {
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 	padding: 10px;
 }
 
 .adContainer {
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 	margin: 30px;
 	padding: 10px;
 	text-align: center;
 }
 
 .adContainer button {
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 }
 
 #createAdBtn {
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 	margin: 0 auto;
 }

@@ -23,7 +23,7 @@ INDIVIDUAL THUMBNAILS
 .video-thumbnail {
 	padding: 0.5vw;
 	margin: 0.5vw;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 }
 
 .video-thumbnail .thumbnail img {
@@ -53,7 +53,7 @@ INDIVIDUAL THUMBNAILS
 .video-thumbnail .links .channel-links .extralinks {
 	display: none;
 	position: absolute;
-	background-color: #adff12;
+	background-color: var(--green);
 	padding: 10px;
 	border: solid black 5px;
 }
@@ -68,7 +68,7 @@ INDIVIDUAL THUMBNAILS
 }
 
 .video-thumbnail .links .channel-links .extralinks object * {
-	color: #1f1f1f;
+	color: var(--dark-grey);
 }
 
 .not-interested-undo {

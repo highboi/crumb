@@ -8,8 +8,8 @@ COMMENTS SECTION
 }
 
 .container .comments #commentform form button{
-	color: #adff12;
-	background-color: #3f3f3f;
+	color: var(--green);
+	background-color: var(--grey);
 }
 
 .container .comments #commentform form #commentbtn {
@@ -24,18 +24,18 @@ COMMENTS SECTION
 .container .comments #theComments .commentlikes button {
 	width: 2.5rem;
 	height: 2.5rem;
-	color: #3f3f3f;
-	background-color: #adff12;
-	border: 2px solid #adff12;
+	color: var(--grey);
+	background-color: var(--green);
+	border: 2px solid var(--green);
 	vertical-align: text-top;
 }
 
 .container .comments #theComments .commentlikes .commentlikebuttons {
 	width: 2.5rem;
 	height: 2.5rem;
-	color: #3f3f3f;
-	background-color: #adff12;
-	border: 2px solid #adff12;
+	color: var(--grey);
+	background-color: var(--green);
+	border: 2px solid var(--green);
 	vertical-align: text-top;
 }
 
@@ -56,7 +56,7 @@ COMMENTS SECTION
 
 .container .comments #theComments .replybox {
 	display: none;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 	border: solid black;
 	border-width: 5px;
 	z-index: 10;
@@ -65,8 +65,8 @@ COMMENTS SECTION
 .container .comments #theComments .replybox button {
 	width: 5rem;
 	height: 2.5rem;
-	background-color: #adff12;
-	color: #3f3f3f;
+	background-color: var(--green);
+	color: var(--grey);
 	border: solid black;
 	border-width: 5px;
 	margin: 10px;
@@ -74,16 +74,16 @@ COMMENTS SECTION
 
 .container .comments #theComments .replies {
 	display: none;
-	background-color: #1f1f1f;
+	background-color: var(--dark-grey);
 	padding: 15px;
 	width: 100%;
 }
 
 .container .comments #theComments .morerepliesbtn {
-	color: #adff12;
-	background-color: #1f1f1f;
+	color: var(--green);
+	background-color: var(--dark-grey);
 	width: 150px;
-	border: solid #adff12;
+	border: solid var(--green);
 	border-width: 5px;
 	padding: 5px;
 	margin-top: 35px;

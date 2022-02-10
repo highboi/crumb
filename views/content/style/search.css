@@ -5,7 +5,7 @@
 
 .search-videos hr {	
 	width: 100%;
-	color: #adff12;
+	color: var(--green);
 }
 
 .search-videos .video {

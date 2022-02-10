@@ -22,7 +22,7 @@ STYLING CHANNEL PAGES
 
 .channel .channel-banner #channel-icon img {
 	border-radius: 50px;
-	border-color: #adff12;
+	border-color: var(--green);
 	border-width: 2px;
 	border-style: solid;
 }
@@ -36,9 +36,9 @@ STYLING CHANNEL PAGES
 	width: 8rem;
 	height: 2.5rem;
 	font-size: 20px;
-	color: #adff12;
-	border: 2px solid #adff12;
-	background-color: #2f2f2f;
+	color: var(--green);
+	border: 2px solid var(--green);
+	background-color: var(--medium-grey);
 	vertical-align: text-top;
 	margin-top: 35px;
 	margin-bottom: 35px;
@@ -89,7 +89,7 @@ STYLE THE MINI CHANNELS
 	width: 8rem;
 	height: 2.5rem;
 	font-size: 20px;
-	color: #adff12;
-	border: 2px solid #adff12;
-	background-color: #2f2f2f;
+	color: var(--green);
+	border: 2px solid var(--green);
+	background-color: var(--medium-grey);
 }

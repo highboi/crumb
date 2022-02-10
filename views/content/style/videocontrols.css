@@ -15,14 +15,14 @@
 
 .video-player .range::-moz-range-track {
 	background: transparent;
-	background-color: #adff12;
+	background-color: var(--green);
 	animate: 0.2s;
 	border: 1px solid black;
 	border-radius: 10%;
 }
 
 .video-player .range::-moz-range-thumb {
-	background-color: #3f3f3f;
+	background-color: var(--grey);
 	border: 1px solid black;
 	border-radius: 10%;
 }
@@ -50,11 +50,11 @@
 }
 
 .video-player #timedisplay {
-	color: #adff12;
+	color: var(--green);
 }
 
 .video-player #fullscreen {
-	background-color: #adff12;
+	background-color: var(--green);
 	width: 70px;
 	height: 70px;
 }
