@@ -108,3 +108,12 @@ STYLE THE PLAYLIST VIDEO ENTRIES IN THE SCROLLABLE BAR ON THE SIDE OF PLAYLIST V
 .not-interested-undo {
 	display: none;
 }
+
+
+/*
+STYLE PLAYLIST THUMBNAILS IN SEARCH RESULTS
+*/
+.playlist-result {
+	background-color: var(--dark-grey);
+	padding: 0.5vw;
+}

@@ -1,6 +1,29 @@
+/*
+STYLE THE HEADER CONTENT FOR EACH SEARCH RESULT SECTION
+*/
+#channel-results > h1, #video-results > h1, #playlist-results > h1 {
+	background-color: var(--dark-grey);
+	text-align: center;
+	padding: 0.5vw;
+	border: solid var(--green);
+}
+
+/*
+STYLE THE CHANNELS IN THE SEARCH RESULTS
+*/
+.search-channels {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+/*
+STYLE THE VIDEOS IN THE SEARCH RESULTS
+*/
 .search-videos {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 }
 
 .search-videos hr {	
@@ -37,4 +60,13 @@
 
 .search-videos .video .links .extralinkforms object {
 	display: none;
+}
+
+/*
+STYLE PLAYLISTS IN THE SEARCH RESULTS
+*/
+.search-playlists {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }

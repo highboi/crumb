@@ -1,7 +1,7 @@
 <!--The link to a video that belongs to a playlist on the site-->
 
 <% if (typeof playlist != 'undefined') { %>
-	<div class="playlist">
+	<div class="playlist-result">
 		<% var playlistlink = `/playlistvideo/view/${playlist.id}/${playlist.firstvideoid}` %>
 		<a href="<%= playlistlink %>"><img src="<%= playlist.thumbnail %>" width="450" height="300"></a>
 		<h3><a href="<%= playlistlink %>"><%= playlist.name %></a></h3>

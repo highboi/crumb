@@ -16,17 +16,19 @@
 				<div id="channel-results">
 					<% if (search.channels.length) { %>
 						<h1>Channels:</h1>
-						<hr>
-						<% search.channels.forEach((item, index) => { %>
-							<%- include('content/ejs/minichannel.ejs', {channel: item}) %>
-						<% }); %>
+						
+						<div class="search-channels">
+							<% search.channels.forEach((item, index) => { %>
+								<%- include('content/ejs/minichannel.ejs', {channel: item}) %>
+							<% }); %>
+						</div>
 					<% } %>
 				</div>
 
 				<div id="video-results">
 					<% if (search.videos.length) { %>
 						<h1>Videos:</h1>
-						<hr>
+						
 						<div class="search-videos">
 							<% search.videos.forEach((item, index) => { %>
 								<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
@@ -38,10 +40,12 @@
 				<div id="playlist-results">
 					<% if (search.playlists.length) { %>
 						<h1>Playlists:</h1>
-						<hr>
-						<% search.playlists.forEach((item, index) => { %>
-							<%- include('content/ejs/playlistthumbnail.ejs', {playlist: item}) %>
-						<% }); %>
+						
+						<div class="search-playlists">
+							<% search.playlists.forEach((item, index) => { %>
+								<%- include('content/ejs/playlistthumbnail.ejs', {playlist: item}) %>
+							<% }); %>
+						</div>
 					<% } %>
 				</div>
 

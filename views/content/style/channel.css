@@ -70,6 +70,7 @@ STYLE THE MINI CHANNELS
 .minichannel {
 	display: flex;
 	align-items: center;
+	background-color: var(--dark-grey);
 }
 
 
