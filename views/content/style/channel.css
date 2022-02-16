@@ -3,9 +3,8 @@ STYLESHEET FOR CHANNELS ON THE SITE
 */
 
 /*
-STYLING CHANNEL PAGES
+STYLE THE CHANNEL BANNER
 */
-
 .channel .channel-banner {
 	height: 120px;
 	background-color: black;
@@ -46,21 +45,74 @@ STYLING CHANNEL PAGES
 	float: right;
 }
 
-.channel .channel-content #playlists {
-	display: block;
+/*
+STYLE THE NAVIGATION TABS FOR DIFFERENT CHANNEL SECTIONS
+*/
+.channel #tabs {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	background-color: var(--dark-grey);
+	border: 1px solid var(--green);
 }
 
-.channel .channel-content .video {
-	width: 25%;
+.channel #tabs button {
+	border: 2px solid var(--green);
+	padding: 5px;
+	margin-top: 5px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 5px;
+	background-color: var(--medium-grey);
 }
 
-.channel .channel-content .video .thumbnail {
-	vertical-align: top;
-	height: 16vw;
+/*
+STYLE THE PLAYLIST SECTION OF THE CHANNEL PAGE
+*/
+.channel #playlists {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	width: 30%;
+	margin: 0 auto;
 }
 
-.channel .channel-content .video {
-	font-size: 1vw;
+/*
+STYLE THE SHOUTOUTS SECTION OF THE CHANNEL PAGE
+*/
+.channel #shoutouts #shoutoutform {
+	width: 30vw;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.channel #shoutouts #shoutoutform button {
+	width: 100px;
+	margin-left: calc(50% - 50px);
+	margin-top: 0.5vw;
+}
+
+/*
+STYLE THE ABOUT SECTION OF THE CHANNEL PAGE
+*/
+.channel #about {
+	width: 50vw;
+	text-align: center;
+	margin: 0 auto;
+	padding: 5px;
+	background-color: var(--dark-grey);
+}
+
+/*
+STYLE THE SETTINGS SECTION OF THE CHANNEL PAGE
+*/
+.channel #settings {
+	width: 20vw;
+	text-align: center;
+	margin: 0 auto;
+	padding: 10px;
+	background-color: var(--dark-grey);
 }
 
 /*

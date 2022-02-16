@@ -30,7 +30,11 @@
 			<% } else if (section == "playlists") { %>
 				<%- include('./channelplaylists.ejs', {playlists: playlists}) %>
 			<% } else if (section == "shoutouts") { %>
-				<%- include('./channelshoutouts.ejs', {user: user, shoutouts: shoutouts, creator: creator}) %>
+				<% if (typeof user != 'undefined') { %>
+					<%- include('./channelshoutouts.ejs', {user: user, shoutouts: shoutouts, creator: creator}) %>
+				<% } else { %>
+					<%- include('./channelshoutouts.ejs', {shoutouts: shoutouts, creator: creator}) %>
+				<% } %>
 			<% } else if (section == "settings") { %>
 				<%- include('./channelsettings.ejs', {creator: creator}) %>
 			<% } %>

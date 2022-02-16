@@ -1,6 +1,6 @@
 <% if (typeof user != 'undefined') { %>
 	<% if (user.id == creator.id) { %>
-		<form method="post" action="/shoutout/add">
+		<form method="post" action="/shoutout/add" id="shoutoutform">
 			<label for="shoutout">Shoutout Channel URL:</label>
 			<input type="text" id="shoutout" name="shoutout"><br>
 			<button type="submit">Submit</button>

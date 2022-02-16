@@ -32,7 +32,8 @@ a img:hover {
 
 button {
 	color: var(--green);
-	background-color: var(--grey);
+	background-color: var(--medium-grey);
+	border: solid var(--green) 3px;
 }
 
 

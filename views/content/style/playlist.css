@@ -116,4 +116,7 @@ STYLE PLAYLIST THUMBNAILS IN SEARCH RESULTS
 .playlist-result {
 	background-color: var(--dark-grey);
 	padding: 0.5vw;
+	margin: 0.5vw;
+	border: solid var(--green);
+	width: 450px;
 }

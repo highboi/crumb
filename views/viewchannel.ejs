@@ -9,9 +9,14 @@
 		</nav>
 
 		<main>
+
 			<%- include('content/ejs/body.ejs') %>
 
-			<%- include('content/ejs/channelcontent.ejs', {creator: creator, user: user, section: section}) %>
+			<% if (typeof user != 'undefined') { %>
+				<%- include('content/ejs/channelcontent.ejs', {creator: creator, user: user, section: section}) %>
+			<% } else { %>
+				<%- include('content/ejs/channelcontent.ejs', {creator: creator, section: section}) %>
+			<% } %>
 
 			<%- include('content/ejs/bottombody.ejs') %>
 
