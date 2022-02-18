@@ -8,7 +8,7 @@
 			<form action="<%= commentlink %>" method="post" enctype='multipart/form-data' id="mainCommentForm">
 				<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="500" rows="10" cols="50" required></textarea><br><br>
 
-				<label for="reactionfile">Reaction Image/Video:</label><br>
+				<label class="filelabel" for="reactionfile">Upload Reaction Image/Video</label><br>
 				<input type="file" id="reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
 
 				<button class="submitbtn" type="button" onclick="commentSubmitted('mainCommentForm');">Post Comment</button>

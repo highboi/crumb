@@ -8,7 +8,7 @@
 	<form action="<%= replylink %>" method="post" enctype='multipart/form-data' id="<%= comment.id %>replyform">
 		<textarea id="commenttext" name="commenttext" placeholder="Say Something!" maxlength="500" rows="10" cols="50" required></textarea><br>
 
-		<label for="reactionfile">Reaction Image/Video:</label><br>
+		<label class="filelabel" for="reactionfile">Upload Reaction Image/Video</label><br>
 		<input type="file" id="reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
 
 		<input type="hidden" id="base_parent_id" name="base_parent_id" value="<%= base_parent_id %>">

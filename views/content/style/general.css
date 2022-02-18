@@ -36,6 +36,32 @@ button {
 	border: solid var(--green) 3px;
 }
 
+input, textarea {
+	background-color: var(--medium-grey);
+	color: var(--green);
+	border: none;
+	padding: 5px;
+	margin: 3px;
+}
+
+::placeholder {
+	color: var(--green);
+	opacity: 0.75;
+}
+
+.filelabel {
+	display: inline-block;
+	padding: 5px;
+	margin: 5px;
+	cursor: pointer;
+	background-color: var(--medium-grey);
+	color: var(--green);
+	border: 3px solid var(--green);
+}
+
+input[type=file] {
+	display: none;
+}
 
 /*
 MISC STYLING
