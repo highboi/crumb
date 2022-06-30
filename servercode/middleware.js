@@ -109,7 +109,7 @@ var reqHandling = {
 		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
 		videoInfo.videocreator = videocreator.rows[0];
 
-		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1 AND depth_level=0`, [video.id]);
+		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1`, [video.id]);
 		videoInfo.comments = comments.rows;
 
 		var resolutions = await client.query(`SELECT resolution FROM videofiles WHERE id=$1 LIMIT 1`, [video.id]);

@@ -65,31 +65,4 @@ async function commentSubmitted(formid) {
 		alert("There was an error with our server! Please try again");
 		return false;
 	}
-
-	/*
-	//post the comment
-	var response = await fetch(posturl, {
-		method: "POST",
-		body: new FormData(document.getElementById(formid))
-	});
-
-	//check for proper redirection
-	if (response.redirected) {
-		//replace the previous entry in browser session with redirect url
-		history.replaceState(null, "", response.url);
-
-		//get the response html
-		var body = await response.text();
-
-		//write the html to the document
-		document.open();
-		document.write(body);
-		document.close();
-
-		return true;
-	} else {
-		alert("There was an error with our server! Please try again");
-		return false;
-	}
-	*/
 }

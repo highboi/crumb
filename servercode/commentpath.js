@@ -5,19 +5,6 @@ const path = require("path");
 GET PATHS FOR COMMENTS
 */
 
-//a get path for getting the replies for a comment with AJAX
-app.get("/comment/replies/:commentid", async (req, res) => {
-	if (typeof req.query.limit == 'undefined') {
-		var replies = await client.query(`SELECT * FROM comments WHERE base_parent_id=$1 ORDER BY posttime LIMIT 50`, [req.params.commentid]);
-	} else {
-		var replies = await client.query(`SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT '1')) AS rownum, * FROM comments WHERE base_parent_id=$1) AS comments WHERE rownum>$2 ORDER BY posttime LIMIT 50`, [req.params.commentid, req.query.limit]);
-	}
-
-	return res.render("./content/ejs/commentreplies.ejs", {replies: replies.rows, parentid: req.params.commentid});
-
-	//return res.send({replies: replies.rows});
-});
-
 //a get request for liking a comment on the site
 app.get("/comment/like/:commentid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
@@ -76,19 +63,10 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 
 	var valuesarr = [commentid, userinfo.username, userinfo.id, req.body.commenttext, req.params.videoid, new Date().toISOString(), 0, 0];
 
-	//check to see if this comment belongs to a parent comment
+	//check to see if this is a reply to another comment
 	if (typeof req.query.parent_id != 'undefined') {
 		valuesarr.push(req.query.parent_id);
 
-		//increase the amount of replies attached to the comment
-		await client.query(`UPDATE comments SET replies=replies+1 WHERE id=$1`, [req.body.base_parent_id]);
-
-		var depth_level = await client.query(`SELECT depth_level FROM comments WHERE id=$1 LIMIT 1`, [req.query.parent_id]);
-		depth_level = parseInt(depth_level.rows[0].depth_level, 10)+1;
-		valuesarr.push(depth_level);
-
-		valuesarr.push(req.body.base_parent_id);
-
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == "string") {
 				return "\'" + item + "\'";
@@ -97,10 +75,8 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 			}
 		});
 
-		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, parent_id, depth_level, base_parent_id) VALUES (${valuesarr})`);
+		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, parent_id) VALUES (${valuesarr})`);
 	} else {
-		valuesarr.push(0);
-
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == "string") {
 				return "\'" + item + "\'";
@@ -109,9 +85,10 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 			}
 		});
 
-		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, depth_level) VALUES (${valuesarr})`);
+		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes) VALUES (${valuesarr})`);
 	}
 
+	//check for and handle files attached to the comment
 	if (typeof req.files.reactionfile != "undefined") {
 		var acceptedvideo = ["video/mp4", "video/ogg", "video/webm"];
 		var acceptedimg = ["image/png", "image/jpeg", "image/jpg"];

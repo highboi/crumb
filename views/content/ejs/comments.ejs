@@ -17,22 +17,6 @@
 			</form>
 		</div>
 
-		<% if (typeof comments != 'undefined' && comments.length) { %>
-			<hr>
-			<div id="commentsortform">
-				<p>Sort Comments:</p>
-				<form>
-					<select id="commentSort" onchange="sortComments(this);">
-						<option value="" selected disabled hidden>Comment Filter</option>
-						<option value="top">Top</option>
-						<option value="bottom">Bottom</option>
-						<option value="oldest">Oldest</option>
-						<option value="newest">Newest</option>
-					</select>
-				</form>
-			</div>
-		<% } %>
-
 		<div id="theComments">
 			<% if (typeof comments != 'undefined') { %>
 				<% comments.forEach((item, index) => { %>
@@ -40,25 +24,13 @@
 					<div class="comment" id="<%= item.id %>" likes="<%= item.likes %>" dislikes="<%= item.dislikes %>" posttime="<%= item.posttime %>">
 						<%- include('./comment.ejs', {comment: item}) %>
 
-						<!--
 						<% if (typeof user != 'undefined') { %>
 							<% if (user.id == item.user_id) { %>
 								<button onclick="redirectConfirm('Delete Comment?', '/comment/delete/<%= item.id %>')">Delete Comment?</button>
 							<% } %>
 						<% } %>
-						-->
 
 						<%- include('./commentreplyform.ejs', {comment: item, base_parent_id: item.id, commentlink: commentlink}) %>
-
-						<div class="replies" id="<%= item.id %>repliesdiv">
-							<div id="<%= item.id %>replies"></div>
-
-							<div id="<%= item.id %>loading">
-								<img src="/content/icons/loading.gif" width="150" height="150">
-							</div>
-
-							<button class="morerepliesbtn" id="<%= item.id %>morerepliesbtn" onclick="getReplies('<%= item.id %>', false);">Get more replies.</button>
-						</div>
 					</div>
 					<hr>
 				<% }); %>

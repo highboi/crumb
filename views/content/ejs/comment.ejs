@@ -1,6 +1,9 @@
 <!--The EJS to display an individual comment on the site-->
 
-<h3>&nbsp<%= comment.username %></h3>
+<h3>&nbsp<%= comment.username %> - <%= comment.id %></h3>
+<% if (comment.parent_id) { %>
+	<p class="commentinterlink" parentid="<%= comment.parent_id %>">&nbsp;&nbsp<%= comment.parent_id %></p>
+<% } %>
 <p>&nbsp;&nbsp<%= comment.comment %></p>
 <% if (typeof comment.reactionfile != 'undefined') { %>
 	<% if (comment.filetype == 'img') { %>
@@ -17,5 +20,4 @@
 	<img class="commentlikebuttons" id="commentDislike" onclick="dislikeComment('<%= comment.id %>')" src="/content/icons/rocket_down.png">
 	<p id="<%= comment.id %>dislikes"><%= comment.dislikes %></p>
 	<button id="replybtn" onclick="showElementDraggable('<%= comment.id %>replybox')">Reply</button>
-	<button id="showreplies" onclick="getReplies('<%= comment.id %>', false)">View <%= comment.replies %> Replies</button>
 </div>
