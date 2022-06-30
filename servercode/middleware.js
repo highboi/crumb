@@ -843,6 +843,14 @@ var loggingFunctions = {
 		message = `(${currenttime}) --> ${message}`;
 
 		logger.log({level: level, message: message})
+	},
+
+	//this is a function for logging error messages and handling errors
+	logError: function(error) {
+		error = error.toString();
+
+		middleware.log("error", error);
+		throw new Error(`ERROR: $1`, [error]);
 	}
 };
 

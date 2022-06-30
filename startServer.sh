@@ -13,11 +13,11 @@ fi
 #*************************************************
 echo "[**] Starting Server Processes..."
 #start nginx with the configuration file for the site instead of the default
-nginx -c /etc/nginx/nginx_crumb.conf &
+nginx 2>/dev/null 1>&2 &
 #run the redis server with the configuration file for storing sessions
-redis-server /etc/redis/redis_session.conf &
+redis-server 2>/dev/null 1>&2 &
 #start the node js server
-npm run dev &
+npm run dev 2>/dev/null 1>&2 &
 
 #**************************************
 #HANDLE THE KILLING OF SERVER PROCESSES
@@ -38,5 +38,6 @@ trap ctrl_c SIGINT SIGTSTP SIGQUIT
 #without exiting in order for the program to detect a Ctrl+C
 while true
 do
+	echo "Server running..."
 	sleep 10
 done

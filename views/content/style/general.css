@@ -64,7 +64,7 @@ input[type=file] {
 }
 
 hr {
-	color: #adff12;
+	color: var(--green);
 }
 
 /*
