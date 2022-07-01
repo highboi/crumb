@@ -5,28 +5,8 @@ if (typeof scrollCommentId != 'undefined') {
 	//try to get the comment reply element
 	var commentElement = document.getElementById(scrollCommentId);
 
-	//check for the existence of the comment element to scroll to
-	if (commentElement == null) {
-		//get the replies to the base comment
-		var baseComment = document.getElementById(scrollCommentBaseId);
-		baseComment.querySelector("#showreplies").click();
-
-		//scroll to the comment reply element
-		recursiveScrollComment(scrollCommentBaseId, scrollCommentBaseId);
-	} else {
-		//scroll to the comment element directly
-		scrollToComment(scrollCommentId);
-	}
-}
-
-//a function to recursively get more replies from a comment until the comment reply is found
-function recursiveScrollComment(baseCommentId, commentid) {
-	if (document.getElementById(commentid) == null) {
-		document.getElementById(`${baseCommentId}morerepliesbtn`).click();
-		return recursiveScroll(baseCommentId, commentid);
-	} else {
-		return scrollToComment(commentid);
-	}
+	//scroll to the comment element directly
+	scrollToComment(scrollCommentId);
 }
 
 //a function for scrolling to a comment element with a certain comment id

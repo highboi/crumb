@@ -35,11 +35,10 @@ app.get("/v/:videoid", async (req, res) => {
 		if (typeof req.query.scrollcommentid != 'undefined') {
 			viewObj.scrollCommentId = req.query.scrollcommentid;
 
-			var comment = await client.query(`SELECT base_parent_id FROM comments WHERE id=$1 LIMIT 1`, [viewObj.scrollCommentId]);
+			var comment = await client.query(`SELECT id FROM comments WHERE id=$1 LIMIT 1`, [viewObj.scrollCommentId]);
 
 			if (comment.rows.length) {
-				var base_parent_id = comment.rows[0].base_parent_id;
-				viewObj.scrollCommentBaseId = base_parent_id;
+				viewObj.scrollCommentBaseId = comment.rows[0].id;
 			} else {
 				delete viewObj.scrollCommentId;
 			}

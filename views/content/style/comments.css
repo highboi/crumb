@@ -17,6 +17,22 @@ COMMENTS SECTION
 	height: 40px;
 }
 
+.container .comments #theComments .comment {
+	background-color: #2f2f2f;
+	padding: 20px;
+	border-width: 4px;
+	border: solid black;
+}
+
+.container .comments #theComments .commentheader * {
+	display: inline-block;
+}
+
+.container .comments #theComments .commentinterlink {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
 .container .comments #theComments .commentlikes * {
 	display: inline-block;
 }
@@ -46,9 +62,8 @@ COMMENTS SECTION
 	border-color: black;
 }
 
-
-.container .comments #theComments .commentlikes #showreplies {
-	width: 5rem;
+.container .comments #theComments .commentlikes #deletebtn {
+	width: 6rem;
 	height: 2.5rem;
 	border-width: 4px;
 	border-color: black;

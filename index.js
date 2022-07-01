@@ -11,13 +11,13 @@ const { client, middleware, server, nms, obsWss } = require("./servercode/config
 
 //handle uncaught promise rejections in the code
 process.on("unhandledRejection", (reason, promise) => {
-	console.log(`Unhandled Rejection at: $1 reason: $2`, [promise, reason]);
+	console.log(`Unhandled Rejection at: ${promise} reason: ${reason}`);
 	middleware.logError(reason.message);
 });
 
 //handle uncaught exceptions in the code
 process.on("uncaughtException", (err, origin) => {
-	console.log(`Uncaught Exception: $1 FROM $2`, [err, origin]);
+	console.log(`Uncaught Exception: ${err} FROM ${origin}`);
 	middleware.logError(err.message);
 });
 

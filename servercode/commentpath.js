@@ -27,19 +27,11 @@ app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res
 app.get("/comment/delete/:commentid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var comment = await client.query(`SELECT depth_level, base_parent_id, user_id, video_id FROM comments WHERE id=$1 LIMIT 1`, [req.params.commentid]);
+	var comment = await client.query(`SELECT depth_level, user_id, video_id FROM comments WHERE id=$1 LIMIT 1`, [req.params.commentid]);
 	comment = comment.rows[0];
 
 	if (comment.user_id == userinfo.id) {
 		await client.query("DELETE FROM comments WHERE id=$1", [req.params.commentid]);
-
-		if (typeof comment.base_parent_id != 'undefined' && comment.base_parent_id != null) {
-			await client.query(`UPDATE comments SET replies=replies-1 WHERE id=$1`, [base_parent_id]);
-		}
-
-		if (comment.depth_level == 0) { //if this comment is a base level comment (depth level 0)
-			await client.query(`DELETE FROM comments WHERE base_parent_id=$1`, [req.params.commentid]);
-		}
 
 		req.flash("message", "Comment deleted successfully.");
 		return res.redirect(`/v/${comment.video_id}`);
@@ -76,6 +68,9 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 		});
 
 		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, parent_id) VALUES (${valuesarr})`);
+
+		//add this reply id to the parent comment of this reply
+		await client.query(`UPDATE comments SET replies=concat(replies, $1::text) WHERE id=$2`, [commentid+",", req.query.parent_id]);
 	} else {
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == "string") {

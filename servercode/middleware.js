@@ -110,6 +110,12 @@ var reqHandling = {
 		videoInfo.videocreator = videocreator.rows[0];
 
 		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1`, [video.id]);
+		comments.rows.sort((a, b) => { //sort comments chronologically
+			var epoch_a = new Date(a.posttime).getTime();
+			var epoch_b = new Date(b.posttime).getTime();
+
+			return epoch_a - epoch_b;
+		});
 		videoInfo.comments = comments.rows;
 
 		var resolutions = await client.query(`SELECT resolution FROM videofiles WHERE id=$1 LIMIT 1`, [video.id]);
@@ -850,7 +856,7 @@ var loggingFunctions = {
 		error = error.toString();
 
 		middleware.log("error", error);
-		throw new Error(`ERROR: $1`, [error]);
+		//throw new Error(error);
 	}
 };
 

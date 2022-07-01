@@ -20,19 +20,11 @@
 		<div id="theComments">
 			<% if (typeof comments != 'undefined') { %>
 				<% comments.forEach((item, index) => { %>
-					<hr>
 					<div class="comment" id="<%= item.id %>" likes="<%= item.likes %>" dislikes="<%= item.dislikes %>" posttime="<%= item.posttime %>">
-						<%- include('./comment.ejs', {comment: item}) %>
-
-						<% if (typeof user != 'undefined') { %>
-							<% if (user.id == item.user_id) { %>
-								<button onclick="redirectConfirm('Delete Comment?', '/comment/delete/<%= item.id %>')">Delete Comment?</button>
-							<% } %>
-						<% } %>
+						<%- include('./comment.ejs', {comment: item, user: user}) %>
 
 						<%- include('./commentreplyform.ejs', {comment: item, base_parent_id: item.id, commentlink: commentlink}) %>
 					</div>
-					<hr>
 				<% }); %>
 			<% } %>
 		</div>

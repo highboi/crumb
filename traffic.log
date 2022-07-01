@@ -1,0 +1,17 @@
+{"level":"error","message":"(2022-06-30T11:57:01.062Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-06-30T14:18:51.782Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-06-30T14:19:42.103Z) --> column \"base_parent_id\" does not exist"}
+{"level":"error","message":"(2022-06-30T14:22:27.684Z) --> operator does not exist: text + unknown"}
+{"level":"error","message":"(2022-06-30T14:25:06.855Z) --> operator does not exist: text + unknown"}
+{"level":"error","message":"(2022-06-30T14:28:13.078Z) --> could not determine data type of parameter $1"}
+{"level":"error","message":"(2022-06-30T14:31:27.774Z) --> could not determine data type of parameter $1"}
+{"level":"error","message":"(2022-06-30T14:32:02.829Z) --> could not determine data type of parameter $1"}
+{"level":"error","message":"(2022-06-30T14:32:52.653Z) --> could not determine data type of parameter $1"}
+{"level":"error","message":"(2022-06-30T14:33:57.966Z) --> column \"base_parent_id\" does not exist"}
+{"level":"error","message":"(2022-06-30T14:35:15.294Z) --> could not determine data type of parameter $1"}
+{"level":"error","message":"(2022-06-30T14:36:40.226Z) --> could not determine data type of parameter $1"}
+{"level":"error","message":"(2022-07-01T02:35:06.215Z) --> column \"base_parent_id\" does not exist"}
+{"level":"error","message":"(2022-07-01T02:38:57.294Z) --> column \"Qu89mp7x,\" does not exist"}
+{"level":"error","message":"(2022-07-01T02:45:11.727Z) --> syntax error at or near \"weO0PnU\""}
+{"level":"error","message":"(2022-07-01T02:45:48.988Z) --> could not determine data type of parameter $1"}
+{"level":"error","message":"(2022-07-01T03:03:56.170Z) --> column \"comments.user_id\" must appear in the GROUP BY clause or be used in an aggregate function"}

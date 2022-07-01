@@ -1,23 +1,35 @@
 <!--The EJS to display an individual comment on the site-->
 
-<h3>&nbsp<%= comment.username %> - <%= comment.id %></h3>
+<div class="commentheader">
+	<h3><%= comment.username %> - <%= comment.id %></h3>
+	<% if (comment.replies) { %>
+		<% comment.replies.substr(0, comment.replies.length-1).split(",").forEach((item, index) => { %>
+			<h5 class="commentinterlink" parentid="<%= item %>"> <%= item %> </h5>
+		<% }); %>
+	<% } %>
+</div>
 <% if (comment.parent_id) { %>
-	<p class="commentinterlink" parentid="<%= comment.parent_id %>">&nbsp;&nbsp<%= comment.parent_id %></p>
+	<p class="commentinterlink" parentid="<%= comment.parent_id %>"><%= comment.parent_id %></p>
 <% } %>
-<p>&nbsp;&nbsp<%= comment.comment %></p>
+<p><%= comment.comment %></p>
 <% if (typeof comment.reactionfile != 'undefined') { %>
 	<% if (comment.filetype == 'img') { %>
-		&nbsp;&nbsp;<img src=<%= comment.reactionfile %> width="250">
+		<img src=<%= comment.reactionfile %> width="250">
 	<% } else if (comment.filetype == 'video') { %>
 		<%- include('./videoplayer.ejs', {video: {thumbnail: "", id: comment.id}}) %>
 	<% } %>
 <% } %>
 
 <div class="commentlikes" id="<%= comment.id %>likesection">
-	&nbsp;
 	<img class="commentlikebuttons" id="commentLike" onclick="likeComment('<%= comment.id %>')" src="/content/icons/rocket_up.png">
 	<p id="<%= comment.id %>likes"><%= comment.likes %></p>
 	<img class="commentlikebuttons" id="commentDislike" onclick="dislikeComment('<%= comment.id %>')" src="/content/icons/rocket_down.png">
 	<p id="<%= comment.id %>dislikes"><%= comment.dislikes %></p>
 	<button id="replybtn" onclick="showElementDraggable('<%= comment.id %>replybox')">Reply</button>
+	<% if (typeof user != 'undefined') { %>
+		<% if (user.id == comment.user_id) { %>
+			<button id="deletebtn" onclick="redirectConfirm('Delete Comment?', '/comment/delete/<%= comment.id %>')">Delete Comment?</button>
+		<% } %>
+	<% } %>
+
 </div>
