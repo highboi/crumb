@@ -23,6 +23,8 @@ VIDEO BEING VIEWED
 .container .video-contents {
 	grid-area: video;
 	width: 1000px;
+	border: solid var(--green);
+	padding: 10px;
 }
 
 .container .video-contents .video-container {
@@ -30,6 +32,7 @@ VIDEO BEING VIEWED
 	width: auto;
 	height: auto;
 	background-color: rgb(32, 32, 32);
+
 }
 
 .container .video-contents .video-container #video {
@@ -120,11 +123,11 @@ STYLE VIDEO TEXT
 
 .container .video-contents .videotext #videosettings {
 	background-color: var(--dark-grey);
-	border: solid black;
-	border-width: 5px;
+	padding: 5px;
 	height: 2em;
 	display: flex;
 	flex-direction: row;
+	align-items: center;
 }
 
 .container .video-contents .videotext #subtitles {

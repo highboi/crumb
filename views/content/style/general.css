@@ -67,6 +67,16 @@ hr {
 	color: var(--green);
 }
 
+select {
+	color: var(--green);
+	background-color: var(--darkest-grey);
+	border: solid var(--green);
+	border-width: 2px;
+	text-shadow: -0.06em 0 0.5px rgba(255, 200, 100, 0.9);
+	appearance: none;
+	font-weight: bold;
+}
+
 /*
 MISC STYLING
 */
