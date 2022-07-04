@@ -54,7 +54,9 @@ STYLE VIDEO TEXT
 */
 
 .container .video-contents .videotext {
-	width: 1000px;
+	width: 990px;
+	background-color: #0f0f0f;
+	padding: 5px;
 }
 
 .container .video-contents .videotext button {

@@ -1,7 +1,7 @@
 <!--The EJS to display an individual comment on the site-->
 
 <div class="commentheader">
-	<h3><%= comment.username %> - <%= comment.id %></h3>
+	<h3><a href="/u/<%= comment.user_id %>"><%= comment.username %></a> - <%= comment.id %></h3>
 	<% if (comment.replies) { %>
 		<% comment.replies.substr(0, comment.replies.length-1).split(",").forEach((item, index) => { %>
 			<h5 class="commentinterlink" parentid="<%= item %>"> <%= item %> </h5>
@@ -26,10 +26,11 @@
 	<img class="commentlikebuttons" id="commentDislike" onclick="dislikeComment('<%= comment.id %>')" src="/content/icons/rocket_down.png">
 	<p id="<%= comment.id %>dislikes"><%= comment.dislikes %></p>
 	<button id="replybtn" onclick="showElementDraggable('<%= comment.id %>replybox')">Reply</button>
+	<!--
 	<% if (typeof user != 'undefined') { %>
 		<% if (user.id == comment.user_id) { %>
 			<button id="deletebtn" onclick="redirectConfirm('Delete Comment?', '/comment/delete/<%= comment.id %>')">Delete Comment?</button>
 		<% } %>
 	<% } %>
-
+	-->
 </div>

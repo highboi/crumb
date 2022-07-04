@@ -23,15 +23,18 @@ app.get("/comment/dislike/:commentid", middleware.checkSignedIn, async (req, res
 	return res.send(data);
 });
 
+/*
 //a get request for deleting a comment on the site
 app.get("/comment/delete/:commentid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
-	var comment = await client.query(`SELECT depth_level, user_id, video_id FROM comments WHERE id=$1 LIMIT 1`, [req.params.commentid]);
+	var comment = await client.query(`SELECT user_id, video_id FROM comments WHERE id=$1 LIMIT 1`, [req.params.commentid]);
 	comment = comment.rows[0];
 
 	if (comment.user_id == userinfo.id) {
-		await client.query("DELETE FROM comments WHERE id=$1", [req.params.commentid]);
+		//await client.query("DELETE FROM comments WHERE id=$1", [req.params.commentid]);
+
+		await client.query("UPDATE comments SET comment=$1 WHERE id=$2", ["[DELETED]", req.params.commentid]);
 
 		req.flash("message", "Comment deleted successfully.");
 		return res.redirect(`/v/${comment.video_id}`);
@@ -41,7 +44,7 @@ app.get("/comment/delete/:commentid", middleware.checkSignedIn, async (req, res)
 		return res.redirect("/error");
 	}
 });
-
+*/
 
 /*
 POST PATHS FOR COMMENTS

@@ -21,7 +21,11 @@
 			<% if (typeof comments != 'undefined') { %>
 				<% comments.forEach((item, index) => { %>
 					<div class="comment" id="<%= item.id %>" likes="<%= item.likes %>" dislikes="<%= item.dislikes %>" posttime="<%= item.posttime %>">
-						<%- include('./comment.ejs', {comment: item, user: user}) %>
+						<% if (typeof user != 'undefined') { %>
+							<%- include('./comment.ejs', {comment: item, user: user}) %>
+						<% } else { %>
+							<%- include('./comment.ejs', {comment: item}) %>
+						<% } %>
 
 						<%- include('./commentreplyform.ejs', {comment: item, base_parent_id: item.id, commentlink: commentlink}) %>
 					</div>
