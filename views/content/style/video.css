@@ -32,7 +32,7 @@ VIDEO BEING VIEWED
 	width: auto;
 	height: auto;
 	background-color: rgb(32, 32, 32);
-
+	overflow: none;
 }
 
 .container .video-contents .video-container #video {

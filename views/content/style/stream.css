@@ -11,8 +11,8 @@ STYLING FOR THE CHAT BOX IN LIVE STREAMS
 	width: 580px;
 	height: 450px;
 	color: var(--green);
-	background-color: var(--medium-grey);
-	border: solid black;
+	background-color: var(--dark-grey);
+	border: solid var(--green);
 	border-width: 5px;
 }
 
@@ -21,9 +21,10 @@ STYLING FOR THE CHAT BOX IN LIVE STREAMS
 	width: 580px;
 	height: 450px;
 	color: var(--green);
-	background-color: var(--medium-grey);
-	border: solid black;
-	border-width: 5px;
+	background-color: var(--dark-grey);
+	border: solid var(--green);
+	border-width: 2px;
+	scrollbar-color: var(--green) var(--darkest-grey);
 }
 
 
@@ -34,6 +35,9 @@ STYLING FOR INDIVIDUAL CHAT MESSAGES
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	background-color: var(--medium-grey);
+	border: solid var(--dark-grey);
+	border-width: 10px;
 }
 
 .chatMessage * {
