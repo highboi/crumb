@@ -1,5 +1,9 @@
 const {app, client, middleware} = require("./configBasic");
 
+/*
+MISCELLANEOUS GET REQUESTS
+*/
+
 //get the index of the site working
 app.get('/', async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
@@ -9,6 +13,13 @@ app.get('/', async (req, res) => {
 	viewObj.videos = videos;
 
 	return res.render("index.ejs", viewObj);
+});
+
+//a path for submitting and reporting bugs
+app.get("/bug", async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	return res.render("bug.ejs", viewObj);
 });
 
 //the error path for error rendering
@@ -98,4 +109,23 @@ app.get("/vidheaders", async (req, res) => {
 	var acceptedheaders = ["00000018", "00000020", "1a45dFa3", "4f676753"];
 
 	res.send({acceptedHeaders: acceptedheaders});
+});
+
+/*
+MISCELLANEOUS POST REQUESTS
+*/
+
+//post path for submission of bugs
+app.post("/bugreport", async (req, res) => {
+	console.log(req.body);
+
+	if (typeof req.body.userid == 'undefined') {
+		await client.query(`INSERT INTO bugs (description, url) VALUES ($1, $2)`, [req.body.desc, req.body.url]);
+	} else {
+		await client.query(`INSERT INTO bugs (description, url, userid) VALUES ($1, $2, $3)`, [req.body.desc, req.body.url, req.body.userid]);
+	}
+
+	req.flash("message", "Bug Report Submitted!");
+
+	return res.redirect("/");
 });

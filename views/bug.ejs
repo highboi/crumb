@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Bug Report"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<div id="bug-report">
+				<h1>Submit a bug report:</h1>
+
+				<form action="/bugreport" method="POST" id="bugReportForm">
+					<textarea id="desc" name="desc" rows="4" cols="50" placeholder="Describe the bug." maxlength="5000" required></textarea><br>
+
+					<input id="url" name="url" type="text" placeholder="Paste the URL where the bug occured." required><br><br>
+
+					<% if (typeof user != 'undefined') { %>
+						<input id="userid" name="userid" type="hidden" value="<%= user.id %>">
+					<% } %>
+
+					<button class="submit-btn" id="submitBug" type="submit">Submit Bug Report</button>
+				</form>
+			</div>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+		</main>
+	</body>
+</html>
