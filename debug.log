@@ -2952,3 +2952,25 @@
 {"level":"error","message":"(2022-07-04T23:40:16.465Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
 {"level":"error","message":"(2022-07-04T23:41:46.966Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
 {"level":"error","message":"(2022-07-04T23:43:17.546Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-04T23:44:48.016Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-04T23:46:18.500Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:12:12.541Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:13:43.033Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:26:52.751Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:28:23.203Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:29:53.657Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:31:24.254Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:32:54.698Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:34:25.207Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:34:39.120Z) --> Cannot read property 'mimetype' of undefined"}
+{"level":"error","message":"(2022-07-05T01:35:55.751Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:37:26.233Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:38:22.908Z) --> Cannot read property 'size' of undefined"}
+{"level":"error","message":"(2022-07-05T01:38:56.725Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:40:27.239Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:41:57.680Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:43:28.215Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-05T01:47:08.880Z) --> ENOENT: no such file or directory, unlink '/home/merlin/webdev/astro/storage/views/content/icons/astro_logo.png'"}
+{"level":"error","message":"(2022-07-05T01:47:08.884Z) --> ENOENT: no such file or directory, unlink '/home/merlin/webdev/astro/storage/views/content/icons/astro_flat.png'"}
+{"level":"error","message":"(2022-07-05T01:47:39.922Z) --> ENOENT: no such file or directory, unlink '/home/merlin/webdev/astro/storage/content/icons/astro_flat.png'"}
+{"level":"error","message":"(2022-07-05T01:47:39.930Z) --> ENOENT: no such file or directory, unlink '/home/merlin/webdev/astro/storage/content/icons/astro_logo.png'"}

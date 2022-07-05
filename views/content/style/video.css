@@ -13,7 +13,8 @@ VIDEO AND RECCOMENDATIONS
 	width: 1700px;
 	grid-template-areas: 
 	"video reccomendations"
-	"comments reccomendations";
+	"comments reccomendations"
+	". reccomendations";
 }
 
 /*

@@ -104,8 +104,12 @@ app.post('/register', async (req, res) => {
 
 	var acceptedimage = ["image/png", "image/jpeg", "image/jpg"];
 
-	if (!acceptedimage.includes(req.files.channelicon.mimetype) || !acceptedimage.includes(req.files.channelbanner.mimetype)) {
-		errors.push("Invalid file types for channel icon or channel banner, use png, jpeg, or jpg files.");
+	if (typeof req.files.channelicon != 'undefined' && !acceptedimage.includes(req.files.channelicon.mimetype)) {
+		errors.push("Invalid file type for channel icon. Use png, jpeg or jpg files.");
+	}
+
+	if (typeof req.files.channelbanner != 'undefined' && !acceptedimage.includes(req.files.channelbanner.mimetype)) {
+		errors.push("Invalid file type for channel banner. Use png, jpeg or jpg files.");
 	}
 
 	if (errors.length) {
@@ -116,16 +120,16 @@ app.post('/register', async (req, res) => {
 		var newuserid = await middleware.generateAlphanumId();
 		var streamkey = await middleware.generateStreamKey();
 
-		if (req.files.channelicon.size) {
+		if (typeof req.files.channelicon != 'undefined' && req.files.channelicon.size) {
 			var channeliconpath = middleware.saveFile(req.files.channelicon, "/storage/users/icons/");
 		} else {
-			var channeliconpath = "/views/content/default.png";
+			var channeliconpath = "/content/icons/astro_logo.png";
 		}
 
-		if (req.files.channelbanner.size) {
+		if (typeof req.files.channelbanner != 'undefined' && req.files.channelbanner.size) {
 			var channelbannerpath = middleware.saveFile(req.files.channelbanner, "/storage/users/banners/");
 		} else {
-			var channelbannerpath = "/views/content/default.png";
+			var channelbannerpath = "/content/icons/astro_flat.png";
 		}
 
 		var valuesarr = [newuserid, req.body.username, hashedPassword, channeliconpath, channelbannerpath, req.body.channeldesc, " " + req.body.topics + " ", streamkey];
