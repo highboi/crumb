@@ -80,6 +80,11 @@ STYLE THE PLAYLIST SECTION OF THE CHANNEL PAGE
 /*
 STYLE THE SHOUTOUTS SECTION OF THE CHANNEL PAGE
 */
+.channel #shoutouts {
+	display: flex;
+	justify-content: center;
+}
+
 .channel #shoutouts #shoutoutform {
 	width: 30vw;
 	margin: 0 auto;

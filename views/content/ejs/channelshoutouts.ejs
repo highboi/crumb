@@ -7,7 +7,7 @@
 		</form><br>
 	<% } %>
 <% } %>
-<% if (typeof shoutouts != 'undefined') { %>
+<% if (typeof shoutouts != 'undefined' && shoutouts.length) { %>
 	<hr>
 	<% shoutouts.forEach((item, index) => { %>
 		<%- include('./minichannel.ejs', {channel: item}) %>
@@ -18,4 +18,6 @@
 		<% } %>
 		<hr>
 	<% }); %>
+<% } else { %>
+	<p>No channel shoutouts for this user.</p>
 <% } %>
