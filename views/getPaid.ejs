@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs') %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<%- include('content/ejs/paymentregisterform.ejs') %>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<script>
+				var stripePubKey = <%- JSON.stringify(stripePubKey) %>;
+				var client_secret = <%- JSON.stringify(client_secret) %>;
+				var customerid = <%- JSON.stringify(customerid) %>;
+				var accountid = <%- JSON.stringify(accountid) %>;
+			</script>
+
+			<script src="https://js.stripe.com/v3/"></script>
+
+			<script src="/content/javascript/paymentRegistration.js"></script>
+		</main>
+	</body>
+</html>

@@ -130,3 +130,24 @@
 {"level":"error","message":"(2022-07-05T01:47:08.884Z) --> ENOENT: no such file or directory, unlink '/home/merlin/webdev/astro/storage/views/content/icons/astro_flat.png'"}
 {"level":"error","message":"(2022-07-05T01:47:39.922Z) --> ENOENT: no such file or directory, unlink '/home/merlin/webdev/astro/storage/content/icons/astro_flat.png'"}
 {"level":"error","message":"(2022-07-05T01:47:39.930Z) --> ENOENT: no such file or directory, unlink '/home/merlin/webdev/astro/storage/content/icons/astro_logo.png'"}
+{"level":"error","message":"(2022-07-06T19:08:21.735Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:08:26.809Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:08:46.478Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:09:28.497Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:10:07.954Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:10:08.631Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:10:13.709Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:10:30.136Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:11:21.661Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:12:47.415Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:19:19.512Z) --> Unexpected token ')'"}
+{"level":"error","message":"(2022-07-06T19:20:25.681Z) --> Unexpected token ')'"}
+{"level":"error","message":"(2022-07-06T19:21:02.717Z) --> Unexpected token ')'"}
+{"level":"error","message":"(2022-07-06T19:21:07.479Z) --> Unexpected token ')'"}
+{"level":"error","message":"(2022-07-06T19:24:43.235Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:27:27.898Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:27:32.501Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-06T19:30:08.051Z) --> Stripe: Argument \"id\" must be a string, but got: null (on API request to `DELETE /customers/{id}`)"}
+{"level":"error","message":"(2022-07-06T19:30:48.159Z) --> Stripe: Argument \"id\" must be a string, but got: null (on API request to `DELETE /customers/{id}`)"}
+{"level":"error","message":"(2022-07-06T19:31:03.640Z) --> Stripe: Argument \"id\" must be a string, but got: null (on API request to `DELETE /customers/{id}`)"}
+{"level":"error","message":"(2022-07-06T19:32:44.968Z) --> Stripe: Argument \"id\" must be a string, but got: null (on API request to `DELETE /customers/{id}`)"}

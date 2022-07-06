@@ -21,13 +21,13 @@ var cardElement = elements.create("card", {
 cardElement.mount("#cardForm");
 
 //a function that submits an advertisers information
-async function submitAdvertiser() {
+async function submitPayment() {
 	//disable the form and activate a loading animation
-	formLoadingState("adRegistrationForm");
+	formLoadingState("paymentRegistrationForm");
 
 	//check the validity of the form inputs
-	if (!checkFormInputs("adRegistrationForm")) {
-		formLoadingState("adRegistrationForm", true);
+	if (!checkFormInputs("paymentRegistrationForm")) {
+		formLoadingState("paymentRegistrationForm", true);
 		return false;
 	}
 
@@ -44,30 +44,31 @@ async function submitAdvertiser() {
 	//check for errors with the setup of the card
 	if (error) {
 		alert(error.message);
-		formLoadingState("adRegistrationForm", true);
+		formLoadingState("paymentRegistrationForm", true);
 		return false;
 	} else {
 		//re-enable form elements for submission
-		for (var element of document.getElementById("adRegistrationForm")) {
+		for (var element of document.getElementById("paymentRegistrationForm")) {
 			element.disabled = false;
 		}
 
 		/*
 		Add necessary data to the FormData object
 		*/
-		var advertFormData = new FormData(document.getElementById("adRegistrationForm"));
-		advertFormData.append("customerid", customerid);
+		var paymentFormData = new FormData(document.getElementById("paymentRegistrationForm"));
+		paymentFormData.append("customerid", customerid);
+		paymentFormData.append("accountid", accountid);
 
 		//send the data to register this advertiser
-		var response = await fetch("/adRegistration", {
+		var response = await fetch("/paymentregistration", {
 			method: "POST",
-			body: advertFormData
+			body: paymentFormData
 		});
 
 		//check the response status
 		if (response.ok) {
 			alert("Setup Succeeded!");
-			window.location.href = "/advertise";
+			window.location.href = "/";
 			return true;
 		} else {
 			alert("There was an error with our server! Please try again.");

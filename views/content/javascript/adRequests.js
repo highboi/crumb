@@ -11,6 +11,7 @@ async function getAds(amount, position=undefined) {
 
 	//get the advertisements from the fetch url
 	var advertsResponse = await fetch(fetchurl);
+
 	var adverts = await advertsResponse.json();
 
 	return adverts.adverts;

@@ -6,6 +6,58 @@ const stripe = require("stripe")(process.env.SECRET_STRIPE_KEY);
 GET PATHS FOR PAYMENTS ON THE SITE WITH STRIPE
 */
 
+//a get path for a user wanting to register to get paid
+app.get("/getpaid", middleware.checkSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	var user = await client.query(`SELECT customerid, accountid FROM users WHERE id=$1`, [viewObj.user.id]);
+	user = user.rows[0];
+
+	if (user.customerid != null && user.accountid != null) {
+		req.flash("message", "You have already registered a card for payments. To delete your current card, go to /deletecard.");
+		return res.redirect("/error");
+	}
+
+	viewObj.stripePubKey = process.env.PUBLIC_STRIPE_KEY;
+
+	var customer = await stripe.customers.create();
+
+	var account = await stripe.accounts.create({
+		type: "express"
+	});
+
+	var intent = await stripe.setupIntents.create({
+		customer: customer.id
+	});
+
+	viewObj.client_secret = intent.client_secret;
+	viewObj.customerid = customer.id;
+	viewObj.accountid = account.id;
+
+	return res.render("getPaid.ejs", viewObj);
+});
+
+//a get path for deleting a customer and their stripe account
+app.get("/deletecard", middleware.checkSignedIn, async (req, res) => {
+	var user = await middleware.getUserSession(req.cookies.sessionid);
+
+	var customer = await client.query(`SELECT customerid, accountid FROM users WHERE id=$1`, [user.id]);
+	customer = customer.rows[0];
+
+	if (customer.customerid != null && customer.accountid != null) {
+		await stripe.customers.del(customer.customerid);
+		await stripe.accounts.del(customer.accountid);
+
+		await client.query(`UPDATE users SET customerid=NULL, accountid=NULL WHERE id=$1`, [user.id]);
+
+		req.flash("message", "Successfully deleted your card.");
+		return res.redirect("/");
+	} else {
+		req.flash("message", "You have not registered your card for payments.");
+		return res.redirect("/getpaid");
+	}
+});
+
 //a get path for submitting advertisements on the site
 app.get("/advertise", middleware.checkSignedIn, async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
@@ -183,6 +235,17 @@ app.get("/advertcancel/:advertid", middleware.checkSignedIn, async (req, res) =>
 /*
 POST PATHS FOR PAYMENTS ON THE SITE WITH STRIPE
 */
+
+//the post path for users registering for payments
+app.post("/paymentregistration", middleware.checkSignedIn, async(req, res) => {
+	var user = await middleware.getUserSession(req.cookies.sessionid);
+
+	await client.query(`UPDATE users SET customerid=$1, accountid=$2 WHERE id=$3`, [req.body.customerid, req.body.accountid, user.id]);
+
+	console.log("ACCOUNT REGISTERED CARD");
+
+	res.send({succeeded: true});
+});
 
 //the post path for advertiser registration
 app.post("/adregistration", middleware.checkSignedIn, async (req, res) => {
