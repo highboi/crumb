@@ -77,6 +77,10 @@
 
 			<%- include('content/ejs/bottombody.ejs') %>
 
+			<script type="text/javascript">
+				var videoid = <%- JSON.stringify(video.id) %>;
+			</script>
+
 			<%- include('content/ejs/scripts.ejs') %>
 
 			<% if (!video.deleted && !video.private) { %>

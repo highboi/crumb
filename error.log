@@ -151,3 +151,10 @@
 {"level":"error","message":"(2022-07-06T19:30:48.159Z) --> Stripe: Argument \"id\" must be a string, but got: null (on API request to `DELETE /customers/{id}`)"}
 {"level":"error","message":"(2022-07-06T19:31:03.640Z) --> Stripe: Argument \"id\" must be a string, but got: null (on API request to `DELETE /customers/{id}`)"}
 {"level":"error","message":"(2022-07-06T19:32:44.968Z) --> Stripe: Argument \"id\" must be a string, but got: null (on API request to `DELETE /customers/{id}`)"}
+{"level":"error","message":"(2022-07-07T14:19:44.758Z) --> Invalid integer: 0.05"}
+{"level":"error","message":"(2022-07-07T14:29:57.186Z) --> Invalid integer: 0.05"}
+{"level":"error","message":"(2022-07-07T14:35:45.618Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-07T14:35:47.368Z) --> missing ) after argument list"}
+{"level":"error","message":"(2022-07-07T14:56:25.846Z) --> Your destination account needs to have at least one of the following capabilities enabled: transfers, legacy_payments"}
+{"level":"error","message":"(2022-07-07T14:59:17.232Z) --> Your destination account needs to have at least one of the following capabilities enabled: transfers, legacy_payments"}
+{"level":"error","message":"(2022-07-07T15:25:32.759Z) --> Your destination account needs to have at least one of the following capabilities enabled: transfers, legacy_payments"}

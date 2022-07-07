@@ -67,8 +67,8 @@ async function submitPayment() {
 
 		//check the response status
 		if (response.ok) {
-			alert("Setup Succeeded!");
-			window.location.href = "/";
+			alert("Card Setup Succeeded! Click OK to continue onboarding");
+			window.location = onboarding_url;
 			return true;
 		} else {
 			alert("There was an error with our server! Please try again.");

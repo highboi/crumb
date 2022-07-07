@@ -14,7 +14,7 @@ app.get("/getpaid", middleware.checkSignedIn, async (req, res) => {
 	user = user.rows[0];
 
 	if (user.customerid != null && user.accountid != null) {
-		req.flash("message", "You have already registered a card for payments. To delete your current card, go to /deletecard.");
+		req.flash("message", "You have already registered a card for payments. To delete your current card, go to /deletecard. To change your card, delete your card and fill out your information for the new card on /getpaid.");
 		return res.redirect("/error");
 	}
 
@@ -23,7 +23,14 @@ app.get("/getpaid", middleware.checkSignedIn, async (req, res) => {
 	var customer = await stripe.customers.create();
 
 	var account = await stripe.accounts.create({
-		type: "express"
+		type: "standard"
+	});
+
+	var accountlink = await stripe.accountLinks.create({
+		account: account.id,
+		refresh_url: "http://localhost/paidonboarding",
+		return_url: "http://localhost/",
+		type: "account_onboarding"
 	});
 
 	var intent = await stripe.setupIntents.create({
@@ -33,8 +40,26 @@ app.get("/getpaid", middleware.checkSignedIn, async (req, res) => {
 	viewObj.client_secret = intent.client_secret;
 	viewObj.customerid = customer.id;
 	viewObj.accountid = account.id;
+	viewObj.onboarding_url = accountlink.url;
 
 	return res.render("getPaid.ejs", viewObj);
+});
+
+//a get path for starting onboaring with a stripe account to accept payouts for ad revenue
+app.get("/paidonboarding", middleware.checkSignedIn, async (req, res) => {
+	var user = await middleware.getUserSession(req.cookies.sessionid);
+
+	var account = await client.query(`SELECT accountid FROM users WHERE id=$1`, [user.id]);
+	account = account.rows[0];
+
+	var accountlink = await stripe.accountLinks.create({
+		account: account.accountid,
+		refresh_url: "http://localhost/paidonboarding",
+		return_url: "http://localhost/",
+		type: "account_onboarding"
+	});
+
+	res.redirect(accountlink.url);
 });
 
 //a get path for deleting a customer and their stripe account
@@ -71,7 +96,7 @@ app.get("/advertise", middleware.checkSignedIn, async (req, res) => {
 
 	var adResolutions = await middleware.getAdResolutions();
 
-	viewObj = Object.assign({}, viewObj, {adPrice: 0.5, adResolutions: adResolutions, adDomain: advertiser.rows[0].businessdomain});
+	viewObj = Object.assign({}, viewObj, {adPrice: eval(process.env.IMPRESSION_COST)*10, adResolutions: adResolutions, adDomain: advertiser.rows[0].businessdomain});
 
 	return res.render("adSubmission.ejs", viewObj);
 });
@@ -214,6 +239,21 @@ app.get("/adverts", async (req, res) => {
 				action: "set"
 			}
 		);
+
+		if (req.query.videoid != 'null') {
+			var customer = await client.query(`SELECT customerid, accountid FROM users WHERE id IN (SELECT user_id FROM videos WHERE id=$1)`, [req.query.videoid]);
+			customer = customer.rows[0];
+
+			if (customer.accountid != null) {
+				var transfer = await stripe.transfers.create({
+					amount: eval(process.env.IMPRESSION_COST),
+					currency: 'usd',
+					destination: customer.accountid
+				});
+
+				console.log(transfer);
+			}
+		}
 	}
 });
 
@@ -241,8 +281,6 @@ app.post("/paymentregistration", middleware.checkSignedIn, async(req, res) => {
 	var user = await middleware.getUserSession(req.cookies.sessionid);
 
 	await client.query(`UPDATE users SET customerid=$1, accountid=$2 WHERE id=$3`, [req.body.customerid, req.body.accountid, user.id]);
-
-	console.log("ACCOUNT REGISTERED CARD");
 
 	res.send({succeeded: true});
 });
@@ -283,11 +321,8 @@ app.post("/adsubmission", middleware.checkSignedIn, async (req, res) => {
 	});
 	paymentMethod = paymentMethod.data[0];
 
-	//cost of one ad impression in pennies
-	var impression_cost = 50/1000;
-
 	var price = await stripe.prices.create({
-		unit_amount_decimal: impression_cost,
+		unit_amount_decimal: eval(process.env.IMPRESSION_COST),
 		currency: "usd",
 		recurring: {
 			interval: "month",

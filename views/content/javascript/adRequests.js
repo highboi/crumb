@@ -2,11 +2,17 @@
 
 //a function for making a request to the server for ads
 async function getAds(amount, position=undefined) {
+	console.log(window.videoid);
+
+	if (typeof window.videoid == 'undefined') {
+		window.videoid = null;
+	}
+
 	//set the fetch url based on if the position needs to be specified
 	if (typeof position == 'undefined') {
-		var fetchurl = `/adverts/?adLimit=${amount}`;
+		var fetchurl = `/adverts/?adLimit=${amount}&videoid=${window.videoid}`;
 	} else {
-		var fetchurl = `/adverts/?adLimit=${amount}&position=${position}`;
+		var fetchurl = `/adverts/?adLimit=${amount}&position=${position}&videoid=${window.videoid}`;
 	}
 
 	//get the advertisements from the fetch url
@@ -97,7 +103,6 @@ async function mainAdFunction() {
 		}
 	}
 }
-
 
 //execute the main ad function
 mainAdFunction();
