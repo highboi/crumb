@@ -243,7 +243,9 @@ CREATE TABLE public.users (
     description character varying(1000),
     topics text,
     streamkey text,
-    videocount bigint DEFAULT 0
+    videocount bigint DEFAULT 0,
+    customerid text,
+    accountid text
 );
 
 
@@ -298,7 +300,6 @@ ALTER TABLE public.videos OWNER TO merlin;
 --
 
 COPY public.advertisers (id, businessdomain, businessemail, customerid) FROM stdin;
-319d6fad-2946-405b-be30-1c1be4055e0b	https://duckduckgo.com	samsbusiness@gmail.com	cus_JyEOhkUMHbjVhL
 \.
 
 
@@ -458,9 +459,9 @@ COPY public.subscribedtopics (topicname, user_id) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: merlin
 --
 
-COPY public.users (password, username, id, channelicon, channelbanner, subscribers, description, topics, streamkey, videocount) FROM stdin;
-$2b$10$equ0TrTCwzA8TbqQXRPg1epYz5Xy4A0RPOid4sZOZvYhI4cFv7pZm	jane	60235bb8-41f0-42c9-8bd7-f12f645f10a3	/users/icons/1609522478769-space.png	/users/banners/1609522478769-skyscrapers.jpg	0	A second channel on the site	this is a second channel	wxOGBvOZ3DXnwJ8j7cMxFSXVbFSBysG2bPAP1VQRvo0=	1
-$2b$10$wo4Hx.FPEvKydMybmPirYO1QSphfJk/Ermt4euUMVMQNP0QDrMke.	example channel	319d6fad-2946-405b-be30-1c1be4055e0b	/users/icons/1604712612118-bongoCat.png	/users/banners/1604712612118-bluecity.jpg	1	This is a test channel to test features on the site.	crumb webdev nodejs	XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=	2
+COPY public.users (password, username, id, channelicon, channelbanner, subscribers, description, topics, streamkey, videocount, customerid, accountid) FROM stdin;
+$2b$10$equ0TrTCwzA8TbqQXRPg1epYz5Xy4A0RPOid4sZOZvYhI4cFv7pZm	jane	60235bb8-41f0-42c9-8bd7-f12f645f10a3	/users/icons/1609522478769-space.png	/users/banners/1609522478769-skyscrapers.jpg	0	A second channel on the site	this is a second channel	wxOGBvOZ3DXnwJ8j7cMxFSXVbFSBysG2bPAP1VQRvo0=	1	\N	\N
+$2b$10$wo4Hx.FPEvKydMybmPirYO1QSphfJk/Ermt4euUMVMQNP0QDrMke.	example channel	319d6fad-2946-405b-be30-1c1be4055e0b	/users/icons/1604712612118-bongoCat.png	/users/banners/1604712612118-bluecity.jpg	1	This is a test channel to test features on the site.	crumb webdev nodejs	XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=	2	\N	\N
 \.
 
 
@@ -514,7 +515,7 @@ This is a test of the websocket live streaming capabilities of the site.	/videos
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	/videos/thumbnails/1614229816950-beautiful_landscapes_in_the_world-wallpaper-1920x1080.jpg	/videos/nmsMedia/live/XpKfuO+ZsJIQ71MSfWvCcgPRksb0n2hWXe3hGahhUWU=/2021-02-24-23-10-18.mp4	Test OBS Stream	156	81ae5b9c-628c-48cf-a9f6-5aee7e7b64d0	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-02-25T05:10:16.950Z	test obs stream	example channel	/users/icons/1604712612118-bongoCat.png	f	t	obs	f	f	\N
 This is a test video to show the functionality of subtitles.	/videos/thumbnails/1623391587603-the_bean.jpeg	/videos/files/1623391587603-nyan.mp4	Subtitles Video Test	59	HmmwavpR	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-06-11T06:06:27.607Z	 subtitles 	example channel	/users/icons/1604712612118-bongoCat.png	f	\N	\N	f	f	/videos/subtitles1623391587603-example.srt
 asdf	/server/deleteicon.png			0	wymdU1et	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2022-01-27T04:17:50.008Z	nyan		/server/deletechannelicon.png	f	t	obs	t	f	\N
-This is a test video upload for the site.	/videos/thumbnails/1614151941099-bongoCat.png	/videos/files/1614151941099-nyan.mp4	Test Video Upload	1027	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-02-24T07:32:21.102Z	nyan cat video example upload test	example channel	/users/icons/1604712612118-bongoCat.png	f	\N	\N	f	f	\N
+This is a test video upload for the site.	/videos/thumbnails/1614151941099-bongoCat.png	/videos/files/1614151941099-nyan.mp4	Test Video Upload	1032	db5ee5c6-4dc5-4711-bd72-a166c5e47f25	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-02-24T07:32:21.102Z	nyan cat video example upload test	example channel	/users/icons/1604712612118-bongoCat.png	f	\N	\N	f	f	\N
 This is an example video that is set to private in order to keep it hidden from other users.	/videos/thumbnails/1614534795337-spiderverse.jpeg	/videos/files/1614534795337-nyan.mp4	Example Private Video	2	73f606a5-69a4-4471-9d37-a4dc4eed488f	319d6fad-2946-405b-be30-1c1be4055e0b	0	0	2021-02-28T17:53:15.344Z	private video	example channel	/users/icons/1604712612118-bongoCat.png	f	\N	\N	f	t	\N
 \.
 
