@@ -3002,3 +3002,5 @@
 {"level":"error","message":"(2022-07-07T14:56:25.846Z) --> Your destination account needs to have at least one of the following capabilities enabled: transfers, legacy_payments"}
 {"level":"error","message":"(2022-07-07T14:59:17.232Z) --> Your destination account needs to have at least one of the following capabilities enabled: transfers, legacy_payments"}
 {"level":"error","message":"(2022-07-07T15:25:32.759Z) --> Your destination account needs to have at least one of the following capabilities enabled: transfers, legacy_payments"}
+{"level":"error","message":"(2022-07-07T16:09:18.879Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-07-07T16:09:19.238Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}

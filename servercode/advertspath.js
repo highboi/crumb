@@ -200,6 +200,7 @@ app.get("/adstats", middleware.checkSignedIn, async (req, res) => {
 	return res.render("adInfo.ejs", viewObj);
 });
 
+
 //a get path for the accepted ad dimensions
 app.get("/addimensions", async (req, res) => {
 	var acceptedDimensions = await middleware.getAdResolutions();
@@ -255,6 +256,29 @@ app.get("/adverts", async (req, res) => {
 			}
 		}
 	}
+});
+
+//a get path for deleting an advertiser
+app.get("/deleteadvertiser", middleware.checkSignedIn, async (req, res) => {
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	var adverts = await client.query(`SELECT * FROM adverts WHERE businessid=$1`, [userinfo.id]);
+	adverts = adverts.rows[0];
+
+	for (var advert in adverts) {
+		await middleware.deleteAdvertDetails(userinfo.id, advert.id);
+	}
+
+	var advertiser = await client.query(`SELECT customerid FROM advertisers WHERE id=$1`, [userinfo.id]);
+	advertiser = advertiser.rows[0];
+
+	await stripe.customers.del(advertiser.customerid);
+
+	await client.query(`DELETE FROM advertisers WHERE id=$1`, [userinfo.id]);
+
+	req.flash("message", "Successfully deleted advertiser information.");
+
+	return res.redirect("/");
 });
 
 //a get path for the cancellation of a subscription

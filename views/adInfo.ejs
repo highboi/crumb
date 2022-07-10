@@ -15,7 +15,8 @@
 				<h1>Advertisements for <%= adDomain %></h1>
 
 				<a href="/advertise" target="_blank">Make a new advertisement</a><br><br>
-				<a href="/advertiserEditor/<%= user.id %>" target="_blank">Edit advertiser information</a>
+				<a href="/advertiserEditor/<%= user.id %>" target="_blank">Edit advertiser information</a><br><br>
+				<a href="#" onclick="redirectConfirm('Delete yourself as an advertiser? (your account will be safe)', '/deleteadvertiser')">Delete this advertiser?</a>
 
 				<% adverts.forEach((advert, index) => { %>
 					<div class="adContainer">

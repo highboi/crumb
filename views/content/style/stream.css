@@ -14,6 +14,7 @@ STYLING FOR THE CHAT BOX IN LIVE STREAMS
 	background-color: var(--dark-grey);
 	border: solid var(--green);
 	border-width: 5px;
+	scrollbar-color: var(--green) var(--darkest-grey);
 }
 
 .live-chat-replay #chatBox {
