@@ -128,6 +128,8 @@ STYLE THE MINI CHANNELS
 	display: flex;
 	align-items: center;
 	background-color: var(--dark-grey);
+	border: solid var(--green);
+	border-width: 2px;
 }
 
 
