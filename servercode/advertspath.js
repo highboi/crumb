@@ -246,8 +246,9 @@ app.get("/adverts", async (req, res) => {
 			customer = customer.rows[0];
 
 			if (customer.accountid != null) {
+				//transfer the cost of an ad impression divided by 2 so we get 50% revenue
 				var transfer = await stripe.transfers.create({
-					amount: eval(process.env.IMPRESSION_COST),
+					amount: eval(process.env.IMPRESSION_COST)/2,
 					currency: 'usd',
 					destination: customer.accountid
 				});
