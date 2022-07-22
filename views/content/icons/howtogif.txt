@@ -1,0 +1,13 @@
+#This is a file outlining how to create a gif from images
+
+1. Convert Images to GIF format:
+	ffmpeg -i image.png image.gif
+2. Use Gifsicle to Convert GIF Files to an Animation:
+	gifsicle -i image1.gif image2.gif -o final.gif
+3. Use the Gifsicle Manual for More Features:
+	man gifsicle
+
+A. Use ffmpeg to Concatenate Files:
+	ffmpeg -f concat -i filelist.txt -c copy merged_output.file
+   Make sure the filelist.txt file is in this format:
+	file '/path/to/file.file'
