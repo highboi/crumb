@@ -19,7 +19,18 @@
 				<form action="/fuse" method="POST" class="authform" id="schemaForm">
 					<p>Enter Information about your Database:</p>
 					<div>
-						<input id="url" name="url" placeholder="Database URL" autofocus required>
+						<label for="url">URL to Access Database:</label>
+						<input id="url" name="url" placeholder="postgresql://, mongodb://, etc.">
+					</div>
+					<div>
+						<label for="databasetype">Database Type:</label>
+						<select id="databasetype" name="databasetype">
+							<option value="mysql">MySQL</option>
+							<option value="pgsql">PostgreSQL</option>
+							<option value="oracle">Oracle</option>
+							<option value="mongodb">MongoDB</option>
+							<option value="mssql">Microsoft SQL Server</option>
+						</select>
 					</div>
 					<div>
 						<label class="filelabel" for="schema">Upload Database Schema</label>
