@@ -7,17 +7,17 @@ STYLESHEET FOR MISC OR GENERAL STYLING
 GLOBAL ACCESS OF TAGS
 */
 body {
-	background-color: var(--navy);
-	color: var(--green);
+	background-color: var(--black-navy);
+	color: var(--hot-pink);
 	font-family: monospace,Menlo,DejaVu Sans Mono,Lucida Console;
 	font-smooth: never;
 	font-weight: 600;
-	text-shadow: -0.06em 0 0.5px rgba(255, 200, 100, 0.9);
+	text-shadow: -0.06em 0 0.5px var(--navy);
 	overflow: auto;
 }
 
 a {
-	color: var(--green);
+	color: var(--hot-pink);
 	text-decoration: none;
 }
 
@@ -32,7 +32,7 @@ a img:hover {
 
 button {
 	color: var(--green);
-	background-color: var(--medium-grey);
+	background-color: var(--darkest-navy);
 	border: solid var(--green) 3px;
 }
 

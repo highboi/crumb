@@ -1,10 +1,20 @@
 :root {
+	--green: #00ff9b;
+	/*
 	--green: #adff12;
+	*/
 	--terminal-green: #cffaad;
+
 	--grey: #3f3f3f;
 	--light-grey: #7f7f7f;
 	--medium-grey: #2f2f2f;
 	--dark-grey: #1f1f1f;
 	--darkest-grey: #0f0f0f;
-	--navy: #000010;
+
+	--navy: #6512ff;
+	--dark-navy: #2A0078;
+	--darkest-navy: #180045;
+	--black-navy: #060012;
+
+	--hot-pink: #ff12ac;
 }

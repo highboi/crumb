@@ -155,7 +155,7 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 
 .container .reccomendations .video-thumbnail .thumbnail {
 	text-align: center;
-	background-color: var(--terminal-green);
+	background-color: var(--green);
 }
 
 .container .reccomendations .links .text img {

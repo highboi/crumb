@@ -8,7 +8,7 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 
 /* style the banner in general */
 nav .banner {
-	background-color: var(--dark-grey);
+	background-color: var(--dark-navy);
 	position: fixed;
 	top: 0px;
 	left: 0px;
@@ -27,7 +27,7 @@ nav .banner #banner-icon img {
 	height: 85px;
 	margin: 20px;
 	border-radius: 10%;
-	border: solid var(--green);
+	border: solid var(--darkest-navy);
 	border-width: 3px;
 }
 
@@ -53,7 +53,7 @@ nav .banner #searchbar #searchbtn button img {
 	width: 70px;
 	height: 70px;
 	border-radius: 10%;
-	border: solid var(--grey);
+	border: solid var(--darkest-navy);
 	border-width: 5px;
 }
 
@@ -74,10 +74,10 @@ nav .banner #searchbar #searchquerydiv {
 nav .banner #searchbar #searchquerydiv input {
 	margin-top: 15px;
 	height: 50px;
-	background-color: var(--grey);
-	color: var(--green);
+	background-color: var(--green);
+	color: var(--black-navy);
 	outline: none;
-	border: solid var(--green);
+	border: solid var(--darkest-navy);
 	box-shadow: none;
 	width: 400px;
 	font-size: 18px;
@@ -88,15 +88,15 @@ nav .banner #searchbar #searchrecs {
 	display: none;
 	position: absolute;
 	text-align: center;
-	background-color: var(--green);
-	color: var(--medium-grey);
+	background-color: var(--dark-navy);
+	color: var(--hot-pink);
 	min-width: 400px;
 	max-width: 400px;
 	z-index: 1;
 }
 
 nav .banner #searchbar #searchrecs a {
-	color: var(--medium-grey);
+	color: var(--black-navy);
 }
 
 /* style the channel link or sign-in link on the right side of the banner */
