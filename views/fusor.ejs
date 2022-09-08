@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs') %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<!--Main content goes here-->
+
+			<div id="schemaFuse">
+				<h1>Submit Database for Data Fusion:</h1>
+
+				<form action="/fuse" method="POST" class="authform" id="schemaForm">
+					<p>Enter Information about your Database:</p>
+					<div>
+						<input id="url" name="url" placeholder="Database URL" autofocus required>
+					</div>
+					<div>
+						<label class="filelabel" for="schema">Upload Database Schema</label>
+						<input id="schema" name="schema" type="file" required>
+					</div><br>
+
+					<button class="submitbtn" type="button" onclick="schemaSubmitted();">Submit Database</button>
+					<h1 class="percentage"></h1>
+					<div class="lds-hourglass"></div>
+					<br><br>
+				</form>
+			</div>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<!--Variables given by the EJS are defined in a script tag here-->
+
+			<!--External scripts are defined here-->
+		</main>
+	</body>
+</html>
