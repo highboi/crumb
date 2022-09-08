@@ -1,5 +1,7 @@
 #! /bin/bash
 
-kill "$(pgrep startServer.sh)"
+killall node
+killall nginx
+killall redis-server
 echo "Killed Server..."
 sleep 2
