@@ -52,7 +52,7 @@ A CSS DOCUMENT TO GIVE FUNCTIONALITY TO SWITCHES
 
 /* if the input is clicked, then style the slider element directly after it */
 .switchinput:checked + .slider {
-	background-color: #000;
+	background-color: var(--dark-grey);
 }
 
 /* if the input is clicked, style the slider circle or switch */

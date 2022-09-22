@@ -23,7 +23,6 @@ INDIVIDUAL THUMBNAILS
 .video-thumbnail {
 	padding: 0.5vw;
 	margin: 0.5vw;
-	background-color: var(--dark-navy);
 	border: solid var(--green);
 }
 

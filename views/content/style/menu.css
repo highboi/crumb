@@ -8,7 +8,7 @@ THE SITE BANNER AT THE TOP OF EACH PAGE
 
 /* style the banner in general */
 nav .banner {
-	background-color: var(--dark-navy);
+	background-color: var(--dark-grey);
 	position: fixed;
 	top: 0px;
 	left: 0px;
@@ -27,7 +27,7 @@ nav .banner #banner-icon img {
 	height: 85px;
 	margin: 20px;
 	border-radius: 10%;
-	border: solid var(--darkest-navy);
+	border: solid var(--green);
 	border-width: 3px;
 }
 
@@ -53,8 +53,6 @@ nav .banner #searchbar #searchbtn button img {
 	width: 70px;
 	height: 70px;
 	border-radius: 10%;
-	border: solid var(--darkest-navy);
-	border-width: 5px;
 }
 
 nav .banner #searchbar #searchbtn button {
@@ -88,8 +86,8 @@ nav .banner #searchbar #searchrecs {
 	display: none;
 	position: absolute;
 	text-align: center;
-	background-color: var(--dark-navy);
-	color: var(--hot-pink);
+	background-color: var(--green);
+	color: var(--black-navy);
 	min-width: 400px;
 	max-width: 400px;
 	z-index: 1;

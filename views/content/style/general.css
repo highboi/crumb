@@ -8,16 +8,16 @@ GLOBAL ACCESS OF TAGS
 */
 body {
 	background-color: var(--black-navy);
-	color: var(--hot-pink);
+	color: var(--green);
 	font-family: monospace,Menlo,DejaVu Sans Mono,Lucida Console;
 	font-smooth: never;
 	font-weight: 600;
-	text-shadow: -0.06em 0 0.5px var(--navy);
+	text-shadow: -0.06em 0 0.5px var(--darkest-navy);
 	overflow: auto;
 }
 
 a {
-	color: var(--hot-pink);
+	color: var(--green);
 	text-decoration: none;
 }
 
