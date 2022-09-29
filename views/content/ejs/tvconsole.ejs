@@ -1,15 +1,36 @@
 <div class="tv-console">
-	<h1>TV!</h1>
-
 	<%- include('./videoplayer.ejs', {video: video}) %>
 
-	<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button>
+	<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button><br><br>
 
 	<div class="tv-remote">
-		<% if (typeof types != 'undefined') { %>
-			<% types.forEach((item, index) => { %>
-				<button><a href="/tv/?type=<%= item %>"><%= item %></a></button>
-			<% }); %>
-		<% } %>
+		<div id="tv-search">
+			<h2>TV Remote:</h2><br>
+
+			<input id="remote" name="remote" type="text">
+			<button id="remotebutton" name="remotebutton" type="submit" onclick="tvCustom();">GO!</button><br><br>
+
+			<div id="categories">
+				<% if (typeof types != 'undefined') { %>
+					<% types.forEach((item, index) => { %>
+						<button class="tv-remote-category"><a href="/tv/?type=<%= item %>"><%= item %></a></button><br><br>
+					<% }); %>
+				<% } %>
+			</div>
+		</div><br><br>
+
+		<div id="tv-controls">
+			<h2>Console Controls:</h2><br>
+
+			<div class="autoplay">
+				<p>Autoplay:</p>
+				<label class="switch" id="autoplay">
+					<input class="switchinput" type="checkbox">
+					<span class="slider"></span>
+				</label>
+			</div>
+
+			<img src="/content/icons/fullscreen.png" id="fullscreenTV" onclick="toggleFullscreen(document.documentElement);">
+		</div>
 	</div>
 </div>

@@ -142,8 +142,8 @@ function addFunctionality(player) {
 
 	//handle fullscreen changes
 	player.fullscreenbtn.addEventListener("click", (event) => {
-		//change the fullscreen mode
-		if (document.fullscreenElement) {
+		//change/toggle the fullscreen mode
+		if (document.fullscreenElement != null && document.fullscreenElement.getAttribute("class") == "video-container") {
 			//exit the fullscreen
 			if (document.exitFullscreen) {
 				document.exitFullscreen();
@@ -179,4 +179,28 @@ function addFunctionality(player) {
 			player.controls.style.height = "10%";
 		}
 	});
+}
+
+//a function to toggle fullscreen functionality for an element
+function toggleFullscreen(element) {
+	//change the fullscreen mode
+	if (document.fullscreenElement) {
+		//exit the fullscreen
+		if (document.exitFullscreen) {
+			document.exitFullscreen();
+		} else if (document.webkitExitFullscreen) {
+			document.webkitExitFullscreen();
+		} else if (document.msExitFullscreen) {
+			document.msExitFullscreen();
+		}
+	} else {
+		//make the video fullscreen
+		if (element.requestFullscreen) {
+			element.requestFullscreen();
+		} else if (element.webkitRequestFullscreen) {
+			element.webkitRequestFullscreen();
+		} else if (element.msRequestFullscreen) {
+			element.msRequestFullscreen();
+		}
+	}
 }

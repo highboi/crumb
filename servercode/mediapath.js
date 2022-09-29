@@ -136,7 +136,11 @@ app.get("/tv", async (req, res) => {
 		var video = await client.query("SELECT * FROM videos WHERE deleted=false AND private=false ORDER BY RANDOM() LIMIT 1");
 		video = video.rows[0];
 	} else {
-		var video = await client.query("SELECT * FROM videos WHERE deleted=false AND private=false AND UPPER(topics) LIKE UPPER($1) ORDER BY RANDOM() LIMIT 1", ["% " + req.query.type + " %"]);
+		var typelist = req.query.type.split(" ");
+
+		var finaltype = typelist[Math.floor(Math.random() * typelist.length)];
+
+		var video = await client.query("SELECT * FROM videos WHERE deleted=false AND private=false AND UPPER(topics) LIKE UPPER($1) ORDER BY RANDOM() LIMIT 1", ["%" + finaltype + "%"]);
 		video = video.rows[0];
 	}
 

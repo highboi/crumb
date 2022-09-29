@@ -1,0 +1,52 @@
+/*
+CSS STYLING FOR THE TV CONSOLE ON ASTRO
+*/
+
+.tv-console {
+	text-align: center;
+	width: 60vw;
+	margin: auto;
+	border: solid var(--green);
+	padding: 20px;
+}
+
+.tv-console * {
+	text-align: center;
+	margin: auto;
+}
+
+.tv-remote #tv-controls {
+	display: flex;
+	border: solid var(--green);
+	padding: 20px;
+}
+
+.tv-remote #fullscreenTV {
+	width: 90px;
+	height: 90px;
+}
+
+.tv-remote #categories {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.tv-remote #categories * {
+	background-color: var(--black-navy);
+}
+
+.tv-remote-category a {
+	font-size: 25px;
+}
+
+.tv-remote #tv-search {
+	border: solid var(--green);
+	padding: 20px;
+}
+
+.player-container {
+	text-align: center;
+	width: 50vw;
+	border: solid var(--green);
+}

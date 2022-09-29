@@ -16,6 +16,18 @@
 			<%- include('content/ejs/bottombody.ejs') %>
 
 			<%- include('content/ejs/scripts.ejs') %>
+
+			<script type="text/javascript">
+				//get the next tv link for the browser to redirect to after the current video is done
+				var queryParams = new URLSearchParams(window.location.search);
+				var nextvideolink = `/tv/?type=${queryParams.get("type")}`;
+			</script>
+
+			<script src="/content/javascript/videocontrols.js"></script>
+
+			<script src="/content/javascript/tvconsole.js"></script>
+
+			<script src="/content/javascript/autoplay.js"></script>
 		</main>
 	</body>
 </html>
