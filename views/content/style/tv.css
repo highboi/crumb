@@ -2,12 +2,18 @@
 CSS STYLING FOR THE TV CONSOLE ON ASTRO
 */
 
+
+/*
+TV CONSOLE
+*/
 .tv-console {
+	display: flex;
 	text-align: center;
-	width: 60vw;
+	width: 80vw;
 	margin: auto;
-	border: solid var(--green);
 	padding: 20px;
+	border: solid var(--green);
+	background-color: var(--darkest-grey);
 }
 
 .tv-console * {
@@ -15,38 +21,54 @@ CSS STYLING FOR THE TV CONSOLE ON ASTRO
 	margin: auto;
 }
 
-.tv-remote #tv-controls {
-	display: flex;
+/*
+TV CONTROLS
+*/
+.tv-console #tv-controls {
 	border: solid var(--green);
-	padding: 20px;
+	padding: 10px;
+	margin: 10px;
+	background-color: var(--dark-grey);
 }
 
-.tv-remote #fullscreenTV {
+.tv-console #tv-controls #fullscreenTV {
 	width: 90px;
 	height: 90px;
 }
 
-.tv-remote #categories {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
+/*
+TV SEARCH
+*/
+.tv-console #tv-search {
+	border: solid var(--green);
+	padding: 10px;
+	margin: 10px;
+	background-color: var(--dark-grey);
 }
 
-.tv-remote #categories * {
+.tv-console #tv-search #remote {
+	border: solid var(--green);
+	margin: 5px;
+}
+
+.tv-console #tv-search #categories {
+}
+
+.tv-console #tv-search #categories * {
 	background-color: var(--black-navy);
 }
 
-.tv-remote-category a {
+.tv-console #tv-search #categories .tv-remote-category a {
 	font-size: 25px;
 }
 
-.tv-remote #tv-search {
-	border: solid var(--green);
-	padding: 20px;
-}
-
-.player-container {
+/*
+TV SCREEN
+*/
+.tv-console .player-container {
 	text-align: center;
 	width: 50vw;
 	border: solid var(--green);
+	padding: 10px;
+	margin: 10px;
 }

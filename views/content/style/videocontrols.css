@@ -1,5 +1,5 @@
 .video-player {
-	background-color: rgb(32, 32, 32);
+	background-color: var(--dark-grey);
 	display: flex;
 	flex-direction: row;
 	justify-content: space-evenly;

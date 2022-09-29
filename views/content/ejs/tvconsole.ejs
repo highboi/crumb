@@ -1,36 +1,36 @@
 <div class="tv-console">
-	<%- include('./videoplayer.ejs', {video: video}) %>
+	<div id="tv-controls">
+		<h2>Console Controls:</h2><br>
 
-	<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button><br><br>
+		<div class="autoplay">
+			<p>Autoplay:</p>
+			<label class="switch" id="autoplay">
+				<input class="switchinput" type="checkbox">
+				<span class="slider"></span>
+			</label>
+		</div><br>
 
-	<div class="tv-remote">
-		<div id="tv-search">
-			<h2>TV Remote:</h2><br>
+		<img src="/content/icons/fullscreen.png" id="fullscreenTV" onclick="toggleFullscreen(document.documentElement);">
+	</div>
 
-			<input id="remote" name="remote" type="text">
-			<button id="remotebutton" name="remotebutton" type="submit" onclick="tvCustom();">GO!</button><br><br>
+	<div>
+		<%- include('./videoplayer.ejs', {video: video}) %>
 
-			<div id="categories">
-				<% if (typeof types != 'undefined') { %>
-					<% types.forEach((item, index) => { %>
-						<button class="tv-remote-category"><a href="/tv/?type=<%= item %>"><%= item %></a></button><br><br>
-					<% }); %>
-				<% } %>
-			</div>
-		</div><br><br>
+		<button><a href="/v/<%= video.id %>" target="_blank">Link to Video</a></button><br><br>
+	</div>
 
-		<div id="tv-controls">
-			<h2>Console Controls:</h2><br>
+	<div id="tv-search">
+		<h2>TV Remote:</h2><br>
 
-			<div class="autoplay">
-				<p>Autoplay:</p>
-				<label class="switch" id="autoplay">
-					<input class="switchinput" type="checkbox">
-					<span class="slider"></span>
-				</label>
-			</div>
+		<input id="remote" name="remote" type="text">
+		<button id="remotebutton" name="remotebutton" type="submit" onclick="tvCustom();">GO!</button><br><br>
 
-			<img src="/content/icons/fullscreen.png" id="fullscreenTV" onclick="toggleFullscreen(document.documentElement);">
+		<div id="categories">
+			<% if (typeof types != 'undefined') { %>
+				<% types.forEach((item, index) => { %>
+					<button class="tv-remote-category"><a href="/tv/?type=<%= item %>"><%= item %></a></button><br><br>
+				<% }); %>
+			<% } %>
 		</div>
 	</div>
 </div>

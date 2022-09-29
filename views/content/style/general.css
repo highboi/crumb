@@ -203,4 +203,11 @@ IMPLEMENT BROWSER WIDTH CUTOFF FOR THE SITE BANNER
 		width: 1100px;
 		position: absolute;
 	}
+
+	.tv-console {
+		@extend .tv-console;
+		flex-wrap: wrap;
+	}
+
+	
 }
