@@ -1,0 +1,77 @@
+/*
+STYLESHEET FOR THUMBNAILS ON THE SITE
+*/
+
+
+/*
+STYLE SECTIONS OF THUMBNAILS
+*/
+.group-videos {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.search-videos {
+	display: flex;
+	flex-wrap: flex;
+}
+
+/*
+INDIVIDUAL THUMBNAILS
+*/
+.video-thumbnail {
+	padding: 0.5vw;
+	margin: 0.5vw;
+	background-color: var(--dark-grey);
+	border: solid var(--green);
+}
+
+.video-thumbnail .thumbnail img {
+	vertical-align: top;
+	background-color: black;
+}
+
+.video-thumbnail .links {
+	font-size: 15px;
+}
+
+.video-thumbnail .links .channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.video-thumbnail .links .channel-links #channel-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+}
+
+.video-thumbnail .links .channel-links #extras:hover {
+	cursor: pointer;
+}
+
+.video-thumbnail .links .channel-links .extralinks {
+	display: none;
+	position: absolute;
+	background-color: var(--green);
+	padding: 10px;
+	border: solid black 5px;
+}
+
+.video-thumbnail .links .channel-links .extralinks button {
+	margin: 5px;
+	border: solid black 3px;
+}
+
+.video-thumbnail .links .channel-links .extralinks object {
+	display: none;
+}
+
+.video-thumbnail .links .channel-links .extralinks object * {
+	color: var(--dark-grey);
+}
+
+.not-interested-undo {
+	display: none;
+}

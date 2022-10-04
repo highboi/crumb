@@ -1,0 +1,25 @@
+/*
+GENERAL STYLING FOR CSS ON MOBILE DEVICES
+*/
+
+nav .banner {
+	width: 100vw;
+	position: absolute;
+}
+
+.tv-console {
+	@extend .tv-console;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.tv-console * {
+	text-align: center;
+	margin: auto;
+}
+
+.tv-console .player-container {
+	@extend .player-container;
+	width: 95%;
+}
+

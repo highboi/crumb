@@ -1,0 +1,18 @@
+/*
+MOBILE CSS FILES
+*/
+@import url("/content/style/mobile/menu.css");
+@import url("/content/style/mobile/channel.css");
+@import url("/content/style/mobile/thumbnail.css");
+@import url("/content/style/mobile/video.css");
+@import url("/content/style/mobile/comments.css");
+@import url("/content/style/mobile/videoplayer.css");
+@import url("/content/style/mobile/search.css");
+@import url("/content/style/mobile/playlist.css");
+@import url("/content/style/mobile/stream.css");
+@import url("/content/style/mobile/autoplay.css");
+@import url("/content/style/mobile/adverts.css");
+@import url("/content/style/mobile/videocontrols.css");
+@import url("/content/style/mobile/general.css");
+@import url("/content/style/mobile/tv.css");
+@import url("/content/style/mobile/genmobile.css");

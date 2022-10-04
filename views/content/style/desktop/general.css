@@ -77,6 +77,11 @@ select {
 	font-weight: bold;
 }
 
+.messages {
+	text-align: center;
+	margin: 0 auto;
+}
+
 /*
 MISC STYLING
 */
@@ -189,7 +194,7 @@ STYLING FOR LOADING ANIMATIONS ON THE SITE
 /*
 STYLING FOR SUBMISSION FORMS ON THE SITE
 */
-#register, #login, #video-submit, #playlist-submit, #stream-submit, #bug-report, #schemaFuse {
+#register, #login, #video-submit, #playlist-submit, #stream-submit, #bug-report, #forgotpass {
 	text-align: center;
 	width: 50vw;
 	margin: auto;
@@ -207,7 +212,5 @@ IMPLEMENT BROWSER WIDTH CUTOFF FOR THE SITE BANNER
 	.tv-console {
 		@extend .tv-console;
 		flex-wrap: wrap;
-	}
-
-	
+	}	
 }

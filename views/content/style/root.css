@@ -1,9 +1,15 @@
+/*
+DEFINING VARIABLES TO BE USED BY CSS GLOBALLY
+*/
 :root {
-	/*
-	--green: #00ff9b;
-	*/
 	--green: #adff12;
 	--terminal-green: #cffaad;
+	--blue-green: #00ff9b;
+
+	--red: #ff1236;
+	--dark-red: #780012;
+	--darkest-red: #45000a;
+	--black-red: #120003;
 
 	--grey: #3f3f3f;
 	--light-grey: #7f7f7f;
@@ -17,4 +23,5 @@
 	--black-navy: #060012;
 
 	--hot-pink: #ff12ac;
+
 }

@@ -1,0 +1,123 @@
+/*
+HANDLE THE PLAYLIST VIDEOS WHEN VIEWING A PLAYLIST
+*/
+.playlist-videos {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.playlist-videos .video {
+	padding-right: 0.5vw;
+	padding-left: 0.5vw;
+}
+
+.playlist-videos .video .thumbnail {
+	vertical-align: top;
+}
+
+.playlist-videos .video .links {
+	font-size: 15px;
+}
+
+.playlist-videos .video .links #channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.playlist-videos .video .links #channel-links #channel-icon {
+	width: 50px;
+	height: 50px;
+	border-radius: 50px;
+}
+
+/*
+HANDLE PLAYLIST CONTENT ON THE SIDE OF PLAYLIST VIDEOS
+*/
+.playlist-content {
+	width: 100%;
+	background-color: var(--dark-grey);
+	border: solid var(--green);
+	border-width: 5px;
+	text-align: center;
+}
+
+.playlist-scroll {
+	overflow-y: scroll;
+	height: 450px;
+	border: solid var(--darkest-grey);
+	border-width: 4px;
+}
+
+.playlist-scroll .current-video {
+	background-color: var(--medium-grey);
+}
+
+/*
+STYLE THE PLAYLIST VIDEO ENTRIES IN THE SCROLLABLE BAR ON THE SIDE OF PLAYLIST VIDEOS
+*/
+.playlist-thumbnail {
+	padding-left: 0.5vw;
+	padding-right: 0.5vw;
+	display: flex;
+	flex-direction: row;
+}
+
+.playlist-thumbnail .thumbnail {
+	width: 150px;
+	height: 113px;
+}
+
+.playlist-thumbnail .thumbnail img {
+	vertical-align: top;
+	background-color: black
+}
+
+.playlist-thumbnail .links {
+	font-size: 15px;
+}
+
+.playlist-thumbnail .links .channel-links {
+	display: flex;
+	flex-direction: row;
+	justify-content: left;
+	align-items: center;
+}
+
+.playlist-thumbnail .links .channel-links * {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.playlist-thumbnail .links .channel-links #channel-icon {
+	width: 30px;
+	height: 30px;
+	border-radius: 50px;
+}
+
+.playlist-thumbnail .links .channel-links #extras:hover {
+	cursor: pointer;
+}
+
+.playlist-thumbnail .links .channel-links .extralinks {
+	display: none;
+}
+
+.playlist-thumbnail .links .channel-links .extralinks object {
+	display: none;
+}
+
+.not-interested-undo {
+	display: none;
+}
+
+
+/*
+STYLE PLAYLIST THUMBNAILS IN SEARCH RESULTS
+*/
+.playlist-result {
+	background-color: var(--dark-grey);
+	padding: 0.5vw;
+	margin: 0.5vw;
+	border: solid var(--green);
+	width: 450px;
+}

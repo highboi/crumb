@@ -37,9 +37,9 @@ VIDEO BEING VIEWED
 }
 
 .container .video-contents .video-container #video {
-	object-fit: cover;
 	width: 100%;
-	height: auto;
+	height: 100%;
+	object-fit: cover;
 }
 
 .container .video-contents .video-container:fullscreen #video {
@@ -155,7 +155,7 @@ RECCOMENDATIONS WHILE VIEWING VIDEOS
 
 .container .reccomendations .video-thumbnail .thumbnail {
 	text-align: center;
-	background-color: var(--green);
+	background-color: var(--terminal-green);
 }
 
 .container .reccomendations .links .text img {

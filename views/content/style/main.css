@@ -1,15 +1,14 @@
+/*
+GLOBAL CSS
+*/
 @import url("/content/style/root.css");
-@import url("/content/style/menu.css");
-@import url("/content/style/channel.css");
-@import url("/content/style/thumbnail.css");
-@import url("/content/style/video.css");
-@import url("/content/style/comments.css");
-@import url("/content/style/videoplayer.css");
-@import url("/content/style/search.css");
-@import url("/content/style/playlist.css");
-@import url("/content/style/stream.css");
-@import url("/content/style/autoplay.css");
-@import url("/content/style/adverts.css");
-@import url("/content/style/videocontrols.css");
-@import url("/content/style/general.css");
-@import url("/content/style/tv.css");
+
+/*
+DESKTOP CSS
+*/
+@import url("/content/style/desktop.css") (min-width: 1000px);
+
+/*
+MOBILE CSS
+*/
+@import url("/content/style/mobile.css") (max-width: 1000px);

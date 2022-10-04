@@ -1,0 +1,179 @@
+/*
+STYLING FOR MENU ITEMS SUCH AS BANNERS AND NAVBARS
+*/
+
+/*
+THE SITE BANNER AT THE TOP OF EACH PAGE
+*/
+
+/* style the banner in general */
+nav .banner {
+	background-color: var(--dark-grey);
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	width: 100vw;
+	height: 270px;
+	z-index: 10;
+}
+
+/* style the elements inside the banner to be larger for mobile */
+nav .banner > * {
+	transform: scale(1.2, 1.2);
+}
+
+/* style the banner icon to the left of the banner */
+nav .banner #banner-icon img {
+	width: 85px;
+	height: 85px;
+	margin: 20px;
+	border-radius: 10%;
+	border: solid var(--green);
+	border-width: 3px;
+}
+
+/* style the search bar in the center of the banner */
+nav .banner #searchbar form {
+	display: grid;
+	grid-template-areas:
+		"searchquery searchbtn"
+		"searchrecs searchrecs";
+}
+
+nav .banner #searchbar #searchbtn {
+	grid-area: searchbtn;
+	float: right;
+}
+
+nav .banner #searchbar #searchbtn button img {
+	width: 70px;
+	height: 70px;
+	border-radius: 10%;
+	border: solid var(--grey);
+	border-width: 5px;
+}
+
+nav .banner #searchbar #searchbtn button {
+	border: none;
+	background: none;
+}
+
+nav .banner #searchbar #searchbtn button:hover {
+	cursor: pointer;
+}
+
+nav .banner #searchbar #searchquerydiv {
+	grid-area: searchquery;
+	float: left;
+}
+
+nav .banner #searchbar #searchquerydiv input {
+	margin-top: 15px;
+	height: 50px;
+	background-color: var(--grey);
+	color: var(--green);
+	outline: none;
+	border: solid var(--green);
+	box-shadow: none;
+	width: 95%;
+	font-size: 25px;
+}
+
+nav .banner #searchbar #searchrecs {
+	grid-area: searchrecs;
+	display: none;
+	position: absolute;
+	text-align: center;
+	background-color: var(--green);
+	color: var(--medium-grey);
+	min-width: 100%;
+	max-width: 100%;
+	z-index: 1;
+	font-size: 25px;
+}
+
+nav .banner #searchbar #searchrecs a {
+	color: var(--medium-grey);
+}
+
+/* style the channel link or sign-in link on the right side of the banner */
+nav .banner #usercorner {
+	margin-right: 30px;
+}
+
+nav .banner #usercorner #channelcorner {
+	background: none;
+	border: none;
+	border-radius: 50%;
+}
+
+nav .banner #usercorner #channelcorner:hover {
+	cursor: pointer;
+}
+
+nav .banner #usercorner #channelcorner img {
+	width: 80px;
+	height: 80px;
+	min-width: 50px;
+	min-height: 50px;
+	border-radius: 10%;
+	border: solid var(--green);
+	border-width: 3px;
+}
+
+nav .banner #usercorner #signincorner {
+	background: none;
+	border: none;
+}
+
+nav .banner #usercorner #signincorner img {
+	width: 80px;
+	height: 80px;
+	min-width: 50px;
+	min-height: 50px;
+	border-radius: 10%;
+	border: solid var(--green);
+	border-width: 3px;
+}
+
+nav .banner #usercorner #signincorner:hover {
+	cursor: pointer;
+}
+
+/*
+THE DROPDOWN MENU ON THE BANNER
+*/
+
+nav .banner #actionsmenu #hover-icon {
+	width: 85px;
+	height: 85px;
+	border-radius: 10%;
+	border: solid var(--green);
+	border-width: 3px;
+}
+
+nav .banner #actionsmenu .dropdown-content {
+	border: solid var(--grey);
+	width: 85px;
+}
+
+nav .banner #actionsmenu .dropdown-content img {
+	width: 70px;
+	height: 70px;
+	border-radius: 10%;
+	border: solid var(--green);
+	border-width: 3px;
+}
+
+nav .banner #actionsmenu div {
+	margin-top: 7px;
+	margin-bottom: 7px;
+}
+
+nav .banner #actionsmenu * {
+	margin: 0;
+}

@@ -14,10 +14,10 @@ nav .banner {
 	left: 0px;
 	display: flex;
 	flex-direction: row;
-	justify-content: space-between;
+	justify-content: center;
 	align-items: center;
 	width: 100%;
-	height: 100px;
+	height: 120px;
 	z-index: 10;
 }
 
@@ -53,6 +53,8 @@ nav .banner #searchbar #searchbtn button img {
 	width: 70px;
 	height: 70px;
 	border-radius: 10%;
+	border: solid var(--grey);
+	border-width: 5px;
 }
 
 nav .banner #searchbar #searchbtn button {
@@ -72,10 +74,10 @@ nav .banner #searchbar #searchquerydiv {
 nav .banner #searchbar #searchquerydiv input {
 	margin-top: 15px;
 	height: 50px;
-	background-color: var(--green);
-	color: var(--black-navy);
+	background-color: var(--grey);
+	color: var(--green);
 	outline: none;
-	border: solid var(--darkest-navy);
+	border: solid var(--green);
 	box-shadow: none;
 	width: 400px;
 	font-size: 18px;
@@ -87,14 +89,14 @@ nav .banner #searchbar #searchrecs {
 	position: absolute;
 	text-align: center;
 	background-color: var(--green);
-	color: var(--black-navy);
+	color: var(--medium-grey);
 	min-width: 400px;
 	max-width: 400px;
 	z-index: 1;
 }
 
 nav .banner #searchbar #searchrecs a {
-	color: var(--black-navy);
+	color: var(--medium-grey);
 }
 
 /* style the channel link or sign-in link on the right side of the banner */
@@ -133,7 +135,7 @@ nav .banner #usercorner #signincorner img {
 	min-width: 50px;
 	min-height: 50px;
 	border-radius: 10%;
-	border: solid black;
+	border: solid var(--green);
 	border-width: 3px;
 }
 
@@ -141,10 +143,36 @@ nav .banner #usercorner #signincorner:hover {
 	cursor: pointer;
 }
 
-nav .banner #actionsmenu img {
-	width: 80px;
-	height: 80px;
+/*
+THE DROPDOWN MENU ON THE BANNER
+*/
+
+nav .banner #actionsmenu #hover-icon {
+	width: 85px;
+	height: 85px;
 	border-radius: 10%;
 	border: solid var(--green);
 	border-width: 3px;
+}
+
+nav .banner #actionsmenu .dropdown-content {
+	border: solid var(--grey);
+	width: 85px;
+}
+
+nav .banner #actionsmenu .dropdown-content img {
+	width: 70px;
+	height: 70px;
+	border-radius: 10%;
+	border: solid var(--green);
+	border-width: 3px;
+}
+
+nav .banner #actionsmenu div {
+	margin-top: 7px;
+	margin-bottom: 7px;
+}
+
+nav .banner #actionsmenu * {
+	margin: 0;
 }

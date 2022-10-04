@@ -1,0 +1,52 @@
+/*
+STYLING FOR LIVE STREAM CHATS & CHAT REPLAYS
+*/
+
+
+/*
+STYLING FOR THE CHAT BOX IN LIVE STREAMS
+*/
+.live-chat #chatBox {
+	overflow-y: scroll;
+	width: 580px;
+	height: 450px;
+	color: var(--green);
+	background-color: var(--dark-grey);
+	border: solid var(--green);
+	border-width: 5px;
+	scrollbar-color: var(--green) var(--darkest-grey);
+}
+
+.live-chat-replay #chatBox {
+	overflow-y: scroll;
+	width: 580px;
+	height: 450px;
+	color: var(--green);
+	background-color: var(--dark-grey);
+	border: solid var(--green);
+	border-width: 2px;
+	scrollbar-color: var(--green) var(--darkest-grey);
+}
+
+
+/*
+STYLING FOR INDIVIDUAL CHAT MESSAGES
+*/
+.chatMessage {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	background-color: var(--medium-grey);
+	border: solid var(--dark-grey);
+	border-width: 10px;
+}
+
+.chatMessage * {
+	margin: 10px;
+}
+
+.chatMessage img {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+}

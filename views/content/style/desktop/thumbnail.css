@@ -23,6 +23,7 @@ INDIVIDUAL THUMBNAILS
 .video-thumbnail {
 	padding: 0.5vw;
 	margin: 0.5vw;
+	background-color: var(--dark-grey);
 	border: solid var(--green);
 }
 
@@ -68,7 +69,7 @@ INDIVIDUAL THUMBNAILS
 }
 
 .video-thumbnail .links .channel-links .extralinks object * {
-	color: var(--dark-navy);
+	color: var(--dark-grey);
 }
 
 .not-interested-undo {

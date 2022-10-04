@@ -36,15 +36,16 @@ HANDLE PLAYLIST CONTENT ON THE SIDE OF PLAYLIST VIDEOS
 .playlist-content {
 	width: 100%;
 	background-color: var(--dark-grey);
-	border: solid black;
+	border: solid var(--green);
 	border-width: 5px;
+	text-align: center;
 }
 
 .playlist-scroll {
 	overflow-y: scroll;
 	height: 450px;
-	border: solid black;
-	border-width: 5px;
+	border: solid var(--darkest-grey);
+	border-width: 4px;
 }
 
 .playlist-scroll .current-video {

@@ -1,12 +1,20 @@
 //change the element likes and dislikes on the html and in the server
 async function changeElementLikes(link, likeElement, dislikeElement) {
 	var response = await fetch(link);
-	var data = await response.json();
 
-	likeElement.innerHTML = data[0];
-	dislikeElement.innerHTML = data[1];
+	if (!response.redirected) {
+		var data = await response.json();
 
-	return data;
+		console.log(data);
+
+		likeElement.innerHTML = data[0];
+		dislikeElement.innerHTML = data[1];
+
+		return data;
+	} else {
+		window.location.href = response.url;
+		return;
+	}
 }
 
 //like a video

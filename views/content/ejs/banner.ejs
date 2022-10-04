@@ -22,11 +22,12 @@
 	</div>
 
 	<div id="actionsmenu" class="dropdown" title="Do Stuff!">
-		<img src="/content/icons/astro_flat.png"><br>
+		<img id="hover-icon" src="/content/icons/astro_flat.png"><br>
 		<div class="dropdown-content">
 			<% if (typeof user != 'undefined') { %>
 				<% var channellink = `/u/${user.id}`; %>
 				<a href="<%= channellink %>" title="Your Channel!"><img src="/content/icons/house_dark.png"></a><br>
+				<a href="/tv" title="TV!"><img src="/content/icons/astro_flat.png"></a><br>
 				<a href="/v/submit" title="Submit a Video!"><img src="/content/icons/video_dark.png"></a><br>
 				<a href="/playlist/new" title="Make a Playlist!"><img src="/content/icons/playlist_dark.png"></a><br>
 				<a href="/l/start/web" title="Do a Webcam Stream!"><img src="/content/icons/webcam_dark.png"></a><br>

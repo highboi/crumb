@@ -1,0 +1,61 @@
+/*
+A CSS DOCUMENT TO GIVE FUNCTIONALITY TO SWITCHES
+*/
+
+/* style the container of autoplay switches */
+.autoplay {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+/* the container for the switch */
+.switch {
+	position: relative;
+	display: inline-block;
+	width: 60px;
+	height: 34px;
+}
+
+/* the actual input that will be checked off, make it invisible but functional by reducing all the display properties to 0 */
+.switch .switchinput {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+/* style the span tag (slider) which is the actual container for the "switch" or circle that moves */
+.switch .slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: var(--light-grey);
+	transition: 0.4s;
+	border-radius: 34px;
+}
+
+/* create a pseudoelement inside the slider which comes in the form of a tiny circle that acts as the switch */
+.switch .slider::before {
+	position: absolute;
+	content: "";
+	width: 26px;
+	height: 26px;
+	left: 4px;
+	bottom: 4px;
+	background-color: #adff12;
+	transition: 0.4s;
+	border-radius: 50%;
+}
+
+/* if the input is clicked, then style the slider element directly after it */
+.switchinput:checked + .slider {
+	background-color: var(--hot-pink);
+}
+
+/* if the input is clicked, style the slider circle or switch */
+.switchinput:checked + .slider::before {
+	transform: translateX(26px);
+}

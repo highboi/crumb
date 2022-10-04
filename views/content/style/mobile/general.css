@@ -1,0 +1,216 @@
+/*
+STYLESHEET FOR MISC OR GENERAL STYLING
+*/
+
+
+/*
+GLOBAL ACCESS OF TAGS
+*/
+body {
+	background-color: var(--black-navy);
+	color: var(--green);
+	font-family: monospace,Menlo,DejaVu Sans Mono,Lucida Console;
+	font-smooth: never;
+	font-weight: 600;
+	text-shadow: -0.06em 0 0.5px var(--darkest-navy);
+	overflow: auto;
+}
+
+a {
+	color: var(--green);
+	text-decoration: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a img:hover {
+	opacity: 0.5;
+}
+
+button {
+	color: var(--green);
+	background-color: var(--darkest-navy);
+	border: solid var(--green) 3px;
+}
+
+input, textarea {
+	background-color: var(--medium-grey);
+	color: var(--green);
+	border: none;
+	padding: 5px;
+	margin: 3px;
+}
+
+::placeholder {
+	color: var(--green);
+	opacity: 0.75;
+}
+
+.filelabel {
+	display: inline-block;
+	padding: 5px;
+	margin: 5px;
+	cursor: pointer;
+	background-color: var(--medium-grey);
+	color: var(--green);
+	border: 3px solid var(--green);
+}
+
+input[type=file] {
+	display: none;
+}
+
+hr {
+	color: var(--green);
+}
+
+select {
+	color: var(--green);
+	background-color: var(--darkest-grey);
+	border: solid var(--green);
+	border-width: 2px;
+	text-shadow: -0.06em 0 0.5px rgba(255, 200, 100, 0.9);
+	appearance: none;
+	font-weight: bold;
+}
+
+.messages {
+	text-align: center;
+	margin: 0 auto;
+}
+
+/*
+MISC STYLING
+*/
+
+.underlinelinks {
+	text-decoration: underline;
+}
+
+.hardtoseetext {
+	color: black;
+	text-shadow: 1px 1px 0 var(--green), -1px -1px 0 var(--green), 1px -1px 0 var(--green), -1px 1px 0 var(--green);
+}
+
+
+/*
+STYLING FOR FORMS
+*/
+
+.authform input[type="text"] {
+	width: 250px;
+}
+
+.authform input[type="email"] {
+	width: 250px;
+}
+
+.authform input[type="password"] {
+	width: 250px;
+}
+
+.authform h4 {
+	margin: 3px;
+}
+
+
+/*
+MAIN TAG STYLING
+*/
+main {
+	margin-top: 130px;
+}
+
+/*
+STYLING FOR DROPDOWN MENUS
+*/
+.dropdown {
+	position: relative;
+	background-color: var(--dark-grey);
+	max-width: 100px;
+	margin-left: 30px;
+	margin-right: 30px;
+}
+
+.dropdown:hover {
+	cursor: pointer;
+}
+
+.dropdown-content {
+	display: none;
+	position: absolute;
+	text-align: center;
+	background-color: var(--dark-grey);
+	z-index: 2;
+	width: 100%;
+	overflow: auto;
+}
+
+.dropdown:hover .dropdown-content {
+	display: inline-block;
+}
+
+
+/*
+STYLING FOR LOADING ANIMATIONS ON THE SITE
+*/
+.lds-hourglass {
+	display: none;
+	position: relative;
+	width: 80px;
+	height: 80px;
+}
+
+.lds-hourglass:after {
+	content: " ";
+	display: block;
+	border-radius: 50%;
+	width: 0;
+	height: 0;
+	margin: 8px;
+	box-sizing: border-box;
+	border: 32px solid white;
+	border-color: var(--green) transparent var(--green) transparent;
+	animation: lds-hourglass 1.2s infinite;
+}
+
+@keyframes lds-hourglass {
+	0% {
+		transform: rotate(0);
+		animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+	}
+	50% {
+		transform: rotate(900deg);
+		animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+	}
+	100% {
+		transform: rotate(1800deg);
+	}
+}
+
+/*
+STYLING FOR SUBMISSION FORMS ON THE SITE
+*/
+#register, #login, #video-submit, #playlist-submit, #stream-submit, #bug-report, #schemaFuse {
+	text-align: center;
+	width: 50vw;
+	margin: auto;
+}
+
+/*
+IMPLEMENT BROWSER WIDTH CUTOFF FOR THE SITE BANNER
+*/
+@media only screen and (max-width: 1100px) {
+	nav .banner {
+		width: 1100px;
+		position: absolute;
+	}
+
+	.tv-console {
+		@extend .tv-console;
+		flex-wrap: wrap;
+	}	
+}
