@@ -2022,6 +2022,8 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 (function (Buffer){(function (){
 //this file contains functions which aid in the handling of webtorrents using a webtorrent client given to the functions
 
+
+
 //a function to begin seeding data, returning the torrent object to the callback function
 function seedData(client, data, callback) {
 	//create a buffer object from this data
@@ -2063,12 +2065,25 @@ async function getURLBuffer(url) {
 	return buffer;
 }
 
+//a function to get the file URL from a torrent object
+async function extractFileURL(torrent) {
+	//get the file object in the torrent file
+	var file = torrent.files[0];
+
+	//get the file URL string
+	file.getBlobURLAsync = promisify(file.getBlobURL);
+	var fileURL = await file.getBlobURLAsync();
+
+	//return the file url for use
+	return fileURL;
+}
+
 //define each of the above functions in the form of async/await functions
 var seedDataAsync = promisify(seedData);
 var downloadDataAsync = promisify(downloadData);
 
 //make all of these functions available to the window since browserify will not allow this to be accessed by other scripts
-window.webtorrentLibrary = {seedData: seedData, downloadData: downloadData, seedDataAsync: seedDataAsync, downloadDataAsync: downloadDataAsync, getURLBuffer: getURLBuffer};
+window.webtorrentLibrary = {seedData: seedData, downloadData: downloadData, seedDataAsync: seedDataAsync, downloadDataAsync: downloadDataAsync, getURLBuffer: getURLBuffer, extractFileURL: extractFileURL};
 
 }).call(this)}).call(this,require("buffer").Buffer)
 },{"buffer":2}]},{},[4]);

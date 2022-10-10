@@ -8,57 +8,61 @@ var client = new WebTorrent();
 async function mainTorrentHandler() {
 	console.log("WEBRTC supported, starting torrent process.");
 
-	var magnetStatus = false;
+	//get all tags that could have a file url attached
+	var sourceTags = Array.from(document.getElementsByTagName("source"));
+	var styleTags = Array.from(document.getElementsByTagName("style"));
+	var imgTags = Array.from(document.getElementsByTagName("img"));
+	var scriptTags = Array.from(document.getElementsByTagName("script"));
 
-	/*
-	RETRIEVE ALL FILE LINKS ON THE WEBPAGE
-	*/
+	//concatenate all tags to one array
+	var finalTags = sourceTags.concat(styleTags).concat(imgTags).concat(scriptTags);
 
-	/*
-	LOOK TO SEE IF GUN.JS HAS STORED TORRENT LINKS FOR THESE FILES
-	*/
+	//extract the source urls from the tags
+	var sourceUrls = [];
+	for (var tagindex in finalTags) {
+		var tag = finalTags[tagindex];
 
-	//do something according to the status of the magnet of this video
-	if (!magnetStatus) { //if there is no magnet for this video
-		//create a request object for the url of this video
-		var videoRequest = new Request(`/video/${videoid}`);
-
-		//fetch the data/response from this url
-		var response = await fetch(videoRequest);
-
-		//get the array buffer from this response
-		var responseBuffer = await response.arrayBuffer();
-
-		//convert the array buffer in the response to a uint8array
-		var buffer = new Uint8Array(responseBuffer);
-
-		//seed the data in the buffer (node Buffers and Uint8Arrays are the same)
-		var torrent = await webtorrentLibrary.seedDataAsync(client, buffer);
-
-		//show the torrent in the console
-		console.log("TORRENT:", torrent);
-
-		//get the magnet URI and send it to the server for storage in redis
-		await fetch(`/setmagnet/${videoid}/?magnetlink=${encodeURIComponent(torrent.magnetURI)}`);
-	} else { //if there is a magnet for this video
-		//download data from the magnet link in "magnetStatus"
-		var torrent = await webtorrentLibrary.downloadDataAsync(client, magnetStatus);
-
-		//show the torrent in the console
-		console.log("TORRENT:", torrent);
+		if (tag.src == "") {
+			sourceUrls.push(undefined);
+		} else {
+			sourceUrls.push(tag.src);
+		}
 	}
 
-	//get the file url from the torrent object
-	var fileURL = await webtorrentLibrary.extractFileURL(torrent);
+	//get source urls and their associated torrent links from the gun.js database
+	var torrentLinks = [];
+	for (var sourceindex in sourceUrls) {
+		var source = sourceUrls[sourceindex];
 
-	/*
-	REPLACE THE FILE LINKS NECESSARY WITH TORRENT LINKS
-	*/
+		if (typeof source != 'undefined') {
+			var sourceTorrent = await getGunData(source);
+			torrentLinks.push(sourceTorrent);
+		} else {
+			torrentLinks.push(undefined);
+		}
+	}
 
-	/*
-	START SEEDING/TORRENTING FILES NOT ON THE GUN.JS DATABASE
-	*/
+	//handle torrenting of data
+	for (var torrentindex in torrentLinks) {
+		var torrentLink = torrentLinks[torrentindex];
+		var sourceLink = sourceUrls[torrentindex];
+		var tag = finalTags[torrentindex];
 
+		if (typeof torrentLink != 'undefined') {
+			//DOWNLOAD THE TORRENT
+			var torrent = await webtorrentLibrary.downloadDataAsync(client, torrentLink);
+		} else {
+			//SEED THE TORRENT
+
+			var urlBuffer = await webtorrentLibrary.getURLBuffer(sourceLink);
+
+			var torrent = await webtorrentLibrary.seedDataAsync(client, urlBuffer);
+		}
+
+		//set the torrent as the source of this tag
+		var fileURL = await webtorrentLibrary.extractFileURL(torrent);
+		tag.src = fileURL;
+	}
 }
 
 //check for webrtc support
