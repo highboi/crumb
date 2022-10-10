@@ -4315,3 +4315,5 @@
 {"level":"error","message":"(2022-10-05T20:31:46.989Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
 {"level":"error","message":"(2022-10-05T20:33:17.506Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
 {"level":"error","message":"(2022-10-05T20:34:47.999Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-10-05T20:36:18.429Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-10-05T20:37:48.984Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}

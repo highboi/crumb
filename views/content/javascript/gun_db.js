@@ -97,8 +97,4 @@ MAIN GUN JS FUNCTIONALITY
 			}
 		};
 	});
-
-	//var gun_result = await getCurrentPage();
-
-	//console.log(gun_result.document_html);
 })();

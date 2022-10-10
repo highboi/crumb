@@ -2049,12 +2049,26 @@ function downloadData(client, uri, callback) {
 	});
 }
 
+//a function for returning an array buffer of a url for torrenting
+async function getURLBuffer(url) {
+	//request information/data from the url
+	var urlRequest = new Request(url);
+	var response = await fetch(urlRequest);
+
+	//extract the array buffer from the returned data
+	var responseBuffer = await response.arrayBuffer();
+	var buffer = new Uint8Array(responseBuffer);
+
+	//return the buffer for processing
+	return buffer;
+}
+
 //define each of the above functions in the form of async/await functions
 var seedDataAsync = promisify(seedData);
 var downloadDataAsync = promisify(downloadData);
 
 //make all of these functions available to the window since browserify will not allow this to be accessed by other scripts
-window.webtorrentLibrary = {seedData: seedData, downloadData: downloadData, seedDataAsync: seedDataAsync, downloadDataAsync: downloadDataAsync};
+window.webtorrentLibrary = {seedData: seedData, downloadData: downloadData, seedDataAsync: seedDataAsync, downloadDataAsync: downloadDataAsync, getURLBuffer: getURLBuffer};
 
 }).call(this)}).call(this,require("buffer").Buffer)
 },{"buffer":2}]},{},[4]);
