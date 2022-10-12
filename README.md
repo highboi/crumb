@@ -1,4 +1,4 @@
-Astro: A Creative Site for Web 3.0
+# Astro: A Creative Site for Web 3.0
 
 ![Astro Logo](https://github.com/highboi/astro/blob/master/views/content/icons/astro.png)
 
