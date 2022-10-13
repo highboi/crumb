@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Edit Your Video"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<%- include('content/ejs/editvideoform.ejs') %>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<script>
+				var videoid = "<%- video.id %>";
+			</script>
+
+			<script src="/content/javascript/videoEdits.js"></script>
+		</main>
+	</body>
+</html>

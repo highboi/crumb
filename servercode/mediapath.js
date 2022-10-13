@@ -13,6 +13,16 @@ app.get("/v/submit", middleware.checkSignedIn, async (req, res) => {
 	return res.render("submitvideo.ejs", viewObj);
 });
 
+//get the form for editing videos
+app.get("/v/edit/:videoid", middleware.checkSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	var video = await client.query(`SELECT * FROM videos WHERE id=$1`, [req.params.videoid]);
+	viewObj.video = video.rows[0];
+
+	return res.render("editvideo.ejs", viewObj);
+});
+
 //views individual videos on the site
 app.get("/v/:videoid", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
@@ -181,7 +191,7 @@ POST PATHS FOR VIDEOS/MEDIA
 */
 
 //store the submitted video to the database
-app.post("/v/submit", async (req, res) => {
+app.post("/v/submit", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	var videopath = await middleware.saveFile(req.files.video, "/storage/videos/files/");
@@ -218,4 +228,54 @@ app.post("/v/submit", async (req, res) => {
 	await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userinfo.id]);
 
 	return res.redirect(`/v/${videoid}`);
+});
+
+//update a video with new details
+app.post("/v/postedit/:videoid", middleware.checkSignedIn, async (req, res) => {
+	//get user information for verification of the video edits
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	//get information about the video and it's files
+	var fileinfo = await client.query(`SELECT user_id, deleted, subtitles, video, thumbnail FROM videos WHERE id=$1`, [req.params.videoid]);
+	fileinfo = fileinfo.rows[0];
+
+	//check to make sure this video exists before allowing edits to take place
+	if (fileinfo.deleted) {
+		req.flash("message", "This is a deleted video, you cannot edit this.");
+		return res.redirect("/");
+	}
+
+	//check to make sure this video belongs to the current user
+	if (userinfo.id != fileinfo.user_id) {
+		req.flash("message", "This is not your video to edit.");
+		return res.redirect("/");
+	}
+
+	//replace the subtitle, video, and thumbnail files for this video
+	if (typeof req.files.video != 'undefined') {
+		await middleware.deleteFile(fileinfo.video);
+		var videopath = await middleware.saveFile(req.files.video, "/storage/videos/files/");
+
+		await client.query(`UPDATE videos SET video=$1 WHERE id=$2`, [videopath, req.params.videoid]);
+	}
+	if (typeof req.files.thumbnail != 'undefined') {
+		await middleware.deleteFile(fileinfo.thumbnail);
+		var thumbnailpath = await middleware.saveFile(req.files.thumbnail, "/storage/videos/thumbnails/");
+
+		await client.query(`UPDATE videos SET thumbnail=$1 WHERE id=$2`, [thumbnailpath, req.params.videoid]);
+	}
+	if (typeof req.files.subtitles != 'undefined' && typeof fileinfo.subtitles != 'undefined') {
+		await middleware.deleteFile(fileinfo.subtitles);
+		var subtitlepath = await middleware.saveFile(req.files.subtitles, "/storage/videos/subtitles/");
+
+		await client.query(`UPDATE videos SET subtitles=$1 WHERE id=$2`, [subtitlepath, req.params.videoid]);
+	}
+
+	//change the details around the video
+	var valuesarray = [req.body.title, req.body.description, " " + req.body.topics + " ", req.body.private, req.params.videoid];
+	await client.query(`UPDATE videos SET title=$1, description=$2, topics=$3, private=$4 WHERE id=$5`, valuesarray);
+
+	//redirect the user to the newly edited video
+	req.flash("message", "Video Edited!");
+	return res.redirect(`/v/${req.params.videoid}`);
 });

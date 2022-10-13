@@ -1,0 +1,46 @@
+<div id="video-submit">
+	<h1>Edit Your Video:</h1>
+
+	<form action="/v/submit" method="POST" enctype='multipart/form-data' id="videoSubmissionForm">
+		<div>
+			<input type="text" placeholder="Title" id="title" name="title" maxlength="300" value="<%= video.title %>" required>
+		</div>
+		<div>
+			<textarea id="description" name="description" rows="4" cols="50" placeholder="Description" maxlength="5000" required><%= video.description %></textarea>
+		</div><br>
+
+		<div>
+			<label for="includeChannelTopics">Include your channel topics?</label>
+			<input type="checkbox" id="includeChannelTopics" name="includeChannelTopics">
+		</div><br>
+		<div>
+			<label for="topics">Topics for Video (seperated by spaces):</label><br>
+			<input type="text" placeholder="topic1 topic2" id="topics" name="topics" value="<%= video.topics %>" required>
+		</div><br>
+
+		<div>
+			<label class="filelabel" for="thumbnail">Upload New Thumbnail (optional)</label><br>
+			<input type="file" id="thumbnail" name="thumbnail" accept="image/*">
+		</div>
+		<div>
+			<label class="filelabel" for="video">Upload New Video (optional)</label><br>
+			<input type="file" id="video" name="video" accept="video/*">
+		</div>
+		<div>
+			<label class="filelabel" for="subtitles">Upload Optional Subtitles (SRT format)</label><br>
+			<input type="file" id="subtitles" name="subtitles" accept=".srt">
+		</div><br>
+
+		<div>
+			<label for="private">Make this video private?</label>
+			<select id="private" name="private">
+				<option value="false">No</option>
+				<option value="true">Yes</option>
+			</select>
+		</div><br>
+
+		<button class="submitbtn" id="submitVideo" type="button" onclick="videoSubmitted();">Submit Video Edits</button>
+		<h1 class="percentage"></h1>
+		<div class="lds-hourglass"></div>
+	</form>
+</div>

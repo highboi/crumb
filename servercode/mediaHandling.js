@@ -19,6 +19,17 @@ var mediaFunctions = {
 		return completepath.replace(global.appRoot, "").replace("/storage", "");
 	},
 
+	//this is a function for deleting a file from the server
+	deleteFile: function (filepath) {
+		var completepath = global.appRoot + filepath;
+
+		fs.unlink(completepath, (err) => {
+			if (err) throw err;
+		});
+
+		return true;
+	},
+
 	//this is a function for saving/copying videos to different resolutions using ffmpeg
 	changeVideoResolution: async function (videopath, width, height) {
 		var process = new ffmpeg(videopath);
