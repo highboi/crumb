@@ -1,0 +1,39 @@
+#dropshipping-content {
+	text-align: center;
+	font-size: 40px;
+	width: 100vw;
+}
+
+#dropshipping-content img {
+	width: 40vw;
+	height: 40vw;
+	border: solid var(--green);
+}
+
+#dropshipping-content #bateman {
+	width: 500px;
+	height: 500px;
+}
+
+#dropshipping-content h4 {
+	font-size: 15px;
+}
+
+#dropshipping-content li {
+	padding: 20px;
+}
+
+#dropshipping-content p {
+	font-size: 30px;
+}
+
+#dropshipping-content #sigma-evolution {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+#dropshipping-content #sigma-evolution * {
+	width: 30vw;
+}

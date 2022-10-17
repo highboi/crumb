@@ -15,6 +15,13 @@ app.get('/', async (req, res) => {
 	return res.render("index.ejs", viewObj);
 });
 
+//a path for a funny dropshipping course page
+app.get("/dropshipping", async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	return res.render("dropshipping.ejs", viewObj);
+});
+
 //a path for submitting and reporting bugs
 app.get("/bug", async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
