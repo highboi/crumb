@@ -1,0 +1,32 @@
+<div id="image-submit">
+	<h1>Submit An Image:</h1>
+
+	<form action="/i/submit" method="POST" enctype='multipart/form-data' id="imageSubmitForm">
+		<div>
+			<input type="text" placeholder="Title" id="title" name="title" maxlength="300" required>
+		</div>
+		<div>
+			<label class="filelabel" for="thumbnail">Upload Image</label><br>
+			<input type="file" id="thumbnail" name="thumbnail" accept="image/*" required>
+		</div>
+		<div>
+			<label for="includeChannelTopics">Include your channel topics? </label>
+			<input type="checkbox" id="includeChannelTopics" name="includeChannelTopics">
+		</div>
+		<div>
+			<label for="topics">Topics for Image (seperated by spaces):</label><br>
+			<input type="text" placeholder="topic1 topic2" id="topics" name="topics">
+		</div>
+		<div>
+			<label for="private">Make this image private?</label>
+			<select id="private" name="private">
+				<option value="false">No</option>
+				<option value="true">Yes</option>
+			</select>
+		</div>
+
+		<button class="submitbtn" id="submitImage" type="button" onclick="imageSubmitted();">Submit Image</button>
+		<h1 class="percentage"></h1>
+		<div class="lds-hourglass"></div>
+	</form>
+</div>

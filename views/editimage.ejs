@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: "Edit Your Image"}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<%- include('content/ejs/editimageform.ejs') %>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<script>
+				var imageid = "<%- image.id %>";
+			</script>
+
+			<script src="/content/javascript/imageEdits.js"></script>
+		</main>
+	</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs', {title: image.title}) %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<!--Main content goes here-->
+
+			<div class="image-content">
+				<h1 id="title"><%= image.title %></h1>
+				<img id="image" src="<%= image.image %>">
+			</div>
+
+			<% if (!image.deleted) { %>
+				<div class="image-comments">
+					<%- include('content/ejs/comments.ejs', {content: image, comments: comments, contenttype: "image"}) %>
+				</div>
+			<% } %>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<script src="/content/javascript/commentFunctions.js"></script>
+
+			<script src="/content/javascript/scrollToComment.js"></script>
+
+			<script src="/content/javascript/commentSubmission.js"></script>
+
+			<!--Variables given by the EJS are defined in a script tag here-->
+
+			<!--External scripts are defined here-->
+		</main>
+	</body>
+</html>
