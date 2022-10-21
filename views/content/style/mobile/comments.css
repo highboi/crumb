@@ -2,42 +2,47 @@
 COMMENTS SECTION
 */
 
-.container .comments {
+.comments {
 	grid-area: comments;
 	width: 1000px;
 }
 
-.container .comments #commentform form button{
+.image-comments .comments {
+	text-align: center;
+	margin: 0 auto;
+}
+
+.comments #commentform form button{
 	color: var(--green);
 	background-color: var(--grey);
 }
 
-.container .comments #commentform form #commentbtn {
+.comments #commentform form #commentbtn {
 	width: 200px;
 	height: 40px;
 }
 
-.container .comments #theComments .comment {
+.comments #theComments .comment {
 	background-color: #2f2f2f;
 	padding: 20px;
 	border-width: 4px;
 	border: solid black;
 }
 
-.container .comments #theComments .commentheader * {
+.comments #theComments .commentheader * {
 	display: inline-block;
 }
 
-.container .comments #theComments .commentinterlink {
+.comments #theComments .commentinterlink {
 	cursor: pointer;
 	text-decoration: underline;
 }
 
-.container .comments #theComments .commentlikes * {
+.comments #theComments .commentlikes * {
 	display: inline-block;
 }
 
-.container .comments #theComments .commentlikes button {
+.comments #theComments .commentlikes button {
 	width: 2.5rem;
 	height: 2.5rem;
 	color: var(--grey);
@@ -46,7 +51,7 @@ COMMENTS SECTION
 	vertical-align: text-top;
 }
 
-.container .comments #theComments .commentlikes .commentlikebuttons {
+.comments #theComments .commentlikes .commentlikebuttons {
 	width: 2.5rem;
 	height: 2.5rem;
 	color: var(--grey);
@@ -55,21 +60,21 @@ COMMENTS SECTION
 	vertical-align: text-top;
 }
 
-.container .comments #theComments .commentlikes #replybtn {
+.comments #theComments .commentlikes #replybtn {
 	width: 5rem;
 	height: 2.5rem;
 	border-width: 4px;
 	border-color: black;
 }
 
-.container .comments #theComments .commentlikes #deletebtn {
+.comments #theComments .commentlikes #deletebtn {
 	width: 6rem;
 	height: 2.5rem;
 	border-width: 4px;
 	border-color: black;
 }
 
-.container .comments #theComments .replybox {
+.comments #theComments .replybox {
 	display: none;
 	background-color: var(--dark-grey);
 	border: solid black;
@@ -77,7 +82,7 @@ COMMENTS SECTION
 	z-index: 10;
 }
 
-.container .comments #theComments .replybox button {
+.comments #theComments .replybox button {
 	width: 5rem;
 	height: 2.5rem;
 	background-color: var(--green);
@@ -87,14 +92,14 @@ COMMENTS SECTION
 	margin: 10px;
 }
 
-.container .comments #theComments .replies {
+.comments #theComments .replies {
 	display: none;
 	background-color: var(--dark-grey);
 	padding: 15px;
 	width: 100%;
 }
 
-.container .comments #theComments .morerepliesbtn {
+.comments #theComments .morerepliesbtn {
 	color: var(--green);
 	background-color: var(--dark-grey);
 	width: 150px;
@@ -104,7 +109,7 @@ COMMENTS SECTION
 	margin-top: 35px;
 }
 
-.container .comments #theComments .replies .commentreply {
+.comments #theComments .replies .commentreply {
 	display: flex;
 	flex-direction: row;
 	align-items: center;

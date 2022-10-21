@@ -51,12 +51,12 @@ POST PATHS FOR COMMENTS
 */
 
 //post request for commenting on videos
-app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
+app.post("/comment/:contentid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
 
 	var commentid = await middleware.generateAlphanumId();
 
-	var valuesarr = [commentid, userinfo.username, userinfo.id, req.body.commenttext, req.params.videoid, new Date().toISOString(), 0, 0];
+	var valuesarr = [commentid, userinfo.username, userinfo.id, req.body.commenttext, req.params.contentid, new Date().toISOString(), 0, 0];
 
 	//check to see if this is a reply to another comment
 	if (typeof req.query.parent_id != 'undefined') {
@@ -70,7 +70,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 			}
 		});
 
-		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes, parent_id) VALUES (${valuesarr})`);
+		await client.query(`INSERT INTO comments (id, username, user_id, comment, content_id, posttime, likes, dislikes, parent_id) VALUES (${valuesarr})`);
 
 		//add this reply id to the parent comment of this reply
 		await client.query(`UPDATE comments SET replies=concat(replies, $1::text) WHERE id=$2`, [commentid+",", req.query.parent_id]);
@@ -83,7 +83,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 			}
 		});
 
-		await client.query(`INSERT INTO comments (id, username, user_id, comment, video_id, posttime, likes, dislikes) VALUES (${valuesarr})`);
+		await client.query(`INSERT INTO comments (id, username, user_id, comment, content_id, posttime, likes, dislikes) VALUES (${valuesarr})`);
 	}
 
 	//check for and handle files attached to the comment
@@ -96,7 +96,7 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 		if (acceptedvideo.includes(mimetype) || acceptedimg.includes(mimetype)) {
 			var filepath = await middleware.saveFile(req.files.reactionfile, "/storage/users/comments/");
 
-			await client.query(`INSERT INTO videofiles (id, video, parentid) VALUES ($1, $2, $3)`, [commentid, filepath, req.params.videoid]);
+			await client.query(`INSERT INTO videofiles (id, video, parentid) VALUES ($1, $2, $3)`, [commentid, filepath, req.params.contentid]);
 
 			if (acceptedvideo.includes(mimetype)) {
 				var filetype = "video";
@@ -107,10 +107,19 @@ app.post("/comment/:videoid", middleware.checkSignedIn, async (req, res) => {
 			await client.query(`UPDATE comments SET reactionfile=$1, filetype=$2 WHERE id=$3`, [filepath, filetype, commentid]);
 		} else {
 			req.flash("message", "Unsupported file type, please use mp4, ogg, webm, png, jpeg, or jpg files.");
-			req.flash("redirecturl", `/v/${req.params.videoid}`);
+
+			if (req.query.contenttype == "video") {
+				req.flash("redirecturl", `/v/${req.params.contentid}`);
+			} else if (req.query.contenttype == "image") {
+				req.flash("redirecturl", `/i/${req.params.contentid}`);
+			}
 			return res.redirect("/error");
 		}
 	}
 
-	return res.redirect(`/v/${req.params.videoid}/?scrollcommentid=${commentid}`);
+	if (req.query.contenttype == "video") {
+		return res.redirect(`/v/${req.params.contentid}/?scrollcommentid=${commentid}`);
+	} else if (req.query.contenttype == "image") {
+		return res.redirect(`/i/${req.params.contentid}/?scrollcommentid=${commentid}`);
+	}
 });

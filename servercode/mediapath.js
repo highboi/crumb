@@ -279,3 +279,124 @@ app.post("/v/postedit/:videoid", middleware.checkSignedIn, async (req, res) => {
 	req.flash("message", "Video Edited!");
 	return res.redirect(`/v/${req.params.videoid}`);
 });
+
+/*
+GET PATHS FOR IMAGES
+*/
+
+app.get("/i/submit", middleware.checkSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	return res.render("submitimage.ejs", viewObj);
+});
+
+app.get("/i/:imageid", async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	var image = await client.query(`SELECT * FROM images WHERE id=$1 LIMIT 1`, [req.params.imageid]);
+	viewObj.image = image.rows[0];
+
+	var imageInfo = await middleware.getImageInfo(viewObj.image);
+	viewObj = Object.assign({}, viewObj, imageInfo);
+
+	return res.render("viewimage.ejs", viewObj);
+});
+
+app.get("/i/edit/:imageid", middleware.checkSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	var image = await client.query(`SELECT * FROM images WHERE id=$1 LIMIT 1`, [req.params.imageid]);
+	viewObj.image = image.rows[0];
+
+	if (viewObj.image.deleted) {
+		req.flash("message", "This image is deleted, you cannot edit this");
+		return res.redirect("/");
+	} else if (viewObj.image.user_id != userinfo.id) {
+		req.flash("message", "This is not your image to edit");
+		return res.redirect("/");
+	} else {
+		return res.render("editimage.ejs", viewObj);
+	}
+});
+
+app.get("/i/delete/:imageid", middleware.checkSignedIn, async (req, res) => {
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	var image = await client.query(`SELECT * FROM images WHERE id=$1 LIMIT 1`, [req.params.imageid]);
+	image = image.rows[0];
+
+	if (userinfo.id != image.user_id) {
+		req.flash("message", "This is not your image to delete.");
+		return res.redirect("/");
+	} else {
+		await middleware.deleteImageDetails(image);
+
+		req.flash("message", "Image Deleted!");
+		return res.redirect("/");
+	}
+});
+
+/*
+POST PATHS FOR IMAGES
+*/
+
+app.post("/i/submit", middleware.checkSignedIn, async (req, res) => {
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	var imagepath = await middleware.saveFile(req.files.thumbnail, "/storage/images/");
+
+ 	var imageid = await middleware.generateAlphanumId();
+
+	var valuesarr = [imageid, req.body.title, imagepath, new Date().toISOString(), " " + req.body.topics + " ", userinfo.id, userinfo.username, userinfo.channelicon, req.body.private, false];
+	valuesarr = valuesarr.map((item) => {
+		if (typeof item == "string") {
+			return "\'" + item + "\'";
+		} else {
+			return item;
+		}
+	});
+
+	await client.query(`INSERT INTO images (id, title, image, posttime, topics, user_id, username, channelicon, private, deleted) VALUES (${valuesarr})`);
+
+	return res.redirect(`/i/${imageid}`);
+});
+
+app.post("/i/postedit/:imageid", middleware.checkSignedIn, async (req, res) => {
+	//get user information for verification of the video edits
+	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
+
+	//get information about the image and it's files
+	var fileinfo = await client.query(`SELECT * FROM images WHERE id=$1`, [req.params.imageid]);
+	fileinfo = fileinfo.rows[0];
+
+	//check to make sure this image exists before allowing edits to take place
+	if (fileinfo.deleted) {
+		req.flash("message", "This is a deleted image, you cannot edit this.");
+		return res.redirect("/");
+	}
+
+	//check to make sure this image belongs to the current user
+	if (userinfo.id != fileinfo.user_id) {
+		req.flash("message", "This is not your image to edit.");
+		return res.redirect("/");
+	}
+
+	//replace the image file if necessary
+	if (typeof req.files.thumbnail != 'undefined') {
+		await middleware.deleteFile(fileinfo.image);
+		var imagepath = await middleware.saveFile(req.files.thumbnail, "/storage/images/");
+
+		await client.query(`UPDATE images SET image=$1 WHERE id=$2`, [imagepath, req.params.imageid]);
+	}
+
+	//change the details around the image
+	var valuesarray = [req.body.title, " " + req.body.topics + " ", req.body.private, req.params.imageid];
+	await client.query(`UPDATE images SET title=$1, topics=$2, private=$3 WHERE id=$4`, valuesarray);
+
+	//redirect the user to the newly edited image
+	req.flash("message", "Image Edited!");
+	return res.redirect(`/i/${req.params.imageid}`);
+});
+

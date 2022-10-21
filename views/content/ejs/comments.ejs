@@ -1,10 +1,15 @@
 <!--The display of the entire comments section of a video-->
 
-<% if (typeof video != 'undefined') { %>
+<% if (typeof content != 'undefined') { %>
 	<div class="comments">
 		<h2>Comments:</h2>
 		<div id="commentform">
-			<% var commentlink = `/comment/${video.id}`; %>
+			<% if (typeof contenttype != 'undefined') { %>
+				<% var commentlink = `/comment/${content.id}/?contenttype=${contenttype}`; %>
+			<% } else { %>
+				<% var commentlink = `/comment/${content.id}/?contenttype=video`; %>
+			<% } %>
+
 			<form action="<%= commentlink %>" method="post" enctype='multipart/form-data' id="mainCommentForm">
 				<textarea id="commenttext" name="commenttext" placeholder="Comment Something" maxlength="500" rows="10" cols="50" required></textarea><br><br>
 

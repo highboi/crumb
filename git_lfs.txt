@@ -1,5 +1,6 @@
 To migrate large file changes:
-- git lfs migrate import --include="*.ext"
+- git lfs migrate import --no-rewrite --include="*.ext"
 
 To convert lfs files back to regular files:
 - git lfs pull
+

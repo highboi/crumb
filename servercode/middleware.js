@@ -1,5 +1,4 @@
-//this is a file for storing middleware functions and functions to help the code
-//to look better
+//this is a file for storing middleware functions and functions to help the code to look better
 
 //get the necessary dependencies for use in this file
 const fs = require("fs");
@@ -109,7 +108,7 @@ var reqHandling = {
 		var videocreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [video.user_id]);
 		videoInfo.videocreator = videocreator.rows[0];
 
-		var comments = await client.query(`SELECT * FROM comments WHERE video_id=$1`, [video.id]);
+		var comments = await client.query(`SELECT * FROM comments WHERE content_id=$1`, [video.id]);
 		comments.rows.sort((a, b) => { //sort comments chronologically
 			var epoch_a = new Date(a.posttime).getTime();
 			var epoch_b = new Date(b.posttime).getTime();
@@ -154,6 +153,26 @@ var reqHandling = {
 		}
 
 		return videoInfo;
+	},
+
+	//a function to get information about an image
+	getImageInfo: async function (image) {
+		var imageInfo = {};
+
+		var imagecreator = await client.query(`SELECT * FROM users WHERE id=$1 LIMIT 1`, [image.user_id]);
+		imageInfo.imagecreator = imagecreator.rows[0];
+
+		var comments = await client.query(`SELECT * FROM comments WHERE content_id=$1`, [image.id]);
+		comments.rows.sort((a, b) => { //sort comments chronologically
+			var epoch_a = new Date(a.posttime).getTime();
+			var epoch_b = new Date(b.posttime).getTime();
+
+			return epoch_a - epoch_b;
+		});
+
+		imageInfo.comments = comments.rows;
+
+		return imageInfo;
 	},
 
 	//this is a function that generates a new alphanumeric id
@@ -269,23 +288,7 @@ var deletionHandling = {
 			client.query(`DELETE FROM likedvideos WHERE video_id=$1`, [videoid]);
 			client.query(`DELETE FROM dislikedvideos WHERE video_id=$1`, [videoid]);
 
-			client.query(`DELETE FROM comments WHERE video_id=$1`, [videoid]);
-
-			//select all of the file paths associated with comments on this video
-			var commentfiles = await client.query(`SELECT video FROM videofiles WHERE parentid=$1`, [videoid]);
-			commentfiles = commentfiles.rows.map((item) => {
-				return item.video;
-			});
-
-			//delete all files of comments associated with this video
-			for (var file of commentfiles) {
-				fs.unlink(global.appRoot + "/storage" + file, (err) => {
-					if (err) throw err;
-				});
-			}
-
-			client.query(`DELETE FROM videofiles WHERE parentid=$1`, [videoid]);
-			client.query(`DELETE FROM videofiles WHERE id=$1`, [videoid]);
+			await middleware.deleteCommentDetails(videoid);
 
 			client.query(`DELETE FROM livechat WHERE stream_id=$1`, [videoid]);
 
@@ -295,6 +298,47 @@ var deletionHandling = {
 		} else {
 			return false;
 		}
+	},
+
+	//this is a function to delete image details
+	deleteImageDetails: async function (image) {
+		//delete the image file
+		var imagepath = global.appRoot + "/storage" + image.image;
+		fs.unlink(imagepath, (err) => {
+			if (err) throw err;
+		});
+
+		//remove the image entry
+		await client.query(`UPDATE images SET title=$1, image=$2, username=$3, channelicon=$4, deleted=$5 WHERE id=$6`, ["[DELETED BY USER]", "/server/deleteicon.png", "", "/server/deletechannelicon.png", true, image.id]);
+
+		//delete comments associated with the image
+		await middleware.deleteCommentDetails(image.id);
+
+		return true;
+	},
+
+	//this is a function to delete comment details
+	deleteCommentDetails: async function (content_id) {
+		//delete the comment itself
+		client.query(`DELETE FROM comments WHERE content_id=$1`, [content_id]);
+
+		//select all of the file paths associated with comments on this video
+		var commentfiles = await client.query(`SELECT video FROM videofiles WHERE parentid=$1`, [content_id]);
+		commentfiles = commentfiles.rows.map((item) => {
+			return item.video;
+		});
+
+		//delete all files of comments associated with this video
+		for (var file of commentfiles) {
+			fs.unlink(global.appRoot + "/storage" + file, (err) => {
+				if (err) throw err;
+			});
+		}
+
+		client.query(`DELETE FROM videofiles WHERE parentid=$1`, [content_id]);
+		client.query(`DELETE FROM videofiles WHERE id=$1`, [content_id]);
+
+		return true;
 	},
 
 	//this is a function to delete playlist details
