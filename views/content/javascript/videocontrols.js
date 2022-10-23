@@ -180,27 +180,3 @@ function addFunctionality(player) {
 		}
 	});
 }
-
-//a function to toggle fullscreen functionality for an element
-function toggleFullscreen(element) {
-	//change the fullscreen mode
-	if (document.fullscreenElement) {
-		//exit the fullscreen
-		if (document.exitFullscreen) {
-			document.exitFullscreen();
-		} else if (document.webkitExitFullscreen) {
-			document.webkitExitFullscreen();
-		} else if (document.msExitFullscreen) {
-			document.msExitFullscreen();
-		}
-	} else {
-		//make the video fullscreen
-		if (element.requestFullscreen) {
-			element.requestFullscreen();
-		} else if (element.webkitRequestFullscreen) {
-			element.webkitRequestFullscreen();
-		} else if (element.msRequestFullscreen) {
-			element.msRequestFullscreen();
-		}
-	}
-}

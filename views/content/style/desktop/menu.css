@@ -158,6 +158,8 @@ nav .banner #actionsmenu #hover-icon {
 nav .banner #actionsmenu .dropdown-content {
 	border: solid var(--grey);
 	width: 85px;
+	max-height: 70vh;
+	overflow-y: scroll;
 }
 
 nav .banner #actionsmenu .dropdown-content img {
