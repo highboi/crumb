@@ -45,7 +45,7 @@
 				</div>
 
 				<% if (!video.deleted && !video.private) { %>
-					<div class="reccomendations">
+					<div class="video-misc">
 						<% if (typeof chatReplayMessages != 'undefined') { %>
 							<div class="live-chat-replay">
 								<h3>Chat Replay:</h3>
@@ -53,25 +53,15 @@
 							</div>
 						<% } %>
 
+						<div class="adverts" data-position="square"></div>
+
 						<% if (typeof playlist != "undefined" && typeof playlistvideos != "undefined") { %>
 							&nbsp;
 							<%- include('content/ejs/playlistsidebar.ejs', {playlist: playlist, playlistvideos: playlistvideos}) %>
 						<% } %>
-
-						<div class="adverts" data-position="square"></div>
-
-						<div class="autoplay">
-							<p>Autoplay:</p>
-							<label class="switch" id="autoplay">
-								<input class="switchinput" type="checkbox">
-								<span class="slider"></span>
-							</label>
-						</div>
-
-						<%- include('content/ejs/reccomendations.ejs', {reccomendations: reccomendations}) %>
 					</div>
 
-					<%- include('content/ejs/comments.ejs', {video: video, comments: comments}) %>
+					<%- include('content/ejs/comments.ejs', {content: video, comments: comments}) %>
 				<% } %>
 			</div>
 
@@ -103,8 +93,6 @@
 							<% nextvideoid = playlistvideos[nextvideoid].id; %>
 							var nextvideolink = `/playlistvideo/view/<%= playlist.id %>/<%= nextvideoid %>`;
 						<% } %>
-					<% } else if (typeof reccomendations != 'undefined') { %>
-						var nextvideolink = `/v/<%= reccomendations[0].id %>`;
 					<% } %>
 
 					<% if (typeof subtitles != 'undefined' && subtitles != null) { %>

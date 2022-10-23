@@ -2246,3 +2246,4 @@
 {"level":"error","message":"(2022-10-21T02:50:37.338Z) --> syntax error at or near \",\""}
 {"level":"error","message":"(2022-10-21T02:52:53.545Z) --> syntax error at or near \",\""}
 {"level":"error","message":"(2022-10-21T02:54:05.395Z) --> syntax error at or near \",\""}
+{"level":"error","message":"(2022-10-22T20:47:20.510Z) --> relation \"imagess\" does not exist"}

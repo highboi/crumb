@@ -9,12 +9,16 @@ VIDEO AND RECCOMENDATIONS
 
 .container {
 	display: grid;
-	margin: auto;
-	width: 1700px;
 	grid-template-areas: 
-	"video reccomendations"
-	"comments reccomendations"
-	". reccomendations";
+	"video"
+	"reccomendations"
+	"comments";
+	width: 90vw;
+	margin: 0 auto;
+}
+
+.container > * {
+	margin: 0 auto;
 }
 
 /*
@@ -152,49 +156,9 @@ STYLE VIDEO TEXT
 /*
 RECCOMENDATIONS WHILE VIEWING VIDEOS
 */
-.container .reccomendations {
+.container .video-misc {
 	grid-area: reccomendations;
 	max-width: 600px;
-}
-
-.container .reccomendations .video-thumbnail .thumbnail {
-	text-align: center;
-	background-color: var(--terminal-green);
-}
-
-.container .reccomendations .links .text img {
-	width: 300px;
-	height: 150px;
-	padding: 10px;
-}
-
-.container .reccomendations .links .text {
-	display: inline-block;
-	font-size: 30px;
-}
-
-.container .reccomendations .links .text :not(a) :not(img) {
-	display: inline;
-	margin: 0px;
-}
-
-.container .reccomendations .links .text a {
-	text-decoration: none;
-}
-
-.container .reccomendations .links .extras {
-}
-
-.container .reccomendations .links .extras:hover {
-	cursor: pointer;
-}
-
-.container .reccomendations .links .extralinks {
-	display: none;
-}
-
-.container .reccomendations .links .extralinkforms object {
-	display: none;
 }
 
 /*

@@ -1,7 +1,7 @@
 /*
 STYLE THE HEADER CONTENT FOR EACH SEARCH RESULT SECTION
 */
-#channel-results > h1, #video-results > h1, #playlist-results > h1 {
+#channel-results > h1, #video-results > h1, #playlist-results > h1, #image-results > h1 {
 	background-color: var(--dark-grey);
 	text-align: center;
 	padding: 0.5vw;
@@ -60,6 +60,16 @@ STYLE THE VIDEOS IN THE SEARCH RESULTS
 
 .search-videos .video .links .extralinkforms object {
 	display: none;
+}
+
+/*
+STYLE IMAGES IN THE SEARCH RESULTS
+*/
+
+.search-images {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 /*

@@ -8,9 +8,9 @@ MISCELLANEOUS GET REQUESTS
 app.get('/', async (req, res) => {
 	var viewObj = await middleware.getViewObj(req, res);
 
-	var videos = await middleware.getReccomendations(req);
+	var content = await middleware.getReccomendations(req);
 
-	viewObj.videos = videos;
+	viewObj.content = content;
 
 	return res.render("index.ejs", viewObj);
 });
@@ -47,6 +47,7 @@ app.get("/search", async (req, res) => {
 	var phrases = middleware.getSearchTerms(search.humanquery);
 
 	search.videos = await middleware.searchVideos(phrases);
+	search.images = await middleware.searchImages(phrases);
 	search.channels = await middleware.searchChannels(phrases);
 	search.playlists = await middleware.searchPlaylists(phrases);
 

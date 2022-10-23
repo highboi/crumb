@@ -11,9 +11,13 @@
 			<%- include('content/ejs/body.ejs') %>
 
 			<div class="group-videos">
-				<% if (typeof videos != 'undefined') { %>
-					<% videos.forEach((item, index) => { %>
-						<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+				<% if (typeof content != 'undefined') { %>
+					<% content.forEach((item, index) => { %>
+						<% if (item.type == "video") { %>
+							<%- include('content/ejs/thumbnail.ejs', {video: item}) %>
+						<% } else if (item.type == "image"){ %>
+							<%- include('content/ejs/imagethumbnail.ejs', {image: item}) %>
+						<% } %>
 					<% }); %>
 				<% } %>
 			</div>

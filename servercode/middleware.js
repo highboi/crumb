@@ -562,6 +562,27 @@ var searchFunctions = {
 		return results;
 	},
 
+	//this is a function for searching images based on search terms
+	searchImages: async (phrases) => {
+		var results = [];
+
+		for (var phrase of phrases) {
+			var result = await client.query(`SELECT * FROM images WHERE private=${false} AND deleted=${false} AND (UPPER(title) LIKE UPPER($1) OR UPPER(topics) LIKE UPPER($1) OR UPPER(username) LIKE UPPER($1))`, ["%" + phrase + "%"]);
+
+			result.rows.forEach((item, index) => {
+				var isDuplicate = results.some((res) => {
+					return JSON.stringify(res) == JSON.stringify(item);
+				});
+
+				if (!isDuplicate) {
+					results.push(item);
+				}
+			});
+		}
+
+		return results;
+	},
+
 	//this is a function that returns the channels that come up in search results
 	searchChannels: async (phrases) => {
 		var results = [];
@@ -726,7 +747,7 @@ OBJECT STORING RECCOMENDATION FUNCTIONS
 */
 var reccomendationFunctions = {
 	//this is a function for getting reccomendations based on all of the other functions below, checking for all edge cases
-	getReccomendations: async function (req, video=undefined) {
+	getReccomendations: async function (req, content=undefined) {
 		var reccookies = await middleware.getReccomendationCookies(req);
 
 		if (reccookies.length) {
@@ -735,14 +756,21 @@ var reccomendationFunctions = {
 			var cookierecs = [];
 		}
 
-		if (typeof video == 'undefined') {
+		if (typeof content == 'undefined') {
 			var reccomendations = await middleware.getRandomReccomendations(30);
 			reccomendations.concat(cookierecs);
 		} else {
-			var reccomendations = await middleware.getVideoReccomendations(video);
-			reccomendations.concat(cookierecs);
+			var reccomendations = [];
+			var video_recs = await middleware.getVideoReccomendations(content);
+			var image_recs = await middleware.getImageReccomendations(content);
+
+			reccomendations.concat(video_recs).concat(image_recs).concat(cookierecs);
 			reccomendations = reccomendations.filter((item) => {
 				return !(JSON.stringify(item) == JSON.stringify(video));
+			});
+
+			reccomendations = reccomendations.sort(() => {
+				return Math.random() - 0.5;
 			});
 		}
 
@@ -765,11 +793,35 @@ var reccomendationFunctions = {
 		return vids;
 	},
 
+	//this is a function for getting the reccomendations for videos according to the title of a video
+	getImageReccomendations: async function (content) {
+		var phrases = middleware.getSearchTerms(content.title);
+		phrases = phrases.concat(middleware.getSearchTerms(content.username));
+
+		var images = await middleware.searchImages(phrases);
+
+		images = images.filter((item) => {
+			return !(JSON.stringify(content) == JSON.stringify(item));
+		});
+
+		return images;
+	},
+
 	//this is a function that gets random reccomendations from the database
 	getRandomReccomendations: async function (amount=5) {
+		//get images and videos randomly
 		var videos = await client.query(`SELECT * FROM videos WHERE deleted=false AND private=false ORDER BY random() LIMIT $1`, [amount]);
+		var images = await client.query(`SELECT * FROM images WHERE deleted=false AND private=false ORDER BY random() LIMIT $1`, [amount]);
 
-		return videos.rows;
+		//get all of the content into one array
+		var content = videos.rows.concat(images.rows);
+
+		//shuffle the content to be randomly ordered
+		content = content.sort(() => {
+			return Math.random() - 0.5;
+		});
+
+		return content;
 	},
 
 	//this is a function to get all of the reccomendation cookies from the user's current session

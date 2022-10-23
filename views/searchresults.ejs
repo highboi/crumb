@@ -37,6 +37,18 @@
 					<% } %>
 				</div>
 
+				<div id="image-results">
+					<% if (search.images.length) { %>
+						<h1>Images:</h1>
+
+						<div class="search-images">
+							<% search.images.forEach((item, index) => { %>
+								<%- include('content/ejs/imagethumbnail.ejs', {image: item}) %>
+							<% }) %>
+						</div>
+					<% } %>
+				</div>
+
 				<div id="playlist-results">
 					<% if (search.playlists.length) { %>
 						<h1>Playlists:</h1>
@@ -49,7 +61,7 @@
 					<% } %>
 				</div>
 
-				<% if (!search.videos.length && !search.channels.length && !search.playlists.length) { %>
+				<% if (!search.videos.length && !search.channels.length && !search.playlists.length && !search.images.length) { %>
 					<p>No Results Returned</p>
 				<% } %>
 			</div>

@@ -1,0 +1,50 @@
+<!--Display a image thumbnail which links to the corresponding image-->
+
+<% if (typeof image != 'undefined') { %>
+	<div class="video-thumbnail" id="<%= image.id %>thumbnail">
+
+		<% var imagelink = `/i/${image.id}`; %>
+		<% var channellink = `/u/${image.user_id}`; %>
+
+		<div class="thumbnail">
+			<a href="<%= imagelink %>">
+				<img src="<%= image.image %>" alt="Thumbnail" width="450" height="300">
+			</a>
+		</div>
+		<div class="links">
+			<a href="<%= imagelink %>">
+				<h3><strong><%= image.title %></strong></h3>
+			</a>
+			<div class="channel-links" id="channel-links">
+				<a href="<%= channellink %>">
+					<img id="channel-icon" src="<%= image.channelicon %>">
+				</a>
+				<a href="<%= channellink %>">
+					<p><%= image.username %></p>
+				</a>
+				<div>
+					<svg width="10" height="40" id="extras" onclick="showelement('<%= image.id %>extralinks'); console.log(document.activeElement);">
+						<circle cx="5" cy="5" r="5" fill="#adff12"/>
+						<circle cx="5" cy="20" r="5" fill="#adff12"/>
+						<circle cx="5" cy="35" r="5" fill="#adff12"/>
+					</svg>
+					<div class="extralinks" id="<%= image.id %>extralinks">
+						<button onclick="showelement('<%= image.id %>playlistform')">Add To Playlist</button><br>
+						<object id="<%= image.id %>playlistform">
+							<h3><a href="/playlist/new/?videoid=<%= image.id %>">Create Playlist</a></h3><br>
+							<% if (typeof playlists != 'undefined') { %>
+								<% playlists.forEach((plist, index) => { %>
+									<h3><a href="/playlistvideo/add/<%= plist.id %>/<%= image.id %>"><%= plist.name %></a></h3><br>
+								<% }); %>
+							<% } %>
+						</object>
+						<button onclick="notInterested('<%= image.id %>')">Not Interested</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="not-interested-undo" id="<%= image.id %>undo">
+		<button onclick="notInterested('<%= image.id %>')">Undo</button>
+	</div>
+<% } %>
