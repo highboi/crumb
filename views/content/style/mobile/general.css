@@ -194,7 +194,7 @@ STYLING FOR LOADING ANIMATIONS ON THE SITE
 /*
 STYLING FOR SUBMISSION FORMS ON THE SITE
 */
-#register, #login, #video-submit, #playlist-submit, #stream-submit, #bug-report, #schemaFuse, #image-submit {
+#register, #login, #video-submit, #playlist-submit, #stream-submit, #bug-report, #forgotpass, #image-submit {
 	text-align: center;
 	width: 50vw;
 	margin: auto;

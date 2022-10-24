@@ -4,7 +4,7 @@
 var shownSubtitles = [];
 
 //check for the existence of subtitles for this video
-if (typeof subtitles != 'undefined') {
+if (typeof subtitles != 'undefined' && subtitles.length) {
 	//get the ending subtitle of the current subtitles array
 	var endSubtitle = subtitles[subtitles.length-1];
 

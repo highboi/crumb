@@ -1,5 +1,5 @@
 //make a new websocket for sending the message to the server
-var chatSocket = new WebSocket(`ws://localhost/chat/?isStreamer=${isStreamer}&streamid=${streamid}`);
+var chatSocket = new WebSocket(`wss://astro-tv.space/chat/?isStreamer=${isStreamer}&streamid=${streamid}`);
 
 //get the chat box
 var chatbox = document.getElementById("chatBox");

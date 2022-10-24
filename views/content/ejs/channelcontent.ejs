@@ -36,7 +36,9 @@
 					<%- include('./channelshoutouts.ejs', {shoutouts: shoutouts, creator: creator}) %>
 				<% } %>
 			<% } else if (section == "settings") { %>
-				<%- include('./channelsettings.ejs', {creator: creator}) %>
+				<% if (typeof user != 'undefined' && user.id == creator.id) { %>
+					<%- include('./channelsettings.ejs', {creator: creator}) %>
+				<% } %>
 			<% } %>
 		</div>
 	</div>

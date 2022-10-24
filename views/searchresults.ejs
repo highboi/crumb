@@ -40,11 +40,11 @@
 				<div id="image-results">
 					<% if (search.images.length) { %>
 						<h1>Images:</h1>
-
+						
 						<div class="search-images">
 							<% search.images.forEach((item, index) => { %>
 								<%- include('content/ejs/imagethumbnail.ejs', {image: item}) %>
-							<% }) %>
+							<% }); %>
 						</div>
 					<% } %>
 				</div>

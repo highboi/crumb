@@ -28,8 +28,8 @@ app.get("/getpaid", middleware.checkSignedIn, async (req, res) => {
 
 	var accountlink = await stripe.accountLinks.create({
 		account: account.id,
-		refresh_url: "http://localhost/paidonboarding",
-		return_url: "http://localhost/",
+		refresh_url: "http://astro-tv.space/paidonboarding",
+		return_url: "http://astro-tv.space/",
 		type: "account_onboarding"
 	});
 
@@ -54,8 +54,8 @@ app.get("/paidonboarding", middleware.checkSignedIn, async (req, res) => {
 
 	var accountlink = await stripe.accountLinks.create({
 		account: account.accountid,
-		refresh_url: "http://localhost/paidonboarding",
-		return_url: "http://localhost/",
+		refresh_url: "http://astro-tv.space/paidonboarding",
+		return_url: "http://astro-tv.space/",
 		type: "account_onboarding"
 	});
 
@@ -96,7 +96,7 @@ app.get("/advertise", middleware.checkSignedIn, async (req, res) => {
 
 	var adResolutions = await middleware.getAdResolutions();
 
-	viewObj = Object.assign({}, viewObj, {adPrice: eval(process.env.IMPRESSION_COST)*10, adResolutions: adResolutions, adDomain: advertiser.rows[0].businessdomain});
+	viewObj = Object.assign({}, viewObj, {adPrice: process.env.IMPRESSION_COST, adResolutions: adResolutions, adDomain: advertiser.rows[0].businessdomain});
 
 	return res.render("adSubmission.ejs", viewObj);
 });
@@ -246,7 +246,6 @@ app.get("/adverts", async (req, res) => {
 			customer = customer.rows[0];
 
 			if (customer.accountid != null) {
-				//transfer the cost of an ad impression divided by 2 so we get 50% revenue
 				var transfer = await stripe.transfers.create({
 					amount: eval(process.env.IMPRESSION_COST)/2,
 					currency: 'usd',

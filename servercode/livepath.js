@@ -43,7 +43,7 @@ app.get("/l/view/:streamid", async (req, res) => {
 
 			var reccomendations = await middleware.getReccomendations(req, video);
 
-			viewObj = Object.assign({}, viewObj, {stream: video, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, reccomendations: reccomendations}, videoinfo);
+			viewObj = Object.assign({}, viewObj, {stream: video, streamURL: `http://astro-tv.space:8000/live/${streamkey}/index.m3u8`, reccomendations: reccomendations}, videoinfo);
 
 			return res.render("viewStreamObs.ejs", viewObj);
 		}
@@ -79,7 +79,7 @@ app.get("/l/admin/:streamid", middleware.checkSignedIn, async (req, res) => {
 		if (req.query.streamtype == "obs") {
 			var streamkey = viewObj.user.streamkey;
 
-			viewObj = Object.assign({}, viewObj, {videocreator: viewObj.user, stream: stream, streamURL: `http://localhost:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://localhost/live", streamKey: streamkey});
+			viewObj = Object.assign({}, viewObj, {videocreator: viewObj.user, stream: stream, streamURL: `http://astro-tv.space:8000/live/${streamkey}/index.m3u8`, rtmpServer: "rtmp://astro-tv.space/live", streamKey: streamkey});
 
 			return res.render("obsAdminPanel.ejs", viewObj);
 		} else if (req.query.streamtype == "browser") {

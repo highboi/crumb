@@ -3,7 +3,12 @@ GLOBAL CSS
 */
 @import url("/content/style/root.css");
 
+/*
+FUNNY DROPSHIPPING PAGE CSS
+*/
 @import url("/content/style/dropshipping.css");
+@import url("/content/style/arrows.css");
+
 @import url("/content/style/images.css");
 
 /*
@@ -15,3 +20,4 @@ DESKTOP CSS
 MOBILE CSS
 */
 @import url("/content/style/mobile.css") (max-width: 1000px);
+

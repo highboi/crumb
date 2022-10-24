@@ -1,4 +1,4 @@
-var obsSocket = new WebSocket(`ws://localhost/obslive/?streamid=${streamid}&isClient=true&isStreamer=false`);
+var obsSocket = new WebSocket(`wss://astro-tv.space/obslive/?streamid=${streamid}&isClient=true&isStreamer=false`);
 var livestream = document.querySelector(".video-container #video");
 
 //start the live stream immediately since this is the user

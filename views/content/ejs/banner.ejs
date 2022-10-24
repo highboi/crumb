@@ -3,10 +3,9 @@
 <div class="banner">
 	<div id="banner-icon">
 		<a href="/" target="_parent" title="Go Home">
-			<img src="/content/icons/astro.png">
+			<img src="/content/icons/astro_tv.gif">
 		</a>
 	</div>
-
 	<div id="searchbar">
 		<form action="/search" method="get" target="_parent">
 			<div id="searchbtn">
@@ -20,27 +19,71 @@
 			</div>
 		</form>
 	</div>
-
 	<div id="actionsmenu" class="dropdown" title="Do Stuff!">
-		<img id="hover-icon" src="/content/icons/astro_flat.png"><br>
+		<img id="hover-icon" src="/content/icons/astro_flat_tv.gif"><br>
 		<div class="dropdown-content">
 			<% if (typeof user != 'undefined') { %>
 				<% var channellink = `/u/${user.id}`; %>
-				<a href="<%= channellink %>" title="Your Channel!"><img src="/content/icons/house_dark.png"></a><br>
-				<a href="/tv" title="TV!"><img src="/content/icons/astro_flat.png"></a><br>
-				<a href="/v/submit" title="Submit a Video!"><img src="/content/icons/video_dark.png"></a><br>
-				<a href="/i/submit" title="Submit an Image!"><img src="/content/icons/astro_cam.png"></a><br>
-				<a href="/playlist/new" title="Make a Playlist!"><img src="/content/icons/playlist_dark.png"></a><br>
-				<a href="/l/start/web" title="Do a Webcam Stream!"><img src="/content/icons/webcam_dark.png"></a><br>
-				<a href="/l/start/obs" title="Do an OBS Stream!"><img src="/content/icons/obs_dark.png"></a><br>
-				<a href="/logout" title="Log Out?"><img src="/content/icons/exit_dark.png"></a>
+				<div>
+					<a href="<%= channellink %>" title="Your Channel!"><img src="/content/icons/house_dark.png"></a><br>
+					<p>Channel</p>
+				</div>
+
+				<div>
+					<a href="/tv" title="TV!"><img src="/content/icons/astro_flat.png"></a><br>
+					<p>TV!</p>
+				</div>
+
+				<div>
+					<a href="/v/submit" title="Submit a Video!"><img src="/content/icons/video_dark.png"></a><br>
+					<p>Upload a Video</p>
+				</div>
+
+				<div>
+					<a href="/i/submit" title="Submit an Image!"><img src="/content/icons/astro_cam.png"></a><br>
+					<p>Upload an Image</p>
+				</div>
+
+				<div>
+					<a href="/playlist/new" title="Make a Playlist!"><img src="/content/icons/playlist_dark.png"></a><br>
+					<p>Playlist</p>
+				</div>
+
+				<div>
+					<a href="/l/start/web" title="Do a Webcam Stream!"><img src="/content/icons/webcam_dark.png"></a><br>
+					<p>Webcam Stream</p>
+				</div>
+
+				<div>
+					<a href="/l/start/obs" title="Do an OBS Stream!"><img src="/content/icons/obs_dark.png"></a><br>
+					<p>OBS Stream</p>
+				</div>
+
+				<div>
+					<a href="/logout" title="Log Out?"><img src="/content/icons/exit_dark.png"></a>
+					<p>Log Out</p>
+				</div>
 			<% } else { %>
-				<a href="/register" title="Register"><img src="/content/icons/register.png"></a>
-				<a href="/login" title="Login"><img src="/content/icons/login.png"></a><br>
+				<div>
+					<a href="/register" title="Register"><img src="/content/icons/register.png"></a>
+					<p>Register</p>
+				</div>
+
+				<div>
+					<a href="/login" title="Login"><img src="/content/icons/login.png"></a><br>
+					<p>Login</p>
+				</div>
 			<% } %>
 		</div>
 	</div>
-
+	<!--
+	<div id="settingsmenu" class="dropdown" title="Settings">
+		<img src="/content/icons/gear.png"><br>
+		<div class="dropdown-content">
+			
+		</div>
+	</div>
+	-->
 	<div id="usercorner">
 		<% if (typeof user != 'undefined') { %>
 			<a id="channelcorner" title="Go to channel!" href="/u/<%= user.id %>"><img src="<%= user.channelicon %>"></a>

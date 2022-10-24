@@ -1,5 +1,5 @@
 //get a connection with the obs websocket server
-var obsSocket = new WebSocket(`ws://localhost/obslive/?streamid=${streamid}&isClient=false&isStreamer=true`);
+var obsSocket = new WebSocket(`wss://astro-tv.space/obslive/?streamid=${streamid}&isClient=false&isStreamer=true`);
 
 //get the livestream video element
 var livestream = document.querySelector(".video-container #video");

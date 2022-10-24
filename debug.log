@@ -5091,3 +5091,7 @@
 {"level":"error","message":"(2022-10-21T02:52:53.545Z) --> syntax error at or near \",\""}
 {"level":"error","message":"(2022-10-21T02:54:05.395Z) --> syntax error at or near \",\""}
 {"level":"error","message":"(2022-10-22T20:47:20.510Z) --> relation \"imagess\" does not exist"}
+{"level":"error","message":"(2022-10-24T02:30:41.298Z) --> Cannot find module 'nodemailer'\nRequire stack:\n- /home/merlin/webdev/astro/servercode/auth.js\n- /home/merlin/webdev/astro/servercode/mainpath.js\n- /home/merlin/webdev/astro/index.js"}
+{"level":"error","message":"(2022-10-24T02:31:14.469Z) --> Cannot find module 'nodemailer'\nRequire stack:\n- /home/merlin/webdev/astro/servercode/auth.js\n- /home/merlin/webdev/astro/servercode/mainpath.js\n- /home/merlin/webdev/astro/index.js"}
+{"level":"error","message":"(2022-10-24T02:31:52.397Z) --> Cannot find module 'nodemailer'\nRequire stack:\n- /home/merlin/webdev/astro/servercode/auth.js\n- /home/merlin/webdev/astro/servercode/mainpath.js\n- /home/merlin/webdev/astro/index.js"}
+{"level":"error","message":"(2022-10-24T02:32:22.830Z) --> Cannot find module 'nodemailer-smtp-transport'\nRequire stack:\n- /home/merlin/webdev/astro/servercode/auth.js\n- /home/merlin/webdev/astro/servercode/mainpath.js\n- /home/merlin/webdev/astro/index.js"}

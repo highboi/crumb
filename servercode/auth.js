@@ -1,6 +1,9 @@
 const {app, client, middleware, redisClient} = require("./configBasic");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+const nodemailer = require("nodemailer");
+const smtpTransport = require("nodemailer-smtp-transport");
+const logger = require("./logger");
 
 /*
 GET FILE PATHS FOR USER AUTH
@@ -86,6 +89,29 @@ app.get("/logout", middleware.checkSignedIn, (req, res) => {
 	return res.redirect("/");
 });
 
+//a get path for submitting a forgotten password request
+app.get("/forgotpassword", middleware.checkNotSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	return res.render("forgotpass.ejs", viewObj);
+});
+
+//a get path for submitting a new password to reset on a user account
+app.get("/resetpassword/:tempid", middleware.checkNotSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	//get the user information for the person who forgot their password
+	var forgetfuluser = await redisClient.getAsync(req.params.tempid);
+
+	if (forgetfuluser != null) {
+		viewObj.forgetfuluser = JSON.parse(forgetfuluser);
+	} else {
+		req.flash("message", "That reset link has expired, get another one!");
+		return res.redirect("/forgotpassword");
+	}
+
+	return res.render("resetpass.ejs", viewObj);
+});
 
 /*
 POST PATHS FOR USER AUTH
@@ -93,9 +119,10 @@ POST PATHS FOR USER AUTH
 
 //handle the user registrations
 app.post('/register', async (req, res) => {
-	var existinguser = await client.query(`SELECT username FROM users WHERE username=$1 LIMIT 1`, [req.body.username]);
+	var existinguser = await client.query(`SELECT username FROM users WHERE username=$1 OR email=$2 LIMIT 1`, [req.body.username, req.body.email]);
+
 	if (existinguser.rows.length) {
-		req.flash("message", "Username Already Taken, Please Try Again.");
+		req.flash("message", "Username or Email Already Taken, Please Try Again.");
 		req.flash("redirecturl", "/register");
 		return res.redirect("/error");
 	}
@@ -132,7 +159,7 @@ app.post('/register', async (req, res) => {
 			var channelbannerpath = "/content/icons/astro_flat.png";
 		}
 
-		var valuesarr = [newuserid, req.body.username, hashedPassword, channeliconpath, channelbannerpath, req.body.channeldesc, " " + req.body.topics + " ", streamkey];
+		var valuesarr = [newuserid, req.body.username, req.body.email, hashedPassword, channeliconpath, channelbannerpath, req.body.channeldesc, " " + req.body.topics + " ", streamkey];
 		valuesarr = valuesarr.map((item) => {
 			if (typeof item == 'string') {
 				return "\'"+ item + "\'";
@@ -141,7 +168,7 @@ app.post('/register', async (req, res) => {
 			}
 		});
 
-		var newuser = await client.query(`INSERT INTO users (id, username, password, channelicon, channelbanner, description, topics, streamkey) VALUES (${valuesarr}) RETURNING id, username, password, channelicon, channelbanner, streamkey`);
+		var newuser = await client.query(`INSERT INTO users (id, username, email, password, channelicon, channelbanner, description, topics, streamkey) VALUES (${valuesarr}) RETURNING id, username, password, channelicon, channelbanner, streamkey`);
 		newuser = newuser.rows[0];
 		console.log("Registered User.");
 
@@ -196,4 +223,81 @@ app.post("/login", async (req, res) => {
 		req.flash("redirecturl", "/login");
 		return res.redirect("/error");
 	}
+});
+
+//a post path for sending an email to reset a password
+app.post("/forgotpass", middleware.checkNotSignedIn, async (req, res) => {
+	//check to see if the email submitted exists in the database
+	var existinguser = await client.query(`SELECT id, email FROM users WHERE email=$1`, [req.body.email]);
+	if (!existinguser.rows.length) {
+		req.flash("message", "This email is not attached to any user.");
+		return res.redirect("/forgotpassword");
+	}
+
+	//get a new id for the redis entry
+	var newid = await middleware.generateSessionId();
+
+	//make an object to store in redis
+	var forgotpassobject = {email: req.body.email, id: existinguser.rows[0].id, redisid: newid};
+	forgotpassobject = JSON.stringify(forgotpassobject);
+
+	//insert the forgotpass object into the redis server
+	redisClient.set(newid, forgotpassobject);
+
+	//make a emailer object
+	var transporter = nodemailer.createTransport(smtpTransport({
+		host: "smtp.astro-tv.space",
+		port: 587,
+		secureConnection: false,
+		tls: {
+			rejectUnauthorized: false
+		},
+		auth: {
+			user: process.env.EMAILNAME,
+			pass: process.env.EMAILPASS
+		}
+	}));
+
+	//make an object to store information about the email to send
+	var emailObject = {
+		from: "astro-official@astro-tv.space",
+		to: req.body.email,
+		subject: "Astro Password Reset",
+		text: `Reset your password at this link:\nastro-tv.space/resetpassword/${newid}\n\nIF YOU DID NOT REQUEST A PASSWORD RESET, IGNORE THIS EMAIL.`
+	};
+
+	//send the email using the transporter object
+	transporter.sendMail(emailObject, (error, info) => {
+		if (error) {
+			throw error;
+		} else {
+			logger.log({level: "info", message: `Email sent: ${info.response}`});
+		}
+	});
+
+	//let the user know that the email was sent
+	req.flash("message", "Email has been sent with a password reset link. CHECK YOUR SPAM FOLDER!");
+	return res.redirect("/forgotpassword");
+});
+
+//a post path for reseting a password
+app.post("/resetpass", middleware.checkNotSignedIn, async(req, res) => {
+	//get the user information based on the redis id in the form
+	var forgetfuluser = await redisClient.getAsync(req.body.redisid);
+	forgetfuluser = JSON.parse(forgetfuluser);
+
+	//hash the new password
+	var hashedpass = await bcrypt.hash(req.body.password, 10);
+
+	//set the new password
+	var result = await client.query(`UPDATE users SET password=$1 WHERE id=$2`, [hashedpass, forgetfuluser.id]);
+
+	//delete the redis entry for the forgetful user to make sure that other people can't use the link maliciously
+	await redisClient.del(req.body.redisid, (err, reply) => {
+		if (err) throw err;
+	});
+
+	//tell the user to login with the new password
+	req.flash("message", "Password Reset Successfully! You can now login.");
+	return res.redirect("/");
 });

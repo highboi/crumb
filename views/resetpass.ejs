@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs') %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<!--Main content goes here-->
+
+			<div id="resetpass">
+				<h1>Enter a New Password:</h1>
+
+				<form action="/resetpass" method="POST" class="authform" id="resetpassform">
+					<div>
+					 	<input class="passwordconf" id="password" name="password" type="password" placeholder="Password" required>
+					</div>
+					<div>
+					 	<input class="passwordconf" id="password2" name="password2" type="password" oninput="confirmPassword('passwordconf')" placeholder="Password Confirmation" style="display: inline;" required>
+						<p class="passwordconf" id="passwordconfalert" style="display: inline;"></p>
+					</div><br>
+
+					<input type="hidden" id="redisid" name="redisid" value="<%= forgetfuluser.redisid %>">
+
+					<button class="submitbtn" type="button" onclick="resetpassSubmitted();">Reset Password</button>
+					<h1 class="percentage"></h1>
+					<div class="lds-hourglass"></div>
+					<br><br>
+				</form>
+			</div>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<!--Variables given by the EJS are defined in a script tag here-->
+
+			<!--External scripts are defined here-->
+			<script type="text/javascript" src="/content/javascript/resetpass.js"></script>
+		</main>
+	</body>
+</html>

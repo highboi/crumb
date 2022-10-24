@@ -7,5 +7,4 @@ require("./mediapath");
 require("./livepath");
 require("./example");
 require("./torrentpath");
-require("./advertspath");
-require("./datafusion")
+//require("./advertspath");

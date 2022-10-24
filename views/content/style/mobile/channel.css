@@ -83,6 +83,8 @@ STYLE THE SHOUTOUTS SECTION OF THE CHANNEL PAGE
 .channel #shoutouts {
 	display: flex;
 	justify-content: center;
+	align-items: center;
+	flex-direction: column;
 }
 
 .channel #shoutouts #shoutoutform {

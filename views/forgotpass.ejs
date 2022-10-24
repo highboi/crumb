@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<%- include('content/ejs/head.ejs') %>
+	</head>
+	<body>
+		<nav>
+			<%- include('content/ejs/banner.ejs') %>
+		</nav>
+		<main>
+			<%- include('content/ejs/body.ejs') %>
+
+			<!--Main content goes here-->
+
+			<div id="forgotpass">
+				<h1>Forgot Password?:</h1>
+
+				<form action="/forgotpass" method="POST" class="authform" id="forgotpassform">
+					<p>Enter your email to get a new password.</p>
+					<div>
+						<input id="email" name="email" placeholder="example@email.com" autofocus required>
+					</div>
+
+					<button class="submitbtn" type="button" onclick="forgotpassSubmitted();">Send Email</button>
+					<h1 class="percentage"></h1>
+					<div class="lds-hourglass"></div>
+					<br><br>
+				</form>
+			</div>
+
+			<%- include('content/ejs/bottombody.ejs') %>
+
+			<%- include('content/ejs/scripts.ejs') %>
+
+			<!--Variables given by the EJS are defined in a script tag here-->
+
+			<!--External scripts are defined here-->
+			<script type="text/javascript" src="/content/javascript/forgotpass.js"></script>
+		</main>
+	</body>
+</html>
