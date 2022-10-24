@@ -86,6 +86,8 @@ app.post("/comment/:contentid", middleware.checkSignedIn, async (req, res) => {
 		await client.query(`INSERT INTO comments (id, username, user_id, comment, content_id, posttime, likes, dislikes) VALUES (${valuesarr})`);
 	}
 
+	console.log(req);
+
 	//check for and handle files attached to the comment
 	if (typeof req.files.reactionfile != "undefined") {
 		var acceptedvideo = ["video/mp4", "video/ogg", "video/webm"];

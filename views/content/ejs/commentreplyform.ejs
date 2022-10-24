@@ -3,13 +3,13 @@
 <div class="replybox" id="<%= comment.id %>replybox">
 	<p id="<%= comment.id %>replyboxdragheader">Reply to &quot;<%= comment.username %>:<%= comment.id %>&quot;</p>
 
-	<% var replylink = commentlink + `?parent_id=${comment.id}` %>
+	<% var replylink = commentlink + `&parent_id=${comment.id}` %>
 
-	<form action="<%= replylink %>" method="post" enctype='multipart/form-data' id="<%= comment.id %>replyform">
+	<form action="<%= replylink %>" method="post" enctype="multipart/form-data" id="<%= comment.id %>replyform">
 		<textarea id="commenttext" name="commenttext" placeholder="Say Something!" maxlength="500" rows="10" cols="50" required></textarea><br>
 
-		<label class="filelabel" for="reactionfile">Upload Reaction Image/Video</label><br>
-		<input type="file" id="reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
+		<label class="filelabel" for="<%= comment.id %>reactionfile">Upload Reaction Image/Video</label><br>
+		<input type="file" id="<%= comment.id %>reactionfile" name="reactionfile" accept="image/*,video/*"><br><br>
 
 		<input type="hidden" id="base_parent_id" name="base_parent_id" value="<%= base_parent_id %>">
 
