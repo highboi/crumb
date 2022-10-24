@@ -32,7 +32,7 @@ a img:hover {
 
 button {
 	color: var(--green);
-	background-color: var(--darkest-navy);
+	background-color: var(--dark-grey);
 	border: solid var(--green) 3px;
 }
 

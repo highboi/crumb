@@ -6,9 +6,9 @@
 				<h1 id="TitleFullscreen"><%= video.title %></h1>
 			</div>
 			<video poster="<%= video.thumbnail %>" id="video">
-				<source src="http://localhost/video/<%= video.id %>" type="video/mp4">
-				<source src="http://localhost/video/<%= video.id %>" type="video/webm">
-				<source src="http://localhost/video/<%= video.id %>" type="video/ogg">
+				<source src="/video/<%= video.id %>" type="video/mp4">
+				<source src="/video/<%= video.id %>" type="video/webm">
+				<source src="/video/<%= video.id %>" type="video/ogg">
 				<h1>HTML Video is not supported in your browser, sorry.</h1>
 			</video>
 			<div class="video-controls">

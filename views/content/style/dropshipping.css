@@ -2,6 +2,7 @@
 	text-align: center;
 	font-size: 40px;
 	width: 100vw;
+	height: 1000px;
 }
 
 #dropshipping-content img {
@@ -36,4 +37,82 @@
 
 #dropshipping-content #sigma-evolution * {
 	width: 30vw;
+}
+
+/*
+THE BUY BUTTON CONTENT
+*/
+
+#dropshipping-content #buycontent {
+	text-align: center;
+}
+
+#dropshipping-content #buycontent #buycircle {
+	width: 20vw;
+	height: 20vw;
+	border: solid red;
+	border-width: 20px;
+	border-radius: 50%;
+	animation: blink 1s linear infinite;
+	position: absolute;
+	left: 50%;
+	margin-left: -10vw;
+	z-index: 5;
+}
+
+#dropshipping-content #buycontent #buybutton {
+	width: 30vw;
+	height: 20vw;
+	font-size: 50px;
+	margin: 100px;
+	animation: spin 5s linear infinite;
+}
+
+#dropshipping-content #spinarrow-down {
+	animation: updown 1s linear infinite;
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin-left: 0;
+	margin-right: 0;
+	z-index: 5;
+}
+
+#dropshipping-content #spinarrow-up {
+	animation: downup 1s linear infinite;
+	position: absolute;
+	left: 0;
+	right: 0;
+	margin-left: 0;
+	margin-right: 0;
+	z-index: 5;
+}
+
+
+@keyframes spin {
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes updown {
+	100% {
+		padding-top: 300px;
+	}
+}
+
+@keyframes downup {
+	100% {
+		padding-top: -300px;
+	}
+}
+
+@keyframes blink {
+	0% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
 }
