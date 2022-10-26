@@ -4,16 +4,17 @@ STYLESHEET FOR THE VIDEO ELEMENT IN VIDEO VIEWS
 
 
 /*
-VIDEO AND RECCOMENDATIONS
+VIDEO AND MISC
 */
 
 .container {
 	display: grid;
 	grid-template-areas: 
 	"video"
-	"reccomendations"
+	"misc"
 	"comments";
 	width: 90vw;
+	height: auto
 	margin: 0 auto;
 }
 
@@ -41,15 +42,17 @@ VIDEO BEING VIEWED
 }
 
 .container .video-contents .video-container #video {
+	background-color: black;
+	object-fit: contain;
 	width: 100%;
-	height: 100%;
-	object-fit: cover;
+	height: 90%;
 }
 
 .container .video-contents .video-container:fullscreen #video {
 	position: relative;
 	width: 100%;
 	height: 100%;
+	max-height: 100vh;
 }
 
 .container .video-contents .video-container #loading {
@@ -154,10 +157,10 @@ STYLE VIDEO TEXT
 }
 
 /*
-RECCOMENDATIONS WHILE VIEWING VIDEOS
+MISC WHILE VIEWING VIDEOS
 */
 .container .video-misc {
-	grid-area: reccomendations;
+	grid-area: misc;
 	max-width: 600px;
 }
 
@@ -178,13 +181,13 @@ STYLING THE "DELETED VIDEO" RECTANGLE
 Media Queries for rearranging elements
 */
 
-/*rearrange the layout of videos, reccomendations, and comments*/
+/*rearrange the layout of videos, misc, and comments*/
 @media (max-width: 1800px) {
 	.container {
 		display: grid;
 		grid-template-areas:
 		"video"
-		"reccomendations"
+		"misc"
 		"comments";
 	}
 

@@ -2251,3 +2251,7 @@
 {"level":"error","message":"(2022-10-24T02:31:14.469Z) --> Cannot find module 'nodemailer'\nRequire stack:\n- /home/merlin/webdev/astro/servercode/auth.js\n- /home/merlin/webdev/astro/servercode/mainpath.js\n- /home/merlin/webdev/astro/index.js"}
 {"level":"error","message":"(2022-10-24T02:31:52.397Z) --> Cannot find module 'nodemailer'\nRequire stack:\n- /home/merlin/webdev/astro/servercode/auth.js\n- /home/merlin/webdev/astro/servercode/mainpath.js\n- /home/merlin/webdev/astro/index.js"}
 {"level":"error","message":"(2022-10-24T02:32:22.830Z) --> Cannot find module 'nodemailer-smtp-transport'\nRequire stack:\n- /home/merlin/webdev/astro/servercode/auth.js\n- /home/merlin/webdev/astro/servercode/mainpath.js\n- /home/merlin/webdev/astro/index.js"}
+{"level":"error","message":"(2022-10-25T16:41:11.694Z) --> Cannot read property 'filter' of undefined"}
+{"level":"error","message":"(2022-10-25T16:42:05.158Z) --> Cannot read property 'filter' of undefined"}
+{"level":"error","message":"(2022-10-26T17:47:49.038Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-10-26T17:47:49.401Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
