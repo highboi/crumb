@@ -57,7 +57,7 @@ COMMENTS SECTION
 .comments #theComments .commentlikes button {
 	width: 2.5rem;
 	height: 2.5rem;
-	color: var(--grey);
+	color: black;
 	background-color: var(--green);
 	border: 2px solid var(--green);
 	vertical-align: text-top;
@@ -66,7 +66,7 @@ COMMENTS SECTION
 .comments #theComments .commentlikes .commentlikebuttons {
 	width: 2.5rem;
 	height: 2.5rem;
-	color: var(--grey);
+	color: black;
 	background-color: var(--green);
 	border: 2px solid var(--green);
 	vertical-align: text-top;
@@ -98,7 +98,7 @@ COMMENTS SECTION
 	width: 5rem;
 	height: 2.5rem;
 	background-color: var(--green);
-	color: var(--grey);
+	color: black;
 	border: solid black;
 	border-width: 5px;
 	margin: 10px;

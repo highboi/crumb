@@ -12,7 +12,7 @@ body {
 	font-family: monospace,Menlo,DejaVu Sans Mono,Lucida Console;
 	font-smooth: never;
 	font-weight: 600;
-	text-shadow: -0.06em 0 0.5px var(--darkest-navy);
+	/*text-shadow: -0.06em 0 0.5px var(--darkest-navy);*/
 	overflow: auto;
 }
 
@@ -196,8 +196,9 @@ STYLING FOR SUBMISSION FORMS ON THE SITE
 */
 #register, #login, #video-submit, #playlist-submit, #stream-submit, #bug-report, #forgotpass, #image-submit {
 	text-align: center;
-	width: 50vw;
+	width: 80vw;
 	margin: auto;
+	font-size: 40px;
 }
 
 /*

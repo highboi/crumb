@@ -7,6 +7,15 @@ COMMENTS SECTION
 	width: 90vw;
 	margin: 0 auto;
 	text-align: center;
+	font-size: 30px;
+}
+
+.comments button, textarea {
+	font-size: 30px;
+}
+
+.comments {
+	font-size: 30px;
 }
 
 .image-comments .comments {
@@ -19,9 +28,19 @@ COMMENTS SECTION
 	text-align: center;
 }
 
-.comments #commentform form button{
+.comments #commentform textarea {
+	font-size: 25px;
+}
+
+.comments #commentform form button {
 	color: var(--green);
-	background-color: var(--grey);
+	background-color: var(--dark-grey);
+	padding: 15px;
+}
+
+.comments #commentform form label {
+	background-color: var(--dark-grey);
+	padding: 15px;
 }
 
 .comments #commentform form #commentbtn {
@@ -55,8 +74,8 @@ COMMENTS SECTION
 }
 
 .comments #theComments .commentlikes button {
-	width: 2.5rem;
-	height: 2.5rem;
+	width: 4rem;
+	height: 4rem;
 	color: var(--grey);
 	background-color: var(--green);
 	border: 2px solid var(--green);
@@ -64,8 +83,8 @@ COMMENTS SECTION
 }
 
 .comments #theComments .commentlikes .commentlikebuttons {
-	width: 2.5rem;
-	height: 2.5rem;
+	width: 4rem;
+	height: 4rem;
 	color: var(--grey);
 	background-color: var(--green);
 	border: 2px solid var(--green);
@@ -73,10 +92,11 @@ COMMENTS SECTION
 }
 
 .comments #theComments .commentlikes #replybtn {
-	width: 5rem;
-	height: 2.5rem;
-	border-width: 4px;
+	width: 6rem;
+	height: 3rem;
+	border-width: 5px;
 	border-color: black;
+	color: black;
 }
 
 .comments #theComments .commentlikes #deletebtn {
@@ -95,10 +115,10 @@ COMMENTS SECTION
 }
 
 .comments #theComments .replybox button {
-	width: 5rem;
-	height: 2.5rem;
+	width: 7rem;
+	height: 4rem;
 	background-color: var(--green);
-	color: var(--grey);
+	color: black;
 	border: solid black;
 	border-width: 5px;
 	margin: 10px;

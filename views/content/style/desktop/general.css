@@ -12,7 +12,7 @@ body {
 	font-family: monospace,Menlo,DejaVu Sans Mono,Lucida Console;
 	font-smooth: never;
 	font-weight: 600;
-	text-shadow: -0.06em 0 0.5px var(--darkest-navy);
+	/*text-shadow: -0.06em 0 0.5px var(--darkest-navy);*/
 	overflow: auto;
 }
 
