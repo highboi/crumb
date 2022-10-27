@@ -80,6 +80,7 @@ select {
 .messages {
 	text-align: center;
 	margin: 0 auto;
+	font-size: 40px;
 }
 
 /*
@@ -197,9 +198,75 @@ STYLING FOR SUBMISSION FORMS ON THE SITE
 #register, #login, #video-submit, #playlist-submit, #stream-submit, #bug-report, #forgotpass, #image-submit {
 	text-align: center;
 	width: 80vw;
-	margin: auto;
+	margin: 0 auto;
 	font-size: 40px;
 }
+
+#register button,
+#login button,
+#video-submit button,
+#playlist-submit button,
+#stream-submit button,
+#bug-report button,
+#forgotpass button,
+#image-submit, button {
+	font-size: 50px;
+}
+
+#register input,
+#login input,
+#video-submit input,
+#playlist-submit input,
+#stream-submit input,
+#bug-report input,
+#forgotpass input,
+#image-submit, input {
+	font-size: 40px;
+	width: 100%;
+	margin: 15px;
+	padding: 10px;
+}
+
+#register input[type='checkbox'],
+#login input[type='checkbox'],
+#video-submit input[type='checkbox'],
+#playlist-submit input[type='checkbox'],
+#stream-submit input[type='checkbox'],
+#bug-report input[type='checkbox'],
+#forgotpass input[type='checkbox'],
+#image-submit, input[type='checkbox'] {
+	width: 100px;
+	height: 100px;
+}
+
+#register select,
+#login select,
+#video-submit select,
+#playlist-submit select,
+#stream-submit select,
+#bug-report select,
+#forgotpass select,
+#image-submit, select {
+	font-size: 40px;
+	padding: 10px;
+	margin: 15px;
+}
+
+#register textarea,
+#login textarea,
+#video-submit textarea,
+#playlist-submit textarea,
+#stream-submit textarea,
+#bug-report textarea,
+#forgotpass textarea,
+#image-submit, textarea {
+	font-size: 40px;
+	width: 100%;
+	margin: 15px;
+	padding: 10px;
+}
+
+
 
 /*
 IMPLEMENT BROWSER WIDTH CUTOFF FOR THE SITE BANNER
