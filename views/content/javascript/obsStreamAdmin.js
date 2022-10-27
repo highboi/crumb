@@ -1,5 +1,5 @@
 //get a connection with the obs websocket server
-var obsSocket = new WebSocket(`wss://astro-tv.space/obslive/?streamid=${streamid}&isClient=false&isStreamer=true`);
+var obsSocket = new WebSocket(`ws://localhost/obslive/?streamid=${streamid}&isClient=false&isStreamer=true`);
 
 //get the livestream video element
 var livestream = document.querySelector(".video-container #video");
@@ -18,6 +18,8 @@ a function for starting the HLS live stream and load the
 source of the HLS media to the video element
 */
 function hlsStart() {
+	console.log("STARTING HLS");
+
 	//check for hls support
 	if (Hls.isSupported()) {
 		//attach a new HLS instance to the video element
@@ -56,6 +58,7 @@ function hlsLoad(hls, url) {
 		hls.loadSource(url);
 	} else {
 		hlsLoad(hls, url);
+		console.log("BRUH");
 	}
 }
 

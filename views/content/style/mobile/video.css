@@ -13,9 +13,10 @@ VIDEO AND MISC
 	"video"
 	"misc"
 	"comments";
-	width: 90vw;
-	height: auto
+	width: 100%;
+	height: auto;
 	margin: 0 auto;
+	background-color: var(--darkest-grey);
 }
 
 .container > * {
@@ -28,15 +29,19 @@ VIDEO BEING VIEWED
 
 .container .video-contents {
 	grid-area: video;
-	width: 1000px;
+	width: 90%;
 	border: solid var(--green);
 	padding: 10px;
+}
+
+.container .video-contents button {
+	font-size: 25px;
 }
 
 .container .video-contents .video-container {
 	position: relative;
 	width: auto;
-	height: auto;
+	height: 70vh;
 	background-color: rgb(32, 32, 32);
 	overflow: none;
 }
@@ -45,7 +50,7 @@ VIDEO BEING VIEWED
 	background-color: black;
 	object-fit: contain;
 	width: 100%;
-	height: 90%;
+	height: 60vh;
 }
 
 .container .video-contents .video-container:fullscreen #video {
@@ -65,14 +70,15 @@ STYLE VIDEO TEXT
 */
 
 .container .video-contents .videotext {
-	width: 990px;
-	background-color: #0f0f0f;
+	width: 100%;
 	padding: 5px;
+	font-size: 25px;
 }
 
 .container .video-contents .videotext button {
 	color: var(--green);
 	background-color: var(--medium-grey);
+	font-size: 25px;
 }
 
 .container .video-contents .videotext .channel-details {
@@ -86,7 +92,8 @@ STYLE VIDEO TEXT
 	height: 100px;
 	border-radius: 50px;
 	text-align: center;
-	margin: auto;
+	margin: 10px;
+	border: solid var(--green);
 }
 
 .container .video-contents .videotext .channel-details .video-buttons {
@@ -96,7 +103,6 @@ STYLE VIDEO TEXT
 .container .video-contents .videotext .channel-details .video-buttons .subscribe-section #subscribebutton {
 	width: 100%;
 	height: 100%;
-	font-size: 20px;
 	color: var(--green);
 	border: 2px solid var(--green);
 	background-color: var(--medium-grey);
@@ -110,7 +116,7 @@ STYLE VIDEO TEXT
 
 .container .video-contents .videotext .channel-details .video-buttons .likesection * {
 	margin: 5px;
-	font-size: 25px;
+	font-size: 35px;
 }
 
 .container .video-contents .videotext .channel-details .video-buttons .likesection .likebuttons {
@@ -121,12 +127,11 @@ STYLE VIDEO TEXT
 	background-color: var(--green);
 }
 
-.container .video-contents .videotext .description {
-	font-size: 15px;
-}
-
 .container .video-contents .videotext .extralinks object {
 	display: none;
+	border: solid var(--green);
+	padding: 10px;
+	margin: 10px;
 }
 
 .container .video-contents .videotext #videosettings {
@@ -136,10 +141,13 @@ STYLE VIDEO TEXT
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	font-size: 30px;
 }
 
 .container .video-contents .videotext #videosettings select {
 	font-size: 25px;
+	padding: 10px;
+	text-align: center;
 }
 
 .container .video-contents .videotext #subtitles {

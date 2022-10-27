@@ -5099,3 +5099,24 @@
 {"level":"error","message":"(2022-10-25T16:42:05.158Z) --> Cannot read property 'filter' of undefined"}
 {"level":"error","message":"(2022-10-26T17:47:49.038Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
 {"level":"error","message":"(2022-10-26T17:47:49.401Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-10-26T23:42:53.533Z) --> Cannot read property 'filter' of undefined"}
+{"level":"error","message":"(2022-10-26T23:44:00.982Z) --> Cannot read property 'filter' of undefined"}
+{"level":"error","message":"(2022-10-26T23:44:07.490Z) --> Cannot read property 'filter' of undefined"}
+{"level":"error","message":"(2022-10-26T23:46:25.031Z) --> Cannot read property 'filter' of undefined"}
+{"level":"error","message":"(2022-10-26T23:46:47.637Z) --> Cannot read property 'filter' of undefined"}
+{"level":"error","message":"(2022-10-26T23:59:16.677Z) --> ENOENT: no such file or directory, stat './storagenull'"}
+{"level":"error","message":"(2022-10-26T23:59:16.946Z) --> ENOENT: no such file or directory, stat './storagenull'"}
+{"level":"error","message":"(2022-10-26T23:59:23.535Z) --> ENOENT: no such file or directory, stat './storagenull'"}
+{"level":"error","message":"(2022-10-26T23:59:24.013Z) --> ENOENT: no such file or directory, stat './storagenull'"}
+{"level":"error","message":"(2022-10-26T23:59:24.262Z) --> ENOENT: no such file or directory, stat './storagenull'"}
+{"level":"error","message":"(2022-10-27T00:00:00.022Z) --> ENOENT: no such file or directory, unlink '/home/merlin/webdev/astro/storagenull'"}
+{"level":"error","message":"(2022-10-27T00:00:00.036Z) --> Cannot read property 'video' of undefined"}
+{"level":"error","message":"(2022-10-27T00:00:00.037Z) --> Cannot read property 'video' of undefined"}
+{"level":"error","message":"(2022-10-27T00:00:03.913Z) --> Cannot read property 'video' of undefined"}
+{"level":"error","message":"(2022-10-27T00:10:27.135Z) --> global.webWssClients.findIndex is not a function"}
+{"level":"error","message":"(2022-10-27T00:58:15.561Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-10-27T00:58:15.921Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-10-27T00:58:16.504Z) --> Redis connection to 127.0.0.1:6379 failed - connect ECONNREFUSED 127.0.0.1:6379"}
+{"level":"error","message":"(2022-10-27T01:02:54.657Z) --> Cannot read property 'filter' of undefined"}
+{"level":"error","message":"(2022-10-27T03:28:45.284Z) --> global.obsWssClients.findIndex is not a function"}
+{"level":"error","message":"(2022-10-27T03:29:03.057Z) --> Cannot read property 'filter' of undefined"}

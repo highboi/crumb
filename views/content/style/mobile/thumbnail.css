@@ -45,8 +45,9 @@ INDIVIDUAL THUMBNAILS
 .video-thumbnail .thumbnail img {
 	vertical-align: top;
 	background-color: black;
+	object-fit: contain;
 	width: 100%;
-	height: auto;
+	height: 50vw;
 }
 
 .video-thumbnail .links {

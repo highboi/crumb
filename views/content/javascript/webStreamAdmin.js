@@ -1,5 +1,5 @@
 //get a socket connection to the server and the livestream element to handle
-var streamSocket = new WebSocket(`wss://astro-tv.space/live/?isClient=false&isStreamer=true&streamid=${streamid}`);
+var streamSocket = new WebSocket(`ws://localhost/live/?isClient=false&isStreamer=true&streamid=${streamid}`);
 var livestream = document.querySelector(".video-container #video");
 
 //alert the developer of working connection

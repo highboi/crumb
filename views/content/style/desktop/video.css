@@ -45,7 +45,6 @@ VIDEO BEING VIEWED
 	background-color: black;
 	object-fit: contain;
 	width: 100%;
-	height: 90%;
 }
 
 .container .video-contents .video-container:fullscreen #video {
@@ -85,7 +84,8 @@ STYLE VIDEO TEXT
 	height: 100px;
 	border-radius: 50px;
 	text-align: center;
-	margin: auto;
+	margin: 10px;
+	border: solid var(--green);
 }
 
 .container .video-contents .videotext .channel-details .video-buttons {
