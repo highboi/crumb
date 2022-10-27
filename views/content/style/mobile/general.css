@@ -40,8 +40,6 @@ input, textarea {
 	background-color: var(--medium-grey);
 	color: var(--green);
 	border: none;
-	padding: 5px;
-	margin: 3px;
 }
 
 ::placeholder {
@@ -224,7 +222,6 @@ STYLING FOR SUBMISSION FORMS ON THE SITE
 	font-size: 40px;
 	width: 100%;
 	margin: 15px;
-	padding: 10px;
 }
 
 #register input[type='checkbox'],
@@ -263,7 +260,6 @@ STYLING FOR SUBMISSION FORMS ON THE SITE
 	font-size: 40px;
 	width: 100%;
 	margin: 15px;
-	padding: 10px;
 }
 
 

@@ -13,7 +13,7 @@ VIDEO AND MISC
 	"video"
 	"misc"
 	"comments";
-	width: 100%;
+	width: 90vw;
 	height: auto;
 	margin: 0 auto;
 	background-color: var(--darkest-grey);
@@ -140,8 +140,9 @@ STYLE VIDEO TEXT
 	height: 2em;
 	display: flex;
 	flex-direction: row;
+	justify-content: center;
 	align-items: center;
-	font-size: 30px;
+	font-size: 25px;
 }
 
 .container .video-contents .videotext #videosettings select {
