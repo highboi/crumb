@@ -145,6 +145,10 @@ STYLE VIDEO TEXT
 	font-size: 25px;
 }
 
+.container .video-contents .videotext #videosettings * {
+	vertical-align: middle;
+}
+
 .container .video-contents .videotext #videosettings select {
 	font-size: 25px;
 	padding: 10px;

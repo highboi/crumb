@@ -171,8 +171,8 @@ STYLING FOR LOADING ANIMATIONS ON THE SITE
 	height: 0;
 	margin: 8px;
 	box-sizing: border-box;
-	border: 32px solid white;
-	border-color: var(--green) transparent var(--green) transparent;
+	border: 64px solid var(--green);
+	border-color: var(--green) var(--hot-pink) var(--green) var(--hot-pink);
 	animation: lds-hourglass 1.2s infinite;
 }
 

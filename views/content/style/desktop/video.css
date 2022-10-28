@@ -137,6 +137,10 @@ STYLE VIDEO TEXT
 	align-items: center;
 }
 
+.container .video-contents .videotext #videosettings * {
+	vertical-align: middle;
+}
+
 .container .video-contents .videotext #subtitles {
 	display: none;
 	flex-direction: column;

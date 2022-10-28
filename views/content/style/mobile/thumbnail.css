@@ -56,7 +56,7 @@ INDIVIDUAL THUMBNAILS
 
 .video-thumbnail .links .channel-links * {
 	display: inline-block;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 .video-thumbnail .links .channel-links #channel-icon {

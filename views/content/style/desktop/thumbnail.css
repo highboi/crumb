@@ -30,6 +30,7 @@ INDIVIDUAL THUMBNAILS
 .video-thumbnail .thumbnail img {
 	vertical-align: top;
 	background-color: black;
+	object-fit: contain;
 }
 
 .video-thumbnail .links {
@@ -38,13 +39,15 @@ INDIVIDUAL THUMBNAILS
 
 .video-thumbnail .links .channel-links * {
 	display: inline-block;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 .video-thumbnail .links .channel-links #channel-icon {
 	width: 50px;
 	height: 50px;
 	border-radius: 50px;
+	border: solid var(--green);
+	border-width: 5px;
 }
 
 .video-thumbnail .links .channel-links #extras:hover {
