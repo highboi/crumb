@@ -24,10 +24,18 @@ app.get("/u/:userid", async (req, res) => {
 		case "home":
 			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=$2 ORDER BY views DESC LIMIT 10`, [req.params.userid, false]);
 			viewObj.videos = videos.rows;
+
+			var images = await client.query(`SELECT * FROM images WHERE user_id=$1 AND deleted=$2 ORDER BY views DESC LIMIT 10`, [req.params.userid, false]);
+			viewObj.images = images.rows;
+
 			break;
 		case "videos":
 			var videos = await client.query(`SELECT * FROM videos WHERE user_id=$1 AND deleted=$2`, [req.params.userid, false]);
 			viewObj.videos = videos.rows;
+
+			var images = await client.query(`SELECT * FROM images WHERE user_id=$1 AND deleted=$2`, [req.params.userid, false]);
+			viewObj.images = images.rows;
+
 			break;
 		case "playlists":
 			var playlists = await client.query(`SELECT * FROM playlists WHERE user_id=$1`, [req.params.userid]);
@@ -48,6 +56,7 @@ app.get("/u/:userid", async (req, res) => {
 
 			viewObj.playlists = plists;
 			break;
+		/*
 		case "shoutouts":
 			var shoutouts = await client.query(`SELECT shoutout_id FROM shoutouts WHERE user_id=$1`, [req.params.userid]);
 			var shoutoutids = shoutouts.rows.map((shoutout) => {
@@ -62,6 +71,7 @@ app.get("/u/:userid", async (req, res) => {
 			}
 
 			break;
+		*/
 	}
 
 	if ( (typeof userinfo == 'undefined' || userinfo.id != viewObj.creator.id) && (typeof viewObj.videos != 'undefined') ) {
@@ -121,6 +131,7 @@ app.get("/s/subscribe/:topic", middleware.checkSignedIn, async (req, res) => {
 	}
 });
 
+/*
 //get path for deleting a shoutout from a channel
 app.get("/shoutout/delete/:shoutoutid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
@@ -138,11 +149,13 @@ app.get("/shoutout/delete/:shoutoutid", middleware.checkSignedIn, async (req, re
 		return res.redirect("/error");
 	}
 });
+*/
 
 /*
 POST PATHS FOR USER-RELATED CONTENT
 */
 
+/*
 //this is a post path to post a shoutout channel in the "shoutouts" section of one's channel
 app.post("/shoutout/add", middleware.checkSignedIn, async (req, res) => {
 	//process the shoutout url to get the channel id
@@ -174,6 +187,7 @@ app.post("/shoutout/add", middleware.checkSignedIn, async (req, res) => {
 		}
 	}
 });
+*/
 
 //post path for reporting a video
 app.post("/report/video/:videoid", middleware.checkSignedIn, async (req, res) => {

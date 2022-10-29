@@ -4,6 +4,12 @@
 			<%- include('./thumbnail.ejs', {video: item}) %>
 		<% }); %>
 	</div>
+
+	<div class="group-videos">
+		<% images.forEach((item, index) => { %>
+			<%- include('./imagethumbnail.ejs', {image: item}) %>
+		<% }); %>
+	</div>
 <% } else { %>
 	<p>No Videos Yet!</p>
 <% } %>

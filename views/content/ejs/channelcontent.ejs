@@ -4,7 +4,7 @@
 			<div id="channel-icon">
 				<img src="<%= creator.channelicon %>" width="80px" height="80px">
 			</div>
-			<div id="channel-name" class="hardtoseetext">
+			<div id="channel-name">
 				<h1><%= creator.username %></h1>
 			</div>
 
@@ -17,24 +17,20 @@
 			<button onclick="window.location.href = '<%= channellink %>/?section=home'">Home</button>
 			<button onclick="window.location.href = '<%= channellink %>/?section=videos'">Videos</button>
 			<button onclick="window.location.href = '<%= channellink %>/?section=playlists'">Playlists</button>
+			<!--
 			<button onclick="window.location.href = '<%= channellink %>/?section=shoutouts'">Shoutouts</button>
+			-->
 			<button onclick="window.location.href = '<%= channellink %>/?section=about'">About</button>
 			<button onclick="window.location.href = '<%= channellink %>/?section=settings'">Settings</button>
 		</div>
 		<hr>
 		<div class="channel-content" id="<%= section %>">
 			<% if (section == "home" || section == "videos") { %>
-				<%- include('./channelhome.ejs', {videos: videos}) %>
+				<%- include('./channelhome.ejs', {videos: videos, images: images}) %>
 			<% } else if (section == "about") { %>
 				<%- include('./channelabout.ejs', {creator: creator}) %>
 			<% } else if (section == "playlists") { %>
 				<%- include('./channelplaylists.ejs', {playlists: playlists}) %>
-			<% } else if (section == "shoutouts") { %>
-				<% if (typeof user != 'undefined') { %>
-					<%- include('./channelshoutouts.ejs', {user: user, shoutouts: shoutouts, creator: creator}) %>
-				<% } else { %>
-					<%- include('./channelshoutouts.ejs', {shoutouts: shoutouts, creator: creator}) %>
-				<% } %>
 			<% } else if (section == "settings") { %>
 				<% if (typeof user != 'undefined' && user.id == creator.id) { %>
 					<%- include('./channelsettings.ejs', {creator: creator}) %>
