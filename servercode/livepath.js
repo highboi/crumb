@@ -169,11 +169,11 @@ nms.on("postPublish", async (id, streamPath, args) => {
 				var viewers = global.obsWssClients[streamid].filter((socket) => {
 					return socket.readyState == WebSocket.OPEN;
 				});
-			}
 
-			viewers.forEach((item, index) => {
-				item.send("started");
-			});
+				viewers.forEach((item, index) => {
+					item.send("started");
+				});
+			}
 		} else {
 			session.wasPublished = false;
 		}
@@ -201,13 +201,15 @@ nms.on("donePublish", async (id, streamPath, args) => {
 		await client.query(`UPDATE videos SET streaming=$1 WHERE id=$2`, [false, session.streamid]);
 		await client.query(`UPDATE users SET videocount=videocount+1 WHERE id=$1`, [userid]);
 
-		var viewers = global.obsWssClients[session.streamid].filter((socket) => {
-			return socket.readyState == WebSocket.OPEN;
-		});
+		if (typeof global.obsWssClients[session.streamid] != 'undefined') {
+			var viewers = global.obsWssClients[session.streamid].filter((socket) => {
+				return socket.readyState == WebSocket.OPEN;
+			});
 
-		viewers.forEach((item, index) => {
-			item.send("ended");
-		});
+			viewers.forEach((item, index) => {
+				item.send("ended");
+			});
+		}
 	} else {
 		fs.unlink(`${global.appRoot}/storage/videos/nmsMedia/live/${streamkey}/${filename}.mp4`, (err) => {
 			if (err) throw err;
