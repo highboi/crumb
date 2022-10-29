@@ -25,6 +25,7 @@ INDIVIDUAL THUMBNAILS
 	margin: 0.5vw;
 	background-color: var(--dark-grey);
 	border: solid var(--green);
+	text-align: center;
 }
 
 .video-thumbnail .thumbnail img {

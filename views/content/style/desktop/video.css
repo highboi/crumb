@@ -28,7 +28,7 @@ VIDEO BEING VIEWED
 
 .container .video-contents {
 	grid-area: video;
-	width: 1100px;
+	width: 100%;
 	border: solid var(--green);
 	padding: 10px;
 }
@@ -45,6 +45,7 @@ VIDEO BEING VIEWED
 	background-color: black;
 	object-fit: contain;
 	width: 100%;
+	height: 70vh;
 }
 
 .container .video-contents .video-container:fullscreen #video {
@@ -160,7 +161,7 @@ MISC WHILE VIEWING VIDEOS
 */
 .container .video-misc {
 	grid-area: misc;
-	max-width: 600px;
+	width: 90vw;
 }
 
 /*

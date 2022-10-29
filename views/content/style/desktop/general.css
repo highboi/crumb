@@ -34,7 +34,6 @@ button {
 	color: var(--green);
 	background-color: var(--dark-grey);
 	border: solid var(--green) 3px;
-	border-radius: 10%;
 }
 
 input, textarea {

@@ -225,8 +225,6 @@ if (window.location.hostname == "astro-tv.space" || window.location.hostname == 
 				//get the html document associated with this link
 				var document_text = texts[index];
 				if (document_text != undefined) {
-					alert("GUN.JS NAVIGATION");
-
 					//replace the current entry in the session history with the link the user clicked on
 					history.replaceState(null, "", page_links[index]);
 

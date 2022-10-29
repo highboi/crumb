@@ -6,43 +6,38 @@ STYLESHEET FOR CHANNELS ON THE SITE
 STYLE THE CHANNEL BANNER
 */
 .channel .channel-banner {
-	height: 120px;
+	width: 100%;
+	height: 10vw;
 	background-color: black;
-}
-
-.channel .channel-banner #channel-icon {
-	display: inline-block;
-	vertical-align: top;
-	float: left;
-	padding-top: 20px;
-	padding-bottom: 20px;
-	padding-left: 10px;
+	text-align: center;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+ 	align-items: center;
 }
 
 .channel .channel-banner #channel-icon img {
 	border-radius: 50px;
 	border-color: var(--green);
-	border-width: 2px;
+	border-width: 5px;
 	border-style: solid;
 }
 
 .channel .channel-banner #channel-name {
-	display: inline-block;
-	padding: 20px 0;
+	color: var(--green);
+	background-color: var(--medium-grey);
+	border: 5px solid var(--green);
+	margin-left: 20px;
+	margin-right: 100px;
 }
 
 .channel .channel-banner #subscribebutton {
-	width: 8rem;
-	height: 2.5rem;
-	font-size: 20px;
+	width: auto;
+	height: 6rem;
+	font-size: 40px;
 	color: var(--green);
-	border: 2px solid var(--green);
+	border: 5px solid var(--green);
 	background-color: var(--medium-grey);
-	vertical-align: text-top;
-	margin-top: 35px;
-	margin-bottom: 35px;
-	margin-right: 20px;
-	float: right;
 }
 
 /*

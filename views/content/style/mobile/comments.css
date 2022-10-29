@@ -4,18 +4,20 @@ COMMENTS SECTION
 
 .comments {
 	grid-area: comments;
-	width: 90vw;
-	margin: 0 auto;
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
 	text-align: center;
 	font-size: 30px;
 }
 
-.comments button, textarea {
-	font-size: 30px;	
+.comments button {
+	font-size: 30px;
 }
 
-.comments {
-	font-size: 30px;
+.comments textarea {
+	font-size: 25px;
+	width: 90%;
 }
 
 .image-comments .comments {

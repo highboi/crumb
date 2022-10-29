@@ -1,0 +1,14 @@
+.image-content {
+	text-align: center;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.image-content #image {
+	border: solid var(--green);
+	border-width: 10px;
+	padding: 20px;
+	width: 50vw;
+	height: auto;
+	cursor: pointer;
+}
