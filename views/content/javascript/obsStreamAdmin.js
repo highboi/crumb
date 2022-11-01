@@ -58,7 +58,6 @@ function hlsLoad(hls, url) {
 		hls.loadSource(url);
 	} else {
 		hlsLoad(hls, url);
-		console.log("BRUH");
 	}
 }
 
