@@ -2,6 +2,10 @@
 	<h1><%= playlist.name %></h1>
 
 	<% if (typeof user != 'undefined') { %>
+		<% if (creator.id == user.id) { %>
+			<button><a href="/playlist/edit/<%= playlist.id %>">Edit Playlist</a></button>
+		<% } %>
+
 		<% if (creator.id == user.id && playlist.candelete) { %>
 			<% var deletelink = `/playlist/delete/${playlist.id}` %>
 			<button onclick="redirectConfirm('Delete Playlist?', '<%= deletelink %>')">Delete Playlist</button>

@@ -1,0 +1,19 @@
+<div id="playlist-submit">
+	<h1>Edit Your Playlist</h1>
+
+	<form action="/playlist/edit/<%= playlist.id %>" method="post" class="authform">
+		<div>
+			<input id="name" name="name" type="text" placeholder="Name your playlist" value="<%= playlist.name %>" autofocus required>
+		</div><br>
+		<div>
+			<label for="private">Make playlist private?</label>
+			<select id="private" name="private">
+				<option value="false">No</option>
+				<option value="true">Yes</option>
+			</select>
+		</div><br>
+		<div>
+			<input type="submit" value="Submit Edits">
+		</div>
+	</form>
+</div>

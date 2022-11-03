@@ -125,6 +125,22 @@ app.get("/playlist/new", middleware.checkSignedIn, async (req, res) => {
 	return res.render("createplaylist.ejs", viewObj);
 });
 
+//this is a get request for editing a playlist
+app.get("/playlist/edit/:playlistid", middleware.checkSignedIn, async (req, res) => {
+	var viewObj = await middleware.getViewObj(req, res);
+
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1`, [req.params.playlistid]);
+	playlist = playlist.rows[0];
+	viewObj.playlist = playlist;
+
+	if (viewObj.user.id != playlist.user_id) {
+		req.flash("message", "This is not your playlist to edit");
+		return res.redirect("/");
+	} else {
+		return res.render("editplaylist.ejs", viewObj);
+	}
+});
+
 //this is a get request for deleting a playlist
 app.get("/playlist/delete/:playlistid", middleware.checkSignedIn, async (req, res) => {
 	var userinfo = await middleware.getUserSession(req.cookies.sessionid);
@@ -179,3 +195,20 @@ app.post("/playlist/create", middleware.checkSignedIn, async (req, res) => {
 	}
 });
 
+//this is a post link to edit a playlist
+app.post("/playlist/edit/:playlistid", middleware.checkSignedIn, async (req, res) => {
+	var user = await middleware.getUserSession(req.cookies.sessionid);
+
+	var playlist = await client.query(`SELECT * FROM playlists WHERE id=$1`, [req.params.playlistid]);
+	playlist = playlist.rows[0];
+
+	if (playlist.user_id != user.id) {
+		req.flash("message", "This is not your playlist to edit");
+		return res.redirect("/");
+	} else {
+		await client.query(`UPDATE playlists SET name=$1, private=$2 WHERE id=$3`, [req.body.name, req.body.private, req.params.playlistid]);
+
+		req.flash("message", "Edited your playlist!");
+		return res.redirect(`/p/${req.params.playlistid}`);
+	}
+});
